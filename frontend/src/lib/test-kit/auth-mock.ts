@@ -56,6 +56,7 @@ export function authModuleMock(
 		}),
 		canUsePasskeys: vi.fn(() => true),
 		canUsePasskeyAutofill: vi.fn(async () => true),
+		cancelConditionalLogin: vi.fn(),
 		register: vi.fn(),
 		// [D-241] No setup link unless a test opens the page with one.
 		setupToken: vi.fn(() => null),

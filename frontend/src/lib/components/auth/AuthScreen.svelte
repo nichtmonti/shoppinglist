@@ -25,6 +25,7 @@
 	import {
 		canUsePasskeyAutofill,
 		canUsePasskeys,
+		cancelConditionalLogin,
 		clearSetupToken,
 		fetchAuthMethods,
 		isAutofillUnsupported,
@@ -130,6 +131,9 @@
 	}
 	onMount(() => {
 		void loadMethods();
+		// A sign-in another way (OIDC, the demo) leaves the screen with the
+		// autofill offer still pending.
+		return cancelConditionalLogin;
 	});
 
 	// The provider popup is open (OidcButton then offers "Abbrechen").

@@ -69,14 +69,22 @@ vi.mock('#lib/auth/account-data.js', () => ({
 vi.mock('@simplewebauthn/browser', () => ({
 	browserSupportsWebAuthn: vi.fn(() => true),
 	startRegistration: vi.fn(async () => ({ id: 'cred-1' })),
-	startAuthentication: vi.fn()
+	startAuthentication: vi.fn(),
+	sendSignal: vi.fn(async () => undefined),
+	WebAuthnAbortService: { cancelCeremony: vi.fn() }
 }));
 
-import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+import {
+	WebAuthnAbortService,
+	sendSignal,
+	startAuthentication,
+	startRegistration
+} from '@simplewebauthn/browser';
 import { wipeLocalAccountData } from '#lib/auth/account-data.js';
 import {
 	addPasskey,
 	authState,
+	cancelConditionalLogin,
 	cachedAuthMethods,
 	fetchAuthMethods,
 	isAutofillUnsupported,
@@ -688,8 +696,6 @@ describe('isCeremonyDismissal()', () => {
 	// [D-293] A passkey removed from the account that the device still offers:
 	// named, and the browser is asked to stop offering it.
 	it('names a passkey the server no longer has, and asks the browser to forget it', async () => {
-		const signalUnknownCredential = vi.fn(async () => {});
-		vi.stubGlobal('PublicKeyCredential', { signalUnknownCredential });
 		vi.mocked(startAuthentication).mockResolvedValueOnce({ id: 'cred-gone' } as never);
 		vi.stubGlobal(
 			'fetch',
@@ -704,10 +710,13 @@ describe('isCeremonyDismissal()', () => {
 
 		expect((err as Error).message).toBe(t('auth_passkey_unknown'));
 		expect(isCeremonyDismissal(err)).toBe(false);
-		expect(signalUnknownCredential).toHaveBeenCalledWith({
-			rpId: 'example.test',
-			credentialId: 'cred-gone'
-		});
+		await vi.waitFor(() =>
+			expect(sendSignal).toHaveBeenCalledWith({
+				signalName: 'unknownCredential',
+				rpID: 'example.test',
+				credentialID: 'cred-gone'
+			})
+		);
 	});
 
 	// Not a dismissal: a button press that hits it must still say so.
@@ -753,6 +762,33 @@ describe('isCeremonyDismissal()', () => {
 		const err = await rejectionOf(background);
 		expect(isCeremonyDismissal(err)).toBe(true);
 		await expect(foreground).resolves.toBeUndefined();
+	});
+
+	// A screen that leaves ends its background login, browser offer included,
+	// but never a ceremony a button started since.
+	it('cancelConditionalLogin ends the background login and only that', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn((_url: string, init?: RequestInit) =>
+				init?.signal
+					? new Promise((_resolve, reject) =>
+							init.signal?.addEventListener('abort', () => reject(named('AbortError')))
+						)
+					: Promise.resolve(jsonResponse({}))
+			)
+		);
+		const background = login({ conditional: true });
+		cancelConditionalLogin();
+		expect(isCeremonyDismissal(await rejectionOf(background))).toBe(true);
+
+		vi.mocked(WebAuthnAbortService.cancelCeremony).mockClear();
+		const button = login();
+		cancelConditionalLogin();
+		expect(WebAuthnAbortService.cancelCeremony).not.toHaveBeenCalled();
+		const pending = vi.fn();
+		void button.then(pending, pending);
+		await new Promise((r) => setTimeout(r, 20));
+		expect(pending).not.toHaveBeenCalled();
 	});
 });
 

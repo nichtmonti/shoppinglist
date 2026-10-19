@@ -42,6 +42,25 @@ function startCeremony(): AbortController {
 	return activeCeremony;
 }
 
+// The background conditional login's controller, while it is the active one.
+let conditionalCeremony: AbortController | null = null;
+
+/**
+ * Ends the background conditional login, if it is still the ceremony under
+ * way: its begin fetch, and the browser's autofill offer through the
+ * library's abort service, which exists for a screen that leaves ([D-69]).
+ * A ceremony a button started since is left alone.
+ */
+export function cancelConditionalLogin(): void {
+	if (!conditionalCeremony || conditionalCeremony !== activeCeremony) return;
+	conditionalCeremony.abort();
+	conditionalCeremony = activeCeremony = null;
+	void webauthnModule?.then(
+		({ WebAuthnAbortService }) => WebAuthnAbortService.cancelCeremony(),
+		() => {}
+	);
+}
+
 export function canUsePasskeys(): boolean {
 	// browserSupportsWebAuthn()'s core probe, without loading the library.
 	return typeof window !== 'undefined' && !!window.PublicKeyCredential;
@@ -82,18 +101,17 @@ function classifyCeremonyError(e: unknown): Error | null {
  */
 export class UnknownPasskeyError extends LocalizedError {}
 
-/** Asks the browser to stop offering a passkey the server no longer has. */
+/** Asks the browser to stop offering a passkey the server no longer has; a
+ *  browser without the Signal API ignores it. */
 function forgetPasskey(rpId: string | undefined, credentialId: string): void {
-	const signal = (
-		globalThis.PublicKeyCredential as unknown as
-			| {
-					signalUnknownCredential?: (o: { rpId: string; credentialId: string }) => Promise<void>;
-			  }
-			| undefined
-	)?.signalUnknownCredential;
-	if (!signal) return;
-	void signal
-		.call(globalThis.PublicKeyCredential, { rpId: rpId ?? location.hostname, credentialId })
+	void loadWebauthn()
+		.then(({ sendSignal }) =>
+			sendSignal({
+				signalName: 'unknownCredential',
+				rpID: rpId ?? location.hostname,
+				credentialID: credentialId
+			})
+		)
 		.catch(() => {});
 }
 
@@ -253,6 +271,7 @@ export async function login({
 }: LoginOptions = {}): Promise<void> {
 	const bid = browserId();
 	const ctl = startCeremony();
+	conditionalCeremony = conditional ? ctl : null;
 	// One try for the WHOLE ceremony: any fetch can be aborted by the next
 	// startCeremony(), and .cause keeps the DOMException for
 	// isCeremonyDismissal().

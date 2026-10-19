@@ -14,6 +14,7 @@ export {
 	addPasskey,
 	canUsePasskeyAutofill,
 	canUsePasskeys,
+	cancelConditionalLogin,
 	isAutofillUnsupported,
 	isCeremonyDismissal,
 	login,
