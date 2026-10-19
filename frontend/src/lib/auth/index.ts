@@ -34,6 +34,7 @@ export {
 	type OidcStatus
 } from './login-methods';
 
+// Every save() and clear() of the token publishes it, synchronously.
 pb.authStore.onChange(syncAuthState);
 
 // A sign-out in ANOTHER tab ends the account here too (§5.6 [D-109]). Each
@@ -41,10 +42,7 @@ pb.authStore.onChange(syncAuthState);
 // sign this one out; without this it would keep re-populating the tables that
 // tab wiped. The clear is local (broadcasting lives in logout()), so it does
 // not echo back.
-onRemoteSessionEnd(() => {
-	pb.authStore.clear();
-	syncAuthState();
-});
+onRemoteSessionEnd(() => pb.authStore.clear());
 
 // A sign-in in ANOTHER tab to another account, or while this one is signed
 // out: the tabs share the stored token and the local mirror, so two accounts
@@ -71,17 +69,15 @@ export async function logout(): Promise<void> {
 	// products this account scanned ([D-21]). Fire-and-forget: photos are
 	// re-fetchable. `caches` is absent in SSR/tests.
 	if (typeof caches !== 'undefined') void caches.delete(PHOTO_CACHE);
-	syncAuthState();
 	// Awaited: this is what sign-out is for (./account-data says what stays).
 	await wipeLocalAccountData();
 }
 
-// On app load: wait for the async store to apply its persisted token, give the
-// SDK queue a beat to settle, then refresh the token (§5.6). A sign-out during
-// the refresh wins.
+// On app load: wait for the async store to apply its persisted token (its
+// initial load awaited the same promise first, so the token is in), then
+// refresh it (§5.6). A sign-out during the refresh wins.
 export async function refreshOnStart(): Promise<void> {
 	await initialToken;
-	await new Promise((resolve) => setTimeout(resolve, 50));
 	if (pb.authStore.isValid) {
 		const session = sessionScope();
 		try {

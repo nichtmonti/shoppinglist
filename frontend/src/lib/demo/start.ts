@@ -2,7 +2,6 @@
 // lists so the first screen is not empty.
 import type { RecordModel } from 'pocketbase';
 import { pb } from '#lib/pb.js';
-import { syncAuthState } from '#lib/auth/index.js';
 import { importList, templateCategories } from '#lib/actions/lists.js';
 import { backupDocument, type BackupItem } from '#lib/backup.js';
 import { lookupBarcode, type LookupProduct } from '#lib/scan/lookup.js';
@@ -32,7 +31,6 @@ export async function startDemo(): Promise<void> {
 	}
 	const data = (await res.json()) as { token: string; record: RecordModel };
 	pb.authStore.save(data.token, data.record);
-	syncAuthState();
 }
 
 /** When the signed-in demo account is deleted, or null when unknown. */

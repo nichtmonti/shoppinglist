@@ -6,7 +6,6 @@ import PocketBase, {
 	type RecordAuthResponse
 } from 'pocketbase';
 import { authHeaders, pb } from '../pb';
-import { syncAuthState } from './state';
 import { rememberLoginMethod } from './login-methods';
 import { WrongAccountError } from './wrong-account';
 import { t } from '../i18n';
@@ -36,7 +35,6 @@ export async function oidcLogin(
 ): Promise<boolean> {
 	if (expectAccount) return oidcReauth(provider, expectAccount);
 	if ((await oidcExchange(pb, provider)) === null) return false;
-	syncAuthState();
 	rememberLoginMethod('oidc');
 	return true;
 }
@@ -84,7 +82,6 @@ async function oidcReauth(provider: string, expectAccount: string): Promise<bool
 		if (pendingClient === client) pendingClient = null;
 	}
 	pb.authStore.save(client.authStore.token, client.authStore.record);
-	syncAuthState();
 	rememberLoginMethod('oidc');
 	return true;
 }

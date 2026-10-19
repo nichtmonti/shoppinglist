@@ -2,7 +2,7 @@
 // @simplewebauthn/browser, which is imported DYNAMICALLY at ceremony time so
 // the app entry does not carry it on every boot.
 import { authHeaders, pb } from '../pb';
-import { markAuthExpired, syncAuthState } from './state';
+import { markAuthExpired } from './state';
 import { rememberLoginMethod } from './login-methods';
 import { WrongAccountError } from './wrong-account';
 import { readStored, writeStored } from '../safe-storage';
@@ -137,7 +137,6 @@ async function finishCeremony(
 	// kept: it would sync as that account over this one's local data ([D-76]).
 	if (expectAccount && data.record?.id !== expectAccount) throw new WrongAccountError(false);
 	pb.authStore.save(data.token, data.record);
-	syncAuthState();
 	rememberLoginMethod('passkey');
 }
 
