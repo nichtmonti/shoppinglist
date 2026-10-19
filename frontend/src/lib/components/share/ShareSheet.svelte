@@ -112,13 +112,15 @@
 		linkless = false;
 		const refresh = () => void refreshRoster(listId).catch(() => {});
 		refresh();
+		// The timer and the teardown run untracked, so reading $online there
+		// never makes a reconnect start the sheet over.
 		const poll = setInterval(() => {
-			if (untrack(() => $online) && !document.hidden) refresh();
+			if ($online && !document.hidden) refresh();
 		}, ROSTER_POLL_MS);
 		return () => {
 			clearInterval(poll);
 			clearTimeout(copiedTimer);
-			if (untrack(() => $online)) refresh();
+			if ($online) refresh();
 		};
 	});
 

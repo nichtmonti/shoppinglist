@@ -3,8 +3,9 @@
   for the reasons in PromptDialog's header; `busy`/`error` work as there.
 
   Over the shadcn-svelte AlertDialog (bits-ui, [D-54]), with plain buttons
-  rather than AlertDialog.Action/Cancel, which auto-close: the dialog must
-  stay open across the caller's await. Focus goes to the dialog on open, and
+  rather than AlertDialog.Action/Cancel: the dialog's open state is the
+  caller's, which keeps it open across its await (Cancel would close it on
+  its own; Action closes nothing). Focus goes to the dialog on open, and
   Cancel comes first in the DOM so tab order reaches the safe choice first.
 -->
 <script lang="ts">

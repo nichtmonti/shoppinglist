@@ -74,7 +74,7 @@
 		onkeydown={onKeydown}
 		onblur={() => void commit()}
 		aria-label={t('list_edit_quantity')}
-		use:focusAndSelect
+		{@attach focusAndSelect}
 	/>
 {:else if item.quantity}
 	<button

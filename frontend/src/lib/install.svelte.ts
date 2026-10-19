@@ -6,8 +6,8 @@
 // components that offer it. Safari and Firefox never fire it: there the app
 // can only show the steps.
 //
-// Module state, because the app shell re-keys the banner and the settings card
-// on a language change.
+// Module state, because the event arrives before the banner and the settings
+// card that offer it exist.
 
 interface BeforeInstallPromptEvent extends Event {
 	prompt(): Promise<void>;
