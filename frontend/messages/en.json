@@ -1,0 +1,638 @@
+{
+	"add_placeholder": "e.g. 1 kg potatoes",
+	"add_label": "Add item",
+	"add_suppress_short": "Stop suggesting",
+	"add_suppressed": "Stopped suggesting “{name}”",
+	"add_dedup_active": "“{name}” is already on the list",
+	"add_dedup_quantity": "“{name}” is already on the list; quantity now {quantity}",
+	"add_added": "“{name}” added",
+
+	"auth_title": "Shopping list",
+	"auth_intro": "There's no password here. You sign in with a passkey: your device confirms it's you, usually with your fingerprint, face or screen lock.",
+	"auth_signin_heading": "Already have an account?",
+	"auth_signin_heading_join": "Already using the app?",
+	"auth_signin_body_join": "Sign in with your passkey.",
+	"auth_intro_oidc": "Sign in with {name}. Your account is created the first time.",
+	"auth_methods_loading": "Preparing sign-in…",
+	"auth_methods_failed": "Sign-in could not be loaded. Check your connection.",
+	"auth_nickname_placeholder": "e.g. Anna",
+	"auth_nickname_label": "Nickname",
+	"auth_create_account": "Create account",
+	"auth_create_account_join": "Create account and join",
+	"auth_signup_heading": "New here?",
+	"auth_signup_body": "Pick a nickname. Only the people you share a list with will see it.",
+	"auth_nickname_required": "Enter a nickname first.",
+	"auth_already_have_account": "This device is already linked to an account. Sign in with your passkey, or sign out first.",
+	"auth_login": "Sign in with passkey",
+	"auth_no_passkey_support": "Passkeys not supported",
+	"auth_no_passkey_support_body": "This browser does not support passkeys.",
+	"auth_add_passkey_failed": "Passkey could not be added.",
+	"auth_ceremony_already_registered": "This passkey is already registered.",
+	"auth_ceremony_cancelled": "Passkey prompt canceled.",
+	"auth_ceremony_failed": "That didn't work. Please try again.",
+	"auth_passkey_unknown": "This passkey no longer belongs to an account here; it may have been removed. Pick another one.",
+	"auth_login_begin_failed": "Sign-in could not be started.",
+	"auth_not_authenticated": "Not signed in.",
+	"auth_register_begin_failed": "Registration could not be started.",
+	"auth_register_closed": "This server is not accepting new accounts. Whoever runs it can allow new accounts again.",
+	"auth_register_link_invalid": "This link is no longer valid. Ask for a new one.",
+	"auth_signup_by_link": "New accounts here need an invite link. Ask someone who already uses the app to share a list with you.",
+	"auth_oidc_login": "Continue with {name}",
+	"auth_oidc_failed": "Sign-in failed. The window was closed or the provider refused.",
+	"auth_oidc_server_failed": "Your provider accepted the sign-in, but this server could not complete it. The cause is in the server's OIDC setup, and its log names it.",
+	"install_title": "Install Shopping list",
+	"install_body": "Add it to your home screen to open it full screen in one tap. It already works offline. You can also do this later in Settings.",
+	"install_action": "Install",
+	"install_dismiss": "Not now",
+	"install_guide_title": "Add to home screen",
+	"install_ios_1": "Tap “Share”, in the bar at the bottom or in the ⋯ menu.",
+	"install_ios_2": "Choose “Add to Home Screen”. If it isn't there, scroll down the list.",
+	"install_ios_3": "Tap “Add” in the top right.",
+	"install_ios_signin": "Then open the shopping list from the new icon and sign in there once, the same way as here.",
+	"install_android_1": "Open the browser's menu (⋮).",
+	"install_android_2": "Choose “Install app” or “Add to home screen”.",
+	"install_other_1": "Open the browser's menu.",
+	"install_other_2": "Choose “Install app”. In Safari on a Mac, choose “Add to Dock”.",
+	"install_confirm": "Confirm with “Install” or “Add”.",
+	"install_fallback_ios": "Option missing? If you opened this page in WhatsApp or another app, open it in Safari.",
+	"install_fallback_android": "Option missing? If you opened this page in WhatsApp or another app, open it in Chrome.",
+	"install_fallback_other": "Option missing? Not every browser can install apps. Chrome, Edge and Safari can.",
+
+	"demo_title": "Shopping list demo",
+	"demo_intro": "Try the app without an account or a passkey: you get an example list to change as you like. Open a list's invite link on a second device to watch changes arrive there at once.",
+	"demo_start": "Try it",
+	"demo_start_note": "Everything you enter here is deleted after 24 hours. Nothing about you is stored.",
+	"demo_start_failed": "The demo could not start. Are you online?",
+	"demo_start_too_many": "Too many new demos from this network. Try again in a few minutes.",
+	"demo_start_full": "The demo is full right now. Try again later.",
+	"demo_banner": "Demo: your data is deleted after 24 hours",
+	"demo_banner_hours": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Demo: your data is deleted in {count} hour",
+				"countPlural=other": "Demo: your data is deleted in {count} hours"
+			}
+		}
+	],
+	"demo_banner_minutes": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Demo: your data is deleted in {count} minute",
+				"countPlural=other": "Demo: your data is deleted in {count} minutes"
+			}
+		}
+	],
+	"demo_expired": "This demo has expired and its data is deleted.",
+	"demo_restart": "Start a new demo",
+	"demo_signout": "Sign out and delete",
+	"demo_signout_hint": "A demo account has no sign-in, so signing out deletes it, with every list nobody else is on.",
+	"demo_signout_confirm": "Your demo account is deleted now, with every list nobody else is on. This cannot be undone.",
+	"demo_signout_confirm_action": "Delete",
+
+	"banner_synced": "All changes synced",
+	"banner_synced_when": "last synced {when}",
+	"banner_pending": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} change not synced yet",
+				"countPlural=other": "{count} changes not synced yet"
+			}
+		}
+	],
+	"banner_offline": "Offline",
+	"banner_offline_pending": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Offline · {count} not synced",
+				"countPlural=other": "Offline · {count} not synced"
+			}
+		}
+	],
+	"banner_expired": "Session expired. Sign in again to sync.",
+	"banner_never_synced": "never",
+	"banner_label": "Sync status",
+	"banner_stalled_title": "Changes waiting for another tab",
+	"banner_stalled_body": "The app is also open in another tab or window, and only one of them sends. Close it there and this tab sends your changes.",
+	"sync_line_connection": "Wi-Fi without internet?",
+	"sync_line_server": "Server not answering",
+	"sync_line_rate": "Server busy",
+	"sync_line_other_tab": "Waiting for another tab",
+	"sync_line_stuck": "App stuck · reload",
+	"sync_line_stale": "As of {when}",
+	"sync_line_offline": "Offline · {when}",
+	"sync_line_never": "never",
+	"sync_failing_title": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} change not synced",
+				"countPlural=other": "{count} changes not synced"
+			}
+		}
+	],
+	"sync_failing_connection": "The device is online but can't reach the server. Often it's Wi-Fi without internet.",
+	"sync_failing_server": "The server isn't answering right now.",
+	"sync_failing_rate": "The server is getting too many requests and is holding back.",
+	"sync_failing_kept": "The app keeps trying; until then, everything stays on this device.",
+	"sync_send_now": "Sync now",
+	"sync_stale_title": "No answer from the server",
+	"sync_stale_body": "Your changes are synced. What others changed since may still be missing here.",
+	"sync_stale_action": "Sync now",
+	"sync_stale_sentence": "No answer from the server · last {when}",
+	"sync_stuck_title": "The app is stuck",
+	"sync_stuck_body": "It hasn't tried to sync for over 20 seconds. Reloading usually fixes it, and your changes are kept.",
+	"sync_stuck_action": "Reload",
+	"sync_offline_body": "What you change stays on this device and goes out as soon as there is a connection again.",
+
+	"categories_title": "Categories",
+	"categories_edit": "Edit categories",
+	"categories_add": "New category",
+	"categories_edit_one": "Edit category",
+	"categories_name_placeholder": "e.g. Frozen",
+	"categories_emoji": "Emoji",
+	"categories_color": "Color",
+	"categories_hide_named": "Hide “{name}”",
+	"categories_edit_named": "Edit “{name}”",
+	"categories_hidden_section": "Hidden",
+	"categories_restore": "Restore",
+	"categories_missing_intro": "Newer lists also have these categories:",
+	"categories_missing_add": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Add this category",
+				"countPlural=other": "Add these {count} categories"
+			}
+		}
+	],
+	"categories_missing_added": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Added {count} category",
+				"countPlural=other": "Added {count} categories"
+			}
+		}
+	],
+	"categories_hidden_toast": "“{name}” hidden",
+	"categories_reset_default": "Reset to default",
+	"categories_default_name": "Default: {name}",
+	"categories_others_locked": "“Other” always stays visible",
+	"categories_name_taken": "There is already a category “{name}”",
+	"categories_new_default_name": "New category",
+	"categories_dnd_start": "Started dragging {item}. Use the arrow keys to move it within the list {zone}",
+	"categories_dnd_moved": "Moved {item} to position {position} in the list {zone}",
+	"categories_dnd_moved_end": "Moved {item} to the end of the list {zone}",
+	"categories_dnd_moved_start": "Moved {item} to the beginning of the list {zone}",
+	"categories_dnd_cancel": "Stopped dragging {item}",
+	"categories_dnd_instruction": "Tab to a row's handle and press Space to start dragging it",
+	"categories_dnd_disabled": "This list cannot be reordered",
+	"categories_arrange": "Change order",
+	"categories_arrange_title": "Arrange categories",
+	"categories_list_label": "Categories",
+	"categories_others_last": "“Other” always stays last",
+
+	"color_green": "Green",
+	"color_amber": "Amber",
+	"color_sky": "Sky blue",
+	"color_red": "Red",
+	"color_olive": "Olive",
+	"color_yellow": "Yellow",
+	"color_violet": "Violet",
+	"color_orange": "Orange",
+	"color_pink": "Pink",
+	"color_cyan": "Cyan",
+	"color_teal": "Teal",
+	"color_wine": "Wine",
+	"color_slate": "Slate",
+	"color_lavender": "Lavender",
+	"color_brown": "Brown",
+	"color_blue": "Blue",
+	"color_steel": "Steel blue",
+	"color_lime": "Lime",
+	"color_indigo": "Indigo",
+	"color_magenta": "Magenta",
+	"color_gray": "Gray",
+
+	"common_cancel": "Cancel",
+	"common_retry": "Try again",
+	"common_required": "Fill this in first.",
+	"common_save": "Save",
+	"common_close": "Close",
+	"common_back": "Back",
+	"common_rename": "Rename",
+	"common_undo": "Undo",
+	"common_offline_hint": "You'll need a connection for that.",
+	"common_someone": "someone",
+	"common_error": "Something went wrong.",
+	"common_error_connection": "Couldn't reach the server. Try again.",
+	"common_error_session": "Your session has expired. Sign in again, then try again.",
+	"common_error_rate_limited": "Too many attempts. Wait a moment, then try again.",
+	"error_page_body": "This view could not be shown. The error has been reported.",
+	"error_page_not_found": "This page does not exist.",
+	"error_page_reload": "Reload",
+	"error_page_retrying": "One moment…",
+	"common_quantity": "Quantity",
+	"common_name": "Name",
+	"common_note": "Note",
+	"common_category": "Category",
+	"common_settings": "Settings",
+	"common_app_name": "Shopping list",
+	"common_actions_for": "Actions for {name}",
+
+	"history_previous_items": "Previous items",
+	"history_sort_recent": "Last bought",
+	"history_previous_count": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} item",
+				"countPlural=other": "{count} items"
+			}
+		}
+	],
+	"history_readd": "“{name}” back on the list",
+	"history_readd_when": "“{name}” back on the list, last bought {when}",
+	"history_empty": "No previous items yet",
+	"history_empty_hint": "Checked-off items land here once the shop is over: three hours after the last one.",
+	"history_toast_checked": "“{name}” checked off",
+	"history_toast_restored": "“{name}” back on the list",
+	"history_toast_removed": "“{name}” removed",
+	"history_toast_removed_kept": "“{name}” removed · kept in “Previous items”",
+
+	"home_title": "My lists",
+	"home_list_count": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} list",
+				"countPlural=other": "{count} lists"
+			}
+		}
+	],
+	"home_card_counts": "{open} open",
+	"home_card_all_done": "all done ✓",
+	"home_card_empty": "empty",
+	"home_card_members": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} member",
+				"countPlural=other": "{count} members"
+			}
+		}
+	],
+	"home_card_unsynced": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} not synced",
+				"countPlural=other": "{count} not synced"
+			}
+		}
+	],
+	"home_open_list": "Open {name}",
+	"home_sort_label": "Sort order",
+	"home_sort_activity": "Activity",
+	"home_sort_custom": "Custom order",
+	"home_arrange": "Change order",
+	"home_arrange_title": "Arrange lists",
+	"arrange_hint": "Drag by the handle, or tap it for arrows",
+	"arrange_done": "Done",
+	"arrange_up": "Move {name} up",
+	"arrange_down": "Move {name} down",
+	"arrange_drag": "Move {name}",
+	"arrange_moved": "{item}: position {position} of {count}",
+	"home_new_list": "New list",
+	"home_new_list_prompt": "List name",
+	"home_join_list": "Join with invite",
+	"home_join_prompt": "Invite link or code",
+	"home_online_only": "You'll need a connection to create or join a list.",
+	"home_empty_title": "Welcome!",
+	"home_empty_body": "Create your first list or join a shared one.",
+	"home_loading_title": "Loading your lists…",
+	"home_expired_title": "Session expired",
+	"home_expired_body": "Sign in again so your lists can load.",
+	"home_expired_action": "Sign in again",
+	"home_loading_offline": "You're offline. Your lists will appear once you're connected.",
+	"home_loading_slow": "This is taking longer than usual. The app keeps trying…",
+	"home_action_rename": "Rename",
+	"home_action_share": "Share & members",
+	"home_action_leave": "Leave list",
+	"home_action_duplicate": "Duplicate",
+	"home_clone_title": "Duplicate list",
+	"home_clone_prompt": "Name for the copy",
+	"home_clone_default_name": "{name} (copy)",
+	"home_action_export": "Export backup",
+	"home_export_done": "Backup created",
+	"home_export_failed": "Export failed",
+	"home_import_list": "Import list",
+	"home_import_invalid": "Invalid backup file",
+	"home_import_too_many_items": "The file has {count} items, but an import here brings in at most {max}.",
+	"home_list_limit": "You're already on {max} lists, the most this server allows. Leave one to create another.",
+	"home_import_failed": "Import failed",
+	"home_import_default_name": "Imported list",
+	"import_add_title": "Add items from text",
+	"import_paste_label": "List as text",
+	"import_paste_hint": "One item per line. Share or copy the list in the other app and paste it here. Sections in [brackets] help sort the items.",
+	"import_next": "Continue",
+	"import_backup_import": "Import backup",
+	"import_backup_elsewhere": "This is a backup from this app. It becomes a list of its own: use “Import list” in “My lists”.",
+	"import_format_json": "This is JSON, but not a backup from this app. Share or copy the list in the other app as text, one item per line.",
+	"import_format_markup": "This looks like HTML or XML, not a list. Share or copy the list in the other app as text, one item per line.",
+	"import_format_table": "This is a table, not a list. If the other app also exports a plain list, use that; otherwise one item per line.",
+	"import_format_csv": "This looks like a CSV file, not a list. Share or copy the list in the other app as text, one item per line.",
+	"import_format_yaml": "This looks like YAML, not a list. Share or copy the list in the other app as text, one item per line.",
+	"import_none": "No items found in this text.",
+	"import_backup_hint": "A backup from this app?",
+	"import_backup_pick": "Choose a backup file…",
+	"import_target": "Where to?",
+	"import_target_new": "New list",
+	"import_new_name": "Name of the new list",
+	"import_selected": "{selected} of {count} selected",
+	"import_status_on_list": "already on the list",
+	"import_status_reactivate": "comes back onto the list",
+	"import_status_too_long": "too long for an item",
+	"import_status_ticked": "already checked off there",
+	"import_confirm_new": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Create a list with {count} item",
+				"countPlural=other": "Create a list with {count} items"
+			}
+		}
+	],
+	"import_confirm_add": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Add {count} item",
+				"countPlural=other": "Add {count} items"
+			}
+		}
+	],
+	"import_added": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Added {count} item",
+				"countPlural=other": "Added {count} items"
+			}
+		}
+	],
+	"import_list_room": "This list can take only {room} more. Uncheck some.",
+	"import_text_cut": "The text was longer than {max} characters; only the lines before that are here.",
+	"import_too_many": "{count} items are selected, but a new list here holds at most {max}. Uncheck some.",
+	"home_leave_confirm": "Really leave “{name}”?",
+	"home_leave_confirm_last": "You are the only member of “{name}”. Leaving deletes the list and all its items, and this cannot be undone.",
+	"home_rename_prompt": "The new name applies to every member.",
+	"home_action_clear_history": "Reset purchase dates",
+	"home_clear_confirm_title": "Reset purchase dates?",
+	"home_clear_confirm": "Forgets when items in {name} were last bought. The dates under “Previous items” and when adding disappear, checked-off items move to “Previous items”, and removed items the list only knew from a purchase are forgotten. Items on the list stay. This affects all members and cannot be undone.",
+	"home_clear_confirm_action": "Reset",
+	"history_cleared": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Reset purchase dates for {count} item",
+				"countPlural=other": "Reset purchase dates for {count} items"
+			}
+		}
+	],
+
+	"list_view_shop": "Shopping",
+	"list_view_list": "Editing",
+	"list_switch_none": "No other lists",
+	"list_switch_all": "My lists",
+	"list_switch_title": "Lists",
+	"list_settings": "List settings",
+	"list_members_shared": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "shared · {count} member",
+				"countPlural=other": "shared · {count} members"
+			}
+		}
+	],
+	"list_members_solo": "just you",
+	"list_not_found_title": "List not found",
+	"list_not_found": "This list isn't among your lists. It may have been deleted, or you are not a member: then you need an invite link.",
+	"list_sort_alphabetical": "A–Z",
+	"list_sort_category": "Category",
+	"list_sort_label": "Item order",
+	"list_sort_heading": "Sort order",
+	"list_remove": "Remove {name} from the list",
+	"list_row_category": "{category}, edit {name}",
+	"list_edit_quantity": "Edit quantity",
+	"list_edit_quantity_named": "{quantity} – edit quantity: {name}",
+	"list_add_quantity_named": "Add quantity: {name}",
+	"list_detail_title": "Edit item",
+	"list_note_placeholder": "Note, e.g. brand X only",
+	"list_empty_title": "Nothing on the list yet",
+	"list_empty_body": "Tap above to add something.",
+	"list_all_done": "All done 🎉",
+
+	"scan_title": "Scan barcode",
+	"scan_close": "Close scanner",
+	"scan_permission_denied": "No camera access. Allow the camera in your browser settings.",
+	"scan_decode_failed": "Barcodes can't be read right now. Type the name instead.",
+	"scan_unsupported": "This device can't scan barcodes.",
+	"scan_camera_busy": "The camera can't be opened right now. Close other apps using it, or type the name.",
+	"scan_looking_up": "Looking up product…",
+	"scan_not_found": "Product not found. Type the name instead.",
+	"scan_offline_miss": "Unknown code, and you're offline. Type the name instead.",
+	"scan_attribution": "Photo: Open Food Facts contributors",
+	"scan_hint": "Hold the barcode in the frame",
+
+	"settings_title": "Settings",
+	"settings_section_app": "App",
+	"settings_section_account": "Account",
+	"settings_section_signout": "Sign out",
+	"settings_nickname_title": "Change nickname",
+	"settings_hidden_suggestions_none_value": "none",
+	"settings_nickname": "Nickname",
+	"settings_nickname_hint": "This is what members of shared lists see.",
+	"settings_passkeys": "Passkeys",
+	"settings_add_passkey": "Add passkey",
+	"settings_passkey_name_placeholder": "e.g. iPhone",
+	"settings_new_passkey_label": "Name for the new passkey",
+	"settings_backup_key_nudge": "Add a second passkey, so losing one device doesn't lock you out.",
+	"settings_passkey_unnamed": "Passkey",
+	"settings_passkey_last_used": "last used {when}",
+	"settings_passkey_never_used": "never used",
+	"settings_remove_passkey": "Remove passkey",
+	"settings_passkey_only_login": "This is the only way into your account. Add another passkey first.",
+	"settings_rename_passkey_named": "Rename passkey “{name}”",
+	"settings_remove_passkey_confirm": "Really remove “{name}”?",
+	"settings_remove_passkey_confirm_action": "Remove",
+	"settings_rename_passkey_label": "Name",
+	"settings_signout_device": "Sign out on this device",
+	"settings_signout_device_unsynced": "Some changes on this device have not been synced yet. If you sign out now, they are lost.",
+	"settings_signout_device_anyway": "Sign out anyway",
+	"settings_link_oidc": "Connect with {name}",
+	"settings_link_oidc_hint": "Add your {name} sign-in to this account. Your lists and passkeys stay as they are.",
+	"settings_oidc_linked": "Connected with {name}.",
+	"settings_link_oidc_failed": "Connecting failed. The window was closed or the provider refused.",
+	"settings_link_oidc_in_use": "This sign-in already belongs to another account with its own lists. Sign in with it there, or share lists between the two accounts with an invite.",
+	"settings_oidc_linked_as": "Connected with {name} as {identity}.",
+	"settings_unlink_oidc": "Remove sign-in",
+	"settings_unlink_oidc_title": "Remove {name} sign-in?",
+	"settings_unlink_oidc_confirm": "You'll sign in with your passkey from now on. Signing in with {name} afterwards creates a separate, empty account.",
+	"settings_unlink_oidc_confirm_action": "Remove",
+	"settings_unlink_oidc_needs_passkey": "Add a passkey first. Without one, you couldn't sign in anymore.",
+	"settings_unlink_oidc_failed": "Couldn't remove the sign-in.",
+	"reauth_oidc_not_linked": "Your {name} sign-in is no longer connected to this account. Sign in with your passkey.",
+	"reauth_wrong_account": "That's a different account. Sign in to the account this device was using, or sign out first.",
+	"settings_no_passkeys": "No passkeys on file",
+	"settings_logout_everywhere": "Sign out everywhere",
+	"settings_logout_everywhere_confirm": "You'll be signed out on every device, this one included, and sign in again on each. Your lists are kept.",
+	"settings_logout_everywhere_confirm_unsynced": "You'll be signed out on every device, this one included. Some changes on this device have not been synced yet; they are lost.",
+	"settings_logout_everywhere_confirm_action": "Sign out everywhere",
+	"settings_locale": "Language",
+	"settings_locale_de": "Deutsch",
+	"settings_locale_en": "English",
+	"list_display_heading": "Display",
+	"density_comfortable": "Comfortable",
+	"density_compact": "Compact",
+	"density_list": "List",
+	"settings_theme": "Appearance",
+	"settings_theme_light": "Light",
+	"settings_theme_dark": "Dark",
+	"settings_theme_system": "System",
+	"settings_hidden_suggestions": "Hidden suggestions",
+	"settings_hidden_suggestions_save_failed": "Your hidden suggestions could not be saved.",
+	"settings_unsuppress": "Suggest again",
+	"settings_delete_account": "Permanently delete account",
+	"settings_delete_account_shared": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Your shared list stays with its members.",
+				"countPlural=other": "Your {count} shared lists stay with their members."
+			}
+		}
+	],
+	"settings_delete_account_solo": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Your own list is permanently deleted.",
+				"countPlural=other": "Your {count} own lists are permanently deleted."
+			}
+		}
+	],
+	"settings_delete_account_no_lists": "You're not in any list. Only your account is deleted.",
+	"settings_delete_account_confirm": "Delete account",
+	"settings_delete_account_not_signed_in": "Sign-in canceled. Your account was not deleted.",
+	"settings_about_version": "Version {version}",
+	"settings_about_dev": "Development build",
+	"settings_about_account": "Account {code}",
+	"settings_about_source": "Source code (AGPL-3.0)",
+	"settings_about_product_data": "Product data: Open Food Facts",
+	"settings_about_emoji": "Emoji: OpenMoji",
+	"settings_about_emoji_license": "CC BY-SA 4.0",
+	"settings_general": "General",
+	"settings_install_title": "Install Shopping list",
+	"settings_install_body": "One tap from your home screen, offline too.",
+	"settings_install_done": "Installed. From now on, open the shopping list from its icon on your home screen.",
+	"settings_online_only": "Account changes need a connection.",
+
+	"share_title": "Share & members",
+	"share_invite_link": "Invite link",
+	"share_copy": "Copy",
+	"share_copied": "Link copied",
+	"share_share": "Share",
+	"share_qr": "QR",
+	"share_qr_caption": "Scan to join",
+	"share_reset_link": "Reset link",
+	"share_reset_done": "New link created. The old one no longer works.",
+	"share_link_stops_confirm": "The current link then stops working, also for anyone it was already sent to who has not joined yet. Members stay members.",
+	"share_reset_confirm_action": "Reset",
+	"share_revoke_link": "Revoke link",
+	"share_revoke_confirm_action": "Revoke",
+	"share_revoke_done": "Link revoked. Nobody can join with it anymore.",
+	"share_create_link": "Create link",
+	"share_no_link": "This list has no invite link right now.",
+	"share_expiry": "Valid until {date}",
+	"share_you": "you",
+	"member_unnamed": "Member",
+	"share_joined": "joined {when}",
+	"share_online_only": "Invite links need a connection.",
+	"share_link_unavailable": "This link comes from an older version of the app and cannot be shown here. A new link replaces it for everyone.",
+	"share_join_title": "Join list",
+	"share_join_items": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} item",
+				"countPlural=other": "{count} items"
+			}
+		}
+	],
+	"share_join_more": "{count} more",
+	"share_join_action": "Join",
+	"share_join_invalid": "This invite is invalid, expired, or revoked.",
+	"common_to_lists": "Go to my lists",
+	"share_join_to_signin": "Go to sign-in",
+	"share_join_failed": "That didn't work just now. Check your connection and try again.",
+	"share_join_needs_account": "You need an account to join.",
+	"share_join_session_expired": "Your session has expired. Sign in again to join.",
+
+	"shop_check_tile": "{name}, check off",
+	"shop_restore_tile": "{name}, back on the list",
+	"shop_done_section": "Done",
+	"shop_jump_to_add": "Edit list",
+	"shop_empty_hint": "Switch to “Editing” to add items.",
+	"shop_all_done": "All done",
+	"shop_product_info": "Product details for {name}",
+	"shop_product_details": "Product details",
+	"shop_photo_enlarge": "Enlarge photo of {name}",
+	"shop_copy_barcode": "Copy barcode",
+
+	"sync_conflict_cleared": "{who} had already cleared {field}.",
+	"sync_conflict_cleared_named": "“{name}”: {who} had already cleared {field}.",
+	"sync_conflict_field": "{who} had already set {field} to “{theirs}”.",
+	"sync_conflict_field_named": "“{name}”: {who} had already set {field} to “{theirs}”.",
+	"sync_conflict_deleted": "“{name}” was removed while you were editing it.",
+	"sync_conflict_merged": "“{name}” was already on the list. Kept {who}'s quantity “{theirs}”.",
+	"sync_list_gone": "“{name}” is no longer among your lists.",
+	"sync_list_gone_unknown": "A list is no longer among your lists.",
+	"sync_field_quantity": "the quantity",
+	"sync_field_name": "the name",
+	"sync_field_note": "the note",
+	"sync_field_category_key": "the category",
+	"sync_field_checked": "the status",
+	"sync_field_generic": "a field",
+	"sync_value_checked": "checked off",
+	"sync_value_unchecked": "not checked off",
+	"sync_denied_too_long": "Couldn't save {field}: too long. Your change was undone.",
+	"sync_denied_protected": "“Other” can't be hidden. Your change was undone.",
+	"sync_denied_list_full": "This list is full, so the item wasn't added. Duplicate the list to start over without its removed items.",
+	"sync_denied_categories_full": "This list has too many categories, so the category wasn't added. Duplicate the list to start over without its hidden categories.",
+	"sync_denied_generic": "A change couldn't be synced and was undone."
+}

@@ -1,0 +1,84 @@
+/*
+ * The shop surface's layout (§9.1): the grid, and the three densities that
+ * size it ([D-83], [D-313]). Imported by app.css after the tile template
+ * (shop-tile.css), which owns the tile itself.
+ */
+
+/* No paint containment ([D-89]): Firefox painted `content-visibility: auto`
+ * chunks over a sheet's overlay once its open animation ended. */
+@layer components {
+	.shop-view {
+		container-type: inline-size;
+	}
+}
+
+/* The shop grid (§9.1): intrinsic tracks in rem ([D-83]), so enlarged text
+   gets fewer, wider columns, down to one. */
+@layer components {
+	/* ShopItems' re-measure probe: no height, the tile's inline padding. */
+	.shop-probe {
+		block-size: 0;
+		padding: var(--tile-p);
+		padding-block: 0;
+	}
+	.shop-items {
+		display: contents;
+	}
+	.shop-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+		gap: var(--grid-gap);
+		padding: 0.75rem 0.875rem 1rem;
+	}
+	/* The list density ([D-313]): one column, and rows of one category
+	   touch, so their colour bar runs unbroken; a gap and a rule open where
+	   the next one begins. */
+	.shop-grid.marked {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
+		padding: 0.25rem 0 1rem;
+	}
+	.shop-grid.marked > [data-run-start]:not(:first-child) {
+		margin-block-start: 0.375rem;
+	}
+	.shop-grid.marked > :not([data-run-start]) > .tile {
+		box-shadow: inset 0 1px var(--border);
+	}
+}
+
+/* ---- the three densities ([D-83], [D-313]) ------------------------
+ *
+ * `data-density` sits on the root, not .app-shell, because vaul portals sheets
+ * to <body>. The selectors are attribute-only so a subtree can opt in
+ * (/dev/gallery shows the densities side by side); every density therefore
+ * needs its own block restating every token, or a subtree would inherit the
+ * root's. `:root` doubles as the first paint's fallback.
+ */
+:root,
+[data-density='comfortable'] {
+	--tile-h: 6.5rem; /* 104px at the default root size, and follows it ([D-83]) */
+	--grid-gap: clamp(10px, 1.7cqw, 14px);
+	--tile-p: 0.6875rem 0.75rem; /* rem, so the tile scales with its text ([D-83]) */
+	--aisle-py: 8px; /* the 2px grid ([D-318]) */
+	--tile-name-size: var(--text-tile);
+}
+
+[data-density='compact'] {
+	--tile-h: 4.75rem; /* 76px, the floor: below it a product photo is a smudge */
+	--grid-gap: 8px;
+	--tile-p: 0.5rem 0.625rem;
+	--aisle-py: 6px;
+	--tile-name-size: var(--text-name);
+}
+
+/* Full-width check-off rows without aisle headers ([D-83], [D-313]).
+   --tile-h is a min-height here: the [D-83] uniform height is for the grid,
+   not for rows. */
+[data-density='list'] {
+	--tile-h: 3.25rem; /* 52px */
+	--grid-gap: 6px; /* inert, but every block restates every token: the rows
+	                    touch, the gap is the marked grid's own, 0 */
+	--tile-p: 0.6875rem 0.75rem; /* inert */
+	--aisle-py: 6px; /* inert: no aisle headers */
+	--tile-name-size: var(--text-name);
+}

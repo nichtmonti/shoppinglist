@@ -1,0 +1,60 @@
+# Woodpecker CI — the CI image ([D-203]).
+# Every other workflow runs in localhost/shoppinglist-ci, the `toolchain`
+# stage of .devcontainer/Dockerfile: the toolchain the devcontainer runs, so
+# CI and the gate cannot drift apart. Its tag is the toolchain versions plus a
+# hash of that stage (scripts/ci-image-tag.sh), written into every workflow;
+# the workflows depend on this one, which makes sure the image exists.
+#
+# The image is built on the agent's own Docker daemon and never leaves it: the
+# Docker backend runs a step image it already has instead of pulling it. It
+# stays in the daemon's image store between pipelines, so a run whose tag is
+# there builds nothing, and a Dockerfile change rebuilds the whole stage, a few
+# minutes once per toolchain bump (the build cache is pruned after each build,
+# below). An image lost to a prune is rebuilt by the next pipeline.
+# Codeberg's registry could not hold it: its package quota is 1.5 GiB for an
+# account, and the image alone is over a gigabyte compressed ([D-203]).
+#
+# The step mounts the agent's Docker socket, which is root on the agent host:
+# the repository must be trusted, as it already is for the cache volumes, and
+# a pull request from a fork must keep needing approval before it runs.
+# `localhost/` in the name means a missing image is never pulled from a
+# registry where someone else could publish that name.
+#
+# It runs on every event, so a workflow that depends on it never waits on a
+# skipped one.
+
+when:
+  - event: [push, pull_request, manual, cron]
+  - event: tag
+    ref: refs/tags/v*
+
+steps:
+  image:
+    image: docker:29-cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - scripts/ci-image-tag.sh --check
+      - IMAGE=$(scripts/ci-image-tag.sh --image)
+      - |
+        if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+          echo "CI image $IMAGE is on this agent"
+        else
+          echo "CI image $IMAGE is not on this agent yet: building it"
+          docker build --target toolchain -t "$IMAGE" .devcontainer
+          # What the older toolchain left behind, 5-8 GB per bump: its tag
+          # (3.1 GB), the base image's older tags, and the build cache, which
+          # keeps an old image's layers after its tag is gone. The prune
+          # clears every build's cache on the agent; it is only cache. An
+          # image a running pipeline still uses stays, and a pipeline that
+          # needs one again rebuilds it. No braces on a shell variable here
+          # (AGENTS.md): Woodpecker would empty it, and `docker image ls ""`
+          # lists every image on the agent.
+          docker image ls localhost/shoppinglist-ci --format '{{.Repository}}:{{.Tag}}' |
+            grep -vxF "$IMAGE" | xargs -r docker rmi 2>/dev/null || true
+          BASE=$(sed -n 's/^FROM \([^ ]*\) AS toolchain$/\1/p' .devcontainer/Dockerfile)
+          BASE_REPO=$(echo "$BASE" | cut -d: -f1)
+          [ -n "$BASE_REPO" ] && docker image ls "$BASE_REPO" --format '{{.Repository}}:{{.Tag}}' |
+            grep -vxF "$BASE" | xargs -r docker rmi 2>/dev/null || true
+          docker builder prune -af
+        fi

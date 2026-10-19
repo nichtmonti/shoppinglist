@@ -1,0 +1,257 @@
+[
+	{
+		"in": "Vollmilchschokolade",
+		"expect": "snacks_sweets",
+		"note": "head-final compound — a prefix matcher would see Vollmilch and say dairy"
+	},
+	{
+		"in": "Erdbeermarmelade",
+		"expect": "breakfast",
+		"note": "…and would say produce here (Erdbeere)"
+	},
+	{ "in": "Kirschjoghurt", "expect": "dairy_eggs", "note": "…and produce here (Kirsche)" },
+	{ "in": "Kartoffelchips", "expect": "snacks_sweets", "note": "…and produce here (Kartoffel)" },
+	{ "in": "Rinderhackfleisch", "expect": "meat_fish", "note": "long head noun" },
+	{
+		"in": "Weißbrot",
+		"expect": "bakery",
+		"note": "ß folds to ss; 4-char head at the MIN_HEAD floor"
+	},
+	{ "in": "Apfelessig", "expect": "pantry", "note": "5-char head, not produce" },
+	{ "in": "Traubenzucker", "expect": "baking_spices", "note": "not produce" },
+	{ "in": "Ziegenkäse", "expect": "dairy_eggs", "note": "umlaut folded for matching only" },
+
+	{
+		"in": "Bio-Tomaten",
+		"expect": "produce",
+		"note": "hyphen dropped + plural -n stripped to reach Tomate"
+	},
+	{ "in": "Salzkartoffeln", "expect": "produce", "note": "plural -n over a compound" },
+	{
+		"in": "Bananen",
+		"expect": "produce",
+		"note": "plural of a known name is still a whole-name hit"
+	},
+	{ "in": "Zwiebeln", "expect": "produce", "note": "plural -n" },
+
+	{
+		"in": "2 Liter Milch",
+		"expect": "dairy_eggs",
+		"note": "head after a space needs no size share"
+	},
+	{ "in": "Bio Eier", "expect": "dairy_eggs", "note": "4-char head after a space" },
+	{ "in": "chocolate milk", "expect": "dairy_eggs", "note": "English is head-final too" },
+	{ "in": "apple juice", "expect": "beverages", "note": "whole-name English hit" },
+	{
+		"in": "Milch",
+		"expect": "dairy_eggs",
+		"note": "typed in full and submitted without arrow-selecting — used to land in Others"
+	},
+	{
+		"in": "  MILCH  ",
+		"expect": "dairy_eggs",
+		"note": "normalizeName does the trimming and casing"
+	},
+
+	{ "in": "Handtuch", "expect": null, "note": "Tuch is not a known name" },
+	{ "in": "Briefmarken", "expect": null, "note": "non-grocery, no head match" },
+	{
+		"in": "Weinglas",
+		"expect": null,
+		"note": "Wein is a PREFIX here — must not classify as alcohol"
+	},
+	{ "in": "Milchaufschäumer", "expect": null, "note": "…same trap with Milch" },
+	{ "in": "Brotdose", "expect": null, "note": "…and with Brot" },
+	{ "in": "Käsereibe", "expect": null, "note": "…and with Käse" },
+	{ "in": "Eiswürfelform", "expect": null, "note": "…and with Eis" },
+	{ "in": "Regenschirm", "expect": null, "note": "non-grocery" },
+	{ "in": "Notizbuch", "expect": null, "note": "non-grocery" },
+	{ "in": "Gießkanne", "expect": null, "note": "non-grocery, ß folded" },
+	{ "in": "Briefmarken", "expect": null, "note": "non-grocery, survives plural stripping" },
+	{
+		"in": "Brunnenschlauch",
+		"expect": null,
+		"note": "THE known trap: Lauch is a real produce entry, rejected only by MIN_HEAD_SHARE (5*3 <= 15)"
+	},
+	{
+		"in": "Fahrradschlauch",
+		"expect": "car_bike",
+		"note": "the trap's old example, a seed entry since [D-251]: a whole-name hit never reaches the share rule"
+	},
+	{
+		"in": "Eis",
+		"expect": "frozen",
+		"note": "a whole-name hit is exempt from MIN_HEAD — short names like Eis, Tee, Reis must still work"
+	},
+	{
+		"in": "Aufeis",
+		"expect": null,
+		"note": "…but as a compound head Eis is under MIN_HEAD, so it may not drag anything into frozen"
+	},
+	{
+		"in": "Holzschrauben",
+		"expect": "hardware",
+		"note": "non-food aisles [D-251]: head-final like the groceries"
+	},
+	{
+		"in": "Rasendünger",
+		"expect": "hardware",
+		"note": "Dünger as the head; garden folded into hardware [D-300]"
+	},
+	{ "in": "Winterreifen", "expect": "car_bike", "note": "Reifen as the head" },
+	{
+		"in": "Halsschmerztabletten",
+		"expect": "pharmacy",
+		"note": "pain relievers moved from personal_care to pharmacy"
+	},
+	{
+		"in": "Blumenzwiebeln",
+		"expect": "hardware",
+		"note": "a whole-name hit, not the produce aisle's Zwiebel"
+	},
+	{
+		"in": "Autoshampoo",
+		"expect": "car_bike",
+		"note": "a whole-name hit, not personal care's Shampoo"
+	},
+	{
+		"in": "Gartenschlauch",
+		"expect": "hardware",
+		"note": "a whole-name hit, not car_bike's Fahrradschlauch"
+	},
+	{
+		"in": "Filterkaffee",
+		"expect": "coffee_tea",
+		"note": "Kaffee as the head, its own aisle [D-300]"
+	},
+	{
+		"in": "Bio-Fencheltee",
+		"expect": "coffee_tea",
+		"note": "a seeded tea at a word start: the common teas are seed entries [D-300]"
+	},
+	{
+		"in": "Lindenblütentee",
+		"expect": null,
+		"note": "…because Tee alone is under MIN_HEAD and a third of the compound"
+	},
+	{
+		"in": "Hummus pikant",
+		"expect": "dairy_eggs",
+		"note": "nothing ends in pikant, so the trailing word is dropped and Hummus matches"
+	},
+	{ "in": "Milch 1,5 %", "expect": "dairy_eggs", "note": "…an amount after the noun too" },
+	{ "in": "Earl Grey lose", "expect": "coffee_tea", "note": "…and a two-word name before it" },
+	{
+		"in": "Pikanter Hummus",
+		"expect": "dairy_eggs",
+		"note": "the head after a space matches without dropping anything"
+	},
+	{
+		"in": "WC Reiniger",
+		"expect": "household",
+		"note": "the seed's WC-Reiniger: spaces, hyphens or neither join a name's parts alike"
+	},
+	{ "in": "TK Spinat", "expect": "frozen", "note": "…TK-Spinat, not produce's Spinat" },
+	{ "in": "half and half", "expect": "dairy_eggs", "note": "…Half-and-Half" },
+	{ "in": "smoked ham", "expect": "meat_fish", "note": "a 3-char head standing as a word" },
+	{ "in": "Bio Tee", "expect": "coffee_tea", "note": "…in German too" },
+	{
+		"in": "Zitronen Eis",
+		"expect": "frozen",
+		"note": "…where Zitroneneis is not: Eis is under MIN_HEAD"
+	},
+	{ "in": "Schwein", "expect": "meat_fish", "note": "a whole-name hit, not alcohol's Wein" },
+	{
+		"in": "Kirsche",
+		"expect": "produce",
+		"note": "the singular too, and not the alcohol aisle's kirschwasser"
+	},
+	{
+		"in": "TK Himbeeren",
+		"expect": "frozen",
+		"note": "TK marks the frozen aisle, whatever the head"
+	},
+	{ "in": "Lachsfilet TK", "expect": "frozen", "note": "…after the name too" },
+	{ "in": "Tiefkühl Erdbeeren", "expect": "frozen", "note": "…and Tiefkühl" },
+	{ "in": "frozen broccoli", "expect": "frozen", "note": "…and English frozen" },
+	{
+		"in": "Chips Paprika",
+		"expect": "snacks_sweets",
+		"note": "a vegetable after a product is its flavour"
+	},
+	{ "in": "Joghurt Kirsche", "expect": "dairy_eggs", "note": "…a fruit too" },
+	{
+		"in": "Salat Gurke",
+		"expect": "produce",
+		"note": "…unless the word before it is produce as well"
+	},
+	{
+		"in": "Paprika rot",
+		"expect": "produce",
+		"note": "an unknown word after it is dropped, as before"
+	},
+	{
+		"in": "Erdbeere",
+		"expect": "produce",
+		"note": "a singular reaches the plural the seed knows, not alcohol's beer"
+	},
+	{
+		"in": "Joghurt Erdbeer",
+		"expect": "dairy_eggs",
+		"note": "…the combining form too, as a flavour"
+	},
+	{ "in": "Kerze", "expect": "household", "note": "…outside the produce aisle as well" },
+	{
+		"in": "beer",
+		"expect": "alcohol",
+		"note": "a name typed in full beats one it is the singular of (berries)"
+	},
+	{
+		"in": "Mozzarella light",
+		"expect": "dairy_eggs",
+		"note": "no comparative tail is added: light is not lighter"
+	},
+	{
+		"in": "Gyros",
+		"expect": null,
+		"note": "no added tail inside a compound: gyrose does not end in rose"
+	},
+	{
+		"in": "Avocado reif",
+		"expect": "produce",
+		"note": "a last word only read as a plural yields to the product before it: reif is no Reifen"
+	},
+	{ "in": "Müsli ohne Zucker", "expect": "breakfast", "note": "the words before mit/ohne decide" },
+	{ "in": "pasta with pesto", "expect": "pasta_rice", "note": "…with/without in English" },
+	{
+		"in": "Kaffee in Pads",
+		"expect": "coffee_tea",
+		"note": "…and in, aus, von: the pads are the packing"
+	},
+	{
+		"in": "sweet apples",
+		"expect": "produce",
+		"note": "a word only read as a plural (sweets) is no product to defer to"
+	},
+	{ "in": "", "expect": null, "note": "empty" },
+	{ "in": "   ", "expect": null, "note": "whitespace only" },
+	{ "in": "🍫", "expect": null, "note": "folds away to nothing" },
+	{
+		"in": "Wasser Eis",
+		"expect": "frozen",
+		"note": "a match inside a word may not reach past a typed space: no Reis"
+	},
+	{ "in": "Kinder Eis", "expect": "frozen", "note": "…the same: no Reis" },
+	{ "in": "Wassereis", "expect": "frozen", "note": "a seed name, since -reis outranks -eis" },
+	{
+		"in": "Tiefkühlbeutel",
+		"expect": "household",
+		"note": "a whole known name beats the Tiefkühl marker"
+	},
+	{ "in": "Tiefkühldosen", "expect": "household", "note": "…the same" },
+	{
+		"in": "Tiefkühl Erbsen",
+		"expect": "frozen",
+		"note": "the marker still decides a name known only in part"
+	}
+]

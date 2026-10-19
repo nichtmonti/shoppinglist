@@ -1,0 +1,85 @@
+# Pinned developer tooling
+
+Ten programs the gate, the tests, CI and the dev loop depend on, each declared in
+**its own Go module** here, but one Python tool (below):
+
+| Directory | Tool | Used by |
+| --- | --- | --- |
+| `staticcheck/` | [staticcheck](https://staticcheck.dev) | `go-lint` in the gate, `.woodpecker/go.yaml` |
+| `gosec/` | [gosec](https://github.com/securego/gosec) | `go-lint` in the gate, `.woodpecker/go.yaml` |
+| `gitleaks/` | [gitleaks](https://github.com/gitleaks/gitleaks), secrets in the history | the gate, the pre-push hook, `.woodpecker/go.yaml` ([D-203], [D-274]) |
+| `govulncheck/` | [govulncheck](https://go.dev/blog/vuln) | `.woodpecker/security.yaml` |
+| `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `.woodpecker/security.yaml` |
+| `air/` | [air](https://github.com/air-verse/air) | `scripts/dev.sh` ([D-71]) |
+| `task/` | [go-task](https://taskfile.dev), the runner behind `Taskfile.yml` | `scripts/gate.sh` and CI ([D-177]) |
+| `dex/` | [Dex](https://dexidp.io), an OpenID Connect provider | `scripts/dev.sh --oidc`, the OIDC tests (`backend/internal/dextest`, `e2e/oidc`) and `shots.sh docs` ([D-154]) |
+| `gcov2lcov/` | [gcov2lcov](https://github.com/jandelgado/gcov2lcov), Go's coverage profile as LCOV for diff-cover | `coverage:go` in `Taskfile.yml`, `.woodpecker/e2e.yaml` ([D-203]) |
+| `diff-cover/` | [diff-cover](https://github.com/Bachmann1234/diff_cover), the changed lines no test reaches | `coverage:frontend` and `coverage:go` in `Taskfile.yml`, `.woodpecker/frontend.yaml` and `e2e.yaml` ([D-203]) |
+
+Install one by its directory: `install tool` builds the tool its `go.mod`
+declares, at the version it pins, so no command names a package or a version:
+
+```sh
+go -C tools/staticcheck install tool
+```
+
+`.devcontainer/postCreate.sh` installs the other Go tools into `/go/bin` on
+container create; CI runs the same command per step. Dex is never installed:
+`scripts/dev.sh --oidc` and the OIDC harness run it as
+`go -C tools/dex tool dex serve <config>`.
+
+## diff-cover is a requirements file
+
+diff-cover is Python, so its pin is `diff-cover/requirements.txt`: it and
+every package it installs at an exact version, with their file hashes, which
+pip checks (`--require-hashes`). The Taskfile's `diff-cover` task installs it
+into `diff-cover/.venv` (ignored) on first use and again when the file changes;
+the image carries `python3-venv` for it. Renovate's `pip_requirements`
+manager updates the versions and their hashes. A new dependency of a new
+diff-cover fails the install until its line is added (with
+`pip hash` or hashin).
+
+## Why a module each
+
+A `go.mod` is a manifest Renovate's stock `gomod` manager updates, so no
+version string lives in a command, a Dockerfile or a CI block. Not
+`backend/go.mod`, where a linter's requirements would move the app's own
+dependencies (the SQLite driver among them) past the PocketBase approval gate;
+not one shared `tools/go.mod`, where minimal version selection picks one
+dependency set for every tool and `osv-scanner` stopped compiling. [D-75] in
+[`decisions.md`](../docs/internals/decisions.md) has the numbers.
+
+## Upgrading
+
+Renovate opens a PR per tool. Nothing else needs touching: no version string
+lives outside these files. Renovate raises a module's direct requirement
+only, never an indirect one: when a Go release changes the export data, raise
+`golang.org/x/tools` by hand in `staticcheck/` and `gosec/`
+(`go -C tools/<name> get golang.org/x/tools@latest`); the gate's `go-lint`
+layer fails until it is ([D-273]).
+
+Note that staticcheck numbers releases twice: the module version in `go.mod`
+(v0.6.1 was 2025.1.1) is not the release number `staticcheck --version`
+prints, and `go.mod` can only speak the module one.
+
+## Dex is pinned differently
+
+Dex tags its v2 releases without the `/v2` module path Go requires, so
+`go get github.com/dexidp/dex@v2.45.1` is refused. The pin is the tag's
+**pseudo-version** (`v0.0.0-20260303133905-11d2eeb52b42` is v2.45.1), and a Dex
+upgrade means pinning the new tag's commit the same way:
+
+```sh
+go -C tools/dex get -tool github.com/dexidp/dex/cmd/dex@<commit of the new tag>
+```
+
+Unlike the other Go modules, this one also **raises some of Dex's own
+dependencies** above what its release chose (`golang.org/x/*`, gRPC,
+go-jose, etcd and a few more), because v2.45.1 pins versions with published
+advisories and the `osv-scan` CI step scans this `go.mod` like every other.
+That is the trade [D-75] warned about (a combination upstream did not
+release), accepted because Dex here is a test fixture: the Go and Playwright
+OIDC suites are what check the combination still works. A pseudo-version also
+sorts below every fixed version, so two long-fixed Dex advisories need the
+waivers in `osv-scanner.toml`. None of it reaches the app:
+`backend/deps_arch_test.go` fails if any tool here is linked into the binary.

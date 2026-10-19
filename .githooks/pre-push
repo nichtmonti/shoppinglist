@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# gitleaks before every push ([D-274]). A secret in a pushed commit is public
+# for good, so the whole history is scanned with CI's own command
+# (.woodpecker/go.yaml), about 4 seconds, and a finding refuses the push.
+#
+# Where Go is (the devcontainer), gitleaks is installed from its tools/ pin
+# first, as the gate's layer does ([D-75]); a no-op once built. On the host,
+# which has no Go and no gitleaks, it runs in the running devcontainer (the
+# repo is at the same path there). With neither, the push is refused: start
+# the container with scripts/agent.sh, or skip the scan deliberately with
+# `git push --no-verify`.
+#
+# Enabled by `git config core.hooksPath .githooks`, which
+# .devcontainer/postCreate.sh sets; the host shares the checkout's config.
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+scan="go -C '$root/tools/gitleaks' install github.com/zricethezav/gitleaks/v8 &&
+	gitleaks git '$root' --no-banner --redact"
+
+if command -v go >/dev/null; then
+	exec bash -c "$scan"
+fi
+
+# shellcheck source=../scripts/lib/container.sh
+. "$root/scripts/lib/container.sh"
+if command -v docker >/dev/null && C=$(find_container) && [ -n "$C" ]; then
+	echo "pre-push: gitleaks in the devcontainer ($C)" >&2
+	exec docker exec -w "$root" "$C" bash -lc "$scan"
+fi
+
+cat >&2 <<MSG
+pre-push: Go is not installed here and no devcontainer is running, so
+          this push was not scanned for secrets and is refused. Start the
+          container (scripts/agent.sh), or push with --no-verify to skip the
+          scan deliberately.
+MSG
+exit 1

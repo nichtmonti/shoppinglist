@@ -1,0 +1,54 @@
+# Security policy
+
+shoppinglist handles sign-ins (passkeys and OpenID Connect) and the shopping
+lists of everyone on an instance, so security reports are very welcome.
+
+## Reporting a vulnerability
+
+**Please do not open a public issue.** Email **[security@sebastianclermont.de](mailto:security@sebastianclermont.de)**
+instead, with:
+
+- what is affected (a route, a screen, the sync engine, the deployment
+  configuration) and the version (the settings screen shows it, or
+  `shoppinglist --version`);
+- how to reproduce it, or a proof of concept;
+- what an attacker gains, as you see it.
+
+You will get an answer as soon as possible, usually within a week. Once the
+issue is understood, we agree on a date for publishing it. The fix ships in
+a release whose changelog names the problem and, if you like, credits you.
+
+## Supported versions
+
+Only the latest release receives security fixes. The project is pre-1.0; an
+upgrade is a new image or binary, and its database changes apply on their own
+at start ([upgrades](docs/deploying.md#upgrades)).
+
+Every release carries an SBOM, `sbom.cdx.json` (CycloneDX): the Go modules
+linked into the binary and the npm packages bundled into the web app, for your
+own scanners. The images also carry an SBOM attestation of their base image
+(`docker buildx imagetools inspect --format '{{json .SBOM}}'`).
+
+## Scope
+
+In scope: this repository's code and the configuration it ships:
+`docker-compose.yml`, `.env.example`, the Docker image and the release
+binaries.
+
+Out of scope, but still worth a note:
+
+- **PocketBase** itself: please report it upstream as well
+  (https://github.com/pocketbase/pocketbase/security).
+- An instance deployed against the advice in
+  [`docs/deploying.md`](docs/deploying.md), for example with its port exposed
+  directly to the internet, or a reverse proxy that does not set the
+  client-IP header the app is told to trust.
+
+## The security model
+
+What the app defends against, and how, is written down: the summary and the
+collection rules in [`design.md`](docs/internals/design.md) §10 and §11, the known risks in
+§16, and the deployment side in
+[`docs/deploy-reference.md`](docs/deploy-reference.md#hardening-notes) ("Hardening notes").
+A report that a behaviour contradicts those documents is as useful as one
+about code.

@@ -1,0 +1,114 @@
+# Woodpecker CI — Go workflow (docs/internals/design.md §14).
+# gofmt, vet, staticcheck and gosec (fast-fail), then the backend test suite,
+# in the CI image ([D-203]). Runs in
+# parallel with frontend.yaml on every push/PR; e2e.yaml waits on both. The
+# advisory scanners (govulncheck, osv-scan) live in security.yaml.
+#
+# RESOURCE BOUND: the agent is a small box, so the COMPILE caches are host
+# bind-mounts (a cold staticcheck peaks near 900 MiB, a warm one near 100 MiB):
+#   /var/lib/woodpecker-cache/go-build     → /root/.cache/go-build     (GOCACHE)
+#   /var/lib/woodpecker-cache/staticcheck  → /root/.cache/staticcheck  (facts)
+# Those two are safe to share across pipelines because they are
+# content-addressed: a corrupt or truncated entry degrades to a cache MISS,
+# never a wrong answer. The MODULE cache is not — a truncated extraction in a
+# shared module cache yields empty source files that even `go mod verify`
+# vouches for — so [D-60] makes module state per-pipeline: each step exports
+# GOMODCACHE into <workspace>/.gomod, downloaded once, shared by this
+# workflow's steps, wiped with the workspace when the pipeline ends.
+# Every run must also survive COLD caches (the host directories can be empty
+# at any time): GOMEMLIMIT keeps a cache-invalidated run from being OOM-killed.
+#
+# The cache volumes are host directories on the maintainer's trusted agent;
+# see e2e.yaml's header for what a fork does about them.
+#
+# `tag` (v* only) IS in the when-list: release.yaml waits for the tag event's
+# run of this suite instead of re-running the checks itself ([D-66]).
+# `concurrency: 1` queues a second instance of THIS workflow (a tag landing
+# mid-push, a rapid double push) instead of stacking two staticcheck + go-test
+# runs on the agent.
+
+variables:
+  # Module source is owned by the repo, not inherited from agent-global env: a
+  # misconfigured agent GOPROXY (one serving an EMPTY body for every request)
+  # fails every Go step with a phantom "checksum mismatch" that looks like a
+  # supply-chain compromise. Pin the official proxy + sumdb. GOCACHE is
+  # explicit because the step mounts it; the image default lines up, this
+  # guards against an image bump moving it. No GOMODCACHE here — the first
+  # command of each step exports it into the workspace [D-60].
+  - &go_env
+    GOCACHE: /root/.cache/go-build
+    GOPROXY: https://proxy.golang.org,direct
+    GOSUMDB: sum.golang.org
+    GONOSUMDB: ""
+    GONOPROXY: ""
+    GOFLAGS: ""
+  - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
+  - &go_mod_cache export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod"
+  - &ci_image localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+
+when:
+  - event: [push, pull_request, manual]
+  - event: tag
+    ref: refs/tags/v*
+
+depends_on: [ci-image]
+
+concurrency: 1
+
+steps:
+  go-check:
+    image: *ci_image
+    environment:
+      <<: *go_env
+      # Bound compile/analysis parallelism. This alone does NOT bound memory —
+      # staticcheck is a whole-program analyzer and its peak is one large live
+      # heap, not N parallel ones. GOMEMLIMIT below is the real guard;
+      # GOMAXPROCS only caps the go command's package-compile workers and the
+      # analyzers' worker count at 2.
+      GOMAXPROCS: "2"
+      # Soft cap on the Go runtime heap, step-wide: keeps even a cold
+      # staticcheck from being OOM-killed on the small agent by making the
+      # runtime GC harder instead.
+      GOMEMLIMIT: "512MiB"
+    volumes:
+      - *go_build_cache
+      # staticcheck keeps its fact cache in $XDG_CACHE_HOME/staticcheck, which
+      # is a SEPARATE cache from GOCACHE — mounting go-build does nothing for
+      # it. Best-effort: dockerd creates the source dir when missing, and the
+      # first run against an empty one is cold (GOMEMLIMIT covers it).
+      - /var/lib/woodpecker-cache/staticcheck:/root/.cache/staticcheck
+    commands:
+      # [D-60] Modules live in the workspace, not a host volume: downloaded
+      # once here, reused by this workflow's later steps (go's per-module file
+      # locks make concurrent access safe), wiped with the workspace.
+      - *go_mod_cache
+      # The gate's own tasks ([D-177], [D-273]): gofmt, then go vet, go fix,
+      # staticcheck and gosec, each installed from its tools/ pin. This step's
+      # GOMEMLIMIT wins over the task's own: go-task lets the environment it
+      # is started in override a task's `env`.
+      - go -C tools/task install tool
+      - task gofmt go-lint
+      # Secrets in the history ([D-203]): every commit the clone holds, on every
+      # push (the whole history took 12 s in 2026-10). A finding is a token or
+      # key that reached git, and the fix is rotating it, not hiding it: a
+      # deliberate test value goes into .gitleaksignore by its fingerprint.
+      # The gate's gitleaks task: the history scan, plus scans of the
+      # uncommitted and untracked files, which a CI clone has none of.
+      - task gitleaks
+
+  go-test:
+    image: *ci_image
+    environment:
+      <<: *go_env
+    volumes:
+      - *go_build_cache
+    commands:
+      - *go_mod_cache
+      - go -C tools/task install tool
+      # The gate's go-test task ([D-177]): the suite with -tags no_ui ([D-64]),
+      # then package main as the demo build ([D-234]).
+      # -coverpkg=./...: a package is credited with what any package's tests
+      # reach in it (members and records are run by sync's tests). e2e.yaml's
+      # coverage step reports it with what the servers reached ([D-203]); the
+      # same flags there let most packages replay from the shared build cache.
+      - task go-test -- -coverpkg=./... -coverprofile=coverage.out

@@ -1,0 +1,68 @@
+{
+	"name": "shoppinglist",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".",
+		// The stage with the dev account; CI runs the `toolchain` stage below it.
+		"target": "dev"
+	},
+	// The repo sits at the SAME path inside as on the host. Coding agents run in
+	// here (scripts/agent.sh) and key their sessions and memory by directory,
+	// and a git worktree records its checkout's absolute path in .git: with one
+	// path on both sides, both carry over.
+	"workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
+	"workspaceFolder": "${localWorkspaceFolder}",
+	// The coding agents' binaries, logins and sessions, from the host account
+	// (claude, omp, opencode; scripts/agent.sh runs them in here), and the SSH
+	// key for `git push`, read-only. initialize.sh creates any that are
+	// missing on the host first, so a missing tool is an empty directory
+	// rather than a container that fails to start.
+	"initializeCommand": "bash .devcontainer/initialize.sh",
+	"mounts": [
+		"source=${localEnv:HOME}/.claude,target=/home/dev/.claude,type=bind",
+		"source=${localEnv:HOME}/.local/share/claude,target=/home/dev/.local/share/claude,type=bind",
+		"source=${localEnv:HOME}/.local/bin,target=/home/dev/.local/bin,type=bind",
+		"source=${localEnv:HOME}/.omp,target=/home/dev/.omp,type=bind",
+		"source=${localEnv:HOME}/.opencode,target=/home/dev/.opencode,type=bind",
+		"source=${localEnv:HOME}/.config/opencode,target=/home/dev/.config/opencode,type=bind",
+		"source=${localEnv:HOME}/.local/share/opencode,target=/home/dev/.local/share/opencode,type=bind",
+		"source=${localEnv:HOME}/.local/state/opencode,target=/home/dev/.local/state/opencode,type=bind",
+		"source=${localEnv:HOME}/.cache/opencode,target=/home/dev/.cache/opencode,type=bind",
+		"source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly"
+	],
+	// Hard CPU cap: test suites (vitest forks, type-aware eslint, svelte-check,
+	// Playwright) otherwise saturate every core of the host box and starve the
+	// editor alongside it. 4 of the host's cores for the container, the rest
+	// stay interactive. Takes effect on the next container REBUILD — a running
+	// container keeps its old quota. The vitest worker count (vite.config.ts)
+	// is computed from the cgroup-aware parallelism, so it scales down with
+	// this cap automatically.
+	"runArgs": ["--cpus=4"],
+	// Run as the non-root `dev` user (created in the Dockerfile with UID/GID
+	// 1000:1000). Bind mounts carry raw numeric UIDs, so a root container writes
+	// root-owned files onto the host and breaks `git commit`. updateRemoteUserUID
+	// lets VS Code re-map the UID on Linux if the host account is not 1000.
+	"containerUser": "dev",
+	"remoteUser": "dev",
+	"updateRemoteUserUID": true,
+	"containerEnv": {
+		"HOST": "0.0.0.0",
+		// Tells scripts/gate.sh and scripts/shots.sh they run inside; they refuse the host.
+		"SHOPPINGLIST_DEVCONTAINER": "1",
+		// Claude keeps its settings file in ~/.claude instead of ~/.claude.json:
+		// a single-file bind mount breaks on the atomic rename it saves with.
+		// Sessions, memory and the login are in ~/.claude and shared.
+		"CLAUDE_CONFIG_DIR": "/home/dev/.claude"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.go",
+				"svelte.svelte-vscode",
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode"
+			]
+		}
+	},
+	"postCreateCommand": "bash .devcontainer/postCreate.sh"
+}

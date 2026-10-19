@@ -1,0 +1,10638 @@
+[
+  {
+    "id": "item_cucumber",
+    "names_i18n": {
+      "en": [
+        "cucumber"
+      ],
+      "de": [
+        "Gurke"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_tomato",
+    "names_i18n": {
+      "en": [
+        "tomato"
+      ],
+      "de": [
+        "Tomate"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_potato",
+    "names_i18n": {
+      "en": [
+        "potato"
+      ],
+      "de": [
+        "Kartoffel",
+        "Erdapfel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_onion",
+    "names_i18n": {
+      "en": [
+        "onion"
+      ],
+      "de": [
+        "Zwiebel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_garlic",
+    "names_i18n": {
+      "en": [
+        "garlic"
+      ],
+      "de": [
+        "Knoblauch"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_carrot",
+    "names_i18n": {
+      "en": [
+        "carrot"
+      ],
+      "de": [
+        "Karotte",
+        "Möhre"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_bell_pepper",
+    "names_i18n": {
+      "en": [
+        "bell pepper",
+        "pepper"
+      ],
+      "de": [
+        "Paprika",
+        "Paprikaschoten"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_lettuce",
+    "names_i18n": {
+      "en": [
+        "lettuce",
+        "salad",
+        "salad greens",
+        "mixed greens",
+        "spring mix"
+      ],
+      "de": [
+        "Salat",
+        "Kopfsalat"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_spinach",
+    "names_i18n": {
+      "en": [
+        "spinach"
+      ],
+      "de": [
+        "Spinat"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_broccoli",
+    "names_i18n": {
+      "en": [
+        "broccoli"
+      ],
+      "de": [
+        "Brokkoli"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_cauliflower",
+    "names_i18n": {
+      "en": [
+        "cauliflower"
+      ],
+      "de": [
+        "Blumenkohl"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_zucchini",
+    "names_i18n": {
+      "en": [
+        "zucchini",
+        "courgette"
+      ],
+      "de": [
+        "Zucchini"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_eggplant",
+    "names_i18n": {
+      "en": [
+        "eggplant",
+        "aubergine"
+      ],
+      "de": [
+        "Aubergine"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_mushrooms",
+    "names_i18n": {
+      "en": [
+        "mushrooms"
+      ],
+      "de": [
+        "Champignons",
+        "Champignon",
+        "Pilze"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_celery",
+    "names_i18n": {
+      "en": [
+        "celery"
+      ],
+      "de": [
+        "Sellerie"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_leek",
+    "names_i18n": {
+      "en": [
+        "leek"
+      ],
+      "de": [
+        "Lauch",
+        "Porree"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_beetroot",
+    "names_i18n": {
+      "en": [
+        "beetroot",
+        "beet"
+      ],
+      "de": [
+        "Rote Bete"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_radish",
+    "names_i18n": {
+      "en": [
+        "radish"
+      ],
+      "de": [
+        "Radieschen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_kohlrabi",
+    "names_i18n": {
+      "en": [
+        "kohlrabi"
+      ],
+      "de": [
+        "Kohlrabi"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_red_cabbage",
+    "names_i18n": {
+      "en": [
+        "red cabbage"
+      ],
+      "de": [
+        "Rotkohl",
+        "Rotkraut",
+        "Blaukraut"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_white_cabbage",
+    "names_i18n": {
+      "en": [
+        "white cabbage",
+        "cabbage"
+      ],
+      "de": [
+        "Weißkohl",
+        "Weißkraut",
+        "Kohl"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_apple",
+    "names_i18n": {
+      "en": [
+        "apple"
+      ],
+      "de": [
+        "Apfel",
+        "Äpfel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_banana",
+    "names_i18n": {
+      "en": [
+        "banana"
+      ],
+      "de": [
+        "Banane"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_orange",
+    "names_i18n": {
+      "en": [
+        "orange"
+      ],
+      "de": [
+        "Orange"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_lemon",
+    "names_i18n": {
+      "en": [
+        "lemon"
+      ],
+      "de": [
+        "Zitrone"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 3
+  },
+  {
+    "id": "item_pear",
+    "names_i18n": {
+      "en": [
+        "pear"
+      ],
+      "de": [
+        "Birne"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_grapes",
+    "names_i18n": {
+      "en": [
+        "grapes"
+      ],
+      "de": [
+        "Trauben",
+        "Weintrauben"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_strawberries",
+    "names_i18n": {
+      "en": [
+        "strawberries"
+      ],
+      "de": [
+        "Erdbeeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_raspberries",
+    "names_i18n": {
+      "en": [
+        "raspberries"
+      ],
+      "de": [
+        "Himbeeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_blueberries",
+    "names_i18n": {
+      "en": [
+        "blueberries"
+      ],
+      "de": [
+        "Blaubeeren",
+        "Heidelbeeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_kiwi",
+    "names_i18n": {
+      "en": [
+        "kiwi"
+      ],
+      "de": [
+        "Kiwi"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_peach",
+    "names_i18n": {
+      "en": [
+        "peach"
+      ],
+      "de": [
+        "Pfirsich"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_avocado",
+    "names_i18n": {
+      "en": [
+        "avocado"
+      ],
+      "de": [
+        "Avocado"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_lime",
+    "names_i18n": {
+      "en": [
+        "lime"
+      ],
+      "de": [
+        "Limette"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_ginger",
+    "names_i18n": {
+      "en": [
+        "ginger"
+      ],
+      "de": [
+        "Ingwer"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_spring_onion",
+    "names_i18n": {
+      "en": [
+        "spring onion",
+        "scallion",
+        "green onion"
+      ],
+      "de": [
+        "Frühlingszwiebel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_parsley",
+    "names_i18n": {
+      "en": [
+        "parsley"
+      ],
+      "de": [
+        "Petersilie"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_basil",
+    "names_i18n": {
+      "en": [
+        "basil"
+      ],
+      "de": [
+        "Basilikum"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_chili_pepper",
+    "names_i18n": {
+      "en": [
+        "chili pepper",
+        "chile"
+      ],
+      "de": [
+        "Chili",
+        "Chilischoten",
+        "Peperoni"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_asparagus",
+    "names_i18n": {
+      "en": [
+        "asparagus"
+      ],
+      "de": [
+        "Spargel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_pumpkin",
+    "names_i18n": {
+      "en": [
+        "pumpkin",
+        "squash",
+        "butternut squash"
+      ],
+      "de": [
+        "Kürbis",
+        "Hokkaido",
+        "Butternut"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_brussels_sprouts",
+    "names_i18n": {
+      "en": [
+        "brussels sprouts"
+      ],
+      "de": [
+        "Rosenkohl"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_savoy_cabbage",
+    "names_i18n": {
+      "en": [
+        "savoy cabbage",
+        "cavolo nero"
+      ],
+      "de": [
+        "Wirsing"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_arugula",
+    "names_i18n": {
+      "en": [
+        "arugula",
+        "rocket",
+        "rucola"
+      ],
+      "de": [
+        "Rucola",
+        "Rauke"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_lamb's_lettuce",
+    "names_i18n": {
+      "en": [
+        "lamb's lettuce",
+        "corn salad"
+      ],
+      "de": [
+        "Feldsalat",
+        "Vogerlsalat"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_chicory",
+    "names_i18n": {
+      "en": [
+        "chicory"
+      ],
+      "de": [
+        "Chicorée"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_parsnip",
+    "names_i18n": {
+      "en": [
+        "parsnip"
+      ],
+      "de": [
+        "Pastinake"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_sweet_potato",
+    "names_i18n": {
+      "en": [
+        "sweet potato"
+      ],
+      "de": [
+        "Süßkartoffel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_fennel",
+    "names_i18n": {
+      "en": [
+        "fennel"
+      ],
+      "de": [
+        "Fenchel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_green_beans",
+    "names_i18n": {
+      "en": [
+        "green beans",
+        "string beans"
+      ],
+      "de": [
+        "Grüne Bohnen",
+        "Brechbohnen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_rhubarb",
+    "names_i18n": {
+      "en": [
+        "rhubarb"
+      ],
+      "de": [
+        "Rhabarber"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_cherries",
+    "names_i18n": {
+      "en": [
+        "cherries"
+      ],
+      "de": [
+        "Kirschen",
+        "Süßkirschen",
+        "Kirsche"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_plums",
+    "names_i18n": {
+      "en": [
+        "plums"
+      ],
+      "de": [
+        "Pflaumen",
+        "Zwetschgen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_apricots",
+    "names_i18n": {
+      "en": [
+        "apricots"
+      ],
+      "de": [
+        "Aprikosen",
+        "Marillen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_nectarines",
+    "names_i18n": {
+      "en": [
+        "nectarines"
+      ],
+      "de": [
+        "Nektarinen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_mango",
+    "names_i18n": {
+      "en": [
+        "mango"
+      ],
+      "de": [
+        "Mango"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_pineapple",
+    "names_i18n": {
+      "en": [
+        "pineapple"
+      ],
+      "de": [
+        "Ananas"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_watermelon",
+    "names_i18n": {
+      "en": [
+        "watermelon"
+      ],
+      "de": [
+        "Wassermelone"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_blackberries",
+    "names_i18n": {
+      "en": [
+        "blackberries"
+      ],
+      "de": [
+        "Brombeeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_mint",
+    "names_i18n": {
+      "en": [
+        "mint",
+        "spearmint"
+      ],
+      "de": [
+        "Minze",
+        "Pfefferminze"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_dill",
+    "names_i18n": {
+      "en": [
+        "dill"
+      ],
+      "de": [
+        "Dill"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_chives",
+    "names_i18n": {
+      "en": [
+        "chives"
+      ],
+      "de": [
+        "Schnittlauch"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_sage",
+    "names_i18n": {
+      "en": [
+        "sage"
+      ],
+      "de": [
+        "Salbei"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_iceberg_lettuce",
+    "names_i18n": {
+      "en": [
+        "iceberg lettuce"
+      ],
+      "de": [
+        "Eisbergsalat"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_cherry_tomatoes",
+    "names_i18n": {
+      "en": [
+        "cherry tomatoes",
+        "cocktail tomatoes"
+      ],
+      "de": [
+        "Kirschtomaten",
+        "Cocktailtomaten"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_bread",
+    "names_i18n": {
+      "en": [
+        "bread"
+      ],
+      "de": [
+        "Brot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 3
+  },
+  {
+    "id": "item_bread_rolls",
+    "names_i18n": {
+      "en": [
+        "bread rolls",
+        "rolls"
+      ],
+      "de": [
+        "Brötchen",
+        "Semmel",
+        "Schrippe",
+        "Weckle",
+        "Wecken",
+        "Weckerl"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 3
+  },
+  {
+    "id": "item_sliced_bread",
+    "names_i18n": {
+      "en": [
+        "sliced bread",
+        "toast bread",
+        "toast"
+      ],
+      "de": [
+        "Toastbrot",
+        "Toast"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_baguette",
+    "names_i18n": {
+      "en": [
+        "baguette"
+      ],
+      "de": [
+        "Baguette"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_whole_grain_bread",
+    "names_i18n": {
+      "en": [
+        "whole grain bread"
+      ],
+      "de": [
+        "Vollkornbrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_croissant",
+    "names_i18n": {
+      "en": [
+        "croissant"
+      ],
+      "de": [
+        "Croissant"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_bagel",
+    "names_i18n": {
+      "en": [
+        "bagel"
+      ],
+      "de": [
+        "Bagel"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_muffin",
+    "names_i18n": {
+      "en": [
+        "muffin"
+      ],
+      "de": [
+        "Muffin"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_cake",
+    "names_i18n": {
+      "en": [
+        "cake"
+      ],
+      "de": [
+        "Kuchen"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_rusk",
+    "names_i18n": {
+      "en": [
+        "rusk"
+      ],
+      "de": [
+        "Zwieback"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_crispbread",
+    "names_i18n": {
+      "en": [
+        "crispbread"
+      ],
+      "de": [
+        "Knäckebrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_tortilla_wraps",
+    "names_i18n": {
+      "en": [
+        "tortilla wraps",
+        "wraps"
+      ],
+      "de": [
+        "Tortilla"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_pita_bread",
+    "names_i18n": {
+      "en": [
+        "pita bread"
+      ],
+      "de": [
+        "Pita"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_doughnut",
+    "names_i18n": {
+      "en": [
+        "doughnut",
+        "donut"
+      ],
+      "de": [
+        "Donut"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_pretzel",
+    "names_i18n": {
+      "en": [
+        "pretzel"
+      ],
+      "de": [
+        "Laugenbrezel",
+        "Brezel",
+        "Breze",
+        "Brezn"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_rye_bread",
+    "names_i18n": {
+      "en": [
+        "rye bread"
+      ],
+      "de": [
+        "Roggenbrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_pumpernickel",
+    "names_i18n": {
+      "en": [
+        "pumpernickel"
+      ],
+      "de": [
+        "Pumpernickel"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_black_bread",
+    "names_i18n": {
+      "en": [
+        "black bread"
+      ],
+      "de": [
+        "Schwarzbrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_mixed_bread",
+    "names_i18n": {
+      "en": [
+        "mixed bread",
+        "gray bread"
+      ],
+      "de": [
+        "Mischbrot",
+        "Graubrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_sourdough_bread",
+    "names_i18n": {
+      "en": [
+        "sourdough bread",
+        "sourdough"
+      ],
+      "de": [
+        "Sauerteigbrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_stollen",
+    "names_i18n": {
+      "en": [
+        "stollen",
+        "christmas stollen"
+      ],
+      "de": [
+        "Stollen",
+        "Christstollen"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_berliner",
+    "names_i18n": {
+      "en": [
+        "berliner",
+        "krapfen"
+      ],
+      "de": [
+        "Berliner",
+        "Krapfen"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_cinnamon_rolls",
+    "names_i18n": {
+      "en": [
+        "cinnamon rolls"
+      ],
+      "de": [
+        "Zimtschnecken"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_brioche",
+    "names_i18n": {
+      "en": [
+        "brioche"
+      ],
+      "de": [
+        "Brioche"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_ciabatta",
+    "names_i18n": {
+      "en": [
+        "ciabatta"
+      ],
+      "de": [
+        "Ciabatta"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_milk",
+    "names_i18n": {
+      "en": [
+        "milk"
+      ],
+      "de": [
+        "Milch"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 3
+  },
+  {
+    "id": "item_eggs",
+    "names_i18n": {
+      "en": [
+        "eggs",
+        "egg"
+      ],
+      "de": [
+        "Eier",
+        "Freilandeier",
+        "Bodenhaltungseier",
+        "Ei"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 3
+  },
+  {
+    "id": "item_butter",
+    "names_i18n": {
+      "en": [
+        "butter"
+      ],
+      "de": [
+        "Butter"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 3
+  },
+  {
+    "id": "item_yogurt",
+    "names_i18n": {
+      "en": [
+        "yogurt",
+        "yoghurt"
+      ],
+      "de": [
+        "Joghurt"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 3
+  },
+  {
+    "id": "item_cheese",
+    "names_i18n": {
+      "en": [
+        "cheese"
+      ],
+      "de": [
+        "Käse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 3
+  },
+  {
+    "id": "item_quark",
+    "names_i18n": {
+      "en": [
+        "quark"
+      ],
+      "de": [
+        "Quark",
+        "Topfen"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_cream",
+    "names_i18n": {
+      "en": [
+        "cream",
+        "heavy cream",
+        "whipping cream"
+      ],
+      "de": [
+        "Sahne",
+        "Rahm",
+        "Schlagsahne"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_sour_cream",
+    "names_i18n": {
+      "en": [
+        "sour cream"
+      ],
+      "de": [
+        "Schmand"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_cream_cheese",
+    "names_i18n": {
+      "en": [
+        "cream cheese"
+      ],
+      "de": [
+        "Frischkäse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_grated_cheese",
+    "names_i18n": {
+      "en": [
+        "grated cheese"
+      ],
+      "de": [
+        "Reibekäse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_mozzarella",
+    "names_i18n": {
+      "en": [
+        "mozzarella"
+      ],
+      "de": [
+        "Mozzarella"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_parmesan",
+    "names_i18n": {
+      "en": [
+        "parmesan"
+      ],
+      "de": [
+        "Parmesan"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_feta_cheese",
+    "names_i18n": {
+      "en": [
+        "feta cheese"
+      ],
+      "de": [
+        "Feta"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_buttermilk",
+    "names_i18n": {
+      "en": [
+        "buttermilk"
+      ],
+      "de": [
+        "Buttermilch"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_condensed_milk",
+    "names_i18n": {
+      "en": [
+        "condensed milk"
+      ],
+      "de": [
+        "Kondensmilch"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_oat_milk",
+    "names_i18n": {
+      "en": [
+        "oat milk",
+        "oat drink"
+      ],
+      "de": [
+        "Hafermilch",
+        "Haferdrink"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_almond_milk",
+    "names_i18n": {
+      "en": [
+        "almond milk",
+        "almond drink"
+      ],
+      "de": [
+        "Mandelmilch",
+        "Mandeldrink"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_margarine",
+    "names_i18n": {
+      "en": [
+        "margarine"
+      ],
+      "de": [
+        "Margarine"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_skyr",
+    "names_i18n": {
+      "en": [
+        "skyr"
+      ],
+      "de": [
+        "Skyr"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_creme_fraiche",
+    "names_i18n": {
+      "en": [
+        "creme fraiche"
+      ],
+      "de": [
+        "Crème fraîche"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_cottage_cheese",
+    "names_i18n": {
+      "en": [
+        "cottage cheese"
+      ],
+      "de": [
+        "Hüttenkäse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_mascarpone",
+    "names_i18n": {
+      "en": [
+        "mascarpone"
+      ],
+      "de": [
+        "Mascarpone"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_ricotta",
+    "names_i18n": {
+      "en": [
+        "ricotta"
+      ],
+      "de": [
+        "Ricotta"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_kefir",
+    "names_i18n": {
+      "en": [
+        "kefir"
+      ],
+      "de": [
+        "Kefir"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_lactose_free_milk",
+    "names_i18n": {
+      "en": [
+        "lactose free milk"
+      ],
+      "de": [
+        "Laktosefreie Milch",
+        "Laktosemilch"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_coffee_creamer",
+    "names_i18n": {
+      "en": [
+        "coffee creamer",
+        "coffee cream"
+      ],
+      "de": [
+        "Kaffeesahne",
+        "Kaffeeweißer"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_spreadable_cheese",
+    "names_i18n": {
+      "en": [
+        "spreadable cheese"
+      ],
+      "de": [
+        "Streichkäse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_processed_cheese",
+    "names_i18n": {
+      "en": [
+        "processed cheese",
+        "cheese slices",
+        "American cheese"
+      ],
+      "de": [
+        "Schmelzkäse",
+        "Käsescheiben"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_chicken_breast",
+    "names_i18n": {
+      "en": [
+        "chicken breast",
+        "chicken"
+      ],
+      "de": [
+        "Hähnchenbrust",
+        "Hähnchenbrustfilet",
+        "Hühnerbrust"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 3
+  },
+  {
+    "id": "item_ground_meat",
+    "names_i18n": {
+      "en": [
+        "ground meat",
+        "mince",
+        "minced meat"
+      ],
+      "de": [
+        "Hackfleisch",
+        "Hack",
+        "Gehacktes",
+        "gemischtes Hack"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 3
+  },
+  {
+    "id": "item_beef",
+    "names_i18n": {
+      "en": [
+        "beef"
+      ],
+      "de": [
+        "Rindfleisch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_pork",
+    "names_i18n": {
+      "en": [
+        "pork"
+      ],
+      "de": [
+        "Schweinefleisch",
+        "Schwein"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_bacon",
+    "names_i18n": {
+      "en": [
+        "bacon"
+      ],
+      "de": [
+        "Speck"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_sausage",
+    "names_i18n": {
+      "en": [
+        "sausage",
+        "sausages"
+      ],
+      "de": [
+        "Wurst",
+        "Würste"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 3
+  },
+  {
+    "id": "item_salami",
+    "names_i18n": {
+      "en": [
+        "salami",
+        "pepperoni"
+      ],
+      "de": [
+        "Salami"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_ham",
+    "names_i18n": {
+      "en": [
+        "ham",
+        "deli ham"
+      ],
+      "de": [
+        "Schinken"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_salmon",
+    "names_i18n": {
+      "en": [
+        "salmon"
+      ],
+      "de": [
+        "Lachs"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_tuna",
+    "names_i18n": {
+      "en": [
+        "tuna"
+      ],
+      "de": [
+        "Thunfisch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_shrimp",
+    "names_i18n": {
+      "en": [
+        "shrimp",
+        "prawns"
+      ],
+      "de": [
+        "Garnelen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_cod",
+    "names_i18n": {
+      "en": [
+        "cod"
+      ],
+      "de": [
+        "Kabeljau"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_trout",
+    "names_i18n": {
+      "en": [
+        "trout"
+      ],
+      "de": [
+        "Forelle"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_chicken_thighs",
+    "names_i18n": {
+      "en": [
+        "chicken thighs",
+        "chicken legs",
+        "drumsticks"
+      ],
+      "de": [
+        "Hähnchenschenkel",
+        "Hähnchenkeulen",
+        "Hähnchenkeule"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_bratwurst",
+    "names_i18n": {
+      "en": [
+        "bratwurst"
+      ],
+      "de": [
+        "Bratwurst",
+        "Bratwürste"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_liverwurst",
+    "names_i18n": {
+      "en": [
+        "liverwurst"
+      ],
+      "de": [
+        "Leberwurst"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_duck",
+    "names_i18n": {
+      "en": [
+        "duck"
+      ],
+      "de": [
+        "Ente"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_turkey",
+    "names_i18n": {
+      "en": [
+        "turkey"
+      ],
+      "de": [
+        "Pute",
+        "Truthahn"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_meatballs",
+    "names_i18n": {
+      "en": [
+        "meatballs"
+      ],
+      "de": [
+        "Frikadellen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_bavarian_meat_loaf",
+    "names_i18n": {
+      "en": [
+        "bavarian meat loaf"
+      ],
+      "de": [
+        "Leberkäse",
+        "Leberkäs"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_white_sausage",
+    "names_i18n": {
+      "en": [
+        "white sausage"
+      ],
+      "de": [
+        "Weißwurst",
+        "Weisswurst"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_wieners",
+    "names_i18n": {
+      "en": [
+        "wieners",
+        "frankfurters",
+        "hot dogs"
+      ],
+      "de": [
+        "Wiener Würstchen",
+        "Wiener",
+        "Frankfurter",
+        "Würstchen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_fleischwurst",
+    "names_i18n": {
+      "en": [
+        "fleischwurst"
+      ],
+      "de": [
+        "Fleischwurst",
+        "Lyoner"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_schnitzel",
+    "names_i18n": {
+      "en": [
+        "schnitzel"
+      ],
+      "de": [
+        "Schnitzel"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_goulash",
+    "names_i18n": {
+      "en": [
+        "goulash"
+      ],
+      "de": [
+        "Gulasch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_rouladen",
+    "names_i18n": {
+      "en": [
+        "rouladen"
+      ],
+      "de": [
+        "Rouladen",
+        "Rinderrouladen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_kassler",
+    "names_i18n": {
+      "en": [
+        "kassler",
+        "smoked pork chop"
+      ],
+      "de": [
+        "Kassler",
+        "Kasseler"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_whole_chicken",
+    "names_i18n": {
+      "en": [
+        "whole chicken"
+      ],
+      "de": [
+        "Hähnchen",
+        "Hühnchen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_lamb",
+    "names_i18n": {
+      "en": [
+        "lamb"
+      ],
+      "de": [
+        "Lamm",
+        "Lammfleisch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_herring",
+    "names_i18n": {
+      "en": [
+        "herring"
+      ],
+      "de": [
+        "Hering"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_matjes",
+    "names_i18n": {
+      "en": [
+        "matjes"
+      ],
+      "de": [
+        "Matjes",
+        "Matjeshering"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_sardines",
+    "names_i18n": {
+      "en": [
+        "sardines"
+      ],
+      "de": [
+        "Sardinen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_surimi",
+    "names_i18n": {
+      "en": [
+        "surimi"
+      ],
+      "de": [
+        "Surimi",
+        "Krebsfleischimitat"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_smoked_salmon",
+    "names_i18n": {
+      "en": [
+        "smoked salmon"
+      ],
+      "de": [
+        "Räucherlachs"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_carp",
+    "names_i18n": {
+      "en": [
+        "carp"
+      ],
+      "de": [
+        "Karpfen"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_canned_tomatoes",
+    "names_i18n": {
+      "en": [
+        "canned tomatoes",
+        "tinned tomatoes",
+        "diced tomatoes",
+        "chopped tomatoes",
+        "crushed tomatoes"
+      ],
+      "de": [
+        "Dosentomaten",
+        "gehackte Tomaten",
+        "stückige Tomaten",
+        "Pizzatomaten"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 3
+  },
+  {
+    "id": "item_kidney_beans",
+    "names_i18n": {
+      "en": [
+        "kidney beans"
+      ],
+      "de": [
+        "Kidneybohnen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_chickpeas",
+    "names_i18n": {
+      "en": [
+        "chickpeas"
+      ],
+      "de": [
+        "Kichererbsen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_corn",
+    "names_i18n": {
+      "en": [
+        "corn",
+        "sweetcorn"
+      ],
+      "de": [
+        "Mais"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_lentils",
+    "names_i18n": {
+      "en": [
+        "lentils"
+      ],
+      "de": [
+        "Linsen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_olives",
+    "names_i18n": {
+      "en": [
+        "olives"
+      ],
+      "de": [
+        "Oliven"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_pickles",
+    "names_i18n": {
+      "en": [
+        "pickles",
+        "gherkins"
+      ],
+      "de": [
+        "Essiggurken",
+        "Gewürzgurken",
+        "Cornichons"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_honey",
+    "names_i18n": {
+      "en": [
+        "honey"
+      ],
+      "de": [
+        "Honig"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_jam",
+    "names_i18n": {
+      "en": [
+        "jam",
+        "jelly",
+        "preserves"
+      ],
+      "de": [
+        "Marmelade",
+        "Konfitüre"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_peanut_butter",
+    "names_i18n": {
+      "en": [
+        "peanut butter"
+      ],
+      "de": [
+        "Erdnussbutter"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_ketchup",
+    "names_i18n": {
+      "en": [
+        "ketchup"
+      ],
+      "de": [
+        "Ketchup"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_mustard",
+    "names_i18n": {
+      "en": [
+        "mustard"
+      ],
+      "de": [
+        "Senf"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_mayonnaise",
+    "names_i18n": {
+      "en": [
+        "mayonnaise",
+        "mayo"
+      ],
+      "de": [
+        "Mayonnaise",
+        "Mayo"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_soy_sauce",
+    "names_i18n": {
+      "en": [
+        "soy sauce"
+      ],
+      "de": [
+        "Sojasauce",
+        "Sojasoße"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_broth",
+    "names_i18n": {
+      "en": [
+        "broth",
+        "stock",
+        "bouillon"
+      ],
+      "de": [
+        "Brühe",
+        "Fond"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_cooking_oil",
+    "names_i18n": {
+      "en": [
+        "cooking oil",
+        "oil",
+        "vegetable oil",
+        "canola oil",
+        "sunflower oil"
+      ],
+      "de": [
+        "Speiseöl",
+        "Rapsöl",
+        "Sonnenblumenöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 3
+  },
+  {
+    "id": "item_olive_oil",
+    "names_i18n": {
+      "en": [
+        "olive oil"
+      ],
+      "de": [
+        "Olivenöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_vinegar",
+    "names_i18n": {
+      "en": [
+        "vinegar"
+      ],
+      "de": [
+        "Essig"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_soup",
+    "names_i18n": {
+      "en": [
+        "soup"
+      ],
+      "de": [
+        "Suppe",
+        "Eintopf"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_pasta_sauce",
+    "names_i18n": {
+      "en": [
+        "pasta sauce",
+        "tomato sauce",
+        "marinara",
+        "marinara sauce"
+      ],
+      "de": [
+        "Fertigsauce",
+        "Tomatensauce",
+        "Tomatensoße",
+        "Nudelsoße"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_coconut_milk",
+    "names_i18n": {
+      "en": [
+        "coconut milk"
+      ],
+      "de": [
+        "Kokosmilch"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_tomato_paste",
+    "names_i18n": {
+      "en": [
+        "tomato paste",
+        "tomato concentrate"
+      ],
+      "de": [
+        "Tomatenmark"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 3
+  },
+  {
+    "id": "item_strained_tomatoes",
+    "names_i18n": {
+      "en": [
+        "strained tomatoes",
+        "passata"
+      ],
+      "de": [
+        "Passierte Tomaten",
+        "Passata",
+        "Tomatenpüree"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_sauerkraut",
+    "names_i18n": {
+      "en": [
+        "sauerkraut"
+      ],
+      "de": [
+        "Sauerkraut"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_applesauce",
+    "names_i18n": {
+      "en": [
+        "applesauce"
+      ],
+      "de": [
+        "Apfelmus"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_capers",
+    "names_i18n": {
+      "en": [
+        "capers"
+      ],
+      "de": [
+        "Kapern"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_stock_cubes",
+    "names_i18n": {
+      "en": [
+        "stock cubes",
+        "bouillon cubes"
+      ],
+      "de": [
+        "Brühwürfel",
+        "Bouillonwürfel"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_cornstarch",
+    "names_i18n": {
+      "en": [
+        "cornstarch",
+        "corn starch"
+      ],
+      "de": [
+        "Speisestärke",
+        "Maisstärke"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_maple_syrup",
+    "names_i18n": {
+      "en": [
+        "maple syrup"
+      ],
+      "de": [
+        "Ahornsirup"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_balsamic_vinegar",
+    "names_i18n": {
+      "en": [
+        "balsamic vinegar"
+      ],
+      "de": [
+        "Balsamico",
+        "Balsamessig"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_remoulade",
+    "names_i18n": {
+      "en": [
+        "remoulade"
+      ],
+      "de": [
+        "Remoulade"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_curry_ketchup",
+    "names_i18n": {
+      "en": [
+        "curry ketchup"
+      ],
+      "de": [
+        "Curryketchup"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_aioli",
+    "names_i18n": {
+      "en": [
+        "aioli"
+      ],
+      "de": [
+        "Aioli"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_instant_mashed_potatoes",
+    "names_i18n": {
+      "en": [
+        "instant mashed potatoes"
+      ],
+      "de": [
+        "Kartoffelpüree",
+        "Püreepulver"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_bread_dumplings",
+    "names_i18n": {
+      "en": [
+        "bread dumplings"
+      ],
+      "de": [
+        "Semmelknödel",
+        "Knödel"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_pasta",
+    "names_i18n": {
+      "en": [
+        "pasta",
+        "noodles"
+      ],
+      "de": [
+        "Nudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 3
+  },
+  {
+    "id": "item_spaghetti",
+    "names_i18n": {
+      "en": [
+        "spaghetti"
+      ],
+      "de": [
+        "Spaghetti"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 3
+  },
+  {
+    "id": "item_rice",
+    "names_i18n": {
+      "en": [
+        "rice"
+      ],
+      "de": [
+        "Reis",
+        "Langkornreis"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 3
+  },
+  {
+    "id": "item_basmati_rice",
+    "names_i18n": {
+      "en": [
+        "basmati rice"
+      ],
+      "de": [
+        "Basmatireis"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_whole_wheat_pasta",
+    "names_i18n": {
+      "en": [
+        "whole wheat pasta"
+      ],
+      "de": [
+        "Vollkornnudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_couscous",
+    "names_i18n": {
+      "en": [
+        "couscous"
+      ],
+      "de": [
+        "Couscous"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_bulgur",
+    "names_i18n": {
+      "en": [
+        "bulgur"
+      ],
+      "de": [
+        "Bulgur"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_quinoa",
+    "names_i18n": {
+      "en": [
+        "quinoa"
+      ],
+      "de": [
+        "Quinoa"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_lasagne_sheets",
+    "names_i18n": {
+      "en": [
+        "lasagne sheets",
+        "lasagna noodles",
+        "lasagna sheets"
+      ],
+      "de": [
+        "Lasagneplatten"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_gnocchi",
+    "names_i18n": {
+      "en": [
+        "gnocchi"
+      ],
+      "de": [
+        "Gnocchi"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_polenta",
+    "names_i18n": {
+      "en": [
+        "polenta",
+        "cornmeal"
+      ],
+      "de": [
+        "Polenta"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_semolina",
+    "names_i18n": {
+      "en": [
+        "semolina"
+      ],
+      "de": [
+        "Grieß"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_instant_noodles",
+    "names_i18n": {
+      "en": [
+        "instant noodles",
+        "ramen"
+      ],
+      "de": [
+        "Instantnudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 2
+  },
+  {
+    "id": "item_brown_rice",
+    "names_i18n": {
+      "en": [
+        "brown rice"
+      ],
+      "de": [
+        "Vollkornreis"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_spaetzle",
+    "names_i18n": {
+      "en": [
+        "spaetzle"
+      ],
+      "de": [
+        "Spätzle",
+        "Knöpfle"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 2
+  },
+  {
+    "id": "item_maultaschen",
+    "names_i18n": {
+      "en": [
+        "maultaschen"
+      ],
+      "de": [
+        "Maultaschen"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_potato_dumplings",
+    "names_i18n": {
+      "en": [
+        "potato dumplings"
+      ],
+      "de": [
+        "Kartoffelknödel",
+        "Klöße"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_penne",
+    "names_i18n": {
+      "en": [
+        "penne"
+      ],
+      "de": [
+        "Penne"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 2
+  },
+  {
+    "id": "item_tagliatelle",
+    "names_i18n": {
+      "en": [
+        "tagliatelle",
+        "fettuccine"
+      ],
+      "de": [
+        "Tagliatelle",
+        "Bandnudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_farfalle",
+    "names_i18n": {
+      "en": [
+        "farfalle",
+        "bow tie pasta"
+      ],
+      "de": [
+        "Farfalle",
+        "Schmetterlingsnudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_tortellini",
+    "names_i18n": {
+      "en": [
+        "tortellini"
+      ],
+      "de": [
+        "Tortellini"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 2
+  },
+  {
+    "id": "item_ravioli",
+    "names_i18n": {
+      "en": [
+        "ravioli"
+      ],
+      "de": [
+        "Ravioli"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 2
+  },
+  {
+    "id": "item_fusilli",
+    "names_i18n": {
+      "en": [
+        "fusilli",
+        "spiral pasta"
+      ],
+      "de": [
+        "Fusilli",
+        "Spiralnudeln",
+        "Spirelli"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_elbow_macaroni",
+    "names_i18n": {
+      "en": [
+        "elbow macaroni",
+        "macaroni"
+      ],
+      "de": [
+        "Hörnchen",
+        "Makkaroni"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_flour",
+    "names_i18n": {
+      "en": [
+        "flour"
+      ],
+      "de": [
+        "Mehl"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 3
+  },
+  {
+    "id": "item_sugar",
+    "names_i18n": {
+      "en": [
+        "sugar"
+      ],
+      "de": [
+        "Zucker"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 3
+  },
+  {
+    "id": "item_salt",
+    "names_i18n": {
+      "en": [
+        "salt"
+      ],
+      "de": [
+        "Salz"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 3
+  },
+  {
+    "id": "item_black_pepper",
+    "names_i18n": {
+      "en": [
+        "black pepper"
+      ],
+      "de": [
+        "Pfeffer"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 3
+  },
+  {
+    "id": "item_baking_powder",
+    "names_i18n": {
+      "en": [
+        "baking powder"
+      ],
+      "de": [
+        "Backpulver"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 2
+  },
+  {
+    "id": "item_yeast",
+    "names_i18n": {
+      "en": [
+        "yeast"
+      ],
+      "de": [
+        "Hefe"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 2
+  },
+  {
+    "id": "item_vanilla_sugar",
+    "names_i18n": {
+      "en": [
+        "vanilla sugar"
+      ],
+      "de": [
+        "Vanillezucker"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_cinnamon",
+    "names_i18n": {
+      "en": [
+        "cinnamon"
+      ],
+      "de": [
+        "Zimt"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 2
+  },
+  {
+    "id": "item_paprika_powder",
+    "names_i18n": {
+      "en": [
+        "paprika powder"
+      ],
+      "de": [
+        "Paprikapulver",
+        "Paprika edelsüß",
+        "Paprika rosenscharf"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_curry_powder",
+    "names_i18n": {
+      "en": [
+        "curry powder"
+      ],
+      "de": [
+        "Currypulver",
+        "Curry"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_nutmeg",
+    "names_i18n": {
+      "en": [
+        "nutmeg"
+      ],
+      "de": [
+        "Muskatnuss",
+        "Muskat"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_oregano",
+    "names_i18n": {
+      "en": [
+        "oregano"
+      ],
+      "de": [
+        "Oregano"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_thyme",
+    "names_i18n": {
+      "en": [
+        "thyme"
+      ],
+      "de": [
+        "Thymian"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_rosemary",
+    "names_i18n": {
+      "en": [
+        "rosemary"
+      ],
+      "de": [
+        "Rosmarin"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_cumin",
+    "names_i18n": {
+      "en": [
+        "cumin"
+      ],
+      "de": [
+        "Kreuzkümmel"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_powdered_sugar",
+    "names_i18n": {
+      "en": [
+        "powdered sugar",
+        "icing sugar"
+      ],
+      "de": [
+        "Puderzucker"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_cocoa_powder",
+    "names_i18n": {
+      "en": [
+        "cocoa powder",
+        "baking cocoa"
+      ],
+      "de": [
+        "Kakaopulver",
+        "Backkakao"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 2
+  },
+  {
+    "id": "item_baking_soda",
+    "names_i18n": {
+      "en": [
+        "baking soda"
+      ],
+      "de": [
+        "Natron"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_cloves",
+    "names_i18n": {
+      "en": [
+        "cloves"
+      ],
+      "de": [
+        "Gewürznelken"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_bay_leaves",
+    "names_i18n": {
+      "en": [
+        "bay leaves"
+      ],
+      "de": [
+        "Lorbeerblätter",
+        "Lorbeer"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_vanilla_extract",
+    "names_i18n": {
+      "en": [
+        "vanilla extract"
+      ],
+      "de": [
+        "Vanilleextrakt"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_caraway_seeds",
+    "names_i18n": {
+      "en": [
+        "caraway seeds"
+      ],
+      "de": [
+        "Kümmel"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_marjoram",
+    "names_i18n": {
+      "en": [
+        "marjoram"
+      ],
+      "de": [
+        "Majoran"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_breadcrumbs",
+    "names_i18n": {
+      "en": [
+        "breadcrumbs",
+        "bread crumbs"
+      ],
+      "de": [
+        "Paniermehl",
+        "Semmelbrösel"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 2
+  },
+  {
+    "id": "item_cake_glaze",
+    "names_i18n": {
+      "en": [
+        "cake glaze",
+        "icing"
+      ],
+      "de": [
+        "Tortenguss",
+        "Glasur"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_pudding_mix",
+    "names_i18n": {
+      "en": [
+        "pudding mix",
+        "pudding powder"
+      ],
+      "de": [
+        "Puddingpulver"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_marzipan",
+    "names_i18n": {
+      "en": [
+        "marzipan"
+      ],
+      "de": [
+        "Marzipan"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_muesli",
+    "names_i18n": {
+      "en": [
+        "muesli"
+      ],
+      "de": [
+        "Müsli"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 3
+  },
+  {
+    "id": "item_cornflakes",
+    "names_i18n": {
+      "en": [
+        "cornflakes"
+      ],
+      "de": [
+        "Cornflakes"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_oats",
+    "names_i18n": {
+      "en": [
+        "oats",
+        "rolled oats",
+        "oatmeal"
+      ],
+      "de": [
+        "Haferflocken"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 3
+  },
+  {
+    "id": "item_chocolate_hazelnut_spread",
+    "names_i18n": {
+      "en": [
+        "chocolate hazelnut spread"
+      ],
+      "de": [
+        "Nuss-Nougat-Creme",
+        "Nutella",
+        "Schokocreme",
+        "Nusscreme"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_pancake_mix",
+    "names_i18n": {
+      "en": [
+        "pancake mix"
+      ],
+      "de": [
+        "Pfannkuchenmix"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_granola",
+    "names_i18n": {
+      "en": [
+        "granola"
+      ],
+      "de": [
+        "Granola"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_porridge",
+    "names_i18n": {
+      "en": [
+        "porridge"
+      ],
+      "de": [
+        "Porridge"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_rice_pudding",
+    "names_i18n": {
+      "en": [
+        "rice pudding"
+      ],
+      "de": [
+        "Milchreis"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_potato_chips",
+    "names_i18n": {
+      "en": [
+        "potato chips",
+        "crisps"
+      ],
+      "de": [
+        "Chips"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 3
+  },
+  {
+    "id": "item_chocolate",
+    "names_i18n": {
+      "en": [
+        "chocolate"
+      ],
+      "de": [
+        "Schokolade"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 3
+  },
+  {
+    "id": "item_cookies",
+    "names_i18n": {
+      "en": [
+        "cookies",
+        "biscuits"
+      ],
+      "de": [
+        "Kekse"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 3
+  },
+  {
+    "id": "item_gummy_bears",
+    "names_i18n": {
+      "en": [
+        "gummy bears"
+      ],
+      "de": [
+        "Gummibärchen",
+        "Haribo"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_pretzel_sticks",
+    "names_i18n": {
+      "en": [
+        "pretzel sticks"
+      ],
+      "de": [
+        "Salzstangen"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_popcorn",
+    "names_i18n": {
+      "en": [
+        "popcorn"
+      ],
+      "de": [
+        "Popcorn"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_nuts",
+    "names_i18n": {
+      "en": [
+        "nuts"
+      ],
+      "de": [
+        "Nüsse",
+        "Nuss"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_peanuts",
+    "names_i18n": {
+      "en": [
+        "peanuts"
+      ],
+      "de": [
+        "Erdnüsse"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_almonds",
+    "names_i18n": {
+      "en": [
+        "almonds"
+      ],
+      "de": [
+        "Mandeln"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_cashews",
+    "names_i18n": {
+      "en": [
+        "cashews"
+      ],
+      "de": [
+        "Cashewkerne"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_trail_mix",
+    "names_i18n": {
+      "en": [
+        "trail mix"
+      ],
+      "de": [
+        "Studentenfutter"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_snack_bar",
+    "names_i18n": {
+      "en": [
+        "snack bar",
+        "granola bar"
+      ],
+      "de": [
+        "Müsliriegel"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_marshmallows",
+    "names_i18n": {
+      "en": [
+        "marshmallows"
+      ],
+      "de": [
+        "Marshmallows"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_licorice",
+    "names_i18n": {
+      "en": [
+        "licorice"
+      ],
+      "de": [
+        "Lakritz"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_candy",
+    "names_i18n": {
+      "en": [
+        "candy",
+        "sweets",
+        "mints"
+      ],
+      "de": [
+        "Bonbons",
+        "Süßigkeiten",
+        "Süßes"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_chewing_gum",
+    "names_i18n": {
+      "en": [
+        "chewing gum",
+        "gum"
+      ],
+      "de": [
+        "Kaugummi"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_dried_fruit",
+    "names_i18n": {
+      "en": [
+        "dried fruit"
+      ],
+      "de": [
+        "Trockenfrüchte",
+        "Trockenobst",
+        "Dörrobst"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_raisins",
+    "names_i18n": {
+      "en": [
+        "raisins"
+      ],
+      "de": [
+        "Rosinen"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_tortilla_chips",
+    "names_i18n": {
+      "en": [
+        "tortilla chips",
+        "nachos"
+      ],
+      "de": [
+        "Tortillachips",
+        "Nachos"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_crackers",
+    "names_i18n": {
+      "en": [
+        "crackers"
+      ],
+      "de": [
+        "Cracker"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_dominosteine",
+    "names_i18n": {
+      "en": [
+        "dominosteine"
+      ],
+      "de": [
+        "Dominosteine"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_speculoos",
+    "names_i18n": {
+      "en": [
+        "speculoos",
+        "speculaas"
+      ],
+      "de": [
+        "Spekulatius"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_gingerbread",
+    "names_i18n": {
+      "en": [
+        "gingerbread"
+      ],
+      "de": [
+        "Lebkuchen",
+        "Elisenlebkuchen"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_peppernuts",
+    "names_i18n": {
+      "en": [
+        "peppernuts"
+      ],
+      "de": [
+        "Pfeffernüsse"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_chocolate_bar",
+    "names_i18n": {
+      "en": [
+        "chocolate bar"
+      ],
+      "de": [
+        "Schokoriegel",
+        "Schokoladenriegel"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_peanut_puffs",
+    "names_i18n": {
+      "en": [
+        "peanut puffs",
+        "peanut flips"
+      ],
+      "de": [
+        "Erdnussflips",
+        "Flips"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_wine_gums",
+    "names_i18n": {
+      "en": [
+        "wine gums"
+      ],
+      "de": [
+        "Weingummi",
+        "Fruchtgummi"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_ice_cream",
+    "names_i18n": {
+      "en": [
+        "ice cream"
+      ],
+      "de": [
+        "Eis",
+        "Speiseeis",
+        "Eiscreme"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 3
+  },
+  {
+    "id": "item_frozen_pizza",
+    "names_i18n": {
+      "en": [
+        "frozen pizza",
+        "pizza"
+      ],
+      "de": [
+        "Tiefkühlpizza",
+        "Pizza",
+        "TK-Pizza"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 2
+  },
+  {
+    "id": "item_frozen_vegetables",
+    "names_i18n": {
+      "en": [
+        "frozen vegetables"
+      ],
+      "de": [
+        "Tiefkühlgemüse"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 2
+  },
+  {
+    "id": "item_fries",
+    "names_i18n": {
+      "en": [
+        "fries",
+        "French fries"
+      ],
+      "de": [
+        "Pommes"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 3
+  },
+  {
+    "id": "item_fish_sticks",
+    "names_i18n": {
+      "en": [
+        "fish sticks",
+        "fish fingers"
+      ],
+      "de": [
+        "Fischstäbchen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 2
+  },
+  {
+    "id": "item_frozen_berries",
+    "names_i18n": {
+      "en": [
+        "frozen berries",
+        "frozen fruit"
+      ],
+      "de": [
+        "Tiefkühlbeeren",
+        "TK-Beeren"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_ice_cubes",
+    "names_i18n": {
+      "en": [
+        "ice cubes",
+        "ice"
+      ],
+      "de": [
+        "Eiswürfel"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_frozen_lasagne",
+    "names_i18n": {
+      "en": [
+        "frozen lasagne"
+      ],
+      "de": [
+        "Tiefkühl-Lasagne"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_frozen_spinach",
+    "names_i18n": {
+      "en": [
+        "frozen spinach"
+      ],
+      "de": [
+        "Tiefkühlspinat",
+        "TK-Spinat"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_frozen_ready_meal",
+    "names_i18n": {
+      "en": [
+        "frozen ready meal"
+      ],
+      "de": [
+        "Fertiggericht"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_croquettes",
+    "names_i18n": {
+      "en": [
+        "croquettes"
+      ],
+      "de": [
+        "Kroketten"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_frozen_waffles",
+    "names_i18n": {
+      "en": [
+        "frozen waffles"
+      ],
+      "de": [
+        "Waffeln (TK)"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_cream_spinach",
+    "names_i18n": {
+      "en": [
+        "cream spinach"
+      ],
+      "de": [
+        "Rahmspinat"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_potato_pancakes",
+    "names_i18n": {
+      "en": [
+        "potato pancakes",
+        "hash browns"
+      ],
+      "de": [
+        "Kartoffelpuffer",
+        "Reibekuchen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_puff_pastry",
+    "names_i18n": {
+      "en": [
+        "puff pastry"
+      ],
+      "de": [
+        "Blätterteig"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_frozen_peas",
+    "names_i18n": {
+      "en": [
+        "frozen peas"
+      ],
+      "de": [
+        "TK-Erbsen",
+        "Erbsen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_mixed_vegetables",
+    "names_i18n": {
+      "en": [
+        "mixed vegetables"
+      ],
+      "de": [
+        "Gemüsemischung",
+        "TK-Gemüse"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_soup_greens",
+    "names_i18n": {
+      "en": [
+        "soup greens",
+        "soup vegetables"
+      ],
+      "de": [
+        "Suppengrün"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_rosti",
+    "names_i18n": {
+      "en": [
+        "rosti"
+      ],
+      "de": [
+        "Rösti",
+        "Röstis"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_water",
+    "names_i18n": {
+      "en": [
+        "water"
+      ],
+      "de": [
+        "Wasser"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 3
+  },
+  {
+    "id": "item_sparkling_water",
+    "names_i18n": {
+      "en": [
+        "sparkling water"
+      ],
+      "de": [
+        "Mineralwasser",
+        "Sprudel"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_orange_juice",
+    "names_i18n": {
+      "en": [
+        "orange juice"
+      ],
+      "de": [
+        "Orangensaft",
+        "O-Saft"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 3
+  },
+  {
+    "id": "item_apple_juice",
+    "names_i18n": {
+      "en": [
+        "apple juice"
+      ],
+      "de": [
+        "Apfelsaft"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_coffee",
+    "names_i18n": {
+      "en": [
+        "coffee"
+      ],
+      "de": [
+        "Kaffee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 3
+  },
+  {
+    "id": "item_tea",
+    "names_i18n": {
+      "en": [
+        "tea"
+      ],
+      "de": [
+        "Tee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 3
+  },
+  {
+    "id": "item_cola",
+    "names_i18n": {
+      "en": [
+        "cola",
+        "coke",
+        "coca-cola"
+      ],
+      "de": [
+        "Cola",
+        "Coca-Cola"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_lemonade",
+    "names_i18n": {
+      "en": [
+        "lemonade",
+        "soda",
+        "soft drink"
+      ],
+      "de": [
+        "Limonade",
+        "Limo"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_iced_tea",
+    "names_i18n": {
+      "en": [
+        "iced tea"
+      ],
+      "de": [
+        "Eistee"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_energy_drink",
+    "names_i18n": {
+      "en": [
+        "energy drink"
+      ],
+      "de": [
+        "Energydrink"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_smoothie",
+    "names_i18n": {
+      "en": [
+        "smoothie"
+      ],
+      "de": [
+        "Smoothie"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_instant_coffee",
+    "names_i18n": {
+      "en": [
+        "instant coffee"
+      ],
+      "de": [
+        "Instantkaffee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_hot_chocolate_mix",
+    "names_i18n": {
+      "en": [
+        "hot chocolate mix",
+        "hot chocolate",
+        "cocoa"
+      ],
+      "de": [
+        "Trinkschokolade",
+        "Kakao",
+        "Trinkkakao",
+        "Kakaogetränk"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_grape_juice",
+    "names_i18n": {
+      "en": [
+        "grape juice"
+      ],
+      "de": [
+        "Traubensaft"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_multivitamin_juice",
+    "names_i18n": {
+      "en": [
+        "multivitamin juice"
+      ],
+      "de": [
+        "Multivitaminsaft"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_coconut_water",
+    "names_i18n": {
+      "en": [
+        "coconut water"
+      ],
+      "de": [
+        "Kokoswasser"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_apple_spritzer",
+    "names_i18n": {
+      "en": [
+        "apple spritzer",
+        "apple soda"
+      ],
+      "de": [
+        "Apfelschorle",
+        "Apfelsaftschorle"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 3
+  },
+  {
+    "id": "item_spezi",
+    "names_i18n": {
+      "en": [
+        "spezi"
+      ],
+      "de": [
+        "Spezi",
+        "Cola-Mix"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_herbal_tea",
+    "names_i18n": {
+      "en": [
+        "herbal tea"
+      ],
+      "de": [
+        "Kräutertee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 2
+  },
+  {
+    "id": "item_peppermint_tea",
+    "names_i18n": {
+      "en": [
+        "peppermint tea"
+      ],
+      "de": [
+        "Pfefferminztee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_fruit_tea",
+    "names_i18n": {
+      "en": [
+        "fruit tea"
+      ],
+      "de": [
+        "Früchtetee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_espresso",
+    "names_i18n": {
+      "en": [
+        "espresso"
+      ],
+      "de": [
+        "Espresso"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 2
+  },
+  {
+    "id": "item_cappuccino",
+    "names_i18n": {
+      "en": [
+        "cappuccino"
+      ],
+      "de": [
+        "Cappuccino"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_latte_macchiato",
+    "names_i18n": {
+      "en": [
+        "latte macchiato"
+      ],
+      "de": [
+        "Latte Macchiato"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_mate",
+    "names_i18n": {
+      "en": [
+        "mate",
+        "mate tea"
+      ],
+      "de": [
+        "Mate",
+        "Club-Mate"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_fassbrause",
+    "names_i18n": {
+      "en": [
+        "fassbrause"
+      ],
+      "de": [
+        "Fassbrause"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_bitter_lemon",
+    "names_i18n": {
+      "en": [
+        "bitter lemon"
+      ],
+      "de": [
+        "Bitter Lemon"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_tonic_water",
+    "names_i18n": {
+      "en": [
+        "tonic water"
+      ],
+      "de": [
+        "Tonic Water",
+        "Tonic"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_ginger_ale",
+    "names_i18n": {
+      "en": [
+        "ginger ale"
+      ],
+      "de": [
+        "Ginger Ale",
+        "Ingwerlimonade"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_tomato_juice",
+    "names_i18n": {
+      "en": [
+        "tomato juice"
+      ],
+      "de": [
+        "Tomatensaft"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_beer",
+    "names_i18n": {
+      "en": [
+        "beer"
+      ],
+      "de": [
+        "Bier",
+        "Helles"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 3
+  },
+  {
+    "id": "item_red_wine",
+    "names_i18n": {
+      "en": [
+        "red wine"
+      ],
+      "de": [
+        "Rotwein"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 2
+  },
+  {
+    "id": "item_white_wine",
+    "names_i18n": {
+      "en": [
+        "white wine"
+      ],
+      "de": [
+        "Weißwein"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 2
+  },
+  {
+    "id": "item_sparkling_wine",
+    "names_i18n": {
+      "en": [
+        "sparkling wine",
+        "prosecco"
+      ],
+      "de": [
+        "Sekt"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_vodka",
+    "names_i18n": {
+      "en": [
+        "vodka"
+      ],
+      "de": [
+        "Wodka"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_gin",
+    "names_i18n": {
+      "en": [
+        "gin"
+      ],
+      "de": [
+        "Gin"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_rum",
+    "names_i18n": {
+      "en": [
+        "rum"
+      ],
+      "de": [
+        "Rum"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_whiskey",
+    "names_i18n": {
+      "en": [
+        "whiskey",
+        "whisky"
+      ],
+      "de": [
+        "Whisky"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_radler",
+    "names_i18n": {
+      "en": [
+        "radler"
+      ],
+      "de": [
+        "Radler",
+        "Alsterwasser"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 2
+  },
+  {
+    "id": "item_wheat_beer",
+    "names_i18n": {
+      "en": [
+        "wheat beer",
+        "hefeweizen"
+      ],
+      "de": [
+        "Weizenbier",
+        "Hefeweizen"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 2
+  },
+  {
+    "id": "item_pilsner",
+    "names_i18n": {
+      "en": [
+        "pilsner",
+        "pils"
+      ],
+      "de": [
+        "Pils",
+        "Pilsner"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 2
+  },
+  {
+    "id": "item_mulled_wine",
+    "names_i18n": {
+      "en": [
+        "mulled wine"
+      ],
+      "de": [
+        "Glühwein"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_eggnog",
+    "names_i18n": {
+      "en": [
+        "eggnog"
+      ],
+      "de": [
+        "Eggnog"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_apple_wine",
+    "names_i18n": {
+      "en": [
+        "apple wine",
+        "cider"
+      ],
+      "de": [
+        "Apfelwein",
+        "Äppelwoi"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_grain_schnapps",
+    "names_i18n": {
+      "en": [
+        "grain schnapps",
+        "korn"
+      ],
+      "de": [
+        "Korn",
+        "Kornbrand"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_toilet_paper",
+    "names_i18n": {
+      "en": [
+        "toilet paper",
+        "loo roll"
+      ],
+      "de": [
+        "Toilettenpapier",
+        "Klopapier",
+        "Klorollen"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 3
+  },
+  {
+    "id": "item_paper_towels",
+    "names_i18n": {
+      "en": [
+        "paper towels",
+        "kitchen roll"
+      ],
+      "de": [
+        "Küchenrolle",
+        "Küchenpapier",
+        "Küchentücher"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 3
+  },
+  {
+    "id": "item_dish_soap",
+    "names_i18n": {
+      "en": [
+        "dish soap",
+        "dish detergent",
+        "washing-up liquid"
+      ],
+      "de": [
+        "Spülmittel"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 3
+  },
+  {
+    "id": "item_laundry_detergent",
+    "names_i18n": {
+      "en": [
+        "laundry detergent",
+        "laundry pods"
+      ],
+      "de": [
+        "Waschmittel",
+        "Waschpulver"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 3
+  },
+  {
+    "id": "item_trash_bags",
+    "names_i18n": {
+      "en": [
+        "trash bags",
+        "garbage bags",
+        "bin bags",
+        "bin liners"
+      ],
+      "de": [
+        "Müllbeutel",
+        "Müllsäcke",
+        "Mülltüten"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_aluminum_foil",
+    "names_i18n": {
+      "en": [
+        "aluminum foil",
+        "tin foil",
+        "foil"
+      ],
+      "de": [
+        "Alufolie",
+        "Aluminiumfolie"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_plastic_wrap",
+    "names_i18n": {
+      "en": [
+        "plastic wrap",
+        "cling film"
+      ],
+      "de": [
+        "Frischhaltefolie"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_parchment_paper",
+    "names_i18n": {
+      "en": [
+        "parchment paper"
+      ],
+      "de": [
+        "Backpapier"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_sponges",
+    "names_i18n": {
+      "en": [
+        "sponges",
+        "sponge"
+      ],
+      "de": [
+        "Schwämme",
+        "Schwamm",
+        "Spülschwamm",
+        "Spülschwämme"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_all_purpose_cleaner",
+    "names_i18n": {
+      "en": [
+        "all-purpose cleaner"
+      ],
+      "de": [
+        "Allzweckreiniger",
+        "Putzmittel"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_glass_cleaner",
+    "names_i18n": {
+      "en": [
+        "glass cleaner"
+      ],
+      "de": [
+        "Glasreiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_toilet_cleaner",
+    "names_i18n": {
+      "en": [
+        "toilet cleaner"
+      ],
+      "de": [
+        "WC-Reiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_fabric_softener",
+    "names_i18n": {
+      "en": [
+        "fabric softener"
+      ],
+      "de": [
+        "Weichspüler"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_dishwasher_tablets",
+    "names_i18n": {
+      "en": [
+        "dishwasher tablets",
+        "dishwasher pods"
+      ],
+      "de": [
+        "Spülmaschinentabs",
+        "Geschirrspültabs",
+        "Spülmaschinentabletten"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_candles",
+    "names_i18n": {
+      "en": [
+        "candles"
+      ],
+      "de": [
+        "Kerzen"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_batteries",
+    "names_i18n": {
+      "en": [
+        "batteries"
+      ],
+      "de": [
+        "Batterien"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_matches",
+    "names_i18n": {
+      "en": [
+        "matches"
+      ],
+      "de": [
+        "Streichhölzer"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_vacuum_bags",
+    "names_i18n": {
+      "en": [
+        "vacuum bags"
+      ],
+      "de": [
+        "Staubsaugerbeutel"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_lighter",
+    "names_i18n": {
+      "en": [
+        "lighter"
+      ],
+      "de": [
+        "Feuerzeug"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_descaler",
+    "names_i18n": {
+      "en": [
+        "descaler",
+        "descaling agent"
+      ],
+      "de": [
+        "Entkalker",
+        "Kalklöser"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_limescale_remover",
+    "names_i18n": {
+      "en": [
+        "limescale remover"
+      ],
+      "de": [
+        "Kalkreiniger",
+        "Badreiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_oven_cleaner",
+    "names_i18n": {
+      "en": [
+        "oven cleaner"
+      ],
+      "de": [
+        "Backofenreiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_drain_cleaner",
+    "names_i18n": {
+      "en": [
+        "drain cleaner"
+      ],
+      "de": [
+        "Rohrreiniger",
+        "Abflussreiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_dish_brush",
+    "names_i18n": {
+      "en": [
+        "dish brush"
+      ],
+      "de": [
+        "Spülbürste"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_microfiber_cloths",
+    "names_i18n": {
+      "en": [
+        "microfiber cloths"
+      ],
+      "de": [
+        "Mikrofasertücher",
+        "Microfasertücher"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_cleaning_cloths",
+    "names_i18n": {
+      "en": [
+        "cleaning cloths"
+      ],
+      "de": [
+        "Putzlappen",
+        "Spültücher",
+        "Putztücher",
+        "Schwammtücher"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_laundry_disinfectant",
+    "names_i18n": {
+      "en": [
+        "laundry disinfectant"
+      ],
+      "de": [
+        "Hygienespüler"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_light_bulbs",
+    "names_i18n": {
+      "en": [
+        "light bulbs",
+        "bulbs",
+        "LED bulbs"
+      ],
+      "de": [
+        "Glühbirnen",
+        "Leuchtmittel",
+        "Glühbirne",
+        "LED-Lampe"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_towels",
+    "names_i18n": {
+      "en": [
+        "towels"
+      ],
+      "de": [
+        "Handtücher",
+        "Badetücher"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_toothpaste",
+    "names_i18n": {
+      "en": [
+        "toothpaste"
+      ],
+      "de": [
+        "Zahnpasta",
+        "Zahncreme"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 3
+  },
+  {
+    "id": "item_toothbrush",
+    "names_i18n": {
+      "en": [
+        "toothbrush",
+        "toothbrush heads"
+      ],
+      "de": [
+        "Zahnbürste",
+        "Aufsteckbürsten"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 2
+  },
+  {
+    "id": "item_shower_gel",
+    "names_i18n": {
+      "en": [
+        "shower gel",
+        "body wash"
+      ],
+      "de": [
+        "Duschgel"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 3
+  },
+  {
+    "id": "item_shampoo",
+    "names_i18n": {
+      "en": [
+        "shampoo"
+      ],
+      "de": [
+        "Shampoo"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 3
+  },
+  {
+    "id": "item_deodorant",
+    "names_i18n": {
+      "en": [
+        "deodorant"
+      ],
+      "de": [
+        "Deo"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 3
+  },
+  {
+    "id": "item_soap",
+    "names_i18n": {
+      "en": [
+        "soap"
+      ],
+      "de": [
+        "Seife"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 2
+  },
+  {
+    "id": "item_razor",
+    "names_i18n": {
+      "en": [
+        "razor"
+      ],
+      "de": [
+        "Rasierer"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_shaving_cream",
+    "names_i18n": {
+      "en": [
+        "shaving cream",
+        "shaving gel"
+      ],
+      "de": [
+        "Rasierschaum",
+        "Rasiergel"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_sunscreen",
+    "names_i18n": {
+      "en": [
+        "sunscreen"
+      ],
+      "de": [
+        "Sonnencreme"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 2
+  },
+  {
+    "id": "item_hand_cream",
+    "names_i18n": {
+      "en": [
+        "hand cream"
+      ],
+      "de": [
+        "Handcreme"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_body_lotion",
+    "names_i18n": {
+      "en": [
+        "body lotion",
+        "lotion"
+      ],
+      "de": [
+        "Bodylotion"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 2
+  },
+  {
+    "id": "item_cotton_swabs",
+    "names_i18n": {
+      "en": [
+        "cotton swabs",
+        "Q-tips"
+      ],
+      "de": [
+        "Wattestäbchen"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_sanitary_pads",
+    "names_i18n": {
+      "en": [
+        "sanitary pads",
+        "pads"
+      ],
+      "de": [
+        "Damenbinden",
+        "Binden"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_tampons",
+    "names_i18n": {
+      "en": [
+        "tampons"
+      ],
+      "de": [
+        "Tampons"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_tissues",
+    "names_i18n": {
+      "en": [
+        "tissues",
+        "kleenex"
+      ],
+      "de": [
+        "Taschentücher",
+        "Tempos"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 2
+  },
+  {
+    "id": "item_mouthwash",
+    "names_i18n": {
+      "en": [
+        "mouthwash"
+      ],
+      "de": [
+        "Mundwasser"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_band_aids",
+    "names_i18n": {
+      "en": [
+        "band-aids",
+        "plasters"
+      ],
+      "de": [
+        "Pflaster"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_dental_floss",
+    "names_i18n": {
+      "en": [
+        "dental floss",
+        "floss"
+      ],
+      "de": [
+        "Zahnseide"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_cotton_pads",
+    "names_i18n": {
+      "en": [
+        "cotton pads",
+        "cotton balls"
+      ],
+      "de": [
+        "Wattepads",
+        "Watte"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_lip_balm",
+    "names_i18n": {
+      "en": [
+        "lip balm"
+      ],
+      "de": [
+        "Lippenpflege",
+        "Lipbalm"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_razor_blades",
+    "names_i18n": {
+      "en": [
+        "razor blades"
+      ],
+      "de": [
+        "Rasierklingen"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_hairspray",
+    "names_i18n": {
+      "en": [
+        "hairspray",
+        "hair spray"
+      ],
+      "de": [
+        "Haarspray",
+        "Haarlack"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_hair_gel",
+    "names_i18n": {
+      "en": [
+        "hair gel"
+      ],
+      "de": [
+        "Haargel"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_conditioner",
+    "names_i18n": {
+      "en": [
+        "conditioner",
+        "hair conditioner"
+      ],
+      "de": [
+        "Haarspülung",
+        "Spülung"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_nail_polish_remover",
+    "names_i18n": {
+      "en": [
+        "nail polish remover"
+      ],
+      "de": [
+        "Nagellackentferner"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_makeup_remover",
+    "names_i18n": {
+      "en": [
+        "makeup remover"
+      ],
+      "de": [
+        "Make-up-Entferner",
+        "Abschminktücher"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_face_cream",
+    "names_i18n": {
+      "en": [
+        "face cream"
+      ],
+      "de": [
+        "Gesichtscreme",
+        "Tagescreme"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_dog_food",
+    "names_i18n": {
+      "en": [
+        "dog food",
+        "puppy food"
+      ],
+      "de": [
+        "Hundefutter"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 2
+  },
+  {
+    "id": "item_cat_food",
+    "names_i18n": {
+      "en": [
+        "cat food"
+      ],
+      "de": [
+        "Katzenfutter"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 2
+  },
+  {
+    "id": "item_cat_litter",
+    "names_i18n": {
+      "en": [
+        "cat litter",
+        "litter",
+        "kitty litter"
+      ],
+      "de": [
+        "Katzenstreu",
+        "Streu",
+        "Einstreu"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 2
+  },
+  {
+    "id": "item_pet_treats",
+    "names_i18n": {
+      "en": [
+        "pet treats",
+        "treats",
+        "dog treats"
+      ],
+      "de": [
+        "Leckerlis",
+        "Leckerli"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_bird_food",
+    "names_i18n": {
+      "en": [
+        "bird food"
+      ],
+      "de": [
+        "Vogelfutter"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_dog_chew",
+    "names_i18n": {
+      "en": [
+        "dog chew"
+      ],
+      "de": [
+        "Kauknochen"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_cat_treats",
+    "names_i18n": {
+      "en": [
+        "cat treats"
+      ],
+      "de": [
+        "Katzensnacks"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_wet_pet_food",
+    "names_i18n": {
+      "en": [
+        "wet pet food"
+      ],
+      "de": [
+        "Nassfutter"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_dog_shampoo",
+    "names_i18n": {
+      "en": [
+        "dog shampoo"
+      ],
+      "de": [
+        "Hundeshampoo"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_diapers",
+    "names_i18n": {
+      "en": [
+        "diapers",
+        "nappies"
+      ],
+      "de": [
+        "Windeln",
+        "Pampers"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 3
+  },
+  {
+    "id": "item_baby_food",
+    "names_i18n": {
+      "en": [
+        "baby food",
+        "baby food jars"
+      ],
+      "de": [
+        "Babynahrung",
+        "Gläschen",
+        "Babygläschen"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 2
+  },
+  {
+    "id": "item_baby_wipes",
+    "names_i18n": {
+      "en": [
+        "baby wipes",
+        "wipes"
+      ],
+      "de": [
+        "Feuchttücher"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 3
+  },
+  {
+    "id": "item_baby_formula",
+    "names_i18n": {
+      "en": [
+        "baby formula",
+        "formula"
+      ],
+      "de": [
+        "Milchpulver",
+        "Pre-Milch",
+        "Folgemilch",
+        "Säuglingsnahrung"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 2
+  },
+  {
+    "id": "item_baby_puree",
+    "names_i18n": {
+      "en": [
+        "baby puree"
+      ],
+      "de": [
+        "Babybrei"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_pacifier",
+    "names_i18n": {
+      "en": [
+        "pacifier"
+      ],
+      "de": [
+        "Schnuller"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_baby_bottle",
+    "names_i18n": {
+      "en": [
+        "baby bottle"
+      ],
+      "de": [
+        "Fläschchen"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_baby_oil",
+    "names_i18n": {
+      "en": [
+        "baby oil"
+      ],
+      "de": [
+        "Babyöl"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_baby_shampoo",
+    "names_i18n": {
+      "en": [
+        "baby shampoo"
+      ],
+      "de": [
+        "Babyshampoo"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_baby_lotion",
+    "names_i18n": {
+      "en": [
+        "baby lotion"
+      ],
+      "de": [
+        "Babylotion",
+        "Babycreme"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_teething_gel",
+    "names_i18n": {
+      "en": [
+        "teething gel"
+      ],
+      "de": [
+        "Zahnungshilfe",
+        "Zahngel"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_non_alcoholic_beer",
+    "names_i18n": {
+      "en": [
+        "non-alcoholic beer",
+        "alcohol-free beer"
+      ],
+      "de": [
+        "alkoholfreies Bier"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_dog_waste_bags",
+    "names_i18n": {
+      "en": [
+        "dog waste bags",
+        "poop bags"
+      ],
+      "de": [
+        "Kotbeutel"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 2
+  },
+  {
+    "id": "item_flea_and_tick_treatment",
+    "names_i18n": {
+      "en": [
+        "flea and tick treatment",
+        "flea treatment"
+      ],
+      "de": [
+        "Flohmittel",
+        "Zeckenmittel"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_diaper_rash_cream",
+    "names_i18n": {
+      "en": [
+        "diaper rash cream",
+        "diaper cream"
+      ],
+      "de": [
+        "Wundcreme",
+        "Windelcreme"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_bok_choy",
+    "names_i18n": {
+      "en": [
+        "bok choy",
+        "pak choi"
+      ],
+      "de": [
+        "Pak Choi",
+        "Pak Choy"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_napa_cabbage",
+    "names_i18n": {
+      "en": [
+        "napa cabbage",
+        "Chinese cabbage"
+      ],
+      "de": [
+        "Chinakohl"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_cilantro",
+    "names_i18n": {
+      "en": [
+        "cilantro",
+        "coriander",
+        "fresh coriander"
+      ],
+      "de": [
+        "Koriander"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_lemongrass",
+    "names_i18n": {
+      "en": [
+        "lemongrass"
+      ],
+      "de": [
+        "Zitronengras"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_thai_basil",
+    "names_i18n": {
+      "en": [
+        "Thai basil"
+      ],
+      "de": [
+        "Thai-Basilikum"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_shiitake_mushrooms",
+    "names_i18n": {
+      "en": [
+        "shiitake mushrooms",
+        "shiitake"
+      ],
+      "de": [
+        "Shiitake-Pilze",
+        "Shiitake"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_enoki_mushrooms",
+    "names_i18n": {
+      "en": [
+        "enoki mushrooms",
+        "enoki"
+      ],
+      "de": [
+        "Enoki-Pilze",
+        "Enoki"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_oyster_mushrooms",
+    "names_i18n": {
+      "en": [
+        "oyster mushrooms"
+      ],
+      "de": [
+        "Austernpilze"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_bean_sprouts",
+    "names_i18n": {
+      "en": [
+        "bean sprouts",
+        "mung bean sprouts"
+      ],
+      "de": [
+        "Sojasprossen",
+        "Mungbohnensprossen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_daikon",
+    "names_i18n": {
+      "en": [
+        "daikon",
+        "white radish"
+      ],
+      "de": [
+        "Rettich",
+        "Daikon"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_lychees",
+    "names_i18n": {
+      "en": [
+        "lychees",
+        "lychee"
+      ],
+      "de": [
+        "Litschis",
+        "Litschi"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_papaya",
+    "names_i18n": {
+      "en": [
+        "papaya"
+      ],
+      "de": [
+        "Papaya"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_okra",
+    "names_i18n": {
+      "en": [
+        "okra"
+      ],
+      "de": [
+        "Okra"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_taro",
+    "names_i18n": {
+      "en": [
+        "taro"
+      ],
+      "de": [
+        "Taro"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_dragon_fruit",
+    "names_i18n": {
+      "en": [
+        "dragon fruit",
+        "pitaya"
+      ],
+      "de": [
+        "Drachenfrucht",
+        "Pitahaya"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_grapefruit",
+    "names_i18n": {
+      "en": [
+        "grapefruit"
+      ],
+      "de": [
+        "Grapefruit",
+        "Pampelmuse"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_melon",
+    "names_i18n": {
+      "en": [
+        "melon",
+        "honeydew",
+        "cantaloupe"
+      ],
+      "de": [
+        "Melone",
+        "Honigmelone",
+        "Zuckermelone"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_pomegranate",
+    "names_i18n": {
+      "en": [
+        "pomegranate"
+      ],
+      "de": [
+        "Granatapfel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_figs",
+    "names_i18n": {
+      "en": [
+        "figs"
+      ],
+      "de": [
+        "Feigen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_cranberries",
+    "names_i18n": {
+      "en": [
+        "cranberries"
+      ],
+      "de": [
+        "Cranberrys",
+        "Cranberries"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_mandarins",
+    "names_i18n": {
+      "en": [
+        "mandarins",
+        "clementines",
+        "tangerines"
+      ],
+      "de": [
+        "Mandarinen",
+        "Clementinen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_shallots",
+    "names_i18n": {
+      "en": [
+        "shallots"
+      ],
+      "de": [
+        "Schalotten"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_red_onions",
+    "names_i18n": {
+      "en": [
+        "red onions",
+        "red onion"
+      ],
+      "de": [
+        "rote Zwiebeln",
+        "rote Zwiebel"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_kale",
+    "names_i18n": {
+      "en": [
+        "kale"
+      ],
+      "de": [
+        "Grünkohl"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_jalapeños",
+    "names_i18n": {
+      "en": [
+        "jalapeños",
+        "jalapeño"
+      ],
+      "de": [
+        "Jalapeños"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_flatbread",
+    "names_i18n": {
+      "en": [
+        "flatbread",
+        "Turkish bread"
+      ],
+      "de": [
+        "Fladenbrot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_naan",
+    "names_i18n": {
+      "en": [
+        "naan",
+        "naan bread"
+      ],
+      "de": [
+        "Naan",
+        "Naan-Brot"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_hamburger_buns",
+    "names_i18n": {
+      "en": [
+        "hamburger buns",
+        "burger buns",
+        "buns"
+      ],
+      "de": [
+        "Burgerbrötchen",
+        "Burger Buns"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 2
+  },
+  {
+    "id": "item_hot_dog_buns",
+    "names_i18n": {
+      "en": [
+        "hot dog buns"
+      ],
+      "de": [
+        "Hot-Dog-Brötchen"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_english_muffins",
+    "names_i18n": {
+      "en": [
+        "English muffins"
+      ],
+      "de": [
+        "English Muffins"
+      ]
+    },
+    "default_category": "bakery",
+    "popularity": 1
+  },
+  {
+    "id": "item_tofu",
+    "names_i18n": {
+      "en": [
+        "tofu"
+      ],
+      "de": [
+        "Tofu"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_silken_tofu",
+    "names_i18n": {
+      "en": [
+        "silken tofu"
+      ],
+      "de": [
+        "Seidentofu"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_tempeh",
+    "names_i18n": {
+      "en": [
+        "tempeh"
+      ],
+      "de": [
+        "Tempeh"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_kimchi",
+    "names_i18n": {
+      "en": [
+        "kimchi"
+      ],
+      "de": [
+        "Kimchi"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_hummus",
+    "names_i18n": {
+      "en": [
+        "hummus"
+      ],
+      "de": [
+        "Hummus"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_halloumi",
+    "names_i18n": {
+      "en": [
+        "halloumi"
+      ],
+      "de": [
+        "Halloumi",
+        "Grillkäse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_paneer",
+    "names_i18n": {
+      "en": [
+        "paneer"
+      ],
+      "de": [
+        "Paneer"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_ayran",
+    "names_i18n": {
+      "en": [
+        "ayran"
+      ],
+      "de": [
+        "Ayran"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_soy_milk",
+    "names_i18n": {
+      "en": [
+        "soy milk"
+      ],
+      "de": [
+        "Sojamilch",
+        "Sojadrink"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_half_and_half",
+    "names_i18n": {
+      "en": [
+        "half-and-half"
+      ],
+      "de": [
+        "Half-and-Half"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_cheddar",
+    "names_i18n": {
+      "en": [
+        "cheddar"
+      ],
+      "de": [
+        "Cheddar"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_gouda",
+    "names_i18n": {
+      "en": [
+        "gouda"
+      ],
+      "de": [
+        "Gouda"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_emmental",
+    "names_i18n": {
+      "en": [
+        "emmental",
+        "Swiss cheese"
+      ],
+      "de": [
+        "Emmentaler"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_sliced_cheese",
+    "names_i18n": {
+      "en": [
+        "sliced cheese"
+      ],
+      "de": [
+        "Scheibenkäse"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 2
+  },
+  {
+    "id": "item_string_cheese",
+    "names_i18n": {
+      "en": [
+        "string cheese"
+      ],
+      "de": [
+        "Käsesticks"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_ghee",
+    "names_i18n": {
+      "en": [
+        "ghee",
+        "clarified butter"
+      ],
+      "de": [
+        "Butterschmalz",
+        "Ghee"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_ground_beef",
+    "names_i18n": {
+      "en": [
+        "ground beef",
+        "beef mince"
+      ],
+      "de": [
+        "Rinderhackfleisch",
+        "Rinderhack"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_steak",
+    "names_i18n": {
+      "en": [
+        "steak"
+      ],
+      "de": [
+        "Steak"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_chicken_wings",
+    "names_i18n": {
+      "en": [
+        "chicken wings"
+      ],
+      "de": [
+        "Chicken Wings",
+        "Hähnchenflügel"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_pork_chops",
+    "names_i18n": {
+      "en": [
+        "pork chops"
+      ],
+      "de": [
+        "Schweinekoteletts",
+        "Koteletts"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_pork_belly",
+    "names_i18n": {
+      "en": [
+        "pork belly"
+      ],
+      "de": [
+        "Schweinebauch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_deli_meat",
+    "names_i18n": {
+      "en": [
+        "deli meat",
+        "cold cuts",
+        "lunch meat"
+      ],
+      "de": [
+        "Aufschnitt"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_mett",
+    "names_i18n": {
+      "en": [
+        "mett",
+        "raw minced pork"
+      ],
+      "de": [
+        "Mett",
+        "Hackepeter"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_sucuk",
+    "names_i18n": {
+      "en": [
+        "sucuk"
+      ],
+      "de": [
+        "Sucuk"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_squid",
+    "names_i18n": {
+      "en": [
+        "squid",
+        "calamari"
+      ],
+      "de": [
+        "Tintenfisch",
+        "Calamari"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_mussels",
+    "names_i18n": {
+      "en": [
+        "mussels"
+      ],
+      "de": [
+        "Miesmuscheln",
+        "Muscheln"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_fish_sauce",
+    "names_i18n": {
+      "en": [
+        "fish sauce"
+      ],
+      "de": [
+        "Fischsauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_oyster_sauce",
+    "names_i18n": {
+      "en": [
+        "oyster sauce"
+      ],
+      "de": [
+        "Austernsauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_hoisin_sauce",
+    "names_i18n": {
+      "en": [
+        "hoisin sauce",
+        "hoisin"
+      ],
+      "de": [
+        "Hoisinsauce",
+        "Hoisin-Sauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_sriracha",
+    "names_i18n": {
+      "en": [
+        "sriracha"
+      ],
+      "de": [
+        "Sriracha"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_sweet_chili_sauce",
+    "names_i18n": {
+      "en": [
+        "sweet chili sauce"
+      ],
+      "de": [
+        "Sweet-Chili-Sauce",
+        "süße Chilisauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_hot_sauce",
+    "names_i18n": {
+      "en": [
+        "hot sauce",
+        "chili sauce"
+      ],
+      "de": [
+        "Chilisauce",
+        "scharfe Soße"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_sambal_oelek",
+    "names_i18n": {
+      "en": [
+        "sambal oelek",
+        "sambal"
+      ],
+      "de": [
+        "Sambal Oelek",
+        "Sambal"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_gochujang",
+    "names_i18n": {
+      "en": [
+        "gochujang"
+      ],
+      "de": [
+        "Gochujang"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_chili_oil",
+    "names_i18n": {
+      "en": [
+        "chili oil",
+        "chili crisp"
+      ],
+      "de": [
+        "Chiliöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_teriyaki_sauce",
+    "names_i18n": {
+      "en": [
+        "teriyaki sauce"
+      ],
+      "de": [
+        "Teriyakisauce",
+        "Teriyaki-Sauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_sesame_oil",
+    "names_i18n": {
+      "en": [
+        "sesame oil"
+      ],
+      "de": [
+        "Sesamöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_rice_vinegar",
+    "names_i18n": {
+      "en": [
+        "rice vinegar"
+      ],
+      "de": [
+        "Reisessig"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_mirin",
+    "names_i18n": {
+      "en": [
+        "mirin"
+      ],
+      "de": [
+        "Mirin"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_shaoxing_wine",
+    "names_i18n": {
+      "en": [
+        "Shaoxing wine",
+        "cooking rice wine"
+      ],
+      "de": [
+        "Shaoxing-Reiswein",
+        "Reiswein zum Kochen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_miso_paste",
+    "names_i18n": {
+      "en": [
+        "miso paste",
+        "miso"
+      ],
+      "de": [
+        "Misopaste",
+        "Miso"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_curry_paste",
+    "names_i18n": {
+      "en": [
+        "curry paste",
+        "red curry paste",
+        "green curry paste"
+      ],
+      "de": [
+        "Currypaste",
+        "rote Currypaste",
+        "grüne Currypaste"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_coconut_cream",
+    "names_i18n": {
+      "en": [
+        "coconut cream"
+      ],
+      "de": [
+        "Kokoscreme"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_dashi",
+    "names_i18n": {
+      "en": [
+        "dashi",
+        "dashi stock"
+      ],
+      "de": [
+        "Dashi"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_nori",
+    "names_i18n": {
+      "en": [
+        "nori",
+        "sushi nori",
+        "seaweed sheets"
+      ],
+      "de": [
+        "Nori",
+        "Noriblätter",
+        "Algenblätter"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_wakame",
+    "names_i18n": {
+      "en": [
+        "wakame",
+        "dried seaweed"
+      ],
+      "de": [
+        "Wakame",
+        "getrocknete Algen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_wasabi",
+    "names_i18n": {
+      "en": [
+        "wasabi"
+      ],
+      "de": [
+        "Wasabi"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_pickled_ginger",
+    "names_i18n": {
+      "en": [
+        "pickled ginger",
+        "sushi ginger"
+      ],
+      "de": [
+        "Sushi-Ingwer",
+        "eingelegter Ingwer"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_bamboo_shoots",
+    "names_i18n": {
+      "en": [
+        "bamboo shoots"
+      ],
+      "de": [
+        "Bambussprossen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_water_chestnuts",
+    "names_i18n": {
+      "en": [
+        "water chestnuts"
+      ],
+      "de": [
+        "Wasserkastanien"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_black_beans",
+    "names_i18n": {
+      "en": [
+        "black beans"
+      ],
+      "de": [
+        "schwarze Bohnen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_red_lentils",
+    "names_i18n": {
+      "en": [
+        "red lentils"
+      ],
+      "de": [
+        "rote Linsen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_tahini",
+    "names_i18n": {
+      "en": [
+        "tahini",
+        "sesame paste"
+      ],
+      "de": [
+        "Tahin",
+        "Tahini",
+        "Sesampaste"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_ajvar",
+    "names_i18n": {
+      "en": [
+        "ajvar"
+      ],
+      "de": [
+        "Ajvar"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_salsa",
+    "names_i18n": {
+      "en": [
+        "salsa"
+      ],
+      "de": [
+        "Salsa",
+        "Salsasauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_bbq_sauce",
+    "names_i18n": {
+      "en": [
+        "BBQ sauce",
+        "barbecue sauce"
+      ],
+      "de": [
+        "Barbecuesauce",
+        "BBQ-Sauce",
+        "Grillsauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_salad_dressing",
+    "names_i18n": {
+      "en": [
+        "salad dressing",
+        "dressing",
+        "ranch"
+      ],
+      "de": [
+        "Salatdressing",
+        "Dressing"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_pesto",
+    "names_i18n": {
+      "en": [
+        "pesto"
+      ],
+      "de": [
+        "Pesto"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 2
+  },
+  {
+    "id": "item_gravy",
+    "names_i18n": {
+      "en": [
+        "gravy"
+      ],
+      "de": [
+        "Bratensoße",
+        "Bratensauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_sauce_thickener",
+    "names_i18n": {
+      "en": [
+        "sauce thickener"
+      ],
+      "de": [
+        "Soßenbinder",
+        "Saucenbinder"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_jasmine_rice",
+    "names_i18n": {
+      "en": [
+        "jasmine rice"
+      ],
+      "de": [
+        "Jasminreis"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 2
+  },
+  {
+    "id": "item_sushi_rice",
+    "names_i18n": {
+      "en": [
+        "sushi rice"
+      ],
+      "de": [
+        "Sushireis"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_sticky_rice",
+    "names_i18n": {
+      "en": [
+        "sticky rice",
+        "glutinous rice"
+      ],
+      "de": [
+        "Klebreis"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_rice_noodles",
+    "names_i18n": {
+      "en": [
+        "rice noodles",
+        "rice vermicelli"
+      ],
+      "de": [
+        "Reisnudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_glass_noodles",
+    "names_i18n": {
+      "en": [
+        "glass noodles",
+        "cellophane noodles"
+      ],
+      "de": [
+        "Glasnudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_egg_noodles",
+    "names_i18n": {
+      "en": [
+        "egg noodles",
+        "Chinese egg noodles"
+      ],
+      "de": [
+        "Mie-Nudeln",
+        "Mienudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_udon_noodles",
+    "names_i18n": {
+      "en": [
+        "udon noodles",
+        "udon"
+      ],
+      "de": [
+        "Udon-Nudeln",
+        "Udon"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_soba_noodles",
+    "names_i18n": {
+      "en": [
+        "soba noodles",
+        "soba"
+      ],
+      "de": [
+        "Soba-Nudeln",
+        "Soba"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_ramen_noodles",
+    "names_i18n": {
+      "en": [
+        "ramen noodles"
+      ],
+      "de": [
+        "Ramen-Nudeln"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_rice_paper",
+    "names_i18n": {
+      "en": [
+        "rice paper"
+      ],
+      "de": [
+        "Reispapier"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_tapioca_pearls",
+    "names_i18n": {
+      "en": [
+        "tapioca pearls",
+        "tapioca"
+      ],
+      "de": [
+        "Tapiokaperlen",
+        "Tapioka"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_panko",
+    "names_i18n": {
+      "en": [
+        "panko"
+      ],
+      "de": [
+        "Panko"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_sesame_seeds",
+    "names_i18n": {
+      "en": [
+        "sesame seeds",
+        "sesame"
+      ],
+      "de": [
+        "Sesam"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_star_anise",
+    "names_i18n": {
+      "en": [
+        "star anise"
+      ],
+      "de": [
+        "Sternanis"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_five_spice_powder",
+    "names_i18n": {
+      "en": [
+        "five-spice powder",
+        "five spice"
+      ],
+      "de": [
+        "Fünf-Gewürze-Pulver"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_sichuan_pepper",
+    "names_i18n": {
+      "en": [
+        "Sichuan pepper",
+        "Szechuan pepper"
+      ],
+      "de": [
+        "Szechuanpfeffer",
+        "Sichuanpfeffer"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_msg",
+    "names_i18n": {
+      "en": [
+        "MSG",
+        "monosodium glutamate"
+      ],
+      "de": [
+        "Glutamat",
+        "Mononatriumglutamat"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_turmeric",
+    "names_i18n": {
+      "en": [
+        "turmeric"
+      ],
+      "de": [
+        "Kurkuma"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_garam_masala",
+    "names_i18n": {
+      "en": [
+        "garam masala"
+      ],
+      "de": [
+        "Garam Masala"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_cardamom",
+    "names_i18n": {
+      "en": [
+        "cardamom"
+      ],
+      "de": [
+        "Kardamom"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_chili_flakes",
+    "names_i18n": {
+      "en": [
+        "chili flakes",
+        "red pepper flakes"
+      ],
+      "de": [
+        "Chiliflocken"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_ground_coriander",
+    "names_i18n": {
+      "en": [
+        "ground coriander",
+        "coriander seeds"
+      ],
+      "de": [
+        "Koriander gemahlen",
+        "Koriandersamen"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_garlic_powder",
+    "names_i18n": {
+      "en": [
+        "garlic powder"
+      ],
+      "de": [
+        "Knoblauchpulver"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_brown_sugar",
+    "names_i18n": {
+      "en": [
+        "brown sugar"
+      ],
+      "de": [
+        "brauner Zucker",
+        "Rohrzucker"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_chocolate_chips",
+    "names_i18n": {
+      "en": [
+        "chocolate chips"
+      ],
+      "de": [
+        "Schokotropfen",
+        "Schokodrops"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_gelatin",
+    "names_i18n": {
+      "en": [
+        "gelatin"
+      ],
+      "de": [
+        "Gelatine"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_cereal",
+    "names_i18n": {
+      "en": [
+        "cereal",
+        "breakfast cereal"
+      ],
+      "de": [
+        "Frühstücksflocken",
+        "Cerealien"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 2
+  },
+  {
+    "id": "item_rice_cakes",
+    "names_i18n": {
+      "en": [
+        "rice cakes"
+      ],
+      "de": [
+        "Reiswaffeln"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 2
+  },
+  {
+    "id": "item_rice_crackers",
+    "names_i18n": {
+      "en": [
+        "rice crackers"
+      ],
+      "de": [
+        "Reiscracker"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_prawn_crackers",
+    "names_i18n": {
+      "en": [
+        "prawn crackers",
+        "shrimp chips"
+      ],
+      "de": [
+        "Krabbenchips"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_seaweed_snacks",
+    "names_i18n": {
+      "en": [
+        "seaweed snacks"
+      ],
+      "de": [
+        "Algensnacks"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_mochi",
+    "names_i18n": {
+      "en": [
+        "mochi"
+      ],
+      "de": [
+        "Mochi"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_dates",
+    "names_i18n": {
+      "en": [
+        "dates"
+      ],
+      "de": [
+        "Datteln"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_pistachios",
+    "names_i18n": {
+      "en": [
+        "pistachios"
+      ],
+      "de": [
+        "Pistazien"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_walnuts",
+    "names_i18n": {
+      "en": [
+        "walnuts"
+      ],
+      "de": [
+        "Walnüsse"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_hazelnuts",
+    "names_i18n": {
+      "en": [
+        "hazelnuts"
+      ],
+      "de": [
+        "Haselnüsse"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_gyoza",
+    "names_i18n": {
+      "en": [
+        "gyoza",
+        "dumplings",
+        "potstickers"
+      ],
+      "de": [
+        "Gyoza",
+        "Dumplings",
+        "Teigtaschen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_spring_rolls",
+    "names_i18n": {
+      "en": [
+        "spring rolls"
+      ],
+      "de": [
+        "Frühlingsrollen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_edamame",
+    "names_i18n": {
+      "en": [
+        "edamame"
+      ],
+      "de": [
+        "Edamame"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_bao_buns",
+    "names_i18n": {
+      "en": [
+        "bao buns",
+        "steamed buns"
+      ],
+      "de": [
+        "Bao Buns"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_frozen_shrimp",
+    "names_i18n": {
+      "en": [
+        "frozen shrimp",
+        "frozen prawns"
+      ],
+      "de": [
+        "TK-Garnelen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_fish_balls",
+    "names_i18n": {
+      "en": [
+        "fish balls"
+      ],
+      "de": [
+        "Fischbällchen"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_chicken_nuggets",
+    "names_i18n": {
+      "en": [
+        "chicken nuggets"
+      ],
+      "de": [
+        "Chicken Nuggets",
+        "Hähnchen-Nuggets"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_green_tea",
+    "names_i18n": {
+      "en": [
+        "green tea"
+      ],
+      "de": [
+        "grüner Tee",
+        "Grüntee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_jasmine_tea",
+    "names_i18n": {
+      "en": [
+        "jasmine tea"
+      ],
+      "de": [
+        "Jasmintee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_matcha",
+    "names_i18n": {
+      "en": [
+        "matcha"
+      ],
+      "de": [
+        "Matcha"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_coffee_pods",
+    "names_i18n": {
+      "en": [
+        "coffee pods",
+        "coffee capsules"
+      ],
+      "de": [
+        "Kaffeekapseln",
+        "Kaffeepads"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 2
+  },
+  {
+    "id": "item_aloe_vera_drink",
+    "names_i18n": {
+      "en": [
+        "aloe vera drink"
+      ],
+      "de": [
+        "Aloe-Vera-Drink"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_sake",
+    "names_i18n": {
+      "en": [
+        "sake"
+      ],
+      "de": [
+        "Sake"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_soju",
+    "names_i18n": {
+      "en": [
+        "soju"
+      ],
+      "de": [
+        "Soju"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_plum_wine",
+    "names_i18n": {
+      "en": [
+        "plum wine",
+        "umeshu"
+      ],
+      "de": [
+        "Pflaumenwein",
+        "Umeshu"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_egg_liqueur",
+    "names_i18n": {
+      "en": [
+        "egg liqueur",
+        "advocaat"
+      ],
+      "de": [
+        "Eierlikör"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_rosé_wine",
+    "names_i18n": {
+      "en": [
+        "rosé wine",
+        "rosé"
+      ],
+      "de": [
+        "Roséwein",
+        "Rosé"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_coffee_filters",
+    "names_i18n": {
+      "en": [
+        "coffee filters"
+      ],
+      "de": [
+        "Kaffeefilter"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_freezer_bags",
+    "names_i18n": {
+      "en": [
+        "freezer bags",
+        "zip bags",
+        "sandwich bags"
+      ],
+      "de": [
+        "Gefrierbeutel",
+        "Tiefkühlbeutel",
+        "Zipperbeutel"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 2
+  },
+  {
+    "id": "item_napkins",
+    "names_i18n": {
+      "en": [
+        "napkins",
+        "paper napkins"
+      ],
+      "de": [
+        "Servietten"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_bleach",
+    "names_i18n": {
+      "en": [
+        "bleach"
+      ],
+      "de": [
+        "Bleichmittel",
+        "Chlorreiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_dishwasher_salt",
+    "names_i18n": {
+      "en": [
+        "dishwasher salt"
+      ],
+      "de": [
+        "Spülmaschinensalz",
+        "Regeneriersalz"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_rinse_aid",
+    "names_i18n": {
+      "en": [
+        "rinse aid"
+      ],
+      "de": [
+        "Klarspüler"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_pain_relievers",
+    "names_i18n": {
+      "en": [
+        "pain relievers",
+        "ibuprofen",
+        "paracetamol",
+        "acetaminophen",
+        "painkillers",
+        "aspirin"
+      ],
+      "de": [
+        "Schmerztabletten",
+        "Ibuprofen",
+        "Paracetamol",
+        "Aspirin"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_screws",
+    "names_i18n": {
+      "en": [
+        "screws"
+      ],
+      "de": [
+        "Schrauben"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 2
+  },
+  {
+    "id": "item_wall_plugs",
+    "names_i18n": {
+      "en": [
+        "wall plugs",
+        "dowels",
+        "anchors"
+      ],
+      "de": [
+        "Dübel"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 2
+  },
+  {
+    "id": "item_nails",
+    "names_i18n": {
+      "en": [
+        "nails"
+      ],
+      "de": [
+        "Nägel"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_screwdriver",
+    "names_i18n": {
+      "en": [
+        "screwdriver"
+      ],
+      "de": [
+        "Schraubendreher",
+        "Schraubenzieher"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_drill_bits",
+    "names_i18n": {
+      "en": [
+        "drill bits"
+      ],
+      "de": [
+        "Bohrer",
+        "Bohrersatz"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_wood_glue",
+    "names_i18n": {
+      "en": [
+        "wood glue"
+      ],
+      "de": [
+        "Holzleim"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_superglue",
+    "names_i18n": {
+      "en": [
+        "superglue"
+      ],
+      "de": [
+        "Sekundenkleber",
+        "Superkleber"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_duct_tape",
+    "names_i18n": {
+      "en": [
+        "duct tape"
+      ],
+      "de": [
+        "Gewebeband",
+        "Panzertape"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_masking_tape",
+    "names_i18n": {
+      "en": [
+        "masking tape",
+        "painter's tape"
+      ],
+      "de": [
+        "Malerkrepp",
+        "Abdeckband"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_wall_paint",
+    "names_i18n": {
+      "en": [
+        "wall paint",
+        "paint"
+      ],
+      "de": [
+        "Wandfarbe"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_paint_roller",
+    "names_i18n": {
+      "en": [
+        "paint roller"
+      ],
+      "de": [
+        "Farbroller",
+        "Farbrolle"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_paintbrush",
+    "names_i18n": {
+      "en": [
+        "paintbrush"
+      ],
+      "de": [
+        "Pinsel"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_sandpaper",
+    "names_i18n": {
+      "en": [
+        "sandpaper"
+      ],
+      "de": [
+        "Schleifpapier"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_filler",
+    "names_i18n": {
+      "en": [
+        "filler",
+        "spackle"
+      ],
+      "de": [
+        "Spachtelmasse",
+        "Füllspachtel"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_silicone_sealant",
+    "names_i18n": {
+      "en": [
+        "silicone sealant",
+        "silicone"
+      ],
+      "de": [
+        "Silikon"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_cable_ties",
+    "names_i18n": {
+      "en": [
+        "cable ties",
+        "zip ties"
+      ],
+      "de": [
+        "Kabelbinder"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_extension_cord",
+    "names_i18n": {
+      "en": [
+        "extension cord",
+        "extension lead"
+      ],
+      "de": [
+        "Verlängerungskabel"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_power_strip",
+    "names_i18n": {
+      "en": [
+        "power strip"
+      ],
+      "de": [
+        "Mehrfachsteckdose",
+        "Steckdosenleiste"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_smoke_detector",
+    "names_i18n": {
+      "en": [
+        "smoke detector",
+        "smoke alarm"
+      ],
+      "de": [
+        "Rauchmelder"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_work_gloves",
+    "names_i18n": {
+      "en": [
+        "work gloves"
+      ],
+      "de": [
+        "Arbeitshandschuhe"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_potting_soil",
+    "names_i18n": {
+      "en": [
+        "potting soil",
+        "compost"
+      ],
+      "de": [
+        "Blumenerde",
+        "Pflanzerde"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 2
+  },
+  {
+    "id": "item_fertilizer",
+    "names_i18n": {
+      "en": [
+        "fertilizer",
+        "plant food"
+      ],
+      "de": [
+        "Dünger",
+        "Blumendünger"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_flower_seeds",
+    "names_i18n": {
+      "en": [
+        "flower seeds"
+      ],
+      "de": [
+        "Blumensamen"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_grass_seed",
+    "names_i18n": {
+      "en": [
+        "grass seed"
+      ],
+      "de": [
+        "Rasensamen",
+        "Grassamen"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_flower_bulbs",
+    "names_i18n": {
+      "en": [
+        "flower bulbs"
+      ],
+      "de": [
+        "Blumenzwiebeln"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_flowers",
+    "names_i18n": {
+      "en": [
+        "flowers"
+      ],
+      "de": [
+        "Blumen"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_houseplant",
+    "names_i18n": {
+      "en": [
+        "houseplant"
+      ],
+      "de": [
+        "Zimmerpflanze"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_flower_pot",
+    "names_i18n": {
+      "en": [
+        "flower pot",
+        "plant pot"
+      ],
+      "de": [
+        "Blumentopf"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_garden_gloves",
+    "names_i18n": {
+      "en": [
+        "garden gloves"
+      ],
+      "de": [
+        "Gartenhandschuhe"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_garden_hose",
+    "names_i18n": {
+      "en": [
+        "garden hose"
+      ],
+      "de": [
+        "Gartenschlauch"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_bark_mulch",
+    "names_i18n": {
+      "en": [
+        "bark mulch",
+        "mulch"
+      ],
+      "de": [
+        "Rindenmulch"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_slug_pellets",
+    "names_i18n": {
+      "en": [
+        "slug pellets"
+      ],
+      "de": [
+        "Schneckenkorn"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_charcoal",
+    "names_i18n": {
+      "en": [
+        "charcoal"
+      ],
+      "de": [
+        "Grillkohle",
+        "Holzkohle"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 2
+  },
+  {
+    "id": "item_fire_starters",
+    "names_i18n": {
+      "en": [
+        "fire starters",
+        "firelighters"
+      ],
+      "de": [
+        "Grillanzünder",
+        "Anzündwürfel"
+      ]
+    },
+    "default_category": "hardware",
+    "popularity": 1
+  },
+  {
+    "id": "item_windshield_washer_fluid",
+    "names_i18n": {
+      "en": [
+        "windshield washer fluid",
+        "screenwash"
+      ],
+      "de": [
+        "Scheibenwischwasser",
+        "Scheibenreiniger"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 2
+  },
+  {
+    "id": "item_motor_oil",
+    "names_i18n": {
+      "en": [
+        "motor oil",
+        "engine oil"
+      ],
+      "de": [
+        "Motoröl"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_tires",
+    "names_i18n": {
+      "en": [
+        "tires",
+        "tyres"
+      ],
+      "de": [
+        "Reifen"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_wiper_blades",
+    "names_i18n": {
+      "en": [
+        "wiper blades"
+      ],
+      "de": [
+        "Scheibenwischer",
+        "Wischerblätter"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_antifreeze",
+    "names_i18n": {
+      "en": [
+        "antifreeze",
+        "coolant"
+      ],
+      "de": [
+        "Frostschutzmittel",
+        "Kühlerfrostschutz"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_de_icer",
+    "names_i18n": {
+      "en": [
+        "de-icer"
+      ],
+      "de": [
+        "Enteiser",
+        "Scheibenenteiser"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_ice_scraper",
+    "names_i18n": {
+      "en": [
+        "ice scraper"
+      ],
+      "de": [
+        "Eiskratzer"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_adblue",
+    "names_i18n": {
+      "en": [
+        "AdBlue"
+      ],
+      "de": [
+        "AdBlue"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_car_shampoo",
+    "names_i18n": {
+      "en": [
+        "car shampoo"
+      ],
+      "de": [
+        "Autoshampoo"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_first_aid_kit",
+    "names_i18n": {
+      "en": [
+        "first aid kit"
+      ],
+      "de": [
+        "Verbandskasten"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_bike_inner_tube",
+    "names_i18n": {
+      "en": [
+        "bike inner tube",
+        "inner tube"
+      ],
+      "de": [
+        "Fahrradschlauch"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_puncture_repair_kit",
+    "names_i18n": {
+      "en": [
+        "puncture repair kit",
+        "patch kit"
+      ],
+      "de": [
+        "Flickzeug"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_chain_oil",
+    "names_i18n": {
+      "en": [
+        "chain oil"
+      ],
+      "de": [
+        "Kettenöl"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_bike_light",
+    "names_i18n": {
+      "en": [
+        "bike light"
+      ],
+      "de": [
+        "Fahrradlicht",
+        "Fahrradlampe"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_bike_lock",
+    "names_i18n": {
+      "en": [
+        "bike lock"
+      ],
+      "de": [
+        "Fahrradschloss"
+      ]
+    },
+    "default_category": "car_bike",
+    "popularity": 1
+  },
+  {
+    "id": "item_cold_medicine",
+    "names_i18n": {
+      "en": [
+        "cold medicine"
+      ],
+      "de": [
+        "Erkältungsmittel",
+        "Grippemittel"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_cough_syrup",
+    "names_i18n": {
+      "en": [
+        "cough syrup"
+      ],
+      "de": [
+        "Hustensaft",
+        "Hustenstiller"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_throat_lozenges",
+    "names_i18n": {
+      "en": [
+        "throat lozenges",
+        "cough drops"
+      ],
+      "de": [
+        "Halstabletten",
+        "Lutschtabletten"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_nasal_spray",
+    "names_i18n": {
+      "en": [
+        "nasal spray"
+      ],
+      "de": [
+        "Nasenspray"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_eye_drops",
+    "names_i18n": {
+      "en": [
+        "eye drops"
+      ],
+      "de": [
+        "Augentropfen"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_allergy_tablets",
+    "names_i18n": {
+      "en": [
+        "allergy tablets",
+        "antihistamines",
+        "allergy medicine"
+      ],
+      "de": [
+        "Allergietabletten"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_thermometer",
+    "names_i18n": {
+      "en": [
+        "thermometer"
+      ],
+      "de": [
+        "Fieberthermometer"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_antiseptic",
+    "names_i18n": {
+      "en": [
+        "antiseptic",
+        "wound disinfectant"
+      ],
+      "de": [
+        "Wunddesinfektion",
+        "Desinfektionsspray"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_bandage",
+    "names_i18n": {
+      "en": [
+        "bandage",
+        "gauze"
+      ],
+      "de": [
+        "Verband",
+        "Mullbinde"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_ointment",
+    "names_i18n": {
+      "en": [
+        "ointment"
+      ],
+      "de": [
+        "Salbe",
+        "Wundsalbe"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_blister_plasters",
+    "names_i18n": {
+      "en": [
+        "blister plasters"
+      ],
+      "de": [
+        "Blasenpflaster"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_black_tea",
+    "names_i18n": {
+      "en": [
+        "black tea"
+      ],
+      "de": [
+        "Schwarztee",
+        "schwarzer Tee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 2
+  },
+  {
+    "id": "item_chamomile_tea",
+    "names_i18n": {
+      "en": [
+        "chamomile tea"
+      ],
+      "de": [
+        "Kamillentee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 2
+  },
+  {
+    "id": "item_fennel_tea",
+    "names_i18n": {
+      "en": [
+        "fennel tea"
+      ],
+      "de": [
+        "Fencheltee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_ginger_tea",
+    "names_i18n": {
+      "en": [
+        "ginger tea"
+      ],
+      "de": [
+        "Ingwertee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_rooibos_tea",
+    "names_i18n": {
+      "en": [
+        "rooibos tea"
+      ],
+      "de": [
+        "Rooibostee",
+        "Rotbuschtee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_sage_tea",
+    "names_i18n": {
+      "en": [
+        "sage tea"
+      ],
+      "de": [
+        "Salbeitee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_rosehip_tea",
+    "names_i18n": {
+      "en": [
+        "rosehip tea"
+      ],
+      "de": [
+        "Hagebuttentee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_nettle_tea",
+    "names_i18n": {
+      "en": [
+        "nettle tea"
+      ],
+      "de": [
+        "Brennnesseltee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_lemon_balm_tea",
+    "names_i18n": {
+      "en": [
+        "lemon balm tea"
+      ],
+      "de": [
+        "Melissentee"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_chai",
+    "names_i18n": {
+      "en": [
+        "chai"
+      ],
+      "de": [
+        "Chai"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_earl_grey",
+    "names_i18n": {
+      "en": [
+        "Earl Grey"
+      ],
+      "de": [
+        "Earl Grey"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_coffee_beans",
+    "names_i18n": {
+      "en": [
+        "coffee beans",
+        "espresso beans"
+      ],
+      "de": [
+        "Kaffeebohnen",
+        "Espressobohnen"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 2
+  },
+  {
+    "id": "item_pointed_cabbage",
+    "names_i18n": {
+      "en": [
+        "pointed cabbage"
+      ],
+      "de": [
+        "Spitzkohl"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_snow_peas",
+    "names_i18n": {
+      "en": [
+        "snow peas",
+        "sugar snap peas",
+        "mangetout",
+        "snap peas"
+      ],
+      "de": [
+        "Zuckerschoten",
+        "Zuckererbsen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_corn_on_the_cob",
+    "names_i18n": {
+      "en": [
+        "corn on the cob"
+      ],
+      "de": [
+        "Maiskolben"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_fresh_herbs",
+    "names_i18n": {
+      "en": [
+        "fresh herbs",
+        "herbs"
+      ],
+      "de": [
+        "Kräuter",
+        "frische Kräuter"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_escarole",
+    "names_i18n": {
+      "en": [
+        "escarole",
+        "endive"
+      ],
+      "de": [
+        "Endivie",
+        "Endiviensalat"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_radicchio",
+    "names_i18n": {
+      "en": [
+        "radicchio"
+      ],
+      "de": [
+        "Radicchio"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_romaine_lettuce",
+    "names_i18n": {
+      "en": [
+        "romaine lettuce",
+        "romaine"
+      ],
+      "de": [
+        "Romanasalat",
+        "Römersalat"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_fruit",
+    "names_i18n": {
+      "en": [
+        "fruit"
+      ],
+      "de": [
+        "Obst"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_vegetables",
+    "names_i18n": {
+      "en": [
+        "vegetables",
+        "veggies"
+      ],
+      "de": [
+        "Gemüse"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 2
+  },
+  {
+    "id": "item_pizza_dough",
+    "names_i18n": {
+      "en": [
+        "pizza dough"
+      ],
+      "de": [
+        "Pizzateig"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_camembert",
+    "names_i18n": {
+      "en": [
+        "camembert"
+      ],
+      "de": [
+        "Camembert"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_brie",
+    "names_i18n": {
+      "en": [
+        "brie"
+      ],
+      "de": [
+        "Brie"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_pudding",
+    "names_i18n": {
+      "en": [
+        "pudding"
+      ],
+      "de": [
+        "Pudding"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_turkey_breast",
+    "names_i18n": {
+      "en": [
+        "turkey breast"
+      ],
+      "de": [
+        "Putenbrust",
+        "Putenbrustfilet"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 2
+  },
+  {
+    "id": "item_fillet",
+    "names_i18n": {
+      "en": [
+        "fillet",
+        "filet"
+      ],
+      "de": [
+        "Filet"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_fish",
+    "names_i18n": {
+      "en": [
+        "fish"
+      ],
+      "de": [
+        "Fisch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_mortadella",
+    "names_i18n": {
+      "en": [
+        "mortadella"
+      ],
+      "de": [
+        "Mortadella"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_millet",
+    "names_i18n": {
+      "en": [
+        "millet"
+      ],
+      "de": [
+        "Hirse"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_agave_syrup",
+    "names_i18n": {
+      "en": [
+        "agave syrup"
+      ],
+      "de": [
+        "Agavendicksaft",
+        "Agavensirup"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_baking_chocolate",
+    "names_i18n": {
+      "en": [
+        "baking chocolate",
+        "couverture"
+      ],
+      "de": [
+        "Kuvertüre"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_sprinkles",
+    "names_i18n": {
+      "en": [
+        "sprinkles"
+      ],
+      "de": [
+        "Streusel",
+        "Schokostreusel",
+        "Zuckerstreusel"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_dried_herbs",
+    "names_i18n": {
+      "en": [
+        "dried herbs",
+        "italian herbs"
+      ],
+      "de": [
+        "Kräuter der Provence",
+        "getrocknete Kräuter",
+        "italienische Kräuter"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_onion_powder",
+    "names_i18n": {
+      "en": [
+        "onion powder"
+      ],
+      "de": [
+        "Zwiebelpulver"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_chili_powder",
+    "names_i18n": {
+      "en": [
+        "chili powder"
+      ],
+      "de": [
+        "Chilipulver"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_coconut_oil",
+    "names_i18n": {
+      "en": [
+        "coconut oil"
+      ],
+      "de": [
+        "Kokosöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_sauce",
+    "names_i18n": {
+      "en": [
+        "sauce"
+      ],
+      "de": [
+        "Soße",
+        "Sauce"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_white_beans",
+    "names_i18n": {
+      "en": [
+        "white beans",
+        "cannellini beans"
+      ],
+      "de": [
+        "weiße Bohnen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_protein_bar",
+    "names_i18n": {
+      "en": [
+        "protein bar"
+      ],
+      "de": [
+        "Proteinriegel",
+        "Eiweißriegel"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_chocolates",
+    "names_i18n": {
+      "en": [
+        "chocolates",
+        "pralines"
+      ],
+      "de": [
+        "Pralinen"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_juice",
+    "names_i18n": {
+      "en": [
+        "juice",
+        "nectar"
+      ],
+      "de": [
+        "Saft",
+        "Säfte",
+        "Nektar"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 2
+  },
+  {
+    "id": "item_syrup",
+    "names_i18n": {
+      "en": [
+        "syrup",
+        "cordial"
+      ],
+      "de": [
+        "Sirup"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_wine",
+    "names_i18n": {
+      "en": [
+        "wine"
+      ],
+      "de": [
+        "Wein"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 2
+  },
+  {
+    "id": "item_liqueur",
+    "names_i18n": {
+      "en": [
+        "liqueur"
+      ],
+      "de": [
+        "Likör"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_hair_ties",
+    "names_i18n": {
+      "en": [
+        "hair ties"
+      ],
+      "de": [
+        "Haargummis"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_vitamins",
+    "names_i18n": {
+      "en": [
+        "vitamins",
+        "supplements"
+      ],
+      "de": [
+        "Vitamine",
+        "Vitamintabletten"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_pet_food",
+    "names_i18n": {
+      "en": [
+        "pet food",
+        "fish food"
+      ],
+      "de": [
+        "Tierfutter",
+        "Futter",
+        "Fischfutter"
+      ]
+    },
+    "default_category": "pet",
+    "popularity": 1
+  },
+  {
+    "id": "item_sticky_tape",
+    "names_i18n": {
+      "en": [
+        "sticky tape",
+        "tape"
+      ],
+      "de": [
+        "Klebeband",
+        "Tesafilm"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_paper_plates",
+    "names_i18n": {
+      "en": [
+        "paper plates"
+      ],
+      "de": [
+        "Pappteller"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_berries",
+    "names_i18n": {
+      "en": [
+        "berries"
+      ],
+      "de": [
+        "Beeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_redcurrants",
+    "names_i18n": {
+      "en": [
+        "redcurrants",
+        "currants"
+      ],
+      "de": [
+        "Johannisbeeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_gooseberries",
+    "names_i18n": {
+      "en": [
+        "gooseberries"
+      ],
+      "de": [
+        "Stachelbeeren"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_mirabelle_plums",
+    "names_i18n": {
+      "en": [
+        "mirabelle plums"
+      ],
+      "de": [
+        "Mirabellen"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_physalis",
+    "names_i18n": {
+      "en": [
+        "physalis"
+      ],
+      "de": [
+        "Physalis"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_passion_fruit",
+    "names_i18n": {
+      "en": [
+        "passion fruit"
+      ],
+      "de": [
+        "Passionsfrucht",
+        "Maracuja"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_persimmon",
+    "names_i18n": {
+      "en": [
+        "persimmon",
+        "kaki"
+      ],
+      "de": [
+        "Kaki",
+        "Sharonfrucht"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_coconut",
+    "names_i18n": {
+      "en": [
+        "coconut"
+      ],
+      "de": [
+        "Kokosnuss"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_cress",
+    "names_i18n": {
+      "en": [
+        "cress"
+      ],
+      "de": [
+        "Kresse"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_swiss_chard",
+    "names_i18n": {
+      "en": [
+        "swiss chard",
+        "chard"
+      ],
+      "de": [
+        "Mangold"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_chanterelles",
+    "names_i18n": {
+      "en": [
+        "chanterelles"
+      ],
+      "de": [
+        "Pfifferlinge"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_rutabaga",
+    "names_i18n": {
+      "en": [
+        "rutabaga",
+        "swede"
+      ],
+      "de": [
+        "Steckrübe",
+        "Kohlrübe"
+      ]
+    },
+    "default_category": "produce",
+    "popularity": 1
+  },
+  {
+    "id": "item_potato_salad",
+    "names_i18n": {
+      "en": [
+        "potato salad"
+      ],
+      "de": [
+        "Kartoffelsalat"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_pasta_salad",
+    "names_i18n": {
+      "en": [
+        "pasta salad"
+      ],
+      "de": [
+        "Nudelsalat"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_egg_salad",
+    "names_i18n": {
+      "en": [
+        "egg salad"
+      ],
+      "de": [
+        "Eiersalat"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_meat_salad",
+    "names_i18n": {
+      "en": [
+        "meat salad"
+      ],
+      "de": [
+        "Fleischsalat"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_coleslaw",
+    "names_i18n": {
+      "en": [
+        "coleslaw"
+      ],
+      "de": [
+        "Krautsalat",
+        "Coleslaw"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_hollandaise_sauce",
+    "names_i18n": {
+      "en": [
+        "hollandaise sauce",
+        "hollandaise"
+      ],
+      "de": [
+        "Sauce Hollandaise",
+        "Hollandaise"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_roast",
+    "names_i18n": {
+      "en": [
+        "roast"
+      ],
+      "de": [
+        "Braten"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_chorizo",
+    "names_i18n": {
+      "en": [
+        "chorizo"
+      ],
+      "de": [
+        "Chorizo"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_prosciutto",
+    "names_i18n": {
+      "en": [
+        "prosciutto"
+      ],
+      "de": [
+        "Parmaschinken",
+        "Prosciutto"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_crab",
+    "names_i18n": {
+      "en": [
+        "crab"
+      ],
+      "de": [
+        "Krabben",
+        "Krebsfleisch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_scallops",
+    "names_i18n": {
+      "en": [
+        "scallops"
+      ],
+      "de": [
+        "Jakobsmuscheln"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_anchovies",
+    "names_i18n": {
+      "en": [
+        "anchovies"
+      ],
+      "de": [
+        "Sardellen"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_rigatoni",
+    "names_i18n": {
+      "en": [
+        "rigatoni"
+      ],
+      "de": [
+        "Rigatoni"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_cannelloni",
+    "names_i18n": {
+      "en": [
+        "cannelloni"
+      ],
+      "de": [
+        "Cannelloni"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_orzo",
+    "names_i18n": {
+      "en": [
+        "orzo"
+      ],
+      "de": [
+        "Kritharaki",
+        "Orzo"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_pearl_barley",
+    "names_i18n": {
+      "en": [
+        "pearl barley"
+      ],
+      "de": [
+        "Graupen"
+      ]
+    },
+    "default_category": "pasta_rice",
+    "popularity": 1
+  },
+  {
+    "id": "item_linseed",
+    "names_i18n": {
+      "en": [
+        "linseed",
+        "flaxseed"
+      ],
+      "de": [
+        "Leinsamen"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_chia_seeds",
+    "names_i18n": {
+      "en": [
+        "chia seeds"
+      ],
+      "de": [
+        "Chiasamen"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_seasoning",
+    "names_i18n": {
+      "en": [
+        "seasoning",
+        "spice mix"
+      ],
+      "de": [
+        "Gewürz",
+        "Gewürzmischung"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_desiccated_coconut",
+    "names_i18n": {
+      "en": [
+        "desiccated coconut"
+      ],
+      "de": [
+        "Kokosraspeln"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_flaked_almonds",
+    "names_i18n": {
+      "en": [
+        "flaked almonds"
+      ],
+      "de": [
+        "Mandelblättchen",
+        "gehobelte Mandeln"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_food_colouring",
+    "names_i18n": {
+      "en": [
+        "food colouring",
+        "food coloring"
+      ],
+      "de": [
+        "Lebensmittelfarbe"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_vanilla_pods",
+    "names_i18n": {
+      "en": [
+        "vanilla pods",
+        "vanilla beans"
+      ],
+      "de": [
+        "Vanilleschoten",
+        "Vanilleschote"
+      ]
+    },
+    "default_category": "baking_spices",
+    "popularity": 1
+  },
+  {
+    "id": "item_peanut_oil",
+    "names_i18n": {
+      "en": [
+        "peanut oil"
+      ],
+      "de": [
+        "Erdnussöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_walnut_oil",
+    "names_i18n": {
+      "en": [
+        "walnut oil"
+      ],
+      "de": [
+        "Walnussöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_linseed_oil",
+    "names_i18n": {
+      "en": [
+        "linseed oil"
+      ],
+      "de": [
+        "Leinöl"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_sun_dried_tomatoes",
+    "names_i18n": {
+      "en": [
+        "sun-dried tomatoes"
+      ],
+      "de": [
+        "getrocknete Tomaten",
+        "sonnengetrocknete Tomaten"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_lollipops",
+    "names_i18n": {
+      "en": [
+        "lollipops"
+      ],
+      "de": [
+        "Lutscher"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_ladyfingers",
+    "names_i18n": {
+      "en": [
+        "ladyfingers",
+        "sponge fingers"
+      ],
+      "de": [
+        "Löffelbiskuits"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_spritzer",
+    "names_i18n": {
+      "en": [
+        "spritzer"
+      ],
+      "de": [
+        "Schorle"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_wine_spritzer",
+    "names_i18n": {
+      "en": [
+        "wine spritzer"
+      ],
+      "de": [
+        "Weinschorle"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_schnapps",
+    "names_i18n": {
+      "en": [
+        "schnapps"
+      ],
+      "de": [
+        "Schnaps",
+        "Obstler"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_brandy",
+    "names_i18n": {
+      "en": [
+        "brandy",
+        "cognac"
+      ],
+      "de": [
+        "Weinbrand",
+        "Cognac"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_tequila",
+    "names_i18n": {
+      "en": [
+        "tequila"
+      ],
+      "de": [
+        "Tequila"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_tea_bags",
+    "names_i18n": {
+      "en": [
+        "tea bags"
+      ],
+      "de": [
+        "Teebeutel"
+      ]
+    },
+    "default_category": "coffee_tea",
+    "popularity": 1
+  },
+  {
+    "id": "item_cleaner",
+    "names_i18n": {
+      "en": [
+        "cleaner"
+      ],
+      "de": [
+        "Reiniger"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_stain_remover",
+    "names_i18n": {
+      "en": [
+        "stain remover"
+      ],
+      "de": [
+        "Fleckentferner"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_clothes_pegs",
+    "names_i18n": {
+      "en": [
+        "clothes pegs",
+        "clothespins"
+      ],
+      "de": [
+        "Wäscheklammern"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_rubber_gloves",
+    "names_i18n": {
+      "en": [
+        "rubber gloves"
+      ],
+      "de": [
+        "Gummihandschuhe",
+        "Haushaltshandschuhe"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_air_freshener",
+    "names_i18n": {
+      "en": [
+        "air freshener"
+      ],
+      "de": [
+        "Lufterfrischer",
+        "Raumduft"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_wax_paper",
+    "names_i18n": {
+      "en": [
+        "wax paper",
+        "sandwich paper"
+      ],
+      "de": [
+        "Butterbrotpapier"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_deodorant_spray",
+    "names_i18n": {
+      "en": [
+        "deodorant spray"
+      ],
+      "de": [
+        "Deospray"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_roll_on_deodorant",
+    "names_i18n": {
+      "en": [
+        "roll-on deodorant"
+      ],
+      "de": [
+        "Deoroller"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_aftershave",
+    "names_i18n": {
+      "en": [
+        "aftershave"
+      ],
+      "de": [
+        "Aftershave",
+        "Rasierwasser"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_lipstick",
+    "names_i18n": {
+      "en": [
+        "lipstick"
+      ],
+      "de": [
+        "Lippenstift"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_mascara",
+    "names_i18n": {
+      "en": [
+        "mascara"
+      ],
+      "de": [
+        "Mascara",
+        "Wimperntusche"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_nail_polish",
+    "names_i18n": {
+      "en": [
+        "nail polish"
+      ],
+      "de": [
+        "Nagellack"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_hair_dye",
+    "names_i18n": {
+      "en": [
+        "hair dye",
+        "hair colour"
+      ],
+      "de": [
+        "Haarfarbe",
+        "Haartönung"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_face_wash",
+    "names_i18n": {
+      "en": [
+        "face wash"
+      ],
+      "de": [
+        "Waschgel"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_condoms",
+    "names_i18n": {
+      "en": [
+        "condoms"
+      ],
+      "de": [
+        "Kondome"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_insect_repellent",
+    "names_i18n": {
+      "en": [
+        "insect repellent"
+      ],
+      "de": [
+        "Mückenspray",
+        "Insektenschutz"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_fruit_pouches",
+    "names_i18n": {
+      "en": [
+        "fruit pouches"
+      ],
+      "de": [
+        "Quetschies",
+        "Quetschbeutel"
+      ]
+    },
+    "default_category": "baby",
+    "popularity": 1
+  },
+  {
+    "id": "item_medicine",
+    "names_i18n": {
+      "en": [
+        "medicine",
+        "medication"
+      ],
+      "de": [
+        "Tabletten",
+        "Medikamente"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_antacids",
+    "names_i18n": {
+      "en": [
+        "antacids"
+      ],
+      "de": [
+        "Sodbrennen-Tabletten",
+        "Magentabletten"
+      ]
+    },
+    "default_category": "pharmacy",
+    "popularity": 1
+  },
+  {
+    "id": "item_vanilla_ice_cream",
+    "names_i18n": {
+      "en": [
+        "vanilla ice cream"
+      ],
+      "de": [
+        "Vanilleeis"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_chocolate_ice_cream",
+    "names_i18n": {
+      "en": [
+        "chocolate ice cream"
+      ],
+      "de": [
+        "Schokoeis",
+        "Schokoladeneis"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_strawberry_ice_cream",
+    "names_i18n": {
+      "en": [
+        "strawberry ice cream"
+      ],
+      "de": [
+        "Erdbeereis"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_water_ice",
+    "names_i18n": {
+      "en": [
+        "water ice"
+      ],
+      "de": [
+        "Wassereis"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_freezer_boxes",
+    "names_i18n": {
+      "en": [
+        "freezer boxes",
+        "freezer containers"
+      ],
+      "de": [
+        "Gefrierdosen",
+        "Tiefkühldosen",
+        "Gefrierboxen"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_ice_lollies",
+    "names_i18n": {
+      "en": [
+        "ice lollies",
+        "popsicles",
+        "ice lolly"
+      ],
+      "de": [
+        "Eis am Stiel",
+        "Stieleis"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  },
+  {
+    "id": "item_prunes",
+    "names_i18n": {
+      "en": [
+        "prunes"
+      ],
+      "de": [
+        "Trockenpflaumen",
+        "Backpflaumen"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_dried_apricots",
+    "names_i18n": {
+      "en": [
+        "dried apricots"
+      ],
+      "de": [
+        "getrocknete Aprikosen"
+      ]
+    },
+    "default_category": "snacks_sweets",
+    "popularity": 1
+  },
+  {
+    "id": "item_kirschwasser",
+    "names_i18n": {
+      "en": [
+        "kirschwasser"
+      ],
+      "de": [
+        "Kirschwasser"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_magnesium_tablets",
+    "names_i18n": {
+      "en": [
+        "magnesium tablets",
+        "magnesium"
+      ],
+      "de": [
+        "Magnesium",
+        "Magnesiumtabletten"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_champagne",
+    "names_i18n": {
+      "en": [
+        "champagne"
+      ],
+      "de": [
+        "Champagner"
+      ]
+    },
+    "default_category": "alcohol",
+    "popularity": 1
+  },
+  {
+    "id": "item_smoked_tofu",
+    "names_i18n": {
+      "en": [
+        "smoked tofu"
+      ],
+      "de": [
+        "Räuchertofu"
+      ]
+    },
+    "default_category": "dairy_eggs",
+    "popularity": 1
+  },
+  {
+    "id": "item_panty_liners",
+    "names_i18n": {
+      "en": [
+        "panty liners"
+      ],
+      "de": [
+        "Slipeinlagen"
+      ]
+    },
+    "default_category": "personal_care",
+    "popularity": 1
+  },
+  {
+    "id": "item_tea_lights",
+    "names_i18n": {
+      "en": [
+        "tea lights"
+      ],
+      "de": [
+        "Teelichter",
+        "Teelicht"
+      ]
+    },
+    "default_category": "household",
+    "popularity": 1
+  },
+  {
+    "id": "item_diced_ham",
+    "names_i18n": {
+      "en": [
+        "diced ham"
+      ],
+      "de": [
+        "Schinkenwürfel"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_diced_bacon",
+    "names_i18n": {
+      "en": [
+        "diced bacon",
+        "lardons"
+      ],
+      "de": [
+        "Speckwürfel"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_drinks",
+    "names_i18n": {
+      "en": [
+        "drinks",
+        "beverages"
+      ],
+      "de": [
+        "Getränke",
+        "Getränk"
+      ]
+    },
+    "default_category": "beverages",
+    "popularity": 1
+  },
+  {
+    "id": "item_meat",
+    "names_i18n": {
+      "en": [
+        "meat"
+      ],
+      "de": [
+        "Fleisch"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_flakes",
+    "names_i18n": {
+      "en": [
+        "flakes"
+      ],
+      "de": [
+        "Flocken"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_spread",
+    "names_i18n": {
+      "en": [
+        "spread",
+        "sandwich spread"
+      ],
+      "de": [
+        "Aufstrich",
+        "Brotaufstrich"
+      ]
+    },
+    "default_category": "breakfast",
+    "popularity": 1
+  },
+  {
+    "id": "item_compote",
+    "names_i18n": {
+      "en": [
+        "compote"
+      ],
+      "de": [
+        "Kompott"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_canned_food",
+    "names_i18n": {
+      "en": [
+        "canned food",
+        "tins"
+      ],
+      "de": [
+        "Konserven"
+      ]
+    },
+    "default_category": "pantry",
+    "popularity": 1
+  },
+  {
+    "id": "item_skewers",
+    "names_i18n": {
+      "en": [
+        "skewers",
+        "kebab skewers"
+      ],
+      "de": [
+        "Spieße",
+        "Spieß",
+        "Grillspieße"
+      ]
+    },
+    "default_category": "meat_fish",
+    "popularity": 1
+  },
+  {
+    "id": "item_sorbet",
+    "names_i18n": {
+      "en": [
+        "sorbet"
+      ],
+      "de": [
+        "Sorbet"
+      ]
+    },
+    "default_category": "frozen",
+    "popularity": 1
+  }
+]

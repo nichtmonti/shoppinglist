@@ -1,0 +1,210 @@
+# Woodpecker CI — release workflow (docs/internals/design.md §14; host substitution [D-35]).
+# Tag-gated (`v*` only) and self-gating through the event's own DAG ([D-66]):
+# the check workflows (go, frontend, e2e) carry `tag` in their when-lists, e2e
+# waits on go+frontend exactly as on every push, and this workflow depends_on
+# e2e — so a tag never publishes artifacts built from a red tree, the
+# re-tagged-old-commit case included, because the suites ran against the TAG
+# EVENT's checkout of it (a failed dependency excludes its dependants: fail
+# closed). The tag's e2e instance QUEUES behind any push run still in flight
+# (e2e carries concurrency: 1), so two Playwright suites never share the agent.
+#
+# This workflow only PUBLISHES: release-frontend produces
+# backend/pb_public, then goreleaser builds the Go binaries itself, for every
+# target platform, from backend/ — serially, in this workflow's own workspace
+# (workflows share NO workspace with each other; the suites the release waits
+# on build in theirs).
+#
+# This workflow needs two things the repo itself cannot provide, both
+# operator/admin one-time setup on the Woodpecker side rather than anything
+# checked in here:
+#   1. TWO Codeberg personal-access-token secrets of the repository OWNER's
+#      account (the registry login uses $CI_REPO_OWNER), both granted to the `tag`
+#      event (this workflow runs on no other event):
+#        - `gitea_token`    scope write:repository. MAY be restricted to this
+#                           repository. Publishes the release + archives.
+#        - `registry_token` scope write:package. Must NOT be repository-
+#                           restricted — Codeberg offers write:package only on
+#                           unrestricted tokens. Pushes the container image.
+#      Why two, and not one: see the release step's environment block.
+#   2. The repo must be marked TRUSTED (project settings) and the Docker
+#      backend must permit privileged containers: the `dind` service
+#      (`docker:29-dind`, privileged: true) runs an isolated, ephemeral daemon
+#      for the multi-arch image build. No host /var/run/docker.sock is mounted
+#      — DinD trades the host socket for a privileged sidecar, which improves
+#      isolation but does NOT remove the Trusted requirement (Woodpecker gates
+#      privileged behind trust).
+#
+# The PUBLISH steps carry no caches: tag-triggered, rare, and meant to mirror
+# a cold production build cell (contrast the push workflows' warm mounts).
+
+when:
+  - event: tag
+    ref: refs/tags/v*
+
+# The tag event's own suite runs gate this workflow (see the header): release
+# starts only after THAT event's e2e — and transitively frontend + go — is
+# green against the tagged commit.
+depends_on: [e2e]
+
+# Two tags pushed close together must not race the same gitea release /
+# registry tags. Serialize this workflow per repo (deployment-style).
+concurrency: 1
+
+# Docker-in-Docker sidecar for the release image build: an isolated, ephemeral
+# daemon. Declared as a SERVICE, not a `detach: true` step — Woodpecker owns
+# the lifecycle (start before steps, SIGTERM→SIGKILL at teardown), and
+# `failure: ignore` tolerates the teardown exit: dockerd's graceful shutdown
+# drains every container + containerd, exceeds Woodpecker's SIGKILL grace
+# window, and would otherwise surface as exit 137 (that is the documented
+# services#stopping case). The daemon's real availability is asserted by the
+# release step's readiness wait (DOCKER_HOST=tcp://dind:2375), so a dind that
+# fails to START still fails the workflow. Services support no `when` filter,
+# which is exactly why the release lives in its own tag-gated workflow file —
+# the daemon never spins up on a push/PR.
+# https://woodpecker-ci.org/docs/usage/services#stopping
+services:
+  - name: dind
+    image: docker:29-dind
+    privileged: true
+    failure: ignore
+    # vfs storage = the Woodpecker-documented safe default for DinD on the
+    # Docker backend (the stock entrypoint would default to overlay2, which is
+    # not reliable nested inside the agent's own overlayfs). On a service,
+    # `commands` is ONE command line rather than a step's list — but it is run
+    # as a traced shell script all the same (Woodpecker's generated entrypoint
+    # is `echo $CI_SCRIPT | base64 -d | /bin/sh -e`, which is why the daemon's
+    # own log opens with a `+ dockerd-entrypoint.sh …` trace line and why tini
+    # reports itself as PID 12 rather than PID 1). That is what lets the retry
+    # below be shell at all.
+    #
+    # `--tls=false` — without it dockerd sleeps a deliberate 15 SECONDS before
+    # doing anything, to make its "binding to an IP address without --tlsverify
+    # is deprecated" notice hard to miss. The flag is the override that notice
+    # itself names, and it is what Woodpecker's own DinD example passes. We are
+    # already on the entrypoint's plaintext branch via DOCKER_TLS_CERTDIR below,
+    # so it changes no security property; it stops the daemon spending its first
+    # quarter-minute asleep.
+    #
+    # The retry loop — dockerd gives its managed containerd a FIXED 15s to come
+    # up (moby's `startupTimeout`; there is no flag for it) and exits 1 when the
+    # window closes ("failed to start containerd: timeout waiting for
+    # containerd to start"). On a busy agent — release-frontend runs
+    # `pnpm install` + `vite build` beside it — opening containerd's boltdb
+    # metadata store alone can take most of that budget. Nothing here can
+    # widen it, so the answer is to start over: the second attempt finds the
+    # bolt file already created and the disk quieter. `pkill containerd` is the
+    # one piece of cleanup the image does not already do — its entrypoint
+    # deletes a stale docker*.pid itself, but a containerd that outlives its
+    # dockerd would hold the socket the replacement needs. The loop never gives
+    # up on purpose: the release step's bounded readiness wait is what fails a
+    # permanently broken daemon, which is the property the `failure: ignore`
+    # above depends on.
+    commands: 'until pkill containerd 2>/dev/null; dockerd-entrypoint.sh --storage-driver=vfs --tls=false; do echo "dind - dockerd exited, retrying"; sleep 3; done'
+    environment:
+      # docker:dind sets DOCKER_TLS_CERTDIR=/certs by default; while set, the
+      # entrypoint ALWAYS binds TLS :2376 (+ --tlsverify) regardless of a
+      # --tls=false CLI arg. Empty it to take the entrypoint's plaintext
+      # branch, which binds tcp://0.0.0.0:2375 — what DOCKER_HOST=tcp://dind:2375
+      # in release below expects. [D-35]
+      DOCKER_TLS_CERTDIR: ""
+
+steps:
+  # ---- The publish -------------------------------------------------------
+  # Serial in definition order on purpose: ONE shared workspace (see
+  # e2e.yaml's rationale), and NO step in this file may set depends_on — one
+  # such flag flips the workflow into DAG mode and the frontend build would
+  # race the goreleaser step's reads of backend/pb_public.
+
+  # Produces backend/pb_public and the demo's backend/pb_public_demo
+  # (scripts/build-embedded-spa.sh, the same builds the e2e workflow and the
+  # local harnesses embed) — never a binary. Split
+  # from `release` because the frontend build needs Node and goreleaser's own
+  # image has none; it runs in the CI image, as the suites do ([D-203]).
+  release-frontend:
+    image: localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+    commands:
+      - (cd frontend && pnpm install --frozen-lockfile)
+      - scripts/build-embedded-spa.sh
+      # [D-234] The demo image's SPA, into its own pb_public_demo.
+      - SHOPPINGLIST_DEMO_BUILD=1 scripts/build-embedded-spa.sh
+
+  release:
+    image: goreleaser/goreleaser:v2.18.3
+    # Serial definition order puts the pb_public-producing step ahead of this
+    # one; there is deliberately NO step-level depends_on anywhere in this
+    # file (see the publish comment above). And NOT dind: services are not
+    # steps and cannot be depended on. The bounded
+    # readiness wait below bridges the daemon-startup race instead — and
+    # doubles as the assertion that the (failure-ignored) daemon actually
+    # started.
+    environment:
+      DOCKER_HOST: tcp://dind:2375
+      # TWO tokens, because Codeberg scopes the two publish targets
+      # differently and no single restricted token can cover both:
+      #
+      #   GITEA_TOKEN    — the Gitea release + its uploaded archives. May be
+      #                    restricted to this repository; needs write:repository.
+      #   REGISTRY_TOKEN — `docker login` for the container registry. CANNOT be
+      #                    repository-restricted: Forgejo namespaces packages to
+      #                    the ACCOUNT (codeberg.org/<owner>/shoppinglist is a
+      #                    package owned by <owner> that merely shares the
+      #                    repo's name), so write:package is unavailable on a
+      #                    token with specific repositories selected — Codeberg
+      #                    offers only read/write:issue and read/write:repository
+      #                    there. Hence a second, unrestricted, package-only token.
+      #
+      # Both secrets must be granted to the `tag` event; this workflow runs on
+      # nothing else, and a secret withheld from `tag` arrives EMPTY rather than
+      # failing loudly (it surfaces later as a confusing auth error).
+      GITEA_TOKEN:
+        from_secret: gitea_token
+      REGISTRY_TOKEN:
+        from_secret: registry_token
+      # This image bundles its own Go: an explicit GOTOOLCHAIN keeps the pinned
+      # toolchain binding even if an environment override sets `local`.
+      # Rationale and advisory list: backend/go.mod.
+      GOTOOLCHAIN: go1.27.2
+      EXPECT_GO: go1.27.2
+      # Module source owned by the repo, not the agent's environment (go.yaml
+      # says why): the official proxy + sumdb.
+      GOPROXY: https://proxy.golang.org,direct
+      GOSUMDB: sum.golang.org
+      GONOSUMDB: ""
+      GONOPROXY: ""
+      GOFLAGS: ""
+    commands:
+      # Wait (≤180s) for the dind daemon to accept connections. Sized for one
+      # restart from the service's retry loop, not just a first boot: a cold
+      # dockerd spends ~15s on containerd alone before it even starts serving.
+      - for i in $(seq 1 180); do docker info >/dev/null 2>&1 && break; sleep 1; done
+      - docker info >/dev/null 2>&1 || { echo 'dind daemon not ready'; exit 1; }
+      # A buildx builder with the container driver (not the default docker
+      # driver, which cannot emit multi-platform) against the isolated dind
+      # daemon. No QEMU/binfmt registration is needed: the Dockerfile is a
+      # distroless base plus COPY only (no RUN), so nothing executes
+      # foreign-arch code during the image build — buildx just packages the
+      # prebuilt per-arch binaries goreleaser produced.
+      - docker buildx create --name goreleaser-release --use
+      # REGISTRY_TOKEN, not GITEA_TOKEN: see the environment block above.
+      # The image lives under the repository owner's namespace (.goreleaser.yaml).
+      - echo "$REGISTRY_TOKEN" | docker login codeberg.org -u "$CI_REPO_OWNER" --password-stdin
+      # The release page leads with the prose from CHANGELOG.md's section for
+      # this tag, above GoReleaser's own commit list (scripts/release-notes.sh).
+      # Before anything is built or published: a tag with no entry fails here.
+      # /tmp, not the checkout: an untracked file there makes goreleaser refuse
+      # a dirty tree.
+      - scripts/release-notes.sh "$CI_COMMIT_TAG" > /tmp/release-notes.md
+      - goreleaser release --clean --release-header /tmp/release-notes.md
+      # Post-build provenance gate on what goreleaser actually produced. This
+      # runs AFTER publishing (goreleaser builds and uploads in one pass), so
+      # treat a failure here as "yank the release", not "it was blocked" —
+      # the GOTOOLCHAIN pin above is what prevents it. Every binary under
+      # dist/ is checked, so a per-target gobinary override in
+      # .goreleaser.yaml cannot slip past.
+      - |
+        find dist -type f -name 'shoppinglist*' ! -name '*.tar.gz' ! -name '*.zip' ! -name '*.txt' | while read -r bin; do
+          stamped=$(go version -m "$bin" 2>/dev/null | head -1 | awk '{print $2}')
+          [ -z "$stamped" ] && continue
+          echo "$bin: $stamped"
+          [ "$stamped" = "$EXPECT_GO" ] || { echo "RELEASED ARTIFACT built with $stamped, expected $EXPECT_GO — yank this release"; exit 1; }
+        done

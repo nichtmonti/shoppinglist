@@ -1,0 +1,477 @@
+# The commit gate and the browser harnesses, as go-task tasks (tools/task,
+# [D-177]). Run them through scripts/gate.sh, which takes the same arguments
+# (`scripts/gate.sh e2e:arch -- --last-failed`) and adds what go-task leaves
+# out; `task --list` shows what is here.
+#
+# What runs is decided by the tools, not by path rules here: a task whose
+# `sources` are unchanged since it last PASSED is skipped (a docs edit runs
+# only the repo-rule checks, a failed layer reruns until it passes), `vitest --changed` and the
+# changed-file lint scope to the diff, and Go's test cache replays unchanged
+# packages. The checksums live in .task/, per checkout.
+#
+# Two layers at a time (.taskrc.yml): lint beside the rest, as before, inside
+# the box's 8 GB. One gate or harness run at a time on the machine
+# (scripts/lib/lock.sh).
+version: '3'
+
+output: prefixed
+
+vars:
+  # The diff the changed-file layers scope to: everything not yet on
+  # origin/main, the commits since the merge base and the working tree, on
+  # any branch; SINCE picks another base ([D-299]). Scoped to the uncommitted
+  # files only, a commit took its changes out of reach, and a layer that then
+  # reached no test passed and was skipped from then on, since its `sources`
+  # had not changed. Without origin/main (a clone with no remote), HEAD.
+  # SINCE is read from the environment: go-task evaluates this before it
+  # applies a variable given as an argument (scripts/gate.sh exports one).
+  BASE:
+    sh: git merge-base "${SINCE:-origin/main}" HEAD 2>/dev/null || git rev-parse HEAD
+  LOCK: scripts/lib/lock.sh
+  BIN: '{{.ROOT_DIR}}/backend/shoppinglist'
+  BIN_NOUI: '{{.ROOT_DIR}}/backend/shoppinglist-no-ui'
+  BIN_DEMO: '{{.ROOT_DIR}}/backend/shoppinglist-demo'
+
+tasks:
+  default:
+    desc: The commit gate, scoped to what is not yet on origin/main, no browser
+    cmds:
+      - '{{.LOCK}} gate task gate'
+
+  gate:
+    deps: [format, gofmt, gitleaks, repo-rules, osv, lint, check, check:e2e, go-lint, go-test, vitest, integration]
+
+  full:
+    desc: Every non-browser layer at full scope (a release, a toolchain bump)
+    cmds:
+      - '{{.LOCK}} gate task --force gate:full'
+
+  gate:full:
+    deps: [format, gofmt, gitleaks, repo-rules, osv, lint:all, check, check:e2e, go-lint, go-test, vitest:all, integration]
+
+  # --- dependencies ------------------------------------------------------------
+  deps:
+    desc: Install node_modules from the lockfiles (a fresh worktree has none)
+    sources:
+      - pnpm-lock.yaml
+      - frontend/pnpm-lock.yaml
+      - e2e/pnpm-lock.yaml
+    status:
+      - test -d node_modules && test -d frontend/node_modules && test -d e2e/node_modules
+    cmds:
+      # A failed layer names itself for scripts/gate.sh's summary (go-task
+      # reports only the first failure).
+      - defer: &failed '{{if and .EXIT_CODE (ne .EXIT_CODE "0")}}[ -z "$GATE_FAILED" ] || echo {{.TASK}} >>"$GATE_FAILED"{{end}}'
+      - for: [., frontend, e2e]
+        cmd: cd {{.ITEM}} && pnpm install --frozen-lockfile --prefer-offline
+
+  # --- static layers -----------------------------------------------------------
+  format:
+    desc: Prettier over the repo; its cache skips files unchanged since they passed
+    deps: [deps]
+    cmds:
+      - defer: *failed
+      - pnpm format:check
+
+  gofmt:
+    desc: gofmt over the backend
+    cmds:
+      - defer: *failed
+      - test -z "$(gofmt -l backend | tee /dev/stderr)"
+
+  gitleaks:
+    desc: gitleaks over the history (CI's scan) and over the uncommitted changes
+    # [D-274] Every run, no sources: about 4 s, and its input is the history,
+    # which every commit changes. The history scan is go.yaml's own, and
+    # covers local commits not yet pushed; the --pre-commit scans and the
+    # untracked files' catch a secret before it is committed at all. The
+    # pre-push hook (.githooks/pre-push) repeats the history scan at the push.
+    cmds:
+      - defer: *failed
+      - go -C tools/gitleaks install tool
+      - gitleaks git . --no-banner --redact
+      - gitleaks git . --pre-commit --no-banner --redact
+      - gitleaks git . --pre-commit --staged --no-banner --redact
+      # A new file is in no diff until it is staged: each untracked, unignored
+      # one on its own.
+      - git ls-files -z --others --exclude-standard | xargs -0 -r -n1 gitleaks dir --no-banner --redact
+
+  osv:
+    desc: osv-scanner over every lockfile, CI's osv-scan step, when a dependency changed
+    # A new dependency once brought three advisories that only CI's security
+    # workflow saw, after the push. Its inputs are the lockfiles and the
+    # waivers; an advisory published later for an unchanged lockfile is still
+    # CI's to find. --no-ignore: a worktree sits under .claude/worktrees, which
+    # the main checkout ignores, and osv reads that .gitignore and finds no
+    # lockfile at all. --no-call-analysis=go as in security.yaml.
+    sources:
+      - '**/pnpm-lock.yaml'
+      - '**/go.mod'
+      - '**/go.sum'
+      - tools/diff-cover/requirements.txt
+      - osv-scanner.toml
+      - exclude: '**/node_modules/**/*'
+    cmds:
+      - defer: *failed
+      - go -C tools/osv-scanner install tool
+      - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go --no-ignore
+
+  repo-rules:
+    desc: The repo's own rules, as CI checks them (decision index, doc links, settings, CI image tag)
+    # About four seconds, every run, no sources, as gitleaks: doc-links reads
+    # every tracked file, so no list here names its inputs. Without them here
+    # a docs-only commit passed the gate and failed CI's frontend and ci-image
+    # workflows.
+    cmds:
+      - defer: *failed
+      - node scripts/decisions-index.mjs --check
+      - node scripts/doc-links.mjs
+      - node scripts/env-check.mjs
+      - scripts/ci-image-tag.sh --check
+
+  lint:
+    desc: The type-aware lint on the changed frontend files; all of it when its config changed
+    deps: [deps]
+    sources: &frontend
+      - frontend/src/**/*
+      - frontend/messages/**/*
+      - frontend/project.inlang/{settings.json,paraglide.config.js}
+      - frontend/*.{js,ts,json}
+      - frontend/scripts/*.js
+      - frontend/src/service-worker/tsconfig.json
+      - frontend/pnpm-lock.yaml
+      # What the frontend imports from the backend: the seed data, its test
+      # vectors, the field contract and the shell's meta names.
+      - backend/seed/*.json
+      - backend/internal/fieldcontract/*.json
+      - backend/internal/ui/*.json
+      # Generated from messages/ by every check and test run; were it a
+      # source, each run would leave the next one stale.
+      - exclude: frontend/src/lib/paraglide/**/*
+    cmds:
+      - defer: *failed
+      # Exact for every file you touched: typed rules check each file against
+      # the whole program. A finding in an untouched file caused by a changed
+      # type is CI's full run to catch ([D-243]).
+      - |
+        if git diff --name-only {{.BASE}} | grep -qE '^frontend/(eslint[^/]*\.js|package\.json|pnpm-lock\.yaml|tsconfig[^/]*\.json)$'; then
+          cd frontend && pnpm lint
+        else
+          { git diff --name-only --diff-filter=d {{.BASE}} -- frontend; git ls-files --others --exclude-standard -- frontend; } |
+            grep -E '\.(ts|js|svelte)$' | sed 's#^frontend/##' | sort -u |
+            (cd frontend && xargs -r -d '\n' node scripts/lint.js)
+        fi
+
+  lint:all:
+    desc: The type-aware lint over the whole frontend
+    deps: [deps]
+    cmds:
+      - defer: *failed
+      - cd frontend && pnpm lint
+
+  check:
+    desc: svelte-check and the service worker's tsc
+    deps: [deps]
+    sources: *frontend
+    cmds:
+      - defer: *failed
+      - cd frontend && pnpm check
+
+  check:e2e:
+    desc: tsc over the browser harnesses, which Playwright runs with their types stripped
+    deps: [deps]
+    sources:
+      - e2e/**/*.ts
+      - e2e/tsconfig.json
+      - e2e/package.json
+      - e2e/pnpm-lock.yaml
+      - exclude: e2e/node_modules/**/*
+    cmds:
+      - defer: *failed
+      - cd e2e && pnpm check
+
+  # --- tests -------------------------------------------------------------------
+  go-lint:
+    desc: go vet, go fix, staticcheck and gosec over the backend, CI's go-check step
+    # [D-273] CI's go-check runs this task, so a pass here is a pass there: a
+    # Go toolchain bump once broke both tools in CI alone. Their pins are
+    # inputs too, and installing from them is a no-op once built. The memory
+    # cap: a cold staticcheck peaks near 900 MiB, beside the 1.4 GB lint in
+    # the box's 8 GB (CI's step sets its own, which wins). -tags no_ui: no SPA
+    # is built here ([D-64]).
+    sources:
+      - backend/**/*.go
+      - backend/go.mod
+      - backend/go.sum
+      - tools/staticcheck/go.mod
+      - tools/staticcheck/go.sum
+      - tools/gosec/go.mod
+      - tools/gosec/go.sum
+      - exclude: backend/pb_data/**/*
+      - exclude: backend/pb_public*/**/*
+    env:
+      GOMEMLIMIT: 1GiB
+    cmds:
+      - defer: *failed
+      - go -C tools/staticcheck install tool
+      - go -C tools/gosec install tool
+      # `go test` runs only part of vet (no copylocks, no structtag). The demo
+      # build swaps one file in package main, which is vetted again with its
+      # tag ([D-234]).
+      - cd backend && go vet -tags no_ui ./...
+      - cd backend && go vet -tags demo,no_ui .
+      # Go's own modernizers: -diff prints what `go fix` would change and
+      # fails; run `go fix -tags no_ui ./...` in backend/ to apply it.
+      - cd backend && go fix -tags no_ui -diff ./...
+      - cd backend && go fix -tags demo,no_ui -diff .
+      - cd backend && staticcheck -tags no_ui ./...
+      # Our own code's patterns (weak crypto, math/rand, path traversal): its
+      # findings follow from the diff, so it runs on every push, not with the
+      # advisory scanners ([D-203]). A finding is fixed, or gets a `#nosec`
+      # with its why at the line.
+      - cd backend && gosec -tags no_ui ./...
+
+  go-test:
+    desc: The backend suite, then package main as the demo build ([D-234]); `go test` arguments after `--`
+    sources: &backend
+      - backend/**/*.go
+      - backend/**/*.json
+      - backend/go.mod
+      - backend/go.sum
+      - exclude: backend/pb_data/**/*
+      - exclude: backend/pb_public*/**/*
+    cmds:
+      - defer: *failed
+      - cd backend && go test -tags no_ui {{.CLI_ARGS}} ./...
+      - cd backend && go test -tags demo,no_ui .
+
+  vitest:
+    desc: The unit and component tests the change reaches (vitest --changed)
+    deps: [deps]
+    sources: *frontend
+    cmds:
+      - defer: *failed
+      # A config change or a message edit reruns everything (forceRerunTriggers
+      # in vite.config.ts); a change no test imports passes.
+      # --silent=passed-only: a passing test's console output (sync retries,
+      # Svelte dev warnings) is noise; a failing one's is shown ([D-203]).
+      # With a commit, vitest adds the staged, unstaged and untracked files.
+      - cd frontend && npx vitest run --changed {{.BASE}} --project server --project client --passWithNoTests --silent=passed-only
+
+  vitest:all:
+    desc: Every unit and component test (vitest's arguments after `--`, as CI's coverage run)
+    deps: [deps]
+    cmds:
+      - defer: *failed
+      - cd frontend && npx vitest run --project server --project client --silent=passed-only {{.CLI_ARGS}}
+
+  build-backend:
+    desc: The binary without the SPA, for the integration project
+    sources: *backend
+    generates:
+      - backend/shoppinglist-no-ui
+    cmds:
+      - defer: *failed
+      # -cover when GOCOVERDIR is set (CI's e2e workflow): the server then
+      # writes what the suites reached there as it exits ([D-203]).
+      - cd backend && go build {{if .GOCOVERDIR}}-cover {{end}}-tags no_ui -o shoppinglist-no-ui .
+
+  integration:
+    desc: Two Dexie clients against a real binary, when the engine or the server changed
+    deps: [deps, build-backend]
+    sources:
+      # The wire, the engine and the modules the actions decide with
+      # (dedup/normalize decide the server's merge, [D-44]; field-contract
+      # holds the caps the push route enforces), plus the server itself.
+      - frontend/src/lib/{sync,actions,db,pb,idb,auth,backup,categories,dedup,normalize,item-name,sorting,field-contract,test-kit}*
+      - frontend/src/lib/{sync,actions,db,pb,idb,auth,backup,categories,dedup,normalize,item-name,sorting,field-contract,test-kit}/**/*
+      - frontend/src/integration/**/*
+      # The small modules they import (http-status, config, i18n, toasts …)
+      # and the add model the behaviour specs drive.
+      - frontend/src/lib/*.ts
+      - frontend/src/lib/i18n/**/*
+      - frontend/src/lib/components/add/*.ts
+      # The libraries under them (Dexie, pocketbase-js, PocketBase) and the
+      # project's own config.
+      - frontend/*.{js,ts,json}
+      - frontend/pnpm-lock.yaml
+      - backend/go.mod
+      - backend/go.sum
+      - backend/**/*.go
+      - backend/**/*.json
+      - exclude: backend/**/*_test.go
+      - exclude: backend/pb_data/**/*
+      - exclude: backend/pb_public*/**/*
+    env:
+      SHOPPINGLIST_BIN: '{{.BIN_NOUI}}'
+    cmds:
+      - defer: *failed
+      - cd frontend && npx vitest run --project integration --silent=passed-only
+
+  # --- coverage ([D-203]) -------------------------------------------------------
+  # A report, not a gate: the total, and the changed lines no test reaches
+  # against DIFF_BASE below. CI runs both; locally they compare what is not yet
+  # on origin/main (or everything since SINCE).
+  diff-cover:
+    internal: true
+    sources:
+      - tools/diff-cover/requirements.txt
+    status:
+      - test -x tools/diff-cover/.venv/bin/diff-cover
+    cmds:
+      - python3 -m venv tools/diff-cover/.venv
+      - tools/diff-cover/.venv/bin/pip install --quiet --disable-pip-version-check --require-hashes -r tools/diff-cover/requirements.txt
+
+  coverage:frontend:
+    desc: The changed lines the unit and component tests miss, after `task vitest:all -- --coverage`
+    deps: [diff-cover]
+    vars: &diff_base
+      # CI's clone holds the one commit it tests: the base is fetched, a pull
+      # request's target branch or the commit the previous pipeline ran, and
+      # compared with `..` because no merge base is there. A base that cannot
+      # be fetched falls back to the parent commit.
+      DIFF_BASE:
+        sh: |
+          if [ -z "$CI" ]; then git rev-parse {{.BASE}}; exit; fi
+          want=$CI_PREV_COMMIT_SHA
+          [ -n "$CI_COMMIT_PULL_REQUEST" ] && want=$CI_COMMIT_TARGET_BRANCH
+          if [ -n "$want" ] && git fetch -q --no-tags --depth=1 origin "$want"; then
+            git rev-parse FETCH_HEAD
+          else
+            git fetch -q --no-tags --depth=2 origin "$(git rev-parse HEAD)" && git rev-parse HEAD~1
+          fi
+    cmds:
+      # The total is vitest's own text-summary, printed by the run.
+      - tools/diff-cover/.venv/bin/diff-cover frontend/coverage/lcov.info --compare-branch={{.DIFF_BASE}} --diff-range-notation=..
+
+  coverage:go:
+    desc: What the Go suite reaches, with what the servers wrote to GOCOVERDIR when set
+    deps: [diff-cover]
+    vars: *diff_base
+    cmds:
+      # CI's go.yaml ran this exact command and the agent shares the build
+      # cache, so most packages replay from Go's test cache; those reading
+      # repo files (sync, lists) see a fresh clone's mtimes and run again,
+      # about a minute.
+      - cd backend && go test -tags no_ui -coverpkg=./... -coverprofile=coverage.out ./...
+      # The servers' counters (build-app, build-backend, build-demo) added to
+      # it: a block counts as reached when either reached it.
+      - |
+        cd backend && cp coverage.out coverage-all.out
+        {{if .GOCOVERDIR}}go tool covdata textfmt -i="$GOCOVERDIR" -o coverage-servers.out && tail -n +2 coverage-servers.out >>coverage-all.out{{end}}
+      - cd backend && go tool cover -func=coverage-all.out | tail -n 1
+      - go -C tools/gcov2lcov install tool
+      - cd backend && gcov2lcov -infile coverage-all.out -outfile coverage.lcov
+      - tools/diff-cover/.venv/bin/diff-cover backend/coverage.lcov --compare-branch={{.DIFF_BASE}} --diff-range-notation=..
+
+  # --- browser harnesses ----------------------------------------------------------
+  # Each takes Playwright's own arguments after `--`: spec files, -g, --last-failed.
+  build-app:
+    desc: The binary with the real SPA embedded ([D-64]), for the browser harnesses
+    # One list for both builds: a script only the demo runs rebuilds the app
+    # too, which costs a build and drifts nothing.
+    sources: &app
+      - frontend/src/**/*
+      - frontend/messages/**/*
+      - frontend/project.inlang/{settings.json,paraglide.config.js}
+      - frontend/static/**/*
+      - exclude: frontend/src/lib/paraglide/**/*
+      - frontend/*.{js,ts,json}
+      - frontend/scripts/*.js
+      - frontend/pnpm-lock.yaml
+      - backend/**/*.go
+      - backend/**/*.json
+      - backend/go.mod
+      - backend/go.sum
+      - exclude: backend/pb_data/**/*
+      - exclude: backend/pb_public*/**/*
+      - scripts/build-embedded-spa.sh
+      - scripts/build-demo.sh
+    generates:
+      - backend/shoppinglist
+    cmds:
+      - defer: *failed
+      - scripts/build-embedded-spa.sh
+      - cd backend && go build {{if .GOCOVERDIR}}-cover {{end}}-o shoppinglist .
+
+  e2e:functional:
+    desc: The functional suite (e2e/tests, 8097)
+    deps: [deps, build-app]
+    env: { SHOPPINGLIST_BIN: '{{.BIN}}' }
+    cmds:
+      - defer: *failed
+      - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:functional npx playwright test {{.CLI_ARGS}}'
+
+  e2e:arch:
+    desc: The architectural walk (e2e/arch, 8096, [D-124])
+    deps: [deps, build-app]
+    env: { SHOPPINGLIST_BIN: '{{.BIN}}' }
+    cmds:
+      - defer: *failed
+      - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:arch npx playwright test -c arch/arch.config.ts {{.CLI_ARGS}}'
+
+  e2e:oidc:
+    desc: The OIDC journeys against Dex (e2e/oidc, 8095, [D-154])
+    deps: [deps, build-app]
+    env: { SHOPPINGLIST_BIN: '{{.BIN}}' }
+    cmds:
+      - defer: *failed
+      - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:oidc npx playwright test -c oidc/oidc.config.ts {{.CLI_ARGS}}'
+
+  e2e:tiles:
+    desc: The tile audit on the design gallery, no backend (e2e/tiles, 8093, [D-166])
+    deps: [deps]
+    cmds:
+      - defer: *failed
+      - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:tiles npx playwright test -c tiles/tiles.config.ts {{.CLI_ARGS}}'
+
+  build-demo:
+    desc: The demo binary, with its own SPA embedded ([D-234])
+    sources: *app
+    generates:
+      - backend/shoppinglist-demo
+    cmds:
+      - defer: *failed
+      - scripts/build-demo.sh
+
+  e2e:demo:
+    desc: The demo build's harness on its own binary (e2e/demo, 8088, [D-234])
+    deps: [deps, build-demo]
+    cmds:
+      - defer: *failed
+      - cd e2e && SHOPPINGLIST_DEMO_BIN='{{.BIN_DEMO}}' {{.ROOT_DIR}}/{{.LOCK}} e2e:demo npx playwright test -c demo/demo.config.ts {{.CLI_ARGS}}
+
+  e2e:
+    desc: Every harness, in two lanes (what CI runs)
+    cmds:
+      - '{{.LOCK}} e2e task e2e:lanes'
+
+  e2e:lanes:
+    cmds:
+      # Every binary before any browser: a build beside a running suite starves
+      # it on the box's four cores (the arch walk failed to load a chunk while
+      # the other lane built the demo; alone it passed).
+      - task: build-app
+      - task: build-demo
+      - task: e2e:browsers
+
+  # The two lanes run side by side, so every harness writes its own
+  # test-results/ beside its config: Playwright's default is one folder beside
+  # package.json, which each harness empties at its start, deleting the other
+  # lane's traces mid-run (ENOENT at a context's close).
+  e2e:browsers:
+    internal: true
+    deps: [e2e:lane-a, e2e:lane-b]
+
+  e2e:lane-a:
+    internal: true
+    cmds:
+      - task: e2e:functional
+      - task: e2e:arch
+
+  e2e:lane-b:
+    internal: true
+    cmds:
+      - task: e2e:tiles
+      - task: e2e:oidc
+      - task: e2e:demo

@@ -1,0 +1,65 @@
+module shoppinglist
+
+go 1.27
+
+// Minimum toolchain: go1.27.2. PocketBase v0.40 requires Go 1.27 (it moved to
+// encoding/json/v2) and asks for 1.27.1 for its database/sql and json fixes;
+// 1.27.2 fixes 12 stdlib advisories govulncheck flags as reachable
+// (GO-2026-6599 to -6617, among them html/template, net/http and its bundled
+// http2). The 1.26 floor before it, go1.26.6, fixed 7 more (GO-2026-6218
+// net/url, -6091 html/template, -6090 crypto/tls, -6089 net/http, -6088
+// encoding/xml, -5972 encoding/asn1, -5026 idna), all in 1.27.x too.
+// Under GOTOOLCHAIN=auto (the default) the go command upgrades to this
+// version even in images with a bundled older Go — the release image
+// (goreleaser/goreleaser) ships its own, go1.26.4 in v2.17.0 and go1.27.1 in
+// v2.18.2, so a later image that lags would otherwise build every RELEASE
+// binary against an older stdlib. The release workflow sets GOTOOLCHAIN
+// explicitly so an env override to `local` cannot defeat it. Bump together
+// with the image pins.
+toolchain go1.27.2
+
+require (
+	github.com/fxamacker/cbor/v2 v2.9.6
+	github.com/go-webauthn/webauthn v0.18.2
+	github.com/pocketbase/dbx v1.12.0
+	github.com/pocketbase/pocketbase v0.40.5
+	github.com/spf13/cobra v1.10.2
+	github.com/spf13/pflag v1.0.10
+	golang.org/x/oauth2 v0.37.0
+	golang.org/x/text v0.43.0
+)
+
+require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
+	github.com/disintegration/imaging v1.6.2 // indirect
+	github.com/domodwyer/mailyak/v3 v3.6.2 // indirect
+	github.com/dustin/go-humanize v1.1.0 // indirect
+	github.com/fatih/color v1.19.0 // indirect
+	github.com/fsnotify/fsnotify v1.10.1 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/ganigeorgiev/fexpr v0.6.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/go-webauthn/x v0.3.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
+	github.com/google/go-tpm v0.9.8 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
+	github.com/mattn/go-isatty v0.0.24 // indirect
+	github.com/ncruces/go-strftime v1.1.0 // indirect
+	github.com/philhofer/fwd v1.2.0 // indirect
+	github.com/pocketbase/ozzo-validation/v4 v4.3.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
+	github.com/spf13/cast v1.10.0 // indirect
+	github.com/tinylib/msgp v1.6.4 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/image v0.46.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	modernc.org/libc v1.77.1 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
+	modernc.org/memory v1.12.1 // indirect
+	modernc.org/sqlite v1.60.1 // indirect
+)

@@ -1,0 +1,919 @@
+{
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.6",
+	"version": 1,
+	"metadata": {
+		"component": {
+			"type": "application",
+			"bom-ref": "shoppinglist",
+			"name": "shoppinglist",
+			"licenses": [
+				{
+					"expression": "AGPL-3.0-only"
+				}
+			]
+		}
+	},
+	"components": [
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/asaskevich/govalidator@v0.0.0-20230301143203-a9d515a09cc2",
+			"name": "github.com/asaskevich/govalidator",
+			"version": "v0.0.0-20230301143203-a9d515a09cc2",
+			"purl": "pkg:golang/github.com/asaskevich/govalidator@v0.0.0-20230301143203-a9d515a09cc2",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/disintegration/imaging@v1.6.2",
+			"name": "github.com/disintegration/imaging",
+			"version": "v1.6.2",
+			"purl": "pkg:golang/github.com/disintegration/imaging@v1.6.2",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/domodwyer/mailyak/v3@v3.6.2",
+			"name": "github.com/domodwyer/mailyak/v3",
+			"version": "v3.6.2",
+			"purl": "pkg:golang/github.com/domodwyer/mailyak/v3@v3.6.2",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/dustin/go-humanize@v1.1.0",
+			"name": "github.com/dustin/go-humanize",
+			"version": "v1.1.0",
+			"purl": "pkg:golang/github.com/dustin/go-humanize@v1.1.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/fatih/color@v1.19.0",
+			"name": "github.com/fatih/color",
+			"version": "v1.19.0",
+			"purl": "pkg:golang/github.com/fatih/color@v1.19.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/fsnotify/fsnotify@v1.10.1",
+			"name": "github.com/fsnotify/fsnotify",
+			"version": "v1.10.1",
+			"purl": "pkg:golang/github.com/fsnotify/fsnotify@v1.10.1",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.6",
+			"name": "github.com/fxamacker/cbor/v2",
+			"version": "v2.9.6",
+			"purl": "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.6",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/gabriel-vasile/mimetype@v1.4.15",
+			"name": "github.com/gabriel-vasile/mimetype",
+			"version": "v1.4.15",
+			"purl": "pkg:golang/github.com/gabriel-vasile/mimetype@v1.4.15",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/ganigeorgiev/fexpr@v0.6.0",
+			"name": "github.com/ganigeorgiev/fexpr",
+			"version": "v0.6.0",
+			"purl": "pkg:golang/github.com/ganigeorgiev/fexpr@v0.6.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/go-viper/mapstructure/v2@v2.5.0",
+			"name": "github.com/go-viper/mapstructure/v2",
+			"version": "v2.5.0",
+			"purl": "pkg:golang/github.com/go-viper/mapstructure/v2@v2.5.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/go-webauthn/webauthn@v0.18.2",
+			"name": "github.com/go-webauthn/webauthn",
+			"version": "v0.18.2",
+			"purl": "pkg:golang/github.com/go-webauthn/webauthn@v0.18.2",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/go-webauthn/x@v0.3.1",
+			"name": "github.com/go-webauthn/x",
+			"version": "v0.3.1",
+			"purl": "pkg:golang/github.com/go-webauthn/x@v0.3.1",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/golang-jwt/jwt/v5@v5.3.1",
+			"name": "github.com/golang-jwt/jwt/v5",
+			"version": "v5.3.1",
+			"purl": "pkg:golang/github.com/golang-jwt/jwt/v5@v5.3.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/google/go-tpm@v0.9.8",
+			"name": "github.com/google/go-tpm",
+			"version": "v0.9.8",
+			"purl": "pkg:golang/github.com/google/go-tpm@v0.9.8",
+			"licenses": [
+				{
+					"expression": "Apache-2.0"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/google/uuid@v1.6.0",
+			"name": "github.com/google/uuid",
+			"version": "v1.6.0",
+			"purl": "pkg:golang/github.com/google/uuid@v1.6.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/mattn/go-colorable@v0.1.16",
+			"name": "github.com/mattn/go-colorable",
+			"version": "v0.1.16",
+			"purl": "pkg:golang/github.com/mattn/go-colorable@v0.1.16",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/mattn/go-isatty@v0.0.24",
+			"name": "github.com/mattn/go-isatty",
+			"version": "v0.0.24",
+			"purl": "pkg:golang/github.com/mattn/go-isatty@v0.0.24",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/philhofer/fwd@v1.2.0",
+			"name": "github.com/philhofer/fwd",
+			"version": "v1.2.0",
+			"purl": "pkg:golang/github.com/philhofer/fwd@v1.2.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/pocketbase/dbx@v1.12.0",
+			"name": "github.com/pocketbase/dbx",
+			"version": "v1.12.0",
+			"purl": "pkg:golang/github.com/pocketbase/dbx@v1.12.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/pocketbase/ozzo-validation/v4@v4.3.0",
+			"name": "github.com/pocketbase/ozzo-validation/v4",
+			"version": "v4.3.0",
+			"purl": "pkg:golang/github.com/pocketbase/ozzo-validation/v4@v4.3.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/pocketbase/pocketbase@v0.40.5",
+			"name": "github.com/pocketbase/pocketbase",
+			"version": "v0.40.5",
+			"purl": "pkg:golang/github.com/pocketbase/pocketbase@v0.40.5",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec",
+			"name": "github.com/remyoudompheng/bigfft",
+			"version": "v0.0.0-20230129092748-24d4a6f8daec",
+			"purl": "pkg:golang/github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/spf13/cast@v1.10.0",
+			"name": "github.com/spf13/cast",
+			"version": "v1.10.0",
+			"purl": "pkg:golang/github.com/spf13/cast@v1.10.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/spf13/cobra@v1.10.2",
+			"name": "github.com/spf13/cobra",
+			"version": "v1.10.2",
+			"purl": "pkg:golang/github.com/spf13/cobra@v1.10.2",
+			"licenses": [
+				{
+					"expression": "Apache-2.0"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/spf13/pflag@v1.0.10",
+			"name": "github.com/spf13/pflag",
+			"version": "v1.0.10",
+			"purl": "pkg:golang/github.com/spf13/pflag@v1.0.10",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/tinylib/msgp@v1.6.4",
+			"name": "github.com/tinylib/msgp",
+			"version": "v1.6.4",
+			"purl": "pkg:golang/github.com/tinylib/msgp@v1.6.4",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/github.com/x448/float16@v0.8.4",
+			"name": "github.com/x448/float16",
+			"version": "v0.8.4",
+			"purl": "pkg:golang/github.com/x448/float16@v0.8.4",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/stdlib@1.27.2",
+			"name": "stdlib",
+			"version": "1.27.2",
+			"purl": "pkg:golang/stdlib@1.27.2",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/crypto@v0.57.0",
+			"name": "golang.org/x/crypto",
+			"version": "v0.57.0",
+			"purl": "pkg:golang/golang.org/x/crypto@v0.57.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/image@v0.46.0",
+			"name": "golang.org/x/image",
+			"version": "v0.46.0",
+			"purl": "pkg:golang/golang.org/x/image@v0.46.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/net@v0.60.0",
+			"name": "golang.org/x/net",
+			"version": "v0.60.0",
+			"purl": "pkg:golang/golang.org/x/net@v0.60.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/oauth2@v0.37.0",
+			"name": "golang.org/x/oauth2",
+			"version": "v0.37.0",
+			"purl": "pkg:golang/golang.org/x/oauth2@v0.37.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/sync@v0.24.0",
+			"name": "golang.org/x/sync",
+			"version": "v0.24.0",
+			"purl": "pkg:golang/golang.org/x/sync@v0.24.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/sys@v0.48.0",
+			"name": "golang.org/x/sys",
+			"version": "v0.48.0",
+			"purl": "pkg:golang/golang.org/x/sys@v0.48.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/golang.org/x/text@v0.43.0",
+			"name": "golang.org/x/text",
+			"version": "v0.43.0",
+			"purl": "pkg:golang/golang.org/x/text@v0.43.0",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/modernc.org/libc@v1.77.1",
+			"name": "modernc.org/libc",
+			"version": "v1.77.1",
+			"purl": "pkg:golang/modernc.org/libc@v1.77.1",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/modernc.org/mathutil@v1.7.1",
+			"name": "modernc.org/mathutil",
+			"version": "v1.7.1",
+			"purl": "pkg:golang/modernc.org/mathutil@v1.7.1",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/modernc.org/memory@v1.12.1",
+			"name": "modernc.org/memory",
+			"version": "v1.12.1",
+			"purl": "pkg:golang/modernc.org/memory@v1.12.1",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:golang/modernc.org/sqlite@v1.60.1",
+			"name": "modernc.org/sqlite",
+			"version": "v1.60.1",
+			"purl": "pkg:golang/modernc.org/sqlite@v1.60.1",
+			"licenses": [
+				{
+					"expression": "BSD-3-Clause"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40floating-ui/core@1.8.0",
+			"name": "@floating-ui/core",
+			"version": "1.8.0",
+			"purl": "pkg:npm/%40floating-ui/core@1.8.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40floating-ui/dom@1.8.0",
+			"name": "@floating-ui/dom",
+			"version": "1.8.0",
+			"purl": "pkg:npm/%40floating-ui/dom@1.8.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40floating-ui/utils@0.2.12",
+			"name": "@floating-ui/utils",
+			"version": "0.2.12",
+			"purl": "pkg:npm/%40floating-ui/utils@0.2.12",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40fontsource-variable/readex-pro@5.3.0",
+			"name": "@fontsource-variable/readex-pro",
+			"version": "5.3.0",
+			"purl": "pkg:npm/%40fontsource-variable/readex-pro@5.3.0",
+			"licenses": [
+				{
+					"expression": "OFL-1.1"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40inlang/paraglide-js@2.29.0",
+			"name": "@inlang/paraglide-js",
+			"version": "2.29.0",
+			"purl": "pkg:npm/%40inlang/paraglide-js@2.29.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40lucide/svelte@1.58.0",
+			"name": "@lucide/svelte",
+			"version": "1.58.0",
+			"purl": "pkg:npm/%40lucide/svelte@1.58.0",
+			"licenses": [
+				{
+					"expression": "ISC AND MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40simplewebauthn/browser@14.0.0",
+			"name": "@simplewebauthn/browser",
+			"version": "14.0.0",
+			"purl": "pkg:npm/%40simplewebauthn/browser@14.0.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40sveltejs/kit@3.1.0",
+			"name": "@sveltejs/kit",
+			"version": "3.1.0",
+			"purl": "pkg:npm/%40sveltejs/kit@3.1.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/barcode-detector@3.2.2",
+			"name": "barcode-detector",
+			"version": "3.2.2",
+			"purl": "pkg:npm/barcode-detector@3.2.2",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/bits-ui@2.19.5",
+			"name": "bits-ui",
+			"version": "2.19.5",
+			"purl": "pkg:npm/bits-ui@2.19.5",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/clsx@2.1.1",
+			"name": "clsx",
+			"version": "2.1.1",
+			"purl": "pkg:npm/clsx@2.1.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/devalue@5.9.4",
+			"name": "devalue",
+			"version": "5.9.4",
+			"purl": "pkg:npm/devalue@5.9.4",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/dexie@4.4.6",
+			"name": "dexie",
+			"version": "4.4.6",
+			"purl": "pkg:npm/dexie@4.4.6",
+			"licenses": [
+				{
+					"expression": "Apache-2.0"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/inline-style-parser@0.2.7",
+			"name": "inline-style-parser",
+			"version": "0.2.7",
+			"purl": "pkg:npm/inline-style-parser@0.2.7",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/mode-watcher@1.1.0",
+			"name": "mode-watcher",
+			"version": "1.1.0",
+			"purl": "pkg:npm/mode-watcher@1.1.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/openmoji@17.0.0",
+			"name": "openmoji",
+			"version": "17.0.0",
+			"purl": "pkg:npm/openmoji@17.0.0",
+			"licenses": [
+				{
+					"expression": "CC-BY-SA-4.0"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/photoswipe@5.4.4",
+			"name": "photoswipe",
+			"version": "5.4.4",
+			"purl": "pkg:npm/photoswipe@5.4.4",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/pocketbase@0.28.1",
+			"name": "pocketbase",
+			"version": "0.28.1",
+			"purl": "pkg:npm/pocketbase@0.28.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/qrcode-generator@2.0.4",
+			"name": "qrcode-generator",
+			"version": "2.0.4",
+			"purl": "pkg:npm/qrcode-generator@2.0.4",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/runed@0.23.4",
+			"name": "runed",
+			"version": "0.23.4",
+			"purl": "pkg:npm/runed@0.23.4",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/runed@0.25.0",
+			"name": "runed",
+			"version": "0.25.0",
+			"purl": "pkg:npm/runed@0.25.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/runed@0.28.0",
+			"name": "runed",
+			"version": "0.28.0",
+			"purl": "pkg:npm/runed@0.28.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/runed@0.35.1",
+			"name": "runed",
+			"version": "0.35.1",
+			"purl": "pkg:npm/runed@0.35.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/style-to-object@1.0.14",
+			"name": "style-to-object",
+			"version": "1.0.14",
+			"purl": "pkg:npm/style-to-object@1.0.14",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/svelte@5.57.2",
+			"name": "svelte",
+			"version": "5.57.2",
+			"purl": "pkg:npm/svelte@5.57.2",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/svelte-dnd-action@0.9.80",
+			"name": "svelte-dnd-action",
+			"version": "0.9.80",
+			"purl": "pkg:npm/svelte-dnd-action@0.9.80",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/svelte-sonner@1.2.1",
+			"name": "svelte-sonner",
+			"version": "1.2.1",
+			"purl": "pkg:npm/svelte-sonner@1.2.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/svelte-toolbelt@0.7.1",
+			"name": "svelte-toolbelt",
+			"version": "0.7.1",
+			"purl": "pkg:npm/svelte-toolbelt@0.7.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/svelte-toolbelt@0.10.6",
+			"name": "svelte-toolbelt",
+			"version": "0.10.6",
+			"purl": "pkg:npm/svelte-toolbelt@0.10.6",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/tabbable@6.5.0",
+			"name": "tabbable",
+			"version": "6.5.0",
+			"purl": "pkg:npm/tabbable@6.5.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/tailwind-merge@3.7.0",
+			"name": "tailwind-merge",
+			"version": "3.7.0",
+			"purl": "pkg:npm/tailwind-merge@3.7.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/tailwind-variants@3.3.1",
+			"name": "tailwind-variants",
+			"version": "3.3.1",
+			"purl": "pkg:npm/tailwind-variants@3.3.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/tailwindcss@4.3.3",
+			"name": "tailwindcss",
+			"version": "4.3.3",
+			"purl": "pkg:npm/tailwindcss@4.3.3",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/tw-animate-css@1.4.0",
+			"name": "tw-animate-css",
+			"version": "1.4.0",
+			"purl": "pkg:npm/tw-animate-css@1.4.0",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/vaul-svelte@1.0.0-next.7",
+			"name": "vaul-svelte",
+			"version": "1.0.0-next.7",
+			"purl": "pkg:npm/vaul-svelte@1.0.0-next.7",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/zxing-wasm@3.1.3",
+			"name": "zxing-wasm",
+			"version": "3.1.3",
+			"purl": "pkg:npm/zxing-wasm@3.1.3",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		}
+	]
+}

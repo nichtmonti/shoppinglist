@@ -1,0 +1,7 @@
+{
+	"version_meta": "shoppinglist-version",
+	"source_meta": "shoppinglist-source",
+	"max_items_per_list_meta": "shoppinglist-max-items-per-list",
+	"scanner_meta": "shoppinglist-scanner",
+	"default_source_url": "https://codeberg.org/sclermont/shoppinglist"
+}

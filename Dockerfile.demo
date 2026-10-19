@@ -1,0 +1,35 @@
+# The demo image ([D-234]): the demo build, ready to try on your own machine.
+#
+#   docker run --rm -p 127.0.0.1:8090:8090 codeberg.org/<owner>/shoppinglist:demo
+#
+# then open http://localhost:8090. Packaged exactly like Dockerfile (read its
+# comments for the base image, the user and the health check); GoReleaser
+# hands this one a context of linux/<arch>/shoppinglist-demo, built with
+# `-tags demo` (.goreleaser.yaml).
+#
+# What differs is the environment. The demo binary refuses to boot unless
+# passkeys are off, and passkeys off needs the app's origin; the defaults below
+# are a local tryout's, so `docker run` needs no flags, and a public demo
+# overrides them (docs/internals/demo.md). The start budget is a public demo's
+# guard against filling its disk; on your own machine every start comes from
+# one address, so it is raised out of the way. No volume: the data dies with
+# the container, which is what a tryout wants.
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3
+ARG TARGETPLATFORM
+
+COPY $TARGETPLATFORM/shoppinglist-demo /shoppinglist
+
+USER 65532:65532
+WORKDIR /pb_data
+
+ENV SHOPPINGLIST_PASSKEYS=off \
+    SHOPPINGLIST_APP_URL=http://localhost:8090 \
+    SHOPPINGLIST_ADMIN_UI=off \
+    SHOPPINGLIST_DEMO_STARTS_PER_IP=1000
+
+EXPOSE 8090
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD ["/shoppinglist", "healthcheck"]
+
+ENTRYPOINT ["/shoppinglist", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data"]

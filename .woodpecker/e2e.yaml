@@ -1,0 +1,125 @@
+# Woodpecker CI — integration + E2E workflow (docs/internals/design.md §14).
+# Waits for both frontend.yaml and go.yaml, then exercises the REAL built
+# binary: the two-client Dexie sync integration suite, then the Playwright
+# harnesses (passkey ceremonies via CDP virtual authenticator, offline sync,
+# conflict UX, the dead-controls walk, OIDC against Dex, the tile audit, the
+# demo build).
+# Every step runs in the CI image ([D-203]) and calls the gate's tasks
+# (Taskfile.yml, [D-177]), so CI runs what `scripts/gate.sh e2e` runs locally.
+# Steps share one workspace and run serially in definition order: the binary
+# `build` makes is the one every suite runs (go-task finds it up to date), and
+# no two steps race on backend/shoppinglist, backend/pb_public or
+# frontend/build.
+#
+# `tag` (v* only) is in the when-list: release.yaml waits on the tag event's
+# OWN run of this workflow ([D-66]).
+#
+# CACHES: the /var/lib/woodpecker-cache/* volumes are host directories on the
+# maintainer's own agent, where this repository is marked trusted (Woodpecker
+# allows host volumes only for trusted repositories). A fork running on
+# another agent drops the `volumes:` entries or marks its repo trusted; the
+# steps work either way, only colder.
+
+variables:
+  - &ci_image localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+  - &pnpm_cache /var/lib/woodpecker-cache/pnpm:/root/.local/share/pnpm
+  - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
+  # go-task and Go's state: the module cache per pipeline in the workspace
+  # ([D-60], go.yaml), the build cache shared; the official proxy and sumdb.
+  # GOCOVERDIR: every binary the steps build is built with -cover and writes
+  # what it reached there on exit, for the coverage step ([D-203]).
+  - &install_task export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod" GOCOVERDIR="${CI_WORKSPACE:-$PWD}/.cover" GOCACHE=/root/.cache/go-build GOPROXY=https://proxy.golang.org,direct GOSUMDB=sum.golang.org GOFLAGS= && mkdir -p "$GOCOVERDIR" && go -C tools/task install tool
+
+when:
+  - event: [push, pull_request, manual]
+  - event: tag
+    ref: refs/tags/v*
+
+depends_on: [frontend, go]
+
+# One Playwright suite on the agent at a time. This is the heaviest workflow,
+# and its sync-timing assertions lose races on a contended box, so a second
+# instance (a tag landing while a push run is mid-flight, a rapid double push)
+# QUEUES, shown as pending in the UI. The tag-event instance this queue admits
+# is exactly what release.yaml waits on.
+concurrency: 1
+
+steps:
+  # The SPA, then the binary that embeds it ([D-64]): this is also what keeps
+  # the embed path compiled on every push, since go.yaml builds with -tags
+  # no_ui and never sees it.
+  build:
+    image: *ci_image
+    volumes:
+      - *pnpm_cache
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task build-app
+      # The boot path's weight, against its 220 KiB gz budget ([D-203]): what
+      # a first paint waits on, so a heavy dependency fails here instead of
+      # landing unnoticed. It reads frontend/build, which build-app just wrote.
+      - node scripts/bundle-budget.mjs
+
+  # Two Dexie clients against a real binary (the no-UI build, as locally).
+  integration:
+    image: *ci_image
+    volumes:
+      - *pnpm_cache
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task integration
+
+  # docs/THIRD_PARTY_LICENSES.md must list exactly what ships, under licences
+  # the AGPL-3.0 release can carry: one script over the Go modules and the npm
+  # packages, in the one image that has both. Its rebuild rewrites frontend/build; the binary the suites
+  # below run already embeds its SPA.
+  third-party-licenses:
+    image: *ci_image
+    volumes:
+      - *go_build_cache
+    commands:
+      - *install_task
+      - scripts/third-party-licenses.sh --check
+
+  # Every harness, one after the other, each on its own port and server.
+  # The arch walk ([D-124]) is single-worker on its own server; the OIDC
+  # journeys ([D-154]) start Dex from tools/dex; the tile audit ([D-166])
+  # runs the Vite dev server; the demo harness ([D-234]) builds its own
+  # binary first.
+  e2e:
+    image: *ci_image
+    volumes:
+      - *pnpm_cache
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task e2e:functional e2e:arch e2e:oidc e2e:tiles e2e:demo
+
+  # Go coverage ([D-203]): the backend suite (go.yaml's run, mostly from the
+  # test cache) with what the integration and browser suites' servers
+  # reached: the total, and the changed lines none of them reaches. After a
+  # passing e2e only, since a run cut short would report lines as unreached.
+  # A report: its failure does not fail the pipeline.
+  coverage:
+    image: *ci_image
+    failure: ignore
+    volumes:
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task coverage:go
+
+  # The server keeps no artifacts, so Playwright's per-failure "Error Context:
+  # test-results/…/error-context.md" lines point at files nobody can read. This
+  # step inlines every error-context.md (the DOM snapshot at the failure) and
+  # every page-diagnosis*.md (what the page was doing, e2e/diagnose.ts,
+  # [D-247]) straight into the log. Runs only when e2e failed.
+  e2e-failure-context:
+    image: *ci_image
+    when:
+      - status: [failure]
+    commands:
+      - cd e2e
+      - sh -c 'found=0; for f in test-results/*/error-context.md test-results/*/page-diagnosis*.md */test-results/*/error-context.md */test-results/*/page-diagnosis*.md; do [ -f "$f" ] || continue; found=1; echo "===== $f ====="; cat "$f"; echo; done; [ "$found" = 1 ] || echo "(no error-context.md or page-diagnosis files written)"'

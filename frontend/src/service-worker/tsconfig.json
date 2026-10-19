@@ -1,0 +1,11 @@
+{
+	// The service worker's own program: SvelteKit's service-worker base (the
+	// WebWorker lib instead of the DOM, which the root tsconfig.json excludes
+	// this directory from). Checked by `pnpm check:worker`; eslint's
+	// projectService finds it by name.
+	"extends": "$app/tsconfig/service-worker",
+	"compilerOptions": {
+		"strict": true
+	},
+	"include": ["."]
+}

@@ -1,0 +1,150 @@
+// Setup for the `client` vitest project (Svelte component tests).
+//
+// @testing-library/svelte only auto-registers its afterEach cleanup when vitest
+// runs with `globals: true`, which this project deliberately does not — so it is
+// wired explicitly here. Without it, components from one test stay mounted in
+// the happy-dom document and the next test's queries match the wrong element.
+// Component tests assert against German strings. Paraglide's `baseLocale` is
+// 'en' (docs/internals/design.md §12.2), the app's fresh-user default, not a
+// constraint on which locale tests assert against. Reset to 'de' before each test so a `setLocale('en')` inside one
+// test (e.g. a locale-switch test) can't leak into the next.
+import { cleanup, configure, waitFor } from '@testing-library/svelte';
+import { afterAll, afterEach, beforeEach, expect, vi } from 'vitest';
+import { setLocale } from '#lib/i18n/index.js';
+import { trackTimers } from '#lib/test-kit/timers.js';
+import { conflictingClasses } from '#lib/utils.js';
+
+// The default 1000ms is too tight for the first test per file on a slow CI
+// runner: the Dexie liveQuery stores that back every component haven't emitted
+// their first value yet, so waitFor/findBy* give up before hydration. 5s is
+// the same ceiling Sheet.svelte.test.ts already passes manually for the same
+// class of problem. Passing cases finish immediately — this only raises the
+// polling ceiling.
+configure({ asyncUtilTimeout: 5000 });
+
+beforeEach(() => {
+	setLocale('de');
+	// What a tab keeps for a reload (#lib/safe-storage) is per test.
+	sessionStorage.clear();
+});
+
+// SvelteKit's router does not run under testing-library, and every sheet,
+// dialog and menu is a history entry (#lib/history-layers, [D-230]), so the
+// router modules are the test kit's fake history in every component test — a
+// fresh one per test, with the browser's traversal routed into it. A suite
+// that spies on `goto` mocks `$app/navigation` over this (see the kit).
+vi.mock('$app/state', () => import('#lib/test-kit/app-state.svelte.js'));
+vi.mock(
+	'$app/navigation',
+	async () => (await import('#lib/test-kit/app-state.svelte.js')).navigation
+);
+
+beforeEach(async () => {
+	const appState = await import('#lib/test-kit/app-state.svelte.js');
+	appState.resetHistory();
+	vi.spyOn(history, 'go').mockImplementation((delta = 0) => appState.historyGo(delta));
+	vi.spyOn(history, 'back').mockImplementation(appState.historyBack);
+});
+
+// [D-146] Every component test doubles as a class-conflict check: any element
+// that EVER carries two utilities overriding each other (relative + absolute,
+// rounded-chip + rounded-full, …) fails the test that rendered it. Which of the
+// two applies is decided by where Tailwind emits them, not by their order in the
+// attribute — a sheet-order lottery two past bugs came from, defended only by
+// comments until this. A MutationObserver sees every class list the test
+// produces, transient states (an open dropdown, a sheet) included, and portals,
+// since bits-ui mounts those under document.body too.
+const classConflicts = new Map<string, string>();
+let classWatch: MutationObserver | null = null;
+
+function recordClassConflicts(el: Element): void {
+	const className = el.getAttribute('class');
+	if (!className) return;
+	const dropped = conflictingClasses(className);
+	if (dropped.length > 0)
+		classConflicts.set(className, `<${el.tagName.toLowerCase()}> drops [${dropped.join(' ')}]`);
+}
+
+function scanClassConflicts(root: Element): void {
+	recordClassConflicts(root);
+	for (const el of root.querySelectorAll('[class]')) recordClassConflicts(el);
+}
+
+function drainClassWatch(records: MutationRecord[]): void {
+	for (const r of records) {
+		if (r.type === 'attributes' && r.target instanceof Element) recordClassConflicts(r.target);
+		for (const node of r.addedNodes) if (node instanceof Element) scanClassConflicts(node);
+	}
+}
+
+beforeEach(() => {
+	classConflicts.clear();
+	classWatch = new MutationObserver(drainClassWatch);
+	classWatch.observe(document.body, {
+		subtree: true,
+		childList: true,
+		attributes: true,
+		attributeFilter: ['class']
+	});
+});
+
+// vaul's drawer-close path arms two REAL 500ms timers — a body-cssText
+// restore and an onAnimationEnd ping (vaul-svelte's use-drawer-root:
+// handleOpenChange(false) → afterSleep(TRANSITIONS.DURATION * 1000, …),
+// svelte-toolbelt's afterSleep is a plain setTimeout) — and never cancels
+// them on unmount. They are Node's timers, not the DOM environment's, so
+// they outlive its teardown: if the file's environment is gone before they
+// fire, the callback throws "ReferenceError: document is not defined" as
+// an UNHANDLED error and vitest fails the whole run despite every test
+// passing. The restore's write is value-invisible (bits-ui's 24ms
+// scroll-lock cleanup restored the same cssText long before), so the
+// timers are the thing to watch: count them (see timers.ts) and,
+// ONCE PER FILE, wait for the count to drain — the dependent event itself,
+// however long it actually takes, instead of the old blind 650ms.
+//
+// Deliberately NOT per test: the hazard is the environment dying at
+// FILE end, and draining after every drawer test would serialize up to
+// 500ms apiece — under parallel workers that stall starves other files'
+// hydration waits (measured: 12 spurious failures across 8 files).
+// Watching [400,600)ms keeps every other delay — vitest's own, Dexie's,
+// ScanButton's 1200ms reset — untracked and untouched.
+const drawerTimers = trackTimers((delay) => delay >= 400 && delay < 600);
+
+afterEach(async () => {
+	// Collected BEFORE cleanup (which unmounts everything), asserted after it,
+	// so a conflict never leaves this test's components mounted in the next.
+	if (classWatch) {
+		drainClassWatch(classWatch.takeRecords());
+		scanClassConflicts(document.body);
+		classWatch.disconnect();
+		classWatch = null;
+	}
+	const conflicts = [...classConflicts].map(([className, what]) => `${what} in "${className}"`);
+	cleanup();
+
+	// bits-ui's body-scroll-lock schedules a 24ms cleanup timer when the last
+	// Dialog/Drawer closes, on Node's timers like vaul's below; if this file's
+	// environment tears down before
+	// it fires, resetBodyStyle throws "document is not defined" as an unhandled
+	// error. The lock is value-visible — `overflow: hidden` on document.body
+	// until the timer fires — so wait for the observable, not for a sleep past
+	// its delay. Tests that opened no dialog never see the lock and skip
+	// straight through.
+	if (document.body.style.overflow === 'hidden') {
+		await waitFor(() => {
+			expect(document.body.style.overflow).not.toBe('hidden');
+		});
+	}
+
+	expect(conflicts, 'elements carrying utilities that override each other ([D-146])').toEqual([]);
+});
+
+// vaul's close timers (see trackTimers above) — drained once per file, while
+// this environment is still alive: a timer that never fires fails HERE with
+// a count of who is still armed, instead of as an unhandled
+// "document is not defined" attributed who-knows-where.
+afterAll(async () => {
+	await waitFor(() => {
+		expect(drawerTimers.pending()).toBe(0);
+	});
+});

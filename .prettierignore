@@ -1,0 +1,63 @@
+# Prettier is owned at the repo ROOT, not by frontend/ — it resolves its config
+# by walking UP from each file, so a config living in frontend/ was invisible to
+# e2e/ and everything else, and an ad-hoc `npx prettier` there silently applied
+# prettier's defaults (double quotes, 2-space, 80 cols). Keep this file and
+# prettier.config.js together at the root: the ignore file is resolved from the
+# CWD, so splitting them makes behaviour depend on where the command was run.
+
+# --- Package managers ---------------------------------------------------------
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+node_modules/
+
+# --- Build output / generated -------------------------------------------------
+/frontend/build/
+/frontend/build-demo/
+/frontend/.svelte-kit/
+/frontend/.svelte-kit-dev/
+/frontend/.svelte-kit-tiles/
+/frontend/static/
+/frontend/src/lib/paraglide/
+/backend/pb_public/
+/backend/pb_public_demo/
+/dist/
+
+# --- inlang-managed (only project.inlang/settings.json is ours to touch) ------
+/frontend/project.inlang/.meta.json
+/frontend/project.inlang/README.md
+/frontend/project.inlang/cache/
+
+# --- Machine-owned: Go writes these, so Go's formatting wins ------------------
+# backend/cmd/appendseed rewrites items.json with json.MarshalIndent("  ", "  ").
+# Prettier would collapse the arrays and re-indent with tabs, so every operator
+# append would land a ~5,800-line reformat and a red format:check.
+/backend/seed/*.json
+# CI's per-pipeline Go module cache ([D-60]): thousands of machine-owned files.
+# Also gitignored, which Prettier 3 honours; listed so the ignore is explicit.
+/.gomod/
+# The opencode agent's own session tooling writes this at runtime; it is
+# machine exhaust, not repo style.
+/.opencode/
+
+# --- YAML: hand-aligned, and it stays that way --------------------------------
+# Prettier does not drop YAML comments, but it does collapse the padding that
+# aligns trailing ones (`pnpm check   # …` → `pnpm check # …`). The YAML files
+# here (.woodpecker/, compose, goreleaser, tools/dex) are hand-maintained and
+# deliberately aligned.
+*.yml
+*.yaml
+
+# --- Markdown: prettier's table alignment is worse than what we write ---------
+# It pads every table cell to the widest cell in its column. docs/internals/design.md has Notes
+# cells over 800 characters, so each row becomes a ~1,000-column line and a
+# one-word edit re-pads the whole table. There is no option to turn that off,
+# and the prose conventions here (hard-wrapped AGENTS.md, unwrapped spec docs)
+# are deliberate.
+*.md
+
+# Coverage reports (CI's frontend-test, [D-203]): generated, and ignored by
+# frontend/.gitignore, which prettier does not read.
+frontend/coverage/

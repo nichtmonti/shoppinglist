@@ -1,0 +1,95 @@
+# Woodpecker CI — advisory scanners: known vulnerabilities in dependencies.
+# They can go red without a repo change (a new advisory lands upstream), so
+# they do not block every push: they run weekly, and on a push that changes a
+# dependency file, the moment a vulnerable dependency could come in ([D-203]).
+# gosec scans our own code, so it runs on every push, in go.yaml.
+# Operator setup (one-time): create a cron job named `weekly` in the
+# Woodpecker repo settings, schedule @weekly — the pipelines below filter on
+# the cron NAME, which is server-configured, not checked in here. Manual runs
+# (event: manual) work without the cron entry.
+#
+# Waivers and fixes live in the diff, not in memory: #nosec annotations at the
+# line for gosec, [[IgnoredVulns]] entries in osv-scanner.toml for osv-scan,
+# and `overrides` in frontend/pnpm-workspace.yaml for a transitive npm fix.
+# The steps run in the CI image ([D-203]).
+#
+# The cache volumes are host directories on the maintainer's trusted agent;
+# see e2e.yaml's header for what a fork does about them.
+
+variables:
+  # Same compile-cache mount and OOM protection as go.yaml: both scanners
+  # compile the full dep tree on a cold cache. Module cache is per-pipeline in
+  # the workspace ([D-60], rationale in go.yaml).
+  - &go_env
+    GOCACHE: /root/.cache/go-build
+    GOPROXY: https://proxy.golang.org,direct
+    GOSUMDB: sum.golang.org
+    GONOSUMDB: ""
+    GONOPROXY: ""
+    GOFLAGS: ""
+    GOMAXPROCS: "2"
+    GOMEMLIMIT: "512MiB"
+  - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
+  - &go_mod_cache export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod"
+  - &ci_image localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+
+when:
+  - event: cron
+    cron: weekly
+  - event: manual
+  - event: [push, pull_request]
+    path:
+      include:
+        - 'backend/go.mod'
+        - 'backend/go.sum'
+        - 'tools/*/go.mod'
+        - 'tools/*/go.sum'
+        - 'tools/*/requirements.txt'
+        - '**/package.json'
+        - '**/pnpm-lock.yaml'
+        - '**/pnpm-workspace.yaml'
+        - 'osv-scanner.toml'
+
+depends_on: [ci-image]
+
+steps:
+  go-advisories:
+    image: *ci_image
+    environment:
+      <<: *go_env
+    volumes:
+      - *go_build_cache
+    commands:
+      - *go_mod_cache
+      - cd backend
+      # Versions come from tools/<name>/go.mod ([D-75]); this step has already
+      # cd'd into backend, so the modules are one level up.
+      # Known vulnerabilities in the dependency tree, incl. the Go toolchain
+      # itself (§10). Reachability-based, so it stays quiet about advisories in
+      # code this app never calls — a red result here is worth acting on.
+      - go -C ../tools/govulncheck install tool
+      # -tags no_ui: CI never builds the SPA here, and package main embeds it
+      # ([D-64]); every other Go command in CI passes the tag for that reason.
+      - govulncheck -tags no_ui ./...
+
+  osv-scan:
+    image: *ci_image
+    environment:
+      <<: *go_env
+    volumes:
+      - *go_build_cache
+    commands:
+      - *go_mod_cache
+      # govulncheck covers the Go side with reachability; this step scans every lockfile (backend/go.mod, the tools/
+      # modules and diff-cover's requirements, root + frontend + e2e pnpm-lock.yaml) against the OSV
+      # advisory DB, dev deps and transitive deps included. The --config flag
+      # is required: a bare osv-scanner.toml applies only to lockfiles in its
+      # OWN directory, so the root file would never see backend/go.mod.
+      # Version from tools/osv-scanner/go.mod ([D-75]). This step stays at the
+      # repo root (it scans every lockfile), so no ../ here.
+      - go -C tools/osv-scanner install tool
+      # --no-call-analysis=go: the tools/<name> modules hold only `tool`
+      # directives, so osv's govulncheck pass finds no packages there and
+      # exits 127 with zero findings. Reachability for the app itself is
+      # govulncheck's job, in the step above ([D-201]).
+      - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go

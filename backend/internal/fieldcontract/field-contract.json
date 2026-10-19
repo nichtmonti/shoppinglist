@@ -1,0 +1,134 @@
+{
+	"$comment": "THE cross-language field contract for the §8.3 push route. Both sides read THIS file - Go embeds it (contract.go), TypeScript imports it (frontend/src/lib/field-contract.ts). Same pattern as backend/seed/{digest,normalization}-vectors.json: one artefact, two consumers, so the two implementations cannot drift. Editing a cap or an allowlist entry here changes server enforcement AND the input that feeds it, in one commit. max_ops_per_push is the §8.3 per-request op cap the client chunks its drain to.",
+	"max_ops_per_push": 500,
+	"$comment_max_items_per_list": "The per-list row cap [D-217]: a push create that would add a NEW items row to a list already holding this many rows - living, checked and tombstoned alike, since every one of them is storage - is denied `list_full`. A merge or a restore adds no row and is never refused. The bound on what one member can make the server store, which the per-IP rate limits only slow down. This is the default: SHOPPINGLIST_MAX_ITEMS_PER_LIST moves it (internal/listcap), and where it is set below max_items an import may bring only that many items - the server stamps the cap into the shell document so the client checks a file against the same number (frontend/src/lib/config.ts).",
+	"max_items_per_list": 5000,
+	"backup": {
+		"$comment": "The [D-72] per-list backup envelope, shared for the same reason as everything else in this file: the exporter (frontend backup.ts) and the importer (internal/lists/import.go) must agree on format, version and caps, and each side's tests assert against this one copy, so a one-sided edit cannot pass both suites and fail only on a real user's file.",
+		"format": "einkaufsliste/list-backup",
+		"version": 2,
+		"max_categories": 64,
+		"max_items": 2000
+	},
+	"$comment_server_stamped": "Columns the server stamps and no op may carry: none is writable (contract_test.go), and the client's stamp companions, the optimistic values an op keeps beside the field that implies them, cover exactly this set (frontend/src/lib/sync/reasons-contract.test.ts).",
+	"server_stamped": ["checked_at", "last_bought_at", "deleted_at", "image_url"],
+	"$comment_push_statuses": "The per-op `status` a §8.3 push result can carry. The Go pushStatus consts (internal/sync/types.go) and the client's PUSH_STATUSES (frontend/src/lib/sync/types.ts) are both pinned to this list.",
+	"push_statuses": ["applied", "partial", "noop", "merged", "deleted_conflict", "gone", "denied"],
+	"$comment_list_limit": "The refusal the three list-making routes (create, clone, import) share when an account is on as many lists as the server allows: this HTTP status, a body carrying this code, and the cap as `max`. internal/lists/populate.go answers it (its tests read it here) and frontend/src/lib/actions/lists.ts recognises it by these values.",
+	"list_limit": { "status": 409, "code": "list_limit" },
+	"$comment_demo_lifetime_hours": "How long a demo account lives, counted from its creation: the demo build's sweep deletes by it (internal/demo) and the demo banner counts down to it (frontend/src/lib/demo/start.ts).",
+	"demo_lifetime_hours": 24,
+	"$comment_denied_reasons": "The `denied` reason codes the §8.3 push route can return. The Go const block (internal/sync/types.go) and the client's DeniedReason union are both pinned to this list, so a code added on one side cannot be missing on the other.",
+	"denied_reasons": [
+		"bad_collection",
+		"bad_list",
+		"bad_type",
+		"field_unknown",
+		"field_invalid",
+		"field_too_long",
+		"not_member",
+		"wrong_list",
+		"protected_row",
+		"bad_record_id",
+		"row_missing",
+		"list_full"
+	],
+	"$comment_palette": "The twenty-one curated category color tokens [D-37]. frontend/src/lib/categories.ts, src/app.css and backend/seed/categories.json are pinned to this list, so a typo in the seed fails a test instead of rendering gray. The frontend maps tokens to light/dark-safe CSS values; an unknown token renders gray.",
+	"palette": [
+		"green",
+		"amber",
+		"sky",
+		"red",
+		"olive",
+		"yellow",
+		"violet",
+		"orange",
+		"pink",
+		"cyan",
+		"teal",
+		"wine",
+		"slate",
+		"lavender",
+		"brown",
+		"blue",
+		"steel",
+		"lime",
+		"indigo",
+		"magenta",
+		"gray"
+	],
+	"$comment_row_shape": "The canonical client-facing row columns per collection (itemRecordMap / categoryRecordMap in internal/sync/types.go, normalizeItem / normalizeCategory in frontend/src/lib/sync/record.ts), all pinned to this list. The writable allowlist above covers only the subset a client may set.",
+	"row_shape": {
+		"items": [
+			"id",
+			"list",
+			"name",
+			"name_de",
+			"name_en",
+			"quantity",
+			"note",
+			"category_key",
+			"checked",
+			"checked_at",
+			"last_bought_at",
+			"barcode",
+			"image_url",
+			"modified_by",
+			"updated",
+			"created",
+			"deleted_at"
+		],
+		"list_categories": [
+			"id",
+			"list",
+			"slug",
+			"name",
+			"icon",
+			"color",
+			"sort_order",
+			"updated",
+			"created",
+			"deleted_at"
+		]
+	},
+	"collections": {
+		"items": {
+			"writable": {
+				"name": { "max_bytes": 256 },
+				"name_de": { "max_bytes": 256 },
+				"name_en": { "max_bytes": 256 },
+				"quantity": { "max_bytes": 64 },
+				"note": { "max_bytes": 4096 },
+				"category_key": { "max_bytes": 128 },
+				"checked": { "type": "bool" },
+				"barcode": { "max_bytes": 64 }
+			}
+		},
+		"accounts": {
+			"$comment": "NOT a push collection - accounts are never carried in a sync op. The cap lives here because `nickname` is the one accounts column a client writes (the \u00a711 self-update allowlist, internal/account/guard.go), it is one of the two user-controlled strings this app publishes to OTHER people (the \u00a77.4 roster serves it to every co-member; a list's name is the other, [D-08]), and the passkey signup route writes it with SaveNoValidate - so PocketBase's own text validation never runs there and this number is the enforcement. Sized like a display name, not a bio.",
+			"writable": {
+				"nickname": { "max_bytes": 200 }
+			}
+		},
+		"credentials": {
+			"$comment": "NOT a push collection. `friendly_name` is the passkey's device label, written by two routes (internal/account/rename_credential.go and internal/webauthn/handlers.go), which both read this cap. credentials.UpdateRule is nil (migration 1778000003), so those two routes are the only writers.",
+			"writable": {
+				"friendly_name": { "max_bytes": 64 }
+			}
+		},
+		"lists": {
+			"$comment": "NOT a push collection - lists are never carried in a sync op (processOp refuses any collection but items/list_categories). `name` is the list's one name, shared by its members ([D-08]). Three server routes write it with SaveNoValidate (list create, clone/import via populateList), which bypasses PocketBase's field validation, and members rename through lists.UpdateRule, where the lists package's update guard reads this same cap - so it is the bound on every path.",
+			"writable": {
+				"name": { "max_bytes": 200 }
+			}
+		},
+		"list_categories": {
+			"writable": {
+				"name": { "max_bytes": 128 },
+				"icon": { "max_bytes": 64 },
+				"color": { "max_bytes": 64 },
+				"sort_order": { "type": "number" }
+			}
+		}
+	}
+}

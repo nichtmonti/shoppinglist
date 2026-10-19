@@ -1,0 +1,26 @@
+[
+  { "in": "Müsli",            "out": "müsli",      "note": "umlaut preserved (no de-umlauting)" },
+  { "in": "Muesli",           "out": "muesli",     "note": "distinct from Müsli — de-umlauting deliberately excluded" },
+  { "in": "Bußgeld",          "out": "bußgeld",    "note": "ß preserved (no ß→ss)" },
+  { "in": "Bussgeld",         "out": "bussgeld",   "note": "distinct from Bußgeld — ß→ss deliberately excluded" },
+  { "in": "Mu\u0308sli",      "out": "müsli",      "note": "NFD composition (u + combining diaeresis U+0308) → must equal NFC Müsli below" },
+  { "in": "Müsli",            "out": "müsli",      "note": "NFC baseline — proves NFC and NFD inputs converge to one form" },
+  { "in": "ﬁsch",             "out": "fisch",      "note": "NFKC folds the ﬁ ligature (U+FB01) → fi" },
+  { "in": "Milch ２",         "out": "milch 2",    "note": "full-width digit (U+FF12) NFKC → ASCII 2" },
+  { "in": "Milch\u00a02",     "out": "milch 2",    "note": "non-breaking space (U+00A0) NFKC → regular space, then collapse" },
+  { "in": "Milch  2",         "out": "milch 2",    "note": "double internal space collapsed to one" },
+  { "in": "  milch  ",        "out": "milch",      "note": "leading + trailing whitespace trimmed" },
+  { "in": "mIlCh",            "out": "milch",      "note": "mixed case lowercased" },
+  { "in": "Milch 🥛",         "out": "milch 🥛",   "note": "emoji preserved unchanged through NFKC + lowercase" },
+  { "in": "",                 "out": "",           "note": "empty string is stable" },
+
+  {"in": "a\u000bb", "out": "a\u000bb", "note": "vertical tab is not whitespace to Go's regexp \\s ([\\t\\n\\f\\r ]); JS's \\s would collapse it"},
+  {"in": "a\ufeffb", "out": "a\ufeffb", "note": "ZWNBSP is not Go whitespace and has no NFKC decomposition; JS's \\s would collapse it"},
+  {"in": "\ufeffmilch\ufeff", "out": "\ufeffmilch\ufeff", "note": "ZWNBSP survives trimming; JS String.trim() would strip it, Go's TrimSpace does not"},
+  {"in": "a\u2028b", "out": "a\u2028b", "note": "line separator survives the collapse; JS's \\s would fold it to a space"},
+  {"in": "\u0085milch\u0085", "out": "milch", "note": "NEL is Go whitespace and is trimmed; JS String.trim() would keep it"},
+  {"in": "\u0130stanbul", "out": "istanbul", "note": "dotted capital I lowercases to a single i (simple mapping); JS toLowerCase() yields i + U+0307"},
+  {"in": "\u03a3\u039f\u03a3", "out": "\u03c3\u03bf\u03c3", "note": "word-final sigma stays sigma (simple mapping); JS toLowerCase() yields final sigma U+03C2"},
+  {"in": "\u2166", "out": "vii", "note": "NFKC expands the roman-numeral glyph U+2166 to ASCII vii"},
+  {"in": "milch\u30002", "out": "milch 2", "note": "ideographic space (U+3000) NFKC to regular space, then collapse"}
+]

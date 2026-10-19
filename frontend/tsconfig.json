@@ -1,0 +1,20 @@
+{
+	// SvelteKit generates `$app/tsconfig` (node_modules/$app/tsconfig.json):
+	// module resolution, the DOM lib, the route types and the strictness flags
+	// it needs. This file adds only what the project wants on top, and says what
+	// the program covers. The service worker is its own program
+	// (src/service-worker/tsconfig.json, the WebWorker lib instead of the DOM).
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		// SvelteKit names the CURRENT outDir's types here, so the generated file
+		// would say `.svelte-kit-dev` while scripts/dev.sh runs and `.svelte-kit`
+		// after any gate layer. The program always reads `.svelte-kit`, which
+		// every tool but the running dev server writes ([D-157]).
+		"rootDirs": [".", ".svelte-kit/types"],
+		"rewriteRelativeImportExtensions": true,
+		"sourceMap": true,
+		"strict": true
+	},
+	"include": ["src", "vite.config.ts"],
+	"exclude": ["src/service-worker"]
+}

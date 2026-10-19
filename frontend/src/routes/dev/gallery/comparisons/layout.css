@@ -1,0 +1,54 @@
+/* [D-117]'s layout proposal, the part still open. Its name sizes shipped
+   (--tile-name-size on photo and typed tiles, the 15px planning name); what
+   is left: a long quantity wraps within its space instead of ending in an
+   ellipsis — capped at 38% of a shopping row so the name keeps the rest —
+   and below 19rem of row width the planning row's controls move under the
+   name. Unlayered, so it outranks the tile template's layer and the
+   utilities. */
+
+[data-variant='layout'] .qty {
+	min-inline-size: 0;
+	overflow-wrap: anywhere;
+}
+[data-variant='layout'] .tile > .qty {
+	max-inline-size: 100%;
+}
+[data-variant='layout'] .tile.row > .qty,
+[data-variant='layout'] .done-row > .qty {
+	max-inline-size: 38%;
+	flex-shrink: 0;
+}
+[data-variant='layout'] .row-slot {
+	container: proposal-list-row / inline-size;
+}
+@container proposal-list-row (width < 19rem) {
+	[data-variant='layout'] .list-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0.5rem;
+		padding-inline: 0.75rem;
+		--row-content-column: 1;
+	}
+	[data-variant='layout'] .list-row.has-category {
+		grid-template-columns: auto minmax(0, 1fr);
+		--row-content-column: 2;
+	}
+	[data-variant='layout'] .cat-chip {
+		grid-column: 1;
+		grid-row: 1 / 3;
+	}
+	[data-variant='layout'] .row-name {
+		grid-column: var(--row-content-column);
+		grid-row: 1;
+		min-block-size: 44px;
+		margin-block: 0;
+	}
+	[data-variant='layout'] .qty,
+	[data-variant='layout'] .qty-edit {
+		grid-column: var(--row-content-column);
+		grid-row: 2;
+		justify-self: start;
+		min-inline-size: 0;
+		max-inline-size: 100%;
+	}
+}

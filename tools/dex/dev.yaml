@@ -1,0 +1,39 @@
+# A local OpenID Connect provider for trying the OIDC login by hand
+# (CONTRIBUTING.md, `scripts/dev.sh --oidc`, [D-154]):
+#
+#   scripts/dev.sh --oidc                      # Dex + the app, wired together
+#   go -C tools/dex tool dex serve dev.yaml    # Dex alone
+#
+# Every user's password is "password" (the bcrypt hash below is the example
+# Dex's own docs use). Two users, so a passkey account can practise the
+# settings link against a second identity.
+#
+# e2e/oidc/oidc.config.ts builds the OIDC browser harness's Dex config from
+# this file: everything above `redirectURIs:` (port swapped) plus the password
+# hash, with its own redirect URIs and users.
+issuer: http://127.0.0.1:5556/dex
+storage:
+  type: memory
+web:
+  http: 127.0.0.1:5556
+oauth2:
+  skipApprovalScreen: true
+enablePasswordDB: true
+staticClients:
+  - id: shoppinglist
+    secret: shoppinglist-secret
+    name: Einkaufsliste
+    # scripts/dev.sh serves the SPA from Vite (5173) and the API from 8090;
+    # PocketBase's redirect handler is reachable through either.
+    redirectURIs:
+      - http://localhost:5173/api/oauth2-redirect
+      - http://localhost:8090/api/oauth2-redirect
+staticPasswords:
+  - email: anna@example.com
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: Anna
+    userID: anna
+  - email: bob@example.com
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: Bob
+    userID: bob

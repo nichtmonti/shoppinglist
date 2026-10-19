@@ -1,0 +1,77 @@
+# Woodpecker CI — frontend workflow (docs/internals/design.md §14).
+# The repo's rules, then format + typecheck + lint (fast-fail), then the
+# unit/component test suite, as the gate's tasks in the CI image ([D-203]).
+# Runs in parallel with go.yaml on every push/PR; e2e.yaml waits for both via
+# depends_on. The advisory scanners live in security.yaml (weekly, and on a
+# dependency change, [D-203]): they can go red without a repo change. Steps share one workspace, so frontend-test reuses the
+# node_modules frontend-check installed.
+#
+# `tag` (v* only) runs this suite on the tag event too — release.yaml waits on
+# that event's own suite runs via depends_on ([D-66]). `concurrency: 1` queues
+# a second instance of this workflow instead of stacking two svelte-check +
+# vitest runs on the agent.
+#
+# The pnpm cache volume is a host directory on the maintainer's trusted agent;
+# see e2e.yaml's header for what a fork does about it.
+
+variables:
+  - &ci_image localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+  - &pnpm_cache /var/lib/woodpecker-cache/pnpm:/root/.local/share/pnpm
+  - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
+  # go-task, the gate's runner (tools/task, [D-177]): the steps run the same
+  # tasks the local gate does. Built from its module, with the shared build
+  # cache; the module cache stays per pipeline ([D-60], go.yaml).
+  - &install_task export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod" GOCACHE=/root/.cache/go-build && go -C tools/task install tool
+
+when:
+  - event: [push, pull_request, manual]
+  - event: tag
+    ref: refs/tags/v*
+
+depends_on: [ci-image]
+
+concurrency: 1
+
+steps:
+  # The gate's repo-rules task: the decision log's index against its entries,
+  # relative links and #anchors resolved the way Codeberg resolves them, the
+  # operator's files against the settings the server reads, and the CI image
+  # tag (ci-image.yaml checks it too, before it builds).
+  repo-rules:
+    image: *ci_image
+    volumes:
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task repo-rules
+
+  # The gate's static layers at full scope (Taskfile.yml): prettier over the
+  # repo, svelte-check, tsc over the e2e harnesses, the whole type-aware
+  # lint. The `deps` task installs node_modules from the lockfiles first.
+  frontend-check:
+    image: *ci_image
+    volumes:
+      - *pnpm_cache
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task format check check:e2e lint:all
+
+  frontend-test:
+    image: *ci_image
+    volumes:
+      - *pnpm_cache
+      - *go_build_cache
+    commands:
+      - *install_task
+      # The task runs vitest with --silent=passed-only (Taskfile.yml), so the
+      # expected stderr of passing tests (loop retries, Svelte dev warnings)
+      # stays out of the log and its summary names the failures ([D-203]).
+      # `|| TEST_EXIT=$?`: Woodpecker runs the commands under `sh -e`, so a
+      # bare failing command would end the step before the coverage report.
+      # --coverage: the total the unit and component tests reach, and the
+      # changed lines none reaches, printed below ([D-203]). No threshold; it
+      # costs ~20% of the run.
+      - TEST_EXIT=0; task vitest:all -- --coverage || TEST_EXIT=$?
+      - task coverage:frontend || true
+      - exit $TEST_EXIT

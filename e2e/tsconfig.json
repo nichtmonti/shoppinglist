@@ -1,0 +1,21 @@
+{
+	// Playwright strips the types and runs what is left, so nothing else checks
+	// them: a changed helper signature would break the harnesses neither the
+	// gate nor CI runs (shots/) unnoticed. `task check:e2e` type-checks every
+	// harness. The DOM lib is for the callbacks page.evaluate() runs in the
+	// browser.
+	"compilerOptions": {
+		"target": "ES2024",
+		"lib": ["ES2024", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"types": ["node"],
+		"strict": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules"]
+}

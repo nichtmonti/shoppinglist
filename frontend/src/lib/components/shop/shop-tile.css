@@ -1,0 +1,422 @@
+/* ---- shop tile template (§9.1, [D-86], [D-83]) ----------------------------
+ *
+ * ShopTile's whole styling, keyed on data-shape (grid | row), data-kind
+ * (typed | product) and data-door. Density sizes are tokens in
+ * shop-layout.css; --tile-gap is in app.css.
+ *
+ * Name, chip and door are grid items in named areas, never positioned by
+ * arithmetic; only the full-bleed layers are absolute. Spacing is margin on
+ * the part, not grid gap, so an absent part leaves a zero-width track.
+ *
+ * Stacking, bottom to top: media and scrim (0), check button (1), text and
+ * chip (2, click-through), door and a row's lead (3), sealed inside the tile
+ * ([D-317]).
+ *
+ * The @layer is load-bearing: a utility outranks it, so the chip's and icons'
+ * utilities must never write a property a rule here owns
+ * (tile-template-contract.svelte.test.ts).
+ */
+@layer components {
+	.tile {
+		/* The door's box: the chip's line height, so it never makes the foot
+		   line taller. The hit target is 44px below ([D-56]). */
+		--tile-door: 1.25rem;
+		position: relative;
+		isolation: isolate;
+		display: grid;
+		box-sizing: border-box;
+		inline-size: 100%;
+		min-block-size: var(--tile-h);
+		padding: var(--tile-p);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-card);
+		background-color: var(--surface-2);
+		color: var(--foreground);
+		text-align: start;
+		transition:
+			scale 0.12s ease,
+			border-color 0.12s ease;
+	}
+
+	/* The check-off button covers the tile; the tile shows its states. */
+	.tile > .tile-check {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		border-radius: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.tile > .tile-check:focus-visible {
+		outline: none;
+	}
+	.tile:has(> .tile-check:focus-visible) {
+		outline: 2px solid var(--primary-text);
+		outline-offset: 2px;
+	}
+	.tile:has(> .tile-check:hover) {
+		border-color: var(--line-strong);
+	}
+	.tile:has(> .tile-check:active) {
+		scale: var(--press-card-scale);
+	}
+
+	/* Text and chip paint above the button but let taps through to it. */
+	.tile > .tile-text,
+	.tile > .qty {
+		z-index: 2;
+		pointer-events: none;
+	}
+
+	/* ---- media ------------------------------------------------------------ */
+
+	.tile > .tile-media,
+	.tile > .scrim {
+		pointer-events: none;
+	}
+	/* Grid: full-bleed. Rounded to the tile's inner edge, since the tile
+	   does not clip (a clipping tile would clip the door's hit target). */
+	.tile[data-shape='grid'] > .tile-media {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		inline-size: 100%;
+		block-size: 100%;
+		border-radius: calc(var(--radius-card) - 1px);
+	}
+	/* object-fit: contain keeps a portrait shot legible; the letterbox falls
+	   on the placeholder's dark surface. */
+	.tile[data-shape='grid'][data-kind='product'] {
+		background-image: var(--tile-photo-fallback);
+	}
+	.tile[data-shape='grid'] > .tile-photo {
+		object-fit: contain;
+	}
+	.tile > .tile-photo-fallback {
+		background-image: var(--tile-photo-fallback);
+	}
+	.tile > .scrim {
+		position: absolute;
+		inset-inline: 0;
+		inset-block-end: 0;
+		z-index: 0;
+		block-size: 100%;
+		/* All four corners: the scrim can reach the top of a short tile. */
+		border-radius: calc(var(--radius-card) - 1px);
+		/* Anchored to the text ([D-83]) via ShopTile's --tile-text-top; the
+		   fallback, before it is measured, is a two-line name with a note.
+		   max() keeps the stops in order. */
+		--scrim-text-at: max(2.5rem, var(--tile-text-top, 5.25rem));
+		background-image: linear-gradient(
+			to top,
+			var(--tile-scrim-foot) 0,
+			var(--tile-scrim-chip) 2.25rem,
+			var(--tile-scrim-text) var(--scrim-text-at),
+			transparent calc(var(--scrim-text-at) + var(--tile-scrim-fade))
+		);
+	}
+
+	/* ---- text ------------------------------------------------------------- */
+
+	.tile > .tile-text {
+		grid-area: text;
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+		min-inline-size: 0;
+	}
+	.tile .tile-name {
+		min-inline-size: 0;
+		font-size: var(--text-name);
+		font-weight: var(--font-weight-demi);
+		line-height: var(--leading-flush);
+		text-wrap: balance;
+	}
+	.tile[data-kind='typed'] .tile-name {
+		font-size: var(--tile-name-size);
+		font-weight: 700;
+	}
+	/* The note, ellipsized as the last resort (the sheet reads it all). */
+	.tile .tile-meta {
+		display: flex;
+		align-items: baseline;
+		gap: 0.25rem;
+		min-inline-size: 0;
+		max-inline-size: 100%;
+		font-size: var(--text-note);
+		font-weight: var(--font-weight-book);
+		line-height: var(--leading-flush);
+	}
+	.tile .tile-note {
+		min-inline-size: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		color: var(--muted-foreground);
+	}
+
+	/* ---- the chip and the door -------------------------------------------- */
+
+	.tile > .qty {
+		grid-area: qty;
+		align-self: center;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.tile > .tile-info {
+		grid-area: door;
+		position: relative;
+		z-index: 3;
+		display: grid;
+		place-items: center;
+		align-self: center;
+		inline-size: var(--tile-door);
+		block-size: var(--tile-door);
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--muted-foreground);
+		cursor: pointer;
+	}
+	.tile > .tile-info:hover {
+		color: var(--foreground);
+	}
+	/* 44px effective target around whatever the box is ([D-56]). */
+	.tile > .tile-info::after {
+		content: '';
+		position: absolute;
+		inset: min(0px, calc((var(--tile-door) - 44px) / 2));
+	}
+	.tile .tile-info-icon {
+		display: block;
+		flex-shrink: 0;
+		inline-size: 0.9375rem;
+		block-size: 0.9375rem;
+	}
+
+	/* ---- grid shape ------------------------------------------------------- *
+	 *
+	 * The text, then the foot line: door, chip. `1fr chip 1fr` is the whole
+	 * centring rule ([D-83]): a short chip sits centred, a longer one moves
+	 * off centre past the door, and one longer than the line ellipsizes. */
+	.tile[data-shape='grid'] {
+		grid-template-columns: 1fr minmax(0, max-content) 1fr;
+		grid-template-rows: 1fr auto;
+		grid-template-areas:
+			'text text text'
+			'door qty .';
+	}
+	.tile[data-shape='grid'] > .qty,
+	.tile[data-shape='grid'] > .tile-info {
+		margin-block-start: var(--tile-gap);
+	}
+	.tile[data-shape='grid'] > .tile-info {
+		justify-self: start;
+		margin-inline-end: 0.25rem;
+	}
+	.tile[data-shape='grid'] .tile-name {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		hyphens: auto;
+		overflow-wrap: anywhere;
+	}
+
+	/* Product: the text sits on the scrim at the foot, white over the photo. */
+	.tile[data-shape='grid'][data-kind='product'] > .tile-text {
+		align-self: end;
+	}
+	.tile[data-shape='grid'][data-kind='product'] .tile-name {
+		color: var(--tile-photo-ink);
+		text-shadow: var(--tile-photo-shadow);
+	}
+	.tile[data-shape='grid'][data-kind='product'] .tile-note {
+		color: var(--tile-photo-note);
+		text-shadow: var(--tile-photo-shadow);
+	}
+	.tile[data-shape='grid'][data-kind='product'] > .tile-info {
+		color: var(--tile-photo-note);
+	}
+	.tile[data-shape='grid'][data-kind='product'] > .tile-info:hover {
+		color: var(--tile-photo-ink);
+	}
+
+	/* Typed: name, note and chip centre as one label ([D-147]); a cut name
+	   starts at the edge. With the door, the foot line is the tile's last. */
+	.tile[data-shape='grid'][data-kind='typed'] {
+		grid-template-rows: auto auto;
+		align-content: center;
+		text-align: center;
+	}
+	.tile[data-shape='grid'][data-kind='typed'][data-door] {
+		grid-template-rows: 1fr auto;
+		align-content: normal;
+	}
+	/* A centred name may use a little of the padding ([D-83]), so a word
+	   that only just misses the line keeps it; the note shares the edge. */
+	.tile[data-shape='grid'][data-kind='typed'] > .tile-text {
+		align-self: center;
+		align-items: center;
+		margin-inline: -0.25rem;
+	}
+	.tile[data-shape='grid'][data-kind='typed'] .tile-name.clamped {
+		text-align: start;
+	}
+
+	/* ---- row shape: the list density ([D-83], [D-313]) ------------------ *
+	 *
+	 * Lead, text, chip, flat on the page, with no card. The lead is the
+	 * category icon, or the photo's thumbnail in its place; on a row with a
+	 * door it is the door, marked by an ⓘ badge, so nothing at the row's end
+	 * comes and goes ([D-331]). The chip is capped at 45% so it cannot starve
+	 * the name. ShopItems sets no gap between the rows of one
+	 * category (shop-layout.css), so the bar of its colour at the start edge
+	 * runs unbroken through it and breaks where the next begins, and the row
+	 * takes a wash of the same colour ([D-329]). --c is the tile's
+	 * categoryStyle(); a row with no category has neither. */
+	.tile[data-shape='row'] {
+		grid-template-columns: auto minmax(0, 1fr) fit-content(var(--qty-max));
+		grid-template-areas: 'cat text qty';
+		align-items: center;
+		padding: 0.375rem 1rem 0.375rem 1.125rem;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+	}
+	.tile[data-marked] {
+		background-color: color-mix(in srgb, var(--c) 7%, transparent);
+	}
+	.tile[data-marked]::before {
+		content: '';
+		position: absolute;
+		inset-block: 0;
+		inset-inline-start: 0;
+		inline-size: 4px;
+		background: var(--c);
+		pointer-events: none;
+	}
+	/* The ring stays inside the row: its neighbours touch it. */
+	.tile[data-shape='row']:has(> .tile-check:focus-visible) {
+		outline-offset: -2px;
+	}
+	.tile[data-shape='row']:has(> .tile-check:hover),
+	.tile[data-shape='row']:has(> .tile-check:active) {
+		background-color: color-mix(in srgb, var(--c, var(--muted-foreground)) 14%, transparent);
+		scale: none;
+	}
+	.tile > .tile-lead {
+		grid-area: cat;
+		position: relative;
+		z-index: 2;
+		display: grid;
+		place-items: center;
+		inline-size: 2.125rem;
+		block-size: 2.125rem;
+		margin: 0;
+		margin-inline-end: 0.75rem;
+		padding: 0;
+		border: 0;
+		border-radius: var(--radius-chip);
+		background: transparent;
+		color: var(--muted-foreground);
+		pointer-events: none;
+	}
+	.tile > button.tile-lead {
+		z-index: 3;
+		cursor: pointer;
+		pointer-events: auto;
+	}
+	/* 44px effective target around the 34px lead ([D-56]). */
+	.tile > button.tile-lead::after {
+		content: '';
+		position: absolute;
+		inset: min(0px, calc((2.125rem - 44px) / 2));
+	}
+	.tile > button.tile-lead:focus-visible {
+		outline: 2px solid var(--primary-text);
+		outline-offset: 2px;
+	}
+	.tile-lead > .tile-cat {
+		display: grid;
+		place-items: center;
+		inline-size: 100%;
+		block-size: 100%;
+		overflow: hidden;
+		box-sizing: border-box;
+		border: 1px solid color-mix(in srgb, var(--c, var(--primary-text)) 28%, var(--border));
+		border-radius: var(--radius-chip);
+		/* The plate every category icon sits on (CategoryPlate's row size,
+		   cat-plate-14 / cat-border-28), in both themes ([D-326]). */
+		background-color: color-mix(in srgb, var(--c, var(--primary-text)) 14%, var(--icon-plate));
+		transition: scale 0.12s ease;
+	}
+	.tile > button.tile-lead:active > .tile-cat {
+		scale: 0.9;
+	}
+	.tile-cat > .tile-thumb {
+		inline-size: 100%;
+		block-size: 100%;
+		object-fit: cover;
+	}
+	/* The door's mark ([D-331]): the tiles' ⓘ in the aisle's ink, ringed in
+	   the page's ground so it sits on the icon's corner, not in it. */
+	.tile-lead > .tile-badge {
+		position: absolute;
+		inset-block-end: -0.3125rem;
+		inset-inline-end: -0.4375rem;
+		inline-size: 0.9375rem;
+		block-size: 0.9375rem;
+		border-radius: 50%;
+		background-color: color-mix(in srgb, var(--c, var(--muted-foreground)) 65%, var(--foreground));
+		/* corner-mark's ring (app.css), in the page's ground. */
+		box-shadow: 0 0 0 2px var(--background);
+		color: var(--background);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		line-height: 0.9375rem;
+		text-align: center;
+	}
+	.tile[data-shape='row'] > .tile-text {
+		align-items: flex-start;
+	}
+	.tile[data-shape='row'] .tile-name {
+		max-inline-size: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.tile[data-shape='row'] > .qty {
+		margin-inline-start: 0.6875rem;
+	}
+	/* A row too narrow for one line (200% text on a phone, [D-83]): the name
+	   takes the first line, and lead and chip start the second ([D-313]).
+	   The threshold is rem, following text size. */
+	@container (width < 18rem) {
+		.tile[data-shape='row'] {
+			grid-template-columns: auto minmax(0, 1fr);
+			grid-template-areas:
+				'text text'
+				'cat qty';
+		}
+		.tile[data-shape='row'] > .tile-lead {
+			margin-block-start: var(--tile-gap);
+		}
+		.tile[data-shape='row'] > .qty {
+			justify-self: start;
+			max-inline-size: 100%;
+			margin-inline-start: 0;
+			margin-block-start: var(--tile-gap);
+		}
+	}
+
+	/* Compact: the name yields its second line only when a note is there. */
+	[data-density='compact'] .tile[data-shape='grid'] .tile-text:has(.tile-meta) .tile-name {
+		-webkit-line-clamp: 1;
+	}
+}

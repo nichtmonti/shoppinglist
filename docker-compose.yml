@@ -1,0 +1,31 @@
+# Self-hosting guide: docs/deploying.md. Settings go in .env (.env.example
+# lists them), not here.
+#
+#   docker compose up -d
+#   docker compose logs shoppinglist   # the setup link for the first account
+services:
+  shoppinglist:
+    # Unset, the newest release: a restart can upgrade you.
+    image: codeberg.org/sclermont/shoppinglist:${SHOPPINGLIST_VERSION:-latest}
+    restart: unless-stopped
+    # Localhost only, for your TLS reverse proxy.
+    ports:
+      - "${SHOPPINGLIST_BIND:-127.0.0.1:8090}:8090"
+    # All the app stores: back it up. A host directory instead:
+    # docs/deploy-reference.md#bind-mounting-a-host-directory-instead-of-a-named-volume
+    volumes:
+      - shoppinglist_data:/pb_data
+    env_file: .env
+    # Locked down: docs/deploy-reference.md#the-container-is-locked-down
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    pids_limit: 256
+
+volumes:
+  shoppinglist_data:

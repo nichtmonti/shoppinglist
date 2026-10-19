@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Einkaufsliste</title>
+		<!-- viewport-fit=cover is what makes `env(safe-area-inset-*)` non-zero.
+		     Without it every safe-area calc in the app resolves to 0 and the
+		     sheet, the toast and the install prompt sit under the home
+		     indicator on a notched phone. -->
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="text-scale" content="scale" />
+		<!-- Per scheme, so the browser chrome matches the app in both themes. -->
+		<meta name="theme-color" content="#05773b" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#131311" media="(prefers-color-scheme: dark)" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
+		<!-- Before the stylesheets, so a dark choice paints dark from the first
+		     frame; see the file. -->
+		<script src="%sveltekit.assets%/theme.js"></script>
+		<!-- In the shell, not added by the layout: the starter template's
+		     <svelte:head> icon existed only once the app's JS had run (and as an
+		     inlined data: URI), so bookmarks, history and iOS saw none. The SVG for
+		     browsers that take it, a PNG-in-ICO for those that do not (Safari's
+		     tab), and a full-bleed 180px PNG for the iOS home screen, which
+		     rounds its own corners and paints transparency black. -->
+		<link rel="icon" href="%sveltekit.assets%/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

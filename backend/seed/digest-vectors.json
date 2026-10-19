@@ -1,0 +1,73 @@
+[
+  {
+    "note": "empty list — no rows at all",
+    "rows": [],
+    "row_count": 0,
+    "max_updated": "",
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "note": "single row",
+    "rows": [
+      {
+        "id": "a1b2c3d4e5f6a7b8",
+        "updated": "2026-07-26 12:40:26.053Z"
+      }
+    ],
+    "row_count": 1,
+    "max_updated": "2026-07-26 12:40:26.053Z",
+    "hash": "2aee86da696ffc8ae53028be5c8de688bef2eef710e180ef3a2b14f242ff11f9"
+  },
+  {
+    "note": "rows supplied out of order — the digest sorts before hashing",
+    "rows": [
+      {
+        "id": "ffff0000ffff0000",
+        "updated": "2026-07-26 12:40:26.999Z"
+      },
+      {
+        "id": "0000ffff0000ffff",
+        "updated": "2026-01-02 03:04:05.006Z"
+      },
+      {
+        "id": "8888888888888888",
+        "updated": "2026-07-26 12:40:26.053Z"
+      }
+    ],
+    "row_count": 3,
+    "max_updated": "2026-07-26 12:40:26.999Z",
+    "hash": "f776216d99cede28772d3c77ec2e16db0ab19c033a2a9657e93c579289330604"
+  },
+  {
+    "note": "tombstoned rows count like any other row (deleted_at is not part of the digest)",
+    "rows": [
+      {
+        "id": "aaaaaaaaaaaaaaaa",
+        "updated": "2026-03-03 03:03:03.003Z"
+      },
+      {
+        "id": "bbbbbbbbbbbbbbbb",
+        "updated": "2026-03-03 03:03:03.004Z"
+      }
+    ],
+    "row_count": 2,
+    "max_updated": "2026-03-03 03:03:03.004Z",
+    "hash": "3b6ab70d1d6d6f4fcaa877b9ffd19810b4fd525592adf8c0531f1401d34f5fc2"
+  },
+  {
+    "note": "two rows whose updated differs only in the millisecond field",
+    "rows": [
+      {
+        "id": "cccccccccccccccc",
+        "updated": "2026-04-04 04:04:04.001Z"
+      },
+      {
+        "id": "cccccccccccccccd",
+        "updated": "2026-04-04 04:04:04.002Z"
+      }
+    ],
+    "row_count": 2,
+    "max_updated": "2026-04-04 04:04:04.002Z",
+    "hash": "46794f95546a9a4061a3f24080a5d1489102fd2af5bd60230e50fac575ba8bef"
+  }
+]

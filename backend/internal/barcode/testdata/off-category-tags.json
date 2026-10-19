@@ -1,0 +1,715 @@
+[
+	{
+		"want": "pasta_rice",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:cereals-and-potatoes",
+			"en:cereals-and-their-products",
+			"en:pastas",
+			"en:cereal-pastas",
+			"en:durum-wheat-pasta",
+			"en:dry-pastas",
+			"en:spaghetti",
+			"en:durum-wheat-spaghetti",
+			"en:dry-durum-wheat-pasta"
+		]
+	},
+	{
+		"want": "pasta_rice",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:cereals-and-potatoes",
+			"en:cereals-and-their-products",
+			"en:pastas",
+			"en:cereal-pastas",
+			"en:durum-wheat-pasta",
+			"en:dry-pastas",
+			"en:spaghetti",
+			"en:whole-or-semi-whole-durum-wheat-pasta",
+			"en:dried-wholemeal-pasta",
+			"en:durum-wheat-spaghetti",
+			"en:penne",
+			"en:whole-durum-wheat-pasta",
+			"en:durum-wheat-penne",
+			"en:penne-rigate"
+		]
+	},
+	{
+		"want": "pasta_rice",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:cereals-and-potatoes",
+			"en:seeds",
+			"en:cereals-and-their-products",
+			"en:cereal-grains",
+			"en:quinoa"
+		]
+	},
+	{
+		"want": "coffee_tea",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:plant-based-foods-and-beverages",
+			"en:beverages",
+			"en:plant-based-foods",
+			"en:plant-based-beverages",
+			"en:beverage-preparations",
+			"en:instant-beverages",
+			"en:coffees",
+			"en:instant-coffee-substitutes",
+			"en:instant-coffees",
+			"en:instant-mix-of-chicory-and-coffee-powder"
+		]
+	},
+	{
+		"want": "coffee_tea",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:plant-based-foods-and-beverages",
+			"en:beverages",
+			"en:plant-based-foods",
+			"en:hot-beverages",
+			"en:plant-based-beverages",
+			"en:teas",
+			"en:coffees",
+			"en:Thea"
+		]
+	},
+	{
+		"want": "breakfast",
+		"tags": [
+			"en:breakfasts",
+			"en:spreads",
+			"en:sweet-spreads",
+			"fr:pates-a-tartiner",
+			"en:hazelnut-spreads",
+			"en:chocolate-spreads",
+			"en:cocoa-and-hazelnuts-spreads"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:plant-based-foods-and-beverages",
+			"en:beverages",
+			"en:plant-based-foods",
+			"en:cereals-and-potatoes",
+			"en:dairy-substitutes",
+			"en:cereals-and-their-products",
+			"en:milk-substitutes",
+			"en:plant-based-beverages",
+			"en:plant-based-milk-alternatives",
+			"en:cereal-based-drinks",
+			"en:oat-based-drinks"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:plant-based-foods-and-beverages",
+			"en:beverages",
+			"en:plant-based-foods",
+			"en:dairy-substitutes",
+			"en:milk-substitutes",
+			"en:nuts-and-their-products",
+			"en:plant-based-beverages",
+			"en:plant-based-milk-alternatives",
+			"en:nut-based-drinks",
+			"en:almond-based-drinks"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:dairies",
+			"en:fermented-foods",
+			"en:fermented-milk-products",
+			"en:dairy-drinks",
+			"en:fermented-drinks",
+			"en:fermented-milk-drinks",
+			"en:kefir"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:dairy-substitutes",
+			"en:fruits-based-foods",
+			"en:coconuts-and-their-products",
+			"en:plant-based-creams",
+			"en:coconut-milks-and-creams",
+			"en:plant-based-creams-for-cooking",
+			"en:coconut-creams"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:seafood",
+			"en:fishes-and-their-products",
+			"en:canned-foods",
+			"en:fishes",
+			"en:fatty-fishes",
+			"en:canned-fishes",
+			"en:sardines",
+			"en:canned-sardines",
+			"en:sardines-in-oil",
+			"en:sardines-in-olive-oil"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:seafood",
+			"en:fishes-and-their-products",
+			"en:canned-foods",
+			"en:fishes",
+			"en:fatty-fishes",
+			"en:canned-fishes",
+			"en:fish-fillets",
+			"en:mackerels",
+			"en:mackerel-fillets",
+			"en:mackerel-fillets-in-white-wine-and-herbs",
+			"en:tinned-mackerels"
+		]
+	},
+	{
+		"want": "snacks_sweets",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:snacks",
+			"en:cereals-and-potatoes",
+			"en:sweet-snacks",
+			"en:bars",
+			"en:cereal-bars"
+		]
+	},
+	{
+		"want": "breakfast",
+		"tags": [
+			"en:breakfasts",
+			"en:spreads",
+			"en:sweet-spreads",
+			"fr:pates-a-tartiner",
+			"en:chocolate-spreads",
+			"en:hazelnut-spreads",
+			"en:cocoa-and-hazelnuts-spreads",
+			"en:confectionary-based-spreads",
+			"en:pates-a-tartiner-au-chocolat",
+			"en:pates-a-tartiner-aux-noisettes",
+			"en:pates-a-tartiner-aux-noisettes-et-au-cacao",
+			"en:petit-dejeuners",
+			"en:produits-a-tartiner",
+			"en:produits-a-tartiner-sucres"
+		]
+	},
+	{
+		"want": "breakfast",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:legumes-and-their-products",
+			"en:breakfasts",
+			"en:spreads",
+			"en:nuts-and-their-products",
+			"en:plant-based-spreads",
+			"en:sweet-spreads",
+			"en:oilseed-purees",
+			"en:legume-butters",
+			"en:peanut-butters",
+			"fr:pates-a-tartiner",
+			"en:nut-butters"
+		]
+	},
+	{
+		"want": "breakfast",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:legumes-and-their-products",
+			"en:spreads",
+			"en:plant-based-spreads",
+			"en:nuts-and-their-products",
+			"en:oilseed-purees",
+			"en:legume-butters",
+			"en:nut-butters",
+			"en:peanut-butters"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:vegetable-based-foods-and-beverages",
+			"en:condiments",
+			"en:vegetables-based-foods",
+			"en:tomatoes-and-their-products",
+			"en:sauces",
+			"en:meal-sauces",
+			"en:tomato-sauces",
+			"en:tomato-sauces-with-basil",
+			"en:groceries"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:vegetable-based-foods-and-beverages",
+			"en:condiments",
+			"en:vegetables-based-foods",
+			"en:tomatoes-and-their-products",
+			"en:sauces",
+			"en:meal-sauces",
+			"en:tomato-sauces",
+			"en:cooking-sauces",
+			"en:tomato-sauces-with-basil",
+			"nl:Kruidenierswaren/Droge voeding",
+			"nl:Sauzen (warm/koud)"
+		]
+	},
+	{
+		"want": "snacks_sweets",
+		"tags": [
+			"en:snacks",
+			"en:sweet-snacks",
+			"en:cocoa-and-its-products",
+			"en:confectioneries",
+			"en:chocolate-candies",
+			"en:bonbons",
+			"fr:rochers-au-chocolat"
+		]
+	},
+	{
+		"want": "frozen",
+		"tags": [
+			"en:meals",
+			"en:meals-with-meat",
+			"en:pizzas-pies-and-quiches",
+			"en:pizzas",
+			"en:pork-meals",
+			"en:ham-pizzas",
+			"en:cured-ham-pizza"
+		]
+	},
+	{
+		"want": "frozen",
+		"tags": [
+			"en:frozen-foods",
+			"en:meals",
+			"en:pizzas-pies-and-quiches",
+			"en:pizzas",
+			"en:frozen-pizzas-and-pies",
+			"en:vegetarian-pizzas",
+			"en:frozen-pizzas",
+			"en:vegetable-pizza"
+		]
+	},
+	{
+		"want": "frozen",
+		"tags": [
+			"en:desserts",
+			"en:frozen-foods",
+			"en:frozen-desserts",
+			"en:ice-creams-and-sorbets",
+			"en:ice-creams",
+			"en:ice-cream-tubs",
+			"en:luxury-ice-cream-in-a-cup"
+		]
+	},
+	{
+		"want": "personal_care",
+		"tags": [
+			"en:dietary-supplements",
+			"en:mineral-supplements",
+			"en:flavoured-dietary-supplements",
+			"en:magnesium-supplements",
+			"en:Flavoured magnesium supplements"
+		]
+	},
+	{
+		"want": "beverages",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverage-preparations",
+			"en:syrups",
+			"en:flavoured-syrups",
+			"en:lemon-base-for-beverage-without-sugar-to-be-diluted"
+		]
+	},
+	{
+		"want": "beverages",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:non-alcoholic-beverages",
+			"en:carbonated-drinks",
+			"en:waters",
+			"en:spring-waters",
+			"en:carbonated-waters",
+			"en:mineral-waters",
+			"en:unsweetened-beverages",
+			"en:carbonated-mineral-waters"
+		]
+	},
+	{
+		"want": "beverages",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:non-alcoholic-beverages",
+			"en:carbonated-drinks",
+			"en:soft-drinks",
+			"en:sodas",
+			"en:colas",
+			"en:sweetened-beverages"
+		]
+	},
+	{
+		"want": "beverages",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:waters",
+			"en:spring-waters",
+			"en:mineral-waters",
+			"en:unsweetened-beverages",
+			"en:natural-mineral-waters",
+			"fr:getränke",
+			"fr:natürliches-mineralwasser"
+		]
+	},
+	{
+		"want": "breakfast",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:legumes-and-their-products",
+			"en:fats",
+			"en:spreads",
+			"en:nuts-and-their-products",
+			"en:plant-based-spreads",
+			"en:vegetable-fats",
+			"en:oilseed-purees",
+			"en:legume-butters",
+			"en:peanut-butters",
+			"en:nut-butters",
+			"en:creamy-peanut-butters"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": ["en:condiments", "en:sauces", "en:pestos", "en:cooking-sauces", "en:red-pestos"]
+	},
+	{
+		"want": "beverages",
+		"tags": [
+			"en:Boissons avec sucre ajouté",
+			"en:Boissons gazeuses sucrées sans jus de fruit",
+			"en:Sodas au cola"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:dairies",
+			"en:fermented-foods",
+			"en:fermented-milk-products",
+			"en:cheeses",
+			"en:italian-cheeses",
+			"en:stretched-curd-cheeses",
+			"en:mozzarella",
+			"en:Cibi fermentati",
+			"en:Formaggi",
+			"en:Formaggi italiani",
+			"en:Formaggio vaccino",
+			"en:Latticini",
+			"en:Mozzarella di mucca",
+			"en:Pasta filata",
+			"en:Prodotti lattiero-caseari fermentati"
+		]
+	},
+	{
+		"want": "baking_spices",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:cereals-and-potatoes",
+			"en:cereals-and-their-products",
+			"en:cooking-helpers",
+			"en:starches",
+			"en:cereal-starches",
+			"en:corn-starch"
+		]
+	},
+	{ "want": "baking_spices", "tags": ["en:condiments", "en:salts", "en:sea-salts"] },
+	{
+		"want": "pantry",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:vegetable-based-foods-and-beverages",
+			"en:canned-foods",
+			"en:vegetables-based-foods",
+			"en:canned-plant-based-foods",
+			"en:tomatoes-and-their-products",
+			"en:canned-tomato-products",
+			"en:tomato-pastes",
+			"en:double-concentrate-tomato-paste"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:vegetable-based-foods-and-beverages",
+			"en:canned-foods",
+			"en:vegetables-based-foods",
+			"en:canned-plant-based-foods",
+			"en:tomatoes-and-their-products",
+			"en:vegetables",
+			"en:canned-tomato-products",
+			"en:canned-vegetables",
+			"en:tomatoes",
+			"en:canned-tomatoes",
+			"en:tomato-pulps"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:vegetable-based-foods-and-beverages",
+			"en:meals",
+			"en:vegetables-based-foods",
+			"en:tomatoes-and-their-products",
+			"en:soups",
+			"en:vegetable-soups",
+			"en:cream-soups",
+			"en:cream-of-vegetable-soups",
+			"en:cream-of-tomato-soups"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:dairies",
+			"en:fermented-foods",
+			"en:desserts",
+			"en:fermented-milk-products",
+			"en:dairy-desserts",
+			"en:dairy-drinks",
+			"en:fermented-dairy-desserts",
+			"en:fermented-drinks",
+			"en:fermented-milk-drinks",
+			"en:yogurts",
+			"en:yogurt-drinks",
+			"en:milk-drinks-fermented-with-l-casei",
+			"en:sweetened-fermented-milk-drinks-with-l-casei",
+			"en:fermented-milk-drinks-with-sugar"
+		]
+	},
+	{
+		"want": "pantry",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:fruits-and-vegetables-based-foods",
+			"en:vegetable-based-foods-and-beverages",
+			"en:condiments",
+			"en:vegetables-based-foods",
+			"en:tomatoes-and-their-products",
+			"en:sauces",
+			"en:meal-sauces",
+			"en:tomato-sauces",
+			"en:pizza-sauces"
+		]
+	},
+	{
+		"want": "frozen",
+		"tags": [
+			"en:frozen-foods",
+			"en:meals",
+			"en:pizzas-pies-and-quiches",
+			"en:frozen-pizzas-and-pies",
+			"en:pizzas",
+			"en:frozen-pizzas",
+			"en:tuna-pizzas"
+		]
+	},
+	{
+		"want": "frozen",
+		"tags": [
+			"en:meals",
+			"en:meals-with-meat",
+			"en:pizzas-pies-and-quiches",
+			"en:pizzas",
+			"en:pork-meals",
+			"en:ham-pizzas",
+			"en:cured-ham-pizza",
+			"en:pizza-with-ham-and-cheese"
+		]
+	},
+	{
+		"want": "alcohol",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:alcoholic-beverages",
+			"en:beers",
+			"en:ales",
+			"en:lagers",
+			"en:blonde-ales"
+		]
+	},
+	{
+		"want": "coffee_tea",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:plant-based-foods-and-beverages",
+			"en:beverages",
+			"en:hot-beverages",
+			"en:plant-based-beverages",
+			"en:beverage-preparations",
+			"en:teas",
+			"en:herbal-teas",
+			"en:black-teas",
+			"en:flavored-teas",
+			"en:flavored-black-teas",
+			"en:teas-with-bergamot",
+			"en:bergamot-flavored-black-teas",
+			"fr:The-aromatise-bergamote",
+			"fr:Thé aromatisé bergamote"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:plant-based-foods-and-beverages",
+			"en:beverages",
+			"en:plant-based-foods",
+			"en:dairy-substitutes",
+			"en:milk-substitutes",
+			"en:nuts-and-their-products",
+			"en:plant-based-beverages",
+			"en:plant-based-milk-alternatives",
+			"en:nut-based-drinks",
+			"en:almond-based-drinks"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:condiments",
+			"en:spreads",
+			"en:plant-based-spreads",
+			"en:salted-spreads",
+			"en:sauces",
+			"en:dips",
+			"en:hummus",
+			"en:classic-hummus"
+		]
+	},
+	{
+		"want": "dairy_eggs",
+		"tags": [
+			"en:beverages-and-beverages-preparations",
+			"en:beverages",
+			"en:dairies",
+			"en:dried-products",
+			"en:milks-liquid-and-powder",
+			"en:dried-products-to-be-rehydrated",
+			"en:milks",
+			"en:dehydrated-beverages",
+			"en:whole-milks",
+			"en:milk-powders",
+			"en:whole-milk-powder"
+		]
+	},
+	{
+		"want": "bakery",
+		"tags": [
+			"en:snacks",
+			"en:sweet-snacks",
+			"en:sweet-pastries-and-pies",
+			"en:viennoiseries",
+			"en:brioches"
+		]
+	},
+	{
+		"want": "bakery",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:cereals-and-potatoes",
+			"en:cereals-and-their-products",
+			"en:breads",
+			"en:rye-breads",
+			"en:crispbreads"
+		]
+	},
+	{
+		"want": "personal_care",
+		"tags": [
+			"en:dietary-supplements",
+			"en:mineral-supplements",
+			"en:vitamin-supplements",
+			"en:flavoured-dietary-supplements",
+			"en:multivitamin-and-mineral-supplements",
+			"de:Tab"
+		]
+	},
+	{
+		"want": "meat_fish",
+		"tags": [
+			"en:meats-and-their-products",
+			"en:meat-preparations",
+			"en:meats",
+			"en:chicken-and-its-products",
+			"en:poultries",
+			"en:breaded-products",
+			"en:chicken-preparations",
+			"en:chickens",
+			"en:cooked-poultries",
+			"en:breaded-chicken",
+			"en:cooked-chicken"
+		]
+	},
+	{
+		"want": "meat_fish",
+		"tags": [
+			"en:plant-based-foods-and-beverages",
+			"en:plant-based-foods",
+			"en:vegan-products",
+			"en:meat-alternatives",
+			"en:meat-analogues",
+			"en:vegetarian-sausages",
+			"en:vegan-sausages"
+		]
+	}
+]

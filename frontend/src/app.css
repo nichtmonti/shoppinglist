@@ -1,0 +1,769 @@
+/*
+ * Design tokens (§6.7, [D-37]) + the app's base chrome.
+ *
+ * Two token families:
+ *
+ *  - the neutrals and the three tones (--background, --surface, --primary,
+ *    --amber, --danger, …), listed by family in @theme below ([D-316]),
+ *  - the twenty-one curated CATEGORY palette tokens (--cat-<token>), one per
+ *    value the seed uses ([D-37] "the frontend maps tokens to light/dark-safe
+ *    CSS values"). Nothing else may introduce a category color: a category's
+ *    `color` field is validated against this set (see #lib/categories.ts).
+ *
+ * Both families are redeclared for dark mode (via mode-watcher's `.dark`
+ * class), so every surface that renders a category tint works in both themes
+ * without per-component branching.
+ */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+/* The shop tile's template ([D-86], [D-83]) and the shop grid's layout and
+   densities ([D-83]) live beside their components. */
+@import './lib/components/shop/shop-tile.css';
+@import './lib/components/shop/shop-layout.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * The category tint ramp.
+ *
+ * `--c` is the per-category colour written by categoryStyle() ([D-37]); every
+ * surface that carries a category tint mixes it against a neutral at one of
+ * these strengths. There is no stock utility for color-mix(), so these four
+ * functional utilities are the single definition of the tint, used by every
+ * site instead of an inlined expression.
+ *
+ * The percentage stays explicit in the class name (cat-surface-12, not
+ * cat-surface-soft) because the ramp is not uniform: the values in use are
+ * tuned per surface and collapsing them would shift colours that
+ * e2e/tests/visual-gate.spec.ts asserts exactly.
+ */
+@utility cat-surface-* {
+	background-color: color-mix(
+		in srgb,
+		var(--c, var(--primary-text)) calc(--value(integer) * 1%),
+		var(--surface)
+	);
+}
+@utility cat-border-* {
+	border-color: color-mix(
+		in srgb,
+		var(--c, var(--primary-text)) calc(--value(integer) * 1%),
+		var(--border)
+	);
+}
+@utility cat-text-* {
+	color: color-mix(
+		in srgb,
+		var(--c, var(--primary-text)) calc(--value(integer) * 1%),
+		var(--foreground)
+	);
+}
+
+/* The plate an icon sits on ([D-181]): the chip's base, tinted by the aisle
+   colour like every cat-* surface. OpenMoji draws black outlines for a light
+   ground, so the dark theme gives its icons a light plate instead of a dark
+   chip — the icons stay as drawn, no filter or contour. */
+@utility cat-plate-* {
+	background-color: color-mix(
+		in srgb,
+		var(--c, var(--primary-text)) calc(--value(integer) * 1%),
+		var(--icon-plate)
+	);
+}
+@utility icon-plate {
+	background-color: var(--icon-plate);
+}
+
+/* A mark on a corner (the picker's tick, the scan mark, the tile's ⓘ): round,
+ * ringed 2px in the colour behind it, so it sits on the corner rather than in
+ * it. `--mark-ground` names that colour where it is not the surface. */
+@utility corner-mark {
+	display: grid;
+	place-items: center;
+	border-radius: 9999px;
+	box-shadow: 0 0 0 2px var(--mark-ground, var(--surface));
+}
+
+/* The type roles ([D-314]): the text styles that are more than a size and a
+   weight. Letter-spacing and capitals come only from here (lint refuses
+   `tracking-*` and `uppercase` elsewhere), so a title or a caption cannot be
+   rebuilt by hand with its own spacing. The caption brings its grey; the
+   others take the caller's colour. */
+@utility type-hero {
+	/* The auth, join and demo screens' h1 ([D-281]). */
+	@apply text-hero font-bold tracking-tight;
+}
+@utility type-title {
+	/* A screen's, a sheet's or a dialog's title ([D-278]). */
+	@apply text-title/flush font-bold tracking-tight;
+}
+@utility type-heading {
+	/* A list's name on a card, and a sub-screen's header. */
+	@apply text-base font-bold tracking-tight;
+}
+@utility type-section {
+	/* A group's label over its rows: an aisle, a settings group. */
+	@apply text-meta font-bold tracking-wide uppercase;
+}
+@utility type-caption {
+	/* A field's label, a menu's or a section's small heading. */
+	@apply text-micro font-bold tracking-wider text-muted-foreground uppercase;
+}
+
+/* [D-56]'s hit-expansion idiom, defined once: a control painted at 30px
+ * (size-7.5) reaches a 44px EFFECTIVE target through an ::after carrying a
+ * -7px inset on every side ([D-86]); a smaller one (the sync chip's 26px)
+ * reaches as far as 44px takes. The ::after belongs to the element, so its
+ * box is part of the hit area — but it anchors to the element's positioning:
+ * the element must already be relative/absolute/sticky, and this utility
+ * deliberately does NOT set position itself (Tailwind emits .relative after
+ * .absolute at equal specificity, so an element carrying both can lose its
+ * absolute position). */
+@utility hit-target {
+	&::after {
+		content: '';
+		position: absolute;
+		/* 7px around it, and more where that leaves it under 44px. */
+		inset: min(-7px, calc((100% - 44px) / 2));
+	}
+}
+
+/* A pressable row or card ([D-321]): it hovers and presses grey, like the
+ * ghost Button. Soft green is for what is chosen or highlighted ([D-281]).
+ * The focus outline is drawn inside, where the next row cannot paint over
+ * it ([D-315]). */
+@utility press-row {
+	@apply cursor-pointer text-start hover:bg-tint active:bg-tint-strong focus-visible:-outline-offset-2;
+}
+
+/* A card that presses (a home list card; a shop tile in shop-tile.css):
+ * it gives a little under the finger, one scale for both. */
+@utility press-card {
+	transition:
+		scale 0.12s ease,
+		background-color 0.12s ease;
+	&:active {
+		scale: var(--press-card-scale);
+	}
+}
+
+/* Rows ruled like a list's (§9.1, [D-326]): each row after the first carries
+ * a hairline from `--rule-inset` to the far edge, never a box ([D-269]); the
+ * last row none ([D-128]). The one way rows on a page are separated:
+ * RuledRows wraps it, and a container that must stay the rows' parent (a
+ * drag-and-drop zone) takes it directly. */
+@utility ruled-rows {
+	& > * + * {
+		background-image: linear-gradient(var(--border), var(--border));
+		background-repeat: no-repeat;
+		background-size: calc(100% - var(--rule-inset, 0px)) 1px;
+		background-position: right top;
+	}
+	& > * + *:dir(rtl) {
+		background-position: left top;
+	}
+}
+
+/* A highlighted option in a list of rows (the typeahead): a 3px line on its
+ * start edge in the text green, beside the soft-green fill ([D-321]). The
+ * option must be positioned. */
+@utility option-bar {
+	&[data-highlighted]::before {
+		content: '';
+		position: absolute;
+		inset-block: 0;
+		inset-inline-start: 0;
+		width: 3px;
+		background: var(--primary-text);
+	}
+}
+
+@theme inline {
+	/* The colours, by family ([D-316]): one name per colour, no aliases. The
+	   neutrals are the page, its surfaces, two lines and two text greys; each
+	   tone (primary, amber, danger) is the colour itself with a -soft ground
+	   and a -line edge for a chip or a chosen state, and the primary adds the
+	   pressed fill and its text shade. Lint refuses every other name, and an
+	   opacity on a colour: a grey fill is one of the two tints. */
+	--color-background: var(--background);
+	--color-surface: var(--surface);
+	--color-surface-2: var(--surface-2);
+	--color-border: var(--border);
+	--color-line-strong: var(--line-strong);
+	--color-faint: var(--faint);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-foreground: var(--foreground);
+
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-primary-press: var(--primary-press);
+	--color-primary-text: var(--primary-text);
+	--color-primary-soft: var(--primary-soft);
+	--color-primary-line: var(--primary-line);
+	--color-amber: var(--amber);
+	--color-amber-soft: var(--amber-soft);
+	--color-amber-line: var(--amber-line);
+	--color-danger: var(--danger);
+	--color-danger-foreground: var(--danger-foreground);
+	--color-danger-soft: var(--danger-soft);
+	--color-danger-line: var(--danger-line);
+
+	/* The grey fills, mixed from the secondary text so they follow the theme:
+	   `tint` for a hover and a resting grey field, `tint-strong` for a press,
+	   a disabled fill and a grey chip. */
+	--color-tint: color-mix(in oklab, var(--muted-foreground) 8%, transparent);
+	--color-tint-strong: color-mix(in oklab, var(--muted-foreground) 12%, transparent);
+	--color-overlay: var(--overlay);
+
+	/* Three radii, by what carries them ([D-316]): `chip` inside a row or a
+	   control, `control` for whatever is pressed or typed into, `card` for a
+	   surface or a picture (a card, a tile, a menu, a banner, a sheet, a
+	   dialog). A surface holding controls pads them to stay concentric: a
+	   menu's 6px around its 12px items, a segment band's 4px around its 8px
+	   segments. Lint refuses Tailwind's stock steps. */
+	--radius-chip: 8px;
+	--radius-control: 12px;
+	--radius-card: 18px;
+
+	/* One overlay elevation language. `pop` rises downward (typeahead,
+	   install banner); `sheet` rises upward (bottom sheet). Both ride the
+	   --shadow triplet so dark mode (0 0 0) flattens them for free. */
+	--shadow-pop: 0 16px 40px -16px rgb(var(--shadow) / 0.4);
+	--shadow-sheet: 0 -14px 34px -14px rgb(var(--shadow) / 0.4);
+
+	--font-sans: var(--font-ui);
+	--font-mono: var(--font-num);
+
+	/* The app leans on two weights between Tailwind's semibold (600) and bold
+	   (700). The bundled variable face renders them exactly ([D-184]); the
+	   system fallback snaps them to its nearest real face. The intent is worth
+	   naming rather than repeating `font-[650]` twenty times. */
+	--font-weight-book: 550;
+	--font-weight-demi: 650;
+
+	/* Line heights. `body` is the reading measure used by prose-ish blocks;
+	   `flush` is for single-line labels and headings that must not pick up
+	   leading. 1.25 is Tailwind's own `leading-tight` and is used as-is. */
+	--leading-body: 1.65;
+	--leading-flush: 1.2;
+
+	/* Type ramp.
+	 *
+	 * Tailwind's stock --text-* defaults are deliberately NOT overridden: the
+	 * vendored components in components/ui are written against them, and
+	 * re-keying the scale would resize all 48 of their type utilities as a
+	 * side effect of a refactor that is meant to change nothing.
+	 *
+	 * These are the app's own steps, interleaved with the stock `text-sm`
+	 * (14px) and `text-base` (16px), which coincide with the app's body sizes:
+	 *
+	 *   micro 11 -> note 12 -> meta 12.5 -> qty 13.5 -> [sm 14] -> name 15
+	 *     -> [base 16] -> tile 17 -> title 19 -> hero 22
+	 *
+	 * An item reads in three tiers, name over quantity over note, about 2px
+	 * apart, with no quantity under 13px and no note under 12px ([D-275]):
+	 * `name` is an item's name where space is tight (shop rows, compact and
+	 * photo tiles), `tile` the comfortable tile's, `text-base` the planning
+	 * row's; `sm` a candidate that is not on the list (a previous item, a
+	 * suggestion) and an entry's label in a menu, sheet or settings ([D-322],
+	 * [D-326]). `qty` is an item's quantity, the planning row's and the shop
+	 * chip's; `note` is an item's note. Other small print stays on micro;
+	 * lifting all of it flattened the hierarchy ([D-213]).
+	 *
+	 * Text sizes come from this ramp only; a hand-authored size between its
+	 * steps is drift, not a design. */
+	--text-micro: var(--size-micro);
+	--text-note: var(--size-note);
+	--text-qty: var(--size-qty);
+	--text-meta: var(--size-meta); /* the dominant label size */
+	--text-name: var(--size-name);
+	--text-tile: var(--size-tile);
+	--text-title: var(--size-title); /* screen titles */
+	--text-hero: var(--size-hero); /* the auth screen's h1 */
+}
+
+/* .panel:not(.dark) rides along for the same reason [data-density='comfortable']
+   does below: /dev/gallery renders a light AND a dark panel side by side, and a
+   plain `.dark` ancestor rule cannot un-apply itself for the light one — custom
+   properties inherit, so under a globally dark app a light panel would render
+   dark too. The panel needs its own light declaration to win over the
+   inherited one. */
+.panel:not(.dark),
+:root {
+	/* What an icon chip is mixed from ([D-181]); the light theme's chips are
+	   the raised surface. */
+	--icon-plate: var(--surface-2);
+	/* The Laub palette ([D-114]), chosen in /dev/gallery's palette comparison.
+	   Authored in OKLCH (the source value follows each hex) and written as hex
+	   because the visual gate and the design-tokens test read hex. The
+	   neutrals carry almost no chroma (0.004–0.012 at hue 100): sage-tinted
+	   greys read as a template in light mode and as a green cast in dark.
+	   The green lives in the primary alone. */
+	--background: #f7f7f4; /* oklch(0.975 0.004 100) */
+	--foreground: #1b1b17; /* oklch(0.22 0.008 100) */
+	--primary: #05773b; /* oklch(0.5 0.13 152) */
+	--primary-foreground: #ffffff;
+	/* The primary as TEXT and LINES on the page's own surfaces — links,
+	   icons, the focus ring, selection borders ([D-114]). --primary is the
+	   FILL, read with --primary-foreground on it. In light the two are one
+	   colour; in dark they cannot be: a fill deep enough for white text is
+	   too dark to read as text on the dark ground. */
+	--primary-text: #05773b; /* oklch(0.5 0.13 152) */
+	--muted-foreground: #65635c; /* oklch(0.5 0.012 100) */
+	--danger: #ba3728; /* oklch(0.53 0.17 30) — brick */
+	--danger-foreground: #ffffff;
+	--border: #e2e1db; /* oklch(0.91 0.008 100) */
+
+	--surface: #ffffff;
+	--surface-2: #ffffff;
+	--line-strong: #cbcbc5; /* oklch(0.84 0.008 100) */
+	--faint: #8a8984; /* oklch(0.63 0.008 100) — icons and glyphs only, never text: 3:1 on every surface */
+	--primary-press: #00662b; /* oklch(0.44 0.13 152) */
+	--primary-soft: #def6e3; /* oklch(0.95 0.035 152) */
+	--primary-line: #b8e0c1; /* oklch(0.87 0.06 152) */
+	/* The SyncBanner pending text and count glyph ([D-102]: expired moved to
+	   the danger pair) and the ListCard count badge sit on --amber-soft
+	   and must clear AA (4.5) as 11–16px text; design-tokens.test.ts holds
+	   the pair to it. */
+	--amber: #915c08; /* oklch(0.52 0.11 70) */
+	--amber-soft: #fdecd1; /* oklch(0.95 0.04 80) */
+	--amber-line: #edd0a0; /* oklch(0.87 0.07 80) */
+	--danger-soft: #ffe8e3; /* oklch(0.95 0.03 30) */
+	--danger-line: #f9c6bd; /* oklch(0.87 0.06 30) */
+	--shadow: 20 22 26;
+
+	/* The light-dismiss scrim over the list while the add-bar typeahead is open
+	   ([D-131]). Per-theme ALPHA, not one shared value: the same 10% black that
+	   reads as a clear dim on a near-white list is invisible over the dark
+	   theme's near-black background, and an invisible guard leaves every row
+	   looking live while doing nothing — the dead-control shape [D-124] exists
+	   to keep out. Still black in both themes: "out of reach" recedes, it does
+	   not glow. */
+	--scrim: rgb(0 0 0 / 0.1);
+	/* What a modal (a sheet, a dialog) lays over the page ([D-314]): one value
+	   for both, in both themes. */
+	--overlay: rgb(10 14 8 / 0.4);
+
+	/* Category colours ([D-37], re-derived in [D-114]): one lightness and
+	   chroma per theme (L 0.56, C 0.13 here), hues spread round the wheel, so
+	   two aisles differ by hue rather than by how muddy their tint came out.
+	   The few defined by being dull (slate, gray, brown), deep (wine) or light
+	   (yellow, lavender) step off that line on purpose. */
+	--cat-green: #2d8949; /* oklch(0.56 0.13 150) */
+	--cat-amber: #a46400; /* oklch(0.56 0.13 70) */
+	--cat-sky: #0080b3; /* oklch(0.56 0.13 232) */
+	/* Hue 18: crimson-shifted off --danger's brick (hue 30) so category
+	   red never reads as an error state, and still clear of wine and pink. */
+	--cat-red: #b84c55; /* oklch(0.56 0.14 18) */
+	--cat-olive: #6f7d28; /* oklch(0.56 0.11 118) */
+	--cat-yellow: #9f8400; /* oklch(0.62 0.13 95) */
+	--cat-violet: #865eb1; /* oklch(0.56 0.13 305) */
+	--cat-orange: #b05925; /* oklch(0.56 0.13 48) */
+	--cat-pink: #ad5078; /* oklch(0.56 0.13 355) */
+	--cat-cyan: #008998; /* oklch(0.56 0.13 205) */
+	--cat-teal: #008c77; /* oklch(0.56 0.13 180) */
+	--cat-wine: #90314e; /* oklch(0.46 0.13 5) */
+	--cat-slate: #657689; /* oklch(0.56 0.035 250) */
+	--cat-lavender: #807ab6; /* oklch(0.61 0.09 288) */
+	--cat-brown: #865634; /* oklch(0.5 0.08 55) */
+	--cat-blue: #4972c0; /* oklch(0.56 0.13 262) */
+	/* Four more for twenty-one aisles ([D-251]), in the gaps the first
+	   seventeen left: lime between olive and green, magenta between violet
+	   and pink, and two deep ones like wine, steel (dull, hue 225) and indigo
+	   (hue 280), each further from its nearest neighbour than cyan is from
+	   teal. */
+	--cat-steel: #2f5f71; /* oklch(0.46 0.06 225) */
+	--cat-lime: #63982a; /* oklch(0.62 0.15 132) */
+	--cat-indigo: #4c4c9e; /* oklch(0.46 0.13 280) */
+	--cat-magenta: #a34f9e; /* oklch(0.56 0.15 330) */
+	--cat-gray: #747474; /* oklch(0.56 0 0) */
+
+	/* Readex Pro, bundled from the pinned @fontsource-variable/readex-pro and
+	   precached with the rest of the build ([D-184]): one face on every
+	   device, variable 160–700, so the book/demi weights render as written.
+	   The system stack stays behind it for the moment before the font loads
+	   (font-display: swap) and for scripts it does not cover. */
+	--font-ui:
+		'Readex Pro Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+		Arial, sans-serif;
+	/* Code-like text only, such as an invite link. Quantities and counts are
+	   Readex with tabular figures (`tabular-nums`, [D-275]). */
+	--font-num: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+	/* Type ramp, indirected for runtime overrides ([D-83]). @theme
+	   inline writes the token's VALUE into each utility, so a theme/density
+	   block that redefines --text-meta would change nothing unless the value is
+	   itself a variable. In rem ([D-83]), so every size follows the user's
+	   text size together (the `text-scale` meta hands the OS setting to the
+	   root): as px they would stay put while the rem-sized names, pills and
+	   tap targets around them grow — at 200%, an 11px quantity in a doubled
+	   pill under a 32px name. The px values in the comments are at the
+	   default 16px root. */
+	--size-micro: 0.6875rem; /* 11px */
+	--size-note: 0.75rem; /* 12px */
+	--size-qty: 0.84375rem; /* 13.5px */
+	--size-meta: 0.78125rem; /* 12.5px */
+	--size-name: 0.9375rem; /* 15px */
+	--size-tile: 1.0625rem; /* 17px */
+	--size-title: 1.1875rem; /* 19px */
+	--size-hero: 1.375rem; /* 22px */
+
+	/* The list surfaces' content column (§9.1). Rows, their hairline and the
+	   previous-items door all start here, so the gutter is ONE decision in one
+	   place instead of a px-4 repeated across four components. */
+	--row-gutter: 16px;
+
+	/* The aisle header steps 2px INSIDE that gutter instead of sitting flush
+	   with the rows it labels, on purpose ([D-129]): the
+	   offset is what stops the tinted band from reading as one more row, and it
+	   leaves the header's content looking centred over its group. Derived
+	   rather than typed, because px-4.5 against px-4 reads as a rounding
+	   accident while `gutter + nudge` reads as the intent it is — and moving
+	   the gutter moves both together.
+	   (In the SHOP view the same header sits over a 14px tile grid, so the
+	   painted 18px aligns with rows only in the list view.) */
+	--aisle-head-nudge: 2px;
+	--aisle-head-gutter: calc(var(--row-gutter) + var(--aisle-head-nudge));
+
+	/* Where a list row's hairline STARTS (§9.1): flush with the row's content
+	   column, not the screen edge — the gutter + the aisle chip's size-9.5 (38)
+	   + gap-3 (12). An inset rule reads as "another row", a full-bleed one as
+	   "a new section", which is the only way the planning list's end is visible
+	   in a stack where every row already ends in a line. Rows without a chip
+	   (category-grouped mode) inset by the gutter alone, and the list's LAST row
+	   paints no rule at all ([D-128]). */
+	--row-rule-inset: calc(var(--row-gutter) + 38px + 12px);
+	/* The same after any other row's 34px plate ([D-326]). */
+	--plate-rule-inset: calc(var(--row-gutter) + 34px + 12px);
+	/* Between the home's list cards, not the shop's density gap ([D-328]). */
+	/* The most of a row a quantity takes: in a row, the shop's rows and the
+	   typeahead alike. */
+	--qty-max: min(40%, 220px);
+	/* How far a pressed card gives (press-card). */
+	--press-card-scale: 0.97;
+	--card-gap: 10px;
+
+	/* The pinned add bar's height (the segmented band carries its own h-11,
+	   [D-83]). 56px centers its 44px [D-56] input inside it via items-center. */
+	--band-h: 56px;
+
+	/* The app is a single centered column. On phones the viewport is narrower
+	   than this so the shell simply fills the screen; on a laptop the shell
+	   caps here so the app reads as a column, not a stretched-out webpage.
+	   [D-49] — surfaces that should span the column (the bottom Sheet) track
+	   this token; snackbars (toast/install) keep their own narrower caps. */
+	--app-max: 820px;
+
+	/* Shop-grid geometry that does NOT switch with density ([D-83]). Everything
+	   that DOES switch lives in the three [data-density] blocks in
+	   ./lib/components/shop/shop-layout.css — comfortable's included, which is
+	   why none of it is here.
+
+	   --tile-gap is one value for all three densities: 4px leaves
+	   comfortable's note stack real slack under its 104px budget (any less
+	   and font metrics can overflow it) and gives the template a single
+	   value. */
+	--tile-gap: 4px;
+
+	/* Photo-tile overlays ([D-86]). Static per theme ON PURPOSE: they sit on
+	   an image, so light/dark must not flip them — white text over a photo
+	   keeps its scrim and shadow in both themes. --tile-photo-fallback is the
+	   stand-in for a scan product whose photo is missing or failed ([D-83]'s
+	   product-tile invariant: such a tile keeps the photo-variant layout —
+	   name on the scrim at the foot, door at top-end — so the placeholder
+	   must be dark in both themes, exactly like the scrim it sits under). */
+	/* The photo tile's scrim follows its text ([D-213], [D-83]). Three
+	   alphas, each the darkness at the top of a text band, dark enough there
+	   for its text on a WHITE photo (design-tokens.test.ts recomputes all
+	   three): the foot, the chip line's top (2.25rem up at every density),
+	   and the top of the text block, which the tile measures and hands over
+	   as --tile-text-top. Above it the scrim fades out over --tile-scrim-fade,
+	   so the photo keeps its brightness wherever there is no text: a one-line
+	   name darkens a short band, a two-line name and note a taller one. The
+	   gradient itself is shop-tile.css's, where --tile-text-top is set. */
+	--tile-scrim-foot: rgba(0, 0, 0, 0.8);
+	--tile-scrim-chip: rgba(0, 0, 0, 0.72);
+	--tile-scrim-text: rgba(0, 0, 0, 0.56);
+	--tile-scrim-fade: 0.75rem;
+	--tile-photo-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 1px 8px rgba(0, 0, 0, 0.6);
+	--tile-photo-ink: #ffffff;
+	--tile-photo-note: rgba(255, 255, 255, 0.85);
+	--tile-photo-chip-bg: rgba(255, 255, 255, 0.22);
+	--tile-photo-fallback: linear-gradient(165deg, #484844 0%, #272723 100%);
+
+	/* The row quantity's width ([D-86]): the edit input and both button
+	   states share --qty-w so opening the editor never reflows the row.
+
+	   The quantity is free text ([D-20] — no stepper, no unit parsing), the
+	   control is flex-none, and a realistic entry like „2 Packungen à 500 g"
+	   therefore sizes the control to its content: uncapped it would take ~166px
+	   of a 320px A→Z row, starving the name button down to 18px („Nudeln" as
+	   „N.."). The name is the row's identity and must outrank its
+	   quantity, so the quantity truncates first (.qty-value carries
+	   `truncate`). The cap is proportional — max-w-[min(38%,220px)] on the
+	   set state — so a wide row shows a semi-long quantity whole while a
+	   narrow row still guarantees the name ≥60%. --qty-w (76px) keeps the
+	   common „250 g" / „1 Flasche" entries whole. */
+	--qty-w: 76px;
+
+	/* The product-details sheet's image height ([D-86]) — named per the
+	   no-hardcoded-widths rule that governs --focus-max. */
+	--sheet-img-h: 220px;
+
+	/* Focus surfaces (auth screen, join screen, the scan sheet) are a second,
+	   narrower column. Same rule as --app-max: named widths only, no
+	   hard-coded magic widths in components. */
+	--focus-max: 420px;
+
+	/* The page's layers, bottom to top ([D-317]): an aisle header stuck under
+	   the bar, the add bar and a screen's sticky foot, then whatever is laid
+	   over the page (the dim, sheets, dialogs, menus, tooltips). The undo
+	   toast and the dragged row take their libraries' own, above these. A
+	   component with layers of its own seals them (`isolate`) and numbers
+	   them 1-3 inside; lint refuses a bare number above that. */
+	--layer-sticky: 5;
+	--layer-bar: 6;
+	--layer-modal: 50;
+
+	/* Offset for the list view's pinned add bar. List view
+	   sets this to the bar's height on its own root; every other screen
+	   (shop view's aisle headers included) inherits the 0 default. */
+	--addbar-h: 0px;
+}
+
+.dark,
+.panel.dark {
+	/* A light plate under OpenMoji's black outlines ([D-181]). */
+	--icon-plate: #d9d8d2; /* oklch(0.88 0.006 100) */
+	/* Laub, dark ([D-114]): the same recipe on a charcoal ground. Each raised
+	   layer is one lightness step up (background 0.185 → surface 0.215 →
+	   surface-2 0.245), so elevation reads without borders doing all of it. */
+	--background: #131311; /* oklch(0.185 0.004 100) */
+	--foreground: #efeeeb; /* oklch(0.95 0.004 100) */
+	/* A saturated fill with white text ([D-114]): 4.7:1 for its label, 3.9:1 against the ground
+	   as a control boundary. Text and lines take --primary-text, which
+	   stays light enough to read (8.6:1 on --surface). */
+	--primary: #078543; /* oklch(0.54 0.14 152) */
+	--primary-foreground: #ffffff;
+	--primary-text: #68ca80; /* oklch(0.76 0.14 150) */
+	--muted-foreground: #b2b1ac; /* oklch(0.76 0.008 100) */
+	--danger: #ed7665; /* oklch(0.7 0.15 30) */
+	--danger-foreground: #22110e; /* oklch(0.2 0.03 30) */
+	--border: #2e2e2c; /* oklch(0.3 0.004 100) */
+
+	--surface: #1a1917; /* oklch(0.215 0.004 100) */
+	--surface-2: #21201e; /* oklch(0.245 0.004 100) */
+	--line-strong: #484845; /* oklch(0.4 0.004 100) */
+	--faint: #81807b; /* oklch(0.6 0.008 100) — icons and glyphs only */
+	/* The primary fill's pressed/hover shade — darker, so white stays AA
+	   (5.9:1); a lighter one drops below it. */
+	--primary-press: #007439; /* oklch(0.49 0.13 152) */
+	--primary-soft: #172c1c; /* oklch(0.27 0.04 150) */
+	--primary-line: #294b31; /* oklch(0.38 0.06 150) */
+	--amber: #e4ac59; /* oklch(0.78 0.12 75) */
+	--amber-soft: #2a2011; /* oklch(0.25 0.03 75) */
+	--amber-line: #553d1a; /* oklch(0.38 0.06 75) */
+	--danger-soft: #321a16; /* oklch(0.25 0.04 30) */
+	--danger-line: #5c2e26; /* oklch(0.36 0.07 30) */
+	--shadow: 0 0 0;
+	/* see :root — the alpha is what carries the dim here (comment above). */
+	--scrim: rgb(0 0 0 / 0.4);
+
+	/* L 0.74, C 0.12 — the light theme's hues, lifted for the dark ground. */
+	--cat-green: #6fc082; /* oklch(0.74 0.12 150) */
+	--cat-amber: #db9d4f; /* oklch(0.74 0.12 70) */
+	--cat-sky: #4eb8e9; /* oklch(0.74 0.12 232) */
+	--cat-red: #ed8a8e; /* oklch(0.74 0.12 18) */
+	--cat-olive: #a5b461; /* oklch(0.74 0.11 118) */
+	--cat-yellow: #d6bd5c; /* oklch(0.8 0.12 95) */
+	--cat-violet: #bc97e8; /* oklch(0.74 0.12 305) */
+	--cat-orange: #e89265; /* oklch(0.74 0.12 48) */
+	--cat-pink: #e68aaf; /* oklch(0.74 0.12 355) */
+	--cat-cyan: #26c0cf; /* oklch(0.74 0.12 205) */
+	--cat-teal: #39c3ae; /* oklch(0.74 0.12 180) */
+	--cat-wine: #c86b82; /* oklch(0.64 0.12 5) */
+	--cat-slate: #9badc1; /* oklch(0.74 0.035 250) */
+	--cat-lavender: #b7b2f2; /* oklch(0.79 0.09 288) */
+	--cat-brown: #bf8b68; /* oklch(0.68 0.08 55) */
+	--cat-blue: #81aaf7; /* oklch(0.74 0.12 262) */
+	--cat-steel: #6394a8; /* oklch(0.64 0.06 225) */
+	--cat-lime: #9cd06e; /* oklch(0.8 0.14 132) */
+	--cat-indigo: #7e83d3; /* oklch(0.64 0.12 280) */
+	--cat-magenta: #d98cd2; /* oklch(0.74 0.13 330) */
+	--cat-gray: #ababab; /* oklch(0.74 0 0) */
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-ui);
+	color: var(--foreground);
+	background: var(--background);
+	-webkit-font-smoothing: antialiased;
+	/* Every control here is a custom-styled button with its own `:active`
+	   treatment; the platform's grey flash rectangle only ever painted on top
+	   of that. */
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Width is state-independent: the classic scrollbar must not change the layout
+   width when it appears. Page content crossing the viewport height would
+   otherwise steal ~15px from the centered column and shift it, depending on
+   locale and content height (see the layout-invariants e2e spec). Reserving
+   the gutter keeps the column width
+   identical on every page in every locale; platforms with overlay scrollbars
+   (macOS, iOS, Android) reserve nothing and are unaffected. */
+html {
+	scrollbar-gutter: stable;
+}
+
+/* The one focus mark ([D-315]): a 2px line in the primary's text colour,
+   2px off the edge, on every control, row and tile. In the base layer, so a
+   container that takes focus without being a control (a dialog, a menu, a
+   heading focused for a screen reader) can say `outline-none`, and a row
+   that spans the column draws it inside (`-outline-offset-2`), where its
+   neighbours cannot paint over it. */
+@layer base {
+	:focus-visible {
+		outline: 2px solid var(--primary-text);
+		outline-offset: 2px;
+	}
+}
+
+/* `manipulation` allows pan + pinch-zoom but disables double-tap-zoom and the
+   legacy 300ms tap delay. Without it, rapidly checking off two tiles in iOS
+   Safari can trigger a zoom instead of the second check-off. */
+button,
+a,
+input,
+textarea,
+[role='button'],
+[role='tab'] {
+	touch-action: manipulation;
+}
+
+/* No unlayered font rule on input/textarea. Preflight already gives them
+   `font: inherit` inside @layer base; a copy out here outranked every utility
+   instead, so a field's `text-base` lost to its container's `text-sm` and
+   rendered at 14px - below the 16px at which iOS Safari zooms on focus. The
+   focus-zoom e2e spec guards the floor. */
+
+/* The drag clone. svelte-dnd-action lifts the grabbed row by deep-cloning it
+   into `position: fixed` under this id, then follows the pointer by writing
+   `transform` on it directly.
+
+   Two things have to be said here and nowhere else, because the clone is built
+   by the library and never passes through a component:
+
+   1. No animation. A deep clone RESTARTS every CSS animation inside it, at
+      the instant of every grab — and one with `both` fill ending on
+      `transform: none` would fight the very property the library writes to
+      track the pointer.
+   2. A shadow, so the lift reads as a lift. The clone is otherwise pixel-
+      identical to the row still sitting in the list, so without one a drag
+      looks like nothing is happening. drop-shadow, not box-shadow: the
+      clone's root is a bare wrapper element, so a box shadow would draw a
+      rectangle behind a rounded card. It is also not in the library's own
+      transition list, so it appears at once rather than fading in over 200ms. */
+#dnd-action-dragged-el {
+	filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.3));
+}
+
+#dnd-action-dragged-el,
+#dnd-action-dragged-el * {
+	animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* ---- shared app chrome ------------------------------------------------- */
+
+.app-shell {
+	max-inline-size: var(--app-max);
+	margin-inline: auto;
+	/* dvh, not vh: `100vh` is the viewport with the mobile URL bar EXPANDED, so
+	   the shell would overrun the screen by that bar's height once it collapses. */
+	min-block-size: 100dvh;
+	background: var(--background);
+	display: flex;
+	flex-direction: column;
+	/* The toast region is position: fixed over the bottom of the viewport, so
+	   whatever a screen ends with would sit under it (shop view's "edit list"
+	   button, after every add). Clear the snackbar's height plus its own 16px
+	   offset. */
+	padding-block-end: calc(78px + env(safe-area-inset-bottom));
+}
+
+/* The toast hugs its content, centred, instead of spanning the phone
+   ([D-213]). Sonner's mobile toast is the full width less 32px, so for its
+   whole life it covered the bottom row of shop tiles edge to edge — the
+   row under the thumb, mid check-off. Hugging, it covers only its own
+   width; the tiles either side stay tappable (the toaster list itself is
+   empty of in-flow content, so it takes no taps). It is a floating surface
+   like the others: their edge, shadow and card radius, which holds the
+   Undo button's control radius concentric at 6px; the label size
+   ([D-332]). Specificity beats sonner's mobile rule,
+   `[data-sonner-toaster] [data-sonner-toast]`, which it injects after this
+   file. */
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] {
+	border-color: var(--line-strong);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-pop);
+	font-size: var(--size-meta);
+	inline-size: fit-content;
+	max-inline-size: min(var(--width), calc(100vw - 32px));
+	margin-inline: auto;
+	padding: 6px 6px 6px 14px;
+	gap: 12px;
+}
+
+/* A failure's red icon sits close to its words ([D-332]); sonner's own
+   icon margin makes up the rest. */
+[data-sonner-toaster] [data-sonner-toast][data-styled='true']:has(> [data-icon]) {
+	gap: 4px;
+}
+
+/* Sonner's action pill ships as an inverted near-black 24px button — the
+   only chrome off the token palette, on the toast's UNDO control of all
+   things. Restyle it as the app's secondary button ([D-284]): white, a
+   `--faint` edge, the control radius; soft green would say "chosen"
+   ([D-281]). The doubled [data-button][data-button] is deliberate: sonner
+   injects its stylesheet at mount (later than this file), so a tie loses —
+   the extra attribute buys the specificity to win. */
+[data-sonner-toast][data-styled='true'] [data-button][data-button] {
+	height: auto;
+	min-height: 36px;
+	padding: 6px 12px;
+	border: 1px solid var(--faint);
+	border-radius: var(--radius-control);
+	background: var(--surface-2);
+	color: var(--foreground);
+	/* A `sm` button's label ([D-312]). */
+	font-size: var(--size-meta);
+	font-weight: var(--font-weight-demi);
+}
+
+[data-sonner-toast][data-styled='true'] [data-button][data-button]:hover,
+[data-sonner-toast][data-styled='true'] [data-button][data-button]:active {
+	/* The press tint (tint-strong) over the button's own ground. */
+	background: color-mix(in oklab, var(--muted-foreground) 12%, var(--surface-2));
+}
+
+/* Sonner draws its own focus shadow; the app's one mark is the outline
+   ([D-315]). */
+[data-sonner-toast][data-styled='true'] [data-button][data-button]:focus-visible {
+	box-shadow: none;
+}

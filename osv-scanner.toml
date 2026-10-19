@@ -1,0 +1,61 @@
+# Waivers for osv-scanner (CI step `.woodpecker/security.yaml` -> osv-scan; the
+# devcontainer ships the same version). A waiver is a reviewable exception,
+# not a mute button: each entry carries why it exists and when to revisit.
+#
+# The CI step passes this file via --config because a bare osv-scanner.toml
+# applies only to lockfiles in its OWN directory — a root file would never
+# reach backend/go.mod, where the one current waiver lives.
+#
+# Local run: `osv-scanner scan -r . --config osv-scanner.toml`
+
+# GHSA-q7pp-wcgr-pffx — github.com/disintegration/imaging v1.6.2
+# (backend/go.mod, indirect): pulled in by PocketBase's filesystem package,
+# used on the barcode-photo save path. No fixed version exists yet; the fix
+# will arrive with the next PocketBase bump. Revisit there. (govulncheck is
+# reachability-based and stays silent on it, which is why the waiver lives
+# here.)
+[[IgnoredVulns]]
+id = "GHSA-q7pp-wcgr-pffx"
+reason = "imaging is an indirect dep of pocketbase/tools/filesystem; no fixed version released, and PocketBase v0.40.4 still requires v1.6.2 (re-checked 2026-09); track on the next PB bump"
+
+# The Dex pin (tools/dex/go.mod, [D-154]) — a test-only OIDC provider: it runs
+# beside the OIDC tests on loopback and is never built into the app
+# (backend/deps_arch_test.go holds that). Dex tags v2 releases without the /v2
+# module path, so the pin can only be the pseudo-version of the v2.45.1 tag,
+# v0.0.0-20260303133905-11d2eeb52b42 — which sorts BELOW every fixed version.
+# These two were fixed in 2.27.0 and 2.35.0, long before v2.45.1.
+# Revisit on every Dex bump: a new advisory has a new ID and still fails here.
+[[IgnoredVulns]]
+id = "GHSA-2x32-jm95-2cpx"
+reason = "tools/dex pseudo-version of v2.45.1 sorts below the 2.27.0 fix; the code is v2.45.1"
+
+[[IgnoredVulns]]
+id = "GHSA-vh7g-p26c-j2cw"
+reason = "tools/dex pseudo-version of v2.45.1 sorts below the 2.35.0 fix; the code is v2.45.1"
+
+# GO-2024-2476 — Dex discards its TLS config and serves TLS 1.0/1.1. No fixed
+# version; this Dex serves plain HTTP on 127.0.0.1 to tests and never TLS.
+[[IgnoredVulns]]
+id = "GO-2024-2476"
+reason = "tools/dex runs HTTP-only on loopback for tests; the TLS listener is never configured"
+
+# GO-2026-5932 — golang.org/x/crypto/openpgp is unmaintained. No fixed version
+# will exist; every x/crypto release carries the package, so every module that
+# pins x/crypto matches: tools/dex and tools/gitleaks (dev tools, [D-203]) as
+# much as the backend. Nothing in the app imports openpgp (govulncheck,
+# reachability-based, stays silent on the backend). Revisit if x/crypto
+# removes the package.
+[[IgnoredVulns]]
+id = "GO-2026-5932"
+reason = "openpgp is unmaintained with no fix and ships in every x/crypto; the app never imports it, and the dev tools (Dex, gitleaks) are not shipped"
+
+# GHSA-vfj7-8cjw-p6xm — braces 3.0.3 (frontend/pnpm-lock.yaml, dev only):
+# stack exhaustion on deeply nested brace patterns, every version affected,
+# no fix released. micromatch 4.0.8 brings it, pinned exactly by
+# eslint-plugin-boundaries 7.2.0, the lint's layer table ([D-306]); the
+# patterns it expands are the lint config's own, never input from anyone
+# else, and nothing of it ships. Revisit when braces releases a fix or the
+# plugin moves off micromatch.
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+reason = "braces 3.0.3 has no fix; it runs only in the lint, on the lint config's own patterns, and does not ship"

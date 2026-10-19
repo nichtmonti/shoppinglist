@@ -1,0 +1,2 @@
+# pnpm settings for the root project (prettier, concurrently); frontend/ and
+# e2e/ are projects of their own with their own lockfiles.

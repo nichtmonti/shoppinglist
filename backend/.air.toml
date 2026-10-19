@@ -1,0 +1,64 @@
+# Live reload for the dev backend ([D-71]). Read by `air`, which scripts/dev.sh
+# runs in place of a one-shot `go build` so that a .go save rebuilds and
+# restarts the server instead of leaving yesterday's binary serving.
+#
+# Run from backend/, so root is the Go module. Every value below is either
+# load-bearing or a default worth overriding — and the defaults were read out of
+# air's runner/config.go, NOT its air_example.toml, because the two disagree
+# (see stop_on_error).
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# -tags no_ui for the reason dev.sh always passed it ([D-64]): backend/pb_public
+# is a build INPUT, gitignored with nothing tracked, so an untagged build fails
+# on a clean tree. Dev serves the SPA from Vite with HMR and never from here.
+#
+# Output goes to tmp/, deliberately NOT to backend/shoppinglist: that path is
+# what e2e/run-server.sh reuses when it is executable, so a dev build sitting
+# there would hand the Playwright suite a binary with an EMPTY embedded SPA.
+cmd = "go build -tags no_ui -o ./tmp/shoppinglist ."
+# `entrypoint`, not the soon-to-be-deprecated `bin`. `serve --http=…` is
+# appended by dev.sh via --build.args_bin, because air does no env
+# interpolation in this file and the port has to stay $PORT-controlled.
+entrypoint = ["./tmp/shoppinglist"]
+# dev.sh also passes --dir=pb_data, and must: PocketBase resolves its default
+# data dir from the EXECUTABLE's location, so a binary in tmp/ would otherwise
+# put the dev database in tmp/pb_data — which clean_on_exit below then deletes
+# on every Ctrl-C.
+
+# json as well as go: seed/*.json, internal/fieldcontract/field-contract.json and
+# internal/ui/shell-meta.json are go:embed'd, so editing one changes the binary
+# and has to rebuild. Leaving it out would reproduce the stale-artifact bug this
+# file exists to prevent, one level down from the binary.
+include_ext = ["go", "json"]
+# pb_data is the live SQLite database the running server writes to; pb_public is
+# written by `pnpm build`. Watching either means the server rebuilding itself in
+# a loop, or on frontend work that cannot affect it.
+exclude_dir = ["tmp", "pb_data", "pb_public", "dist", "testdata"]
+exclude_regex = ["_test\\.go"]
+
+# air_example.toml shows `stop_on_error = true`, but defaultConfigBase() in
+# runner/config.go never sets it — the real default is FALSE, meaning "keep
+# serving the old binary when the build fails". That is exactly the stale-binary
+# state this whole arrangement exists to abolish, so it is set explicitly.
+stop_on_error = true
+
+# PocketBase shuts down cleanly on SIGINT, so ask for that first and keep
+# SIGKILL as the fallback. NOTE the unit trap: a bare integer here is
+# NANOSECONDS (config.go multiplies anything under 1ms by time.Millisecond);
+# the quoted duration is the only form that means what it reads as.
+send_interrupt = true
+kill_delay = "2s"
+
+[misc]
+# tmp/ holds only the dev binary and air's build log — both disposable, and
+# leaving them behind is what makes a stale one available to something else.
+clean_on_exit = true
+
+[proxy]
+# Air's own browser live-reload proxy, off. Its default proxy_port is 8090 —
+# our backend's port — and Vite already does this properly for the half of the
+# app that can actually be hot-swapped. Explicit so that enabling it by pasting
+# from air_example.toml is a deliberate act.
+enabled = false

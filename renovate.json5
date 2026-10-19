@@ -1,0 +1,246 @@
+// Renovate configuration (docs/internals/design.md §14: every dependency is
+// pinned to an exact version; §2 and §16: PocketBase is pre-1.0, so its
+// upgrades are deliberate, reviewed events).
+//
+// JSON5, not JSON, so the rules below can carry the reasoning that makes them
+// reviewable. Renovate reads renovate.json5 natively.
+//
+// WHERE THIS RUNS. Codeberg hosts no Renovate app, so this file is read by a
+// self-hosted runner (`renovate/renovate`) — RENOVATE_PLATFORM=gitea against
+// RENOVATE_ENDPOINT=https://codeberg.org/api/v1, with a token carrying
+// write:repository (the same scope as the release workflow's `gitea_token`).
+// The runner lives outside this repo; nothing here configures it.
+//
+// WHAT IT COVERS. Six ecosystems, because the versions in this repo are
+// spread across more than the lockfiles:
+//   npm       package.json + frontend/ + e2e/ (three separate pnpm projects,
+//             no workspace root)
+//   gomod     backend/go.mod + tools/<name>/go.mod (the dev tools, [D-75])
+//   dockerfile  Dockerfile (distroless, digest-pinned) + .devcontainer/Dockerfile
+//   woodpecker  every step image in .woodpecker/
+//   pip_requirements  tools/diff-cover/requirements.txt, versions and their
+//             hashes (hashin), the one Python tool ([D-203])
+//   custom    the versions that live in shell commands and ARGs, which no
+//             manager can see: the devcontainer's pnpm, Playwright and
+//             NODE_VERSION pins, and GOTOOLCHAIN / EXPECT_GO.
+//
+// The CI image ([D-203]) is the devcontainer Dockerfile's toolchain stage,
+// tagged by its content: an update to that Dockerfile rewrites the tag in
+// every workflow (postUpgradeTasks below), and the agent builds the image
+// for the PR's first pipeline ([D-203]). The self-hosted runner must allow that one command:
+// allowedCommands: ['^sh scripts/ci-image-tag\\.sh --write$'].
+//
+// The six pinned Go tools (staticcheck, gosec, osv-scanner, govulncheck, air,
+// dex) need no custom manager: each declares itself in its own
+// tools/<name>/go.mod and rides the stock `gomod` manager. One module per tool,
+// deliberately, so no tool's dependency resolution moves another's — or the
+// app's ([D-75]).
+{
+	$schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+	extends: [
+		'config:recommended',
+		// The Dependency Dashboard issue is the review surface for the
+		// approval-gated updates below (PocketBase). Without it those updates
+		// would be invisible rather than deferred.
+		':dependencyDashboard'
+	],
+
+	timezone: 'Europe/Berlin',
+
+	// Commit style matches the repo: `chore(deps): ...`, mirroring the
+	// type(scope) convention of every hand-written commit here.
+	semanticCommits: 'enabled',
+	semanticCommitType: 'chore',
+	semanticCommitScope: 'deps',
+
+	labels: ['dependencies'],
+
+	// Every PR here fans out to three Woodpecker pipelines (frontend, go, e2e)
+	// on a single self-hosted agent. Keep the queue short.
+	prConcurrentLimit: 4,
+	prHourlyLimit: 2,
+	// Only rebase on real conflicts: the default ("auto") re-runs the whole gate
+	// whenever main moves, which on one agent means the e2e suite runs for every
+	// open PR on every push.
+	rebaseWhen: 'conflicted',
+
+	// OSV-backed alerts, matching how this repo already reasons about
+	// vulnerabilities (osv-scanner.toml, .woodpecker/security.yaml). Platform-
+	// independent, so it works on Codeberg where GitHub's alert feed does not.
+	osvVulnerabilityAlerts: true,
+	vulnerabilityAlerts: {
+		labels: ['dependencies', 'security'],
+		// Security fixes bypass the schedule and the PocketBase approval gate.
+		schedule: ['at any time'],
+		dependencyDashboardApproval: false
+	},
+
+	// Weekly, so the gate is not competing with actual work for the agent.
+	schedule: ['* 0-6 * * 1'],
+
+	lockFileMaintenance: {
+		enabled: true,
+		schedule: ['* 0-6 1 * *']
+	},
+
+	// go.mod carries indirect deps; without a tidy, a bump can leave go.mod and
+	// go.sum inconsistent, and the PR's own CI build fails on it.
+	postUpdateOptions: ['gomodTidy'],
+
+	customManagers: [
+		{
+			// pnpm is pinned by `npm install -g pnpm@…` in the devcontainer, which
+			// is CI's image too (Node 25+ ships no Corepack, [D-203]) — invisible to
+			// the npm manager because it is a shell argument, not a manifest field.
+			customType: 'regex',
+			description: 'pnpm pin in npm install -g',
+			managerFilePatterns: ['/^\\.devcontainer\\/Dockerfile$/'],
+			matchStrings: ['npm install -g pnpm@(?<currentValue>\\S+)'],
+			depNameTemplate: 'pnpm',
+			datasourceTemplate: 'npm'
+		},
+		{
+			// GOTOOLCHAIN / EXPECT_GO in the release workflow. These exist to make
+			// the go.mod `toolchain` directive binding even under an environment
+			// override, and the post-build provenance gate compares released
+			// binaries against EXPECT_GO — so all three must move as one, or the
+			// release yanks itself.
+			customType: 'regex',
+			description: 'Go toolchain pins in CI environment blocks',
+			managerFilePatterns: ['/^\\.woodpecker\\/[^/]+\\.ya?ml$/'],
+			matchStrings: ['(?:GOTOOLCHAIN|EXPECT_GO): go(?<currentValue>\\d+\\.\\d+(?:\\.\\d+)?)'],
+			depNameTemplate: 'go',
+			datasourceTemplate: 'golang-version'
+		},
+		{
+			// The devcontainer installs Node from the official tarball, so the
+			// version is an ARG rather than a FROM tag the dockerfile manager could
+			// read.
+			customType: 'regex',
+			description: 'devcontainer Node tarball version',
+			managerFilePatterns: ['/^\\.devcontainer\\/Dockerfile$/'],
+			matchStrings: ['ARG NODE_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
+			depNameTemplate: 'node',
+			datasourceTemplate: 'node-version'
+		},
+		{
+			// The Chromium the devcontainer and CI run, installed by the
+			// Playwright CLI of the version e2e/package.json pins: grouped with it
+			// below, since a mismatch surfaces as a missing browser mid-suite.
+			customType: 'regex',
+			description: 'devcontainer Playwright browser install',
+			managerFilePatterns: ['/^\\.devcontainer\\/Dockerfile$/'],
+			matchStrings: ['ARG PLAYWRIGHT_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
+			depNameTemplate: '@playwright/test',
+			datasourceTemplate: 'npm'
+		}
+	],
+
+	packageRules: [
+		{
+			// The `go` directive is the language floor, a compatibility promise
+			// separate from the toolchain the build uses — set by hand, never by a
+			// bot. It is 1.27 because PocketBase v0.40's own go.mod requires it
+			// ([D-201]). Renovate extracts it as depType `golang`; leave it to a
+			// human.
+			matchManagers: ['gomod'],
+			matchDepTypes: ['golang'],
+			enabled: false,
+			description: 'go.mod language floor is a design decision, not a dep'
+		},
+		{
+			// One PR for the toolchain, covering: go.mod's `toolchain` directive,
+			// the devcontainer's golang base image, and the GOTOOLCHAIN/EXPECT_GO pins
+			// above. Split across PRs they would each fail the other's gate. The
+			// go.mod header lists the seven stdlib advisories the current floor
+			// fixes — re-read it before lowering anything here.
+			groupName: 'go toolchain',
+			matchDatasources: ['golang-version']
+		},
+		{
+			groupName: 'go toolchain',
+			matchDatasources: ['docker'],
+			matchPackageNames: ['golang']
+		},
+		{
+			// The devcontainer's browser install and the @playwright/test package
+			// must be the same version: the client expects that exact browser
+			// build, and a mismatch surfaces as a driver error mid-suite.
+			groupName: 'playwright',
+			matchPackageNames: ['@playwright/test']
+		},
+		{
+			// The barcode decoder: barcode-detector inlines zxing-wasm's JS glue,
+			// and the app ships zxing-wasm's .wasm binary — the two must be one
+			// build, or every decode fails ([D-21], wasm-version.test.ts).
+			groupName: 'barcode decoder',
+			matchPackageNames: ['barcode-detector', 'zxing-wasm']
+		},
+		{
+			// Node: one PR for the devcontainer's exact patch, which CI runs too.
+			groupName: 'node',
+			matchPackageNames: ['node']
+		},
+		{
+			// An update to the devcontainer Dockerfile is a new CI image: rewrite
+			// its tag in every workflow in the same PR ([D-203]).
+			matchFileNames: ['.devcontainer/Dockerfile'],
+			postUpgradeTasks: {
+				commands: ['sh scripts/ci-image-tag.sh --write'],
+				fileFilters: ['.woodpecker/*.yaml'],
+				executionMode: 'branch'
+			}
+		},
+		{
+			// The CI image's tag is its content (scripts/ci-image-tag.sh), not a
+			// version Renovate could compare.
+			matchManagers: ['woodpecker'],
+			matchPackageNames: ['localhost/shoppinglist-ci'],
+			enabled: false
+		},
+		{
+			// PocketBase is pre-1.0 and single-maintainer: minors break. docs/internals/design.md
+			// §2 and §16 make these deliberate, reviewed events, so they wait for
+			// an explicit tick on the Dependency Dashboard rather than opening a PR
+			// on their own schedule. dbx and ozzo-validation ship on PocketBase's
+			// cadence and move with it.
+			matchPackageNames: [
+				'github.com/pocketbase/pocketbase',
+				'github.com/pocketbase/dbx',
+				'github.com/pocketbase/ozzo-validation/v4'
+			],
+			groupName: 'pocketbase',
+			dependencyDashboardApproval: true,
+			prBodyNotes: [
+				'Check `osv-scanner.toml`: the GHSA-q7pp-wcgr-pffx waiver (imaging, indirect via pocketbase/tools/filesystem) is explicitly parked until the next PocketBase bump. If this bump carries a fixed `imaging`, delete the waiver in the same PR.'
+			]
+		},
+		{
+			// WebAuthn is the authentication mechanism, and passkeys already in the
+			// wild cannot be re-issued. Majors get read, not merged on sight.
+			matchPackageNames: ['github.com/go-webauthn/webauthn'],
+			matchUpdateTypes: ['major'],
+			dependencyDashboardApproval: true
+		},
+		{
+			// Digest-only updates to the distroless base. The Dockerfile pins by
+			// INDEX digest so a rebuild of an old tag is reproducible; that pin is
+			// exactly what goes stale as the base is rebuilt for CVEs, and it is
+			// also the one docker update here that is always safe to take.
+			matchManagers: ['dockerfile'],
+			matchPackageNames: ['gcr.io/distroless/static-debian13'],
+			groupName: 'distroless base',
+			automerge: false
+		},
+		{
+			// Deliberately NOT enabling pinDigests globally. The remaining step
+			// images float on a major on purpose (`docker:29-dind`) so the build
+			// cell picks up base security patches without a PR; the production
+			// image is the only place reproducibility is worth a digest, and it
+			// already has one.
+			matchManagers: ['woodpecker'],
+			pinDigests: false
+		}
+	]
+}

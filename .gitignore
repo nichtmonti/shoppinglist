@@ -1,0 +1,80 @@
+# --- Local agent config ------------------------------------------------------
+.claude/
+
+# --- Go / PocketBase ----------------------------------------------------------
+/backend/pb_data/
+/backend/*.db
+/backend/*.db-journal
+/backend/*.db-wal
+/backend/*.db-shm
+/backend/shoppinglist
+/backend/shoppinglist.exe
+# the gate's -tags no_ui build: API-only (no SPA), deliberately OFF the
+# backend/shoppinglist path that e2e/run-server.sh reuses — a raw playwright
+# run must never health-check an empty-SPA binary left by --cold-without-e2e
+/backend/shoppinglist-no-ui
+# the demo binary and the SPA it embeds ([D-234], scripts/build-demo.sh)
+/backend/shoppinglist-demo
+/backend/pb_public_demo/
+# CI's build of the tools/dex pin for the OIDC browser harness ([D-154])
+/backend/dex
+# air's build output for scripts/dev.sh ([D-71]) — kept off the
+# backend/shoppinglist path that e2e/run-server.sh reuses
+/backend/tmp/
+/backend/dist/
+# CI's per-pipeline Go module cache — workspace state, never committed ([D-60])
+/.gomod/
+/test_pb_data/
+
+# --- Node / pnpm --------------------------------------------------------------
+node_modules/
+.pnpm-store/
+
+# --- SvelteKit (frontend) -----------------------------------------------------
+/frontend/build/
+# the demo build's SPA ([D-234], scripts/build-demo.sh)
+/frontend/build-demo/
+/frontend/.svelte-kit/
+/frontend/.svelte-kit-dev/
+/frontend/.svelte-kit-tiles/
+# Any other named dev-server instance (SHOPPINGLIST_DEV_INSTANCE, frontend/vite.config.ts)
+/frontend/.svelte-kit-*/
+/frontend/package/
+/frontend/vite.config.ts.timestamp-*
+/frontend/.vite/
+
+# --- Playwright (e2e) ---------------------------------------------------------
+/e2e/test-results/
+/e2e/*/test-results/
+/e2e/shots/out/
+/e2e/playwright-report/
+/e2e/blob-report/
+/e2e/playwright/.cache/
+# Core dumps a crashing browser leaves in the harness's working directory
+/e2e/core.[0-9]*
+# CI frontend-test step writes its JSON report here (see .woodpecker/frontend.yaml).
+
+# --- OS / editor --------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# --- Deploy (compose reads .env; keep local domain config out of git) -----------
+.env
+
+# --- GoReleaser (local snapshot output) ---------------------------------------
+/dist/
+/backend/pb_public/
+
+# --- Gate logs (scripts/gate.sh output — one dated file per run) --------------
+/logs/
+
+# Go coverage: the profiles, diff-cover's input and CI's server counters
+# (Taskfile.yml coverage:go, [D-203])
+/backend/coverage*
+/.cover/
+# diff-cover's venv (Taskfile.yml diff-cover)
+/tools/diff-cover/.venv/
+/.task/
