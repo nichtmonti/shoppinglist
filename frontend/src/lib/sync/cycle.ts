@@ -129,6 +129,14 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 	// Captured before the first await and asked before every write (§5.6 [D-109]).
 	const session = sessionScope();
 	const abandoned = () => (deps.abandoned?.() ?? false) || !session.owned();
+	// The check and the write in one transaction, so a sign-out's wipe cannot
+	// land between them and be undone (§5.6 [D-109]). False when abandoned.
+	const writeOwned = (tables: Table[], write: () => Promise<void>) =>
+		db.transaction('rw', tables, async () => {
+			if (abandoned()) return false;
+			await write();
+			return true;
+		});
 
 	if (abandoned()) return nothing();
 
@@ -161,34 +169,33 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 			purged.push(local.list);
 		}
 	}
-	if (abandoned()) return nothing();
-
 	// Memberships, and each list's name with them ([D-08]). Not `updated`: that
-	// is the "pulled" signal ([D-185]) and waits for step 3.
-	await putOnlyChanged(
-		db.memberships,
-		memberships.map((m) => ({
-			id: m.id,
-			account: m.account,
-			list: m.list,
-			created: m.created,
-			updated: m.updated
-		}))
-	);
-	// By id too: a list left and re-joined elsewhere has a new membership row.
-	const serverIds = new Set(memberships.map((m) => m.id));
-	const stale = localMemberships.filter((m) => !serverIds.has(m.id) && serverListIds.has(m.list));
-	if (stale.length > 0) await db.memberships.bulkDelete(stale.map((m) => m.id));
-	if (abandoned()) return nothing();
-	const known = new Map((await db.lists.toArray()).map((l) => [l.id, l] as const));
-	await putOnlyChanged(
-		db.lists,
-		server.map((d) => ({ ...known.get(d.list_id), id: d.list_id, name: d.name }))
-	);
-	// The home tells "not pulled yet" from "no lists" by this stamp ([D-182]), so
-	// it is written before the slow steps below.
-	if (abandoned()) return nothing();
-	await setMeta('memberships_synced_at', new Date().toISOString());
+	// is the "pulled" signal ([D-185]) and waits for step 3. The home tells "not
+	// pulled yet" from "no lists" by the stamp ([D-182]), so it is written
+	// before the slow steps below.
+	const written = await writeOwned([db.memberships, db.lists, db.meta], async () => {
+		await putOnlyChanged(
+			db.memberships,
+			memberships.map((m) => ({
+				id: m.id,
+				account: m.account,
+				list: m.list,
+				created: m.created,
+				updated: m.updated
+			}))
+		);
+		// By id too: a list left and re-joined elsewhere has a new membership row.
+		const serverIds = new Set(memberships.map((m) => m.id));
+		const stale = localMemberships.filter((m) => !serverIds.has(m.id) && serverListIds.has(m.list));
+		if (stale.length > 0) await db.memberships.bulkDelete(stale.map((m) => m.id));
+		const known = new Map((await db.lists.toArray()).map((l) => [l.id, l] as const));
+		await putOnlyChanged(
+			db.lists,
+			server.map((d) => ({ ...known.get(d.list_id), id: d.list_id, name: d.name }))
+		);
+		await setMeta('memberships_synced_at', new Date().toISOString());
+	});
+	if (!written) return nothing();
 
 	// 3. Reconcile diverged lists: the delta and the id set first, the full
 	// snapshot when they do not explain the divergence ([D-40]).
@@ -204,10 +211,13 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 
 	// Every list is pulled: its `updated` (the digest's max_updated, §9.3's sort
 	// key) tells the home its count is real ([D-185]).
-	await putOnlyChanged(
-		db.lists,
-		server.map((d) => ({ id: d.list_id, name: d.name, updated: d.max_updated }))
+	const pulled = await writeOwned([db.lists], () =>
+		putOnlyChanged(
+			db.lists,
+			server.map((d) => ({ id: d.list_id, name: d.name, updated: d.max_updated }))
+		)
 	);
+	if (!pulled) return nothing();
 
 	// 4. The reference mirror, once per session and after the pull: on a fresh
 	// device it is the slowest step, and the lists must not wait for it. A
@@ -223,8 +233,9 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 	}
 
 	// 5. Stamp.
-	if (abandoned()) return nothing();
-	await setMeta('last_synced_at', new Date().toISOString());
+	if (!(await writeOwned([db.meta], () => setMeta('last_synced_at', new Date().toISOString())))) {
+		return nothing();
+	}
 
 	return { drained, failed, diverged, purged, mirrored, error };
 }
