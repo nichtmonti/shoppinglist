@@ -306,6 +306,66 @@ func TestSignCounterIsAdvisory(t *testing.T) {
 	if !strings.Contains(logs.String(), "may be cloned") {
 		t.Errorf("a counter gone back was not logged: %q", logs)
 	}
+
+	// The warning belongs to that login only: a counter that advances again
+	// is not reported.
+	seen := strings.Count(logs.String(), "may be cloned")
+	a.Count = 9
+	if code, body := finishLogin(mux, a.Assert(t, beginLogin(t, mux, "again")), "again"); code != http.StatusOK {
+		t.Fatalf("login with counter 9 = %d %s", code, body)
+	}
+	if strings.Count(logs.String(), "may be cloned") != seen {
+		t.Errorf("a counter that advanced again was reported as cloned: %q", logs)
+	}
+}
+
+// TestAddingAPasskeyExcludesTheAccountsOwn: register/begin for a signed-in
+// account lists its passkeys in excludeCredentials, so an authenticator that
+// already holds one refuses instead of silently replacing it and leaving a
+// credentials row the last-passkey guard would count. A new account has none.
+func TestAddingAPasskeyExcludesTheAccountsOwn(t *testing.T) {
+	_, mux := setupWebauthnApp(t)
+	excluded := func(begin string) []string {
+		t.Helper()
+		var opts struct {
+			PublicKey struct {
+				ExcludeCredentials []struct {
+					ID string `json:"id"`
+				} `json:"excludeCredentials"`
+			} `json:"publicKey"`
+		}
+		if err := json.Unmarshal([]byte(begin), &opts); err != nil {
+			t.Fatal(err)
+		}
+		var ids []string
+		for _, c := range opts.PublicKey.ExcludeCredentials {
+			ids = append(ids, c.ID)
+		}
+		return ids
+	}
+
+	rec, begin := testutil.DoReq(mux, http.MethodPost, "/api/passkey/register/begin", `{"browser_id":"first","nickname":"Anna"}`, nil)
+	if rec.Code != http.StatusOK || len(excluded(begin)) != 0 {
+		t.Fatalf("a new account's begin = %d, excluding %v; want nothing excluded", rec.Code, excluded(begin))
+	}
+	a := testutil.NewAuthenticator(t, "localhost", testOrigin)
+	fin, body := testutil.DoReq(mux, http.MethodPost, "/api/passkey/register/finish", a.Register(t, begin), browser("first"))
+	if fin.Code != http.StatusOK {
+		t.Fatalf("register/finish = %d: %s", fin.Code, body)
+	}
+	var auth authResponse
+	if err := json.Unmarshal([]byte(body), &auth); err != nil {
+		t.Fatal(err)
+	}
+
+	rec, begin = testutil.DoReq(mux, http.MethodPost, "/api/passkey/register/begin",
+		`{"browser_id":"second","friendly_name":"Laptop"}`, testutil.AuthHeader(auth.Token))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("adding a passkey: begin = %d: %s", rec.Code, begin)
+	}
+	if got, want := excluded(begin), base64.RawURLEncoding.EncodeToString(a.CredentialID); len(got) != 1 || got[0] != want {
+		t.Errorf("excludeCredentials = %v, want the account's passkey %s", got, want)
+	}
 }
 
 // TestAddPasskeyOnlyForTheSessionsAccount: adding a passkey runs on the

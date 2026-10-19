@@ -8,6 +8,9 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **Adding a passkey on a device that already holds one for your account now says so** ("This passkey is already registered.") instead of quietly replacing the old one. The replaced passkey's entry stayed in "Passkeys" though it no longer worked, and counted as a way in, so the last working passkey could be removed.
+- **A hardware key whose counter once went backwards is no longer reported as possibly cloned at every later sign-in.** The server log warned on each login after the first warning, even once the counter advanced normally again.
+
 ## v0.16.3: product photos that reach the item however late they arrive, and a demo in both languages with photos of its own (2026-10)
 
 **For operators.** Nothing to do before upgrading. The server gets one more scheduled job, which retries a product photo that failed to download every 15 minutes for two days; it asks the same Open Food Facts photo hosts as before, so an egress allowlist needs no change.
