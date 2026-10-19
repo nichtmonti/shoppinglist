@@ -321,17 +321,14 @@
 		</div>
 
 		{#if open}
-			<!-- The wrapper carries the aria-controls id: bits-ui's ContentStatic
-			     never puts an id prop on the listbox element. -->
-			<div id="add-typeahead">
-				<SuggestionList
-					{candidates}
-					quantity={typed.quantity}
-					onitempointerup={onItemPointerUp}
-					onitemclick={onItemClick}
-					onsuppress={(name) => void suppress(name)}
-				/>
-			</div>
+			<SuggestionList
+				id="add-typeahead"
+				{candidates}
+				quantity={typed.quantity}
+				onitempointerup={onItemPointerUp}
+				onitemclick={onItemClick}
+				onsuppress={(name) => void suppress(name)}
+			/>
 		{/if}
 	</div>
 </Combobox.Root>

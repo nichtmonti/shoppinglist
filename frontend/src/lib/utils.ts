@@ -13,7 +13,8 @@ export const THEME_SCALES = {
 	text: ['hero', 'meta', 'micro', 'name', 'note', 'qty', 'tile', 'title'],
 	radius: ['card', 'chip', 'control'],
 	'font-weight': ['book', 'demi'],
-	leading: ['body', 'flush']
+	leading: ['body', 'flush'],
+	shadow: ['pop', 'sheet']
 };
 
 /** tailwind-merge, taught the project's theme — the one merge `cn` and the class-conflict check share. */

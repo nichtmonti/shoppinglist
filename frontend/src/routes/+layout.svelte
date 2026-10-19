@@ -142,10 +142,14 @@
 	// The browser bar follows the app's light/dark choice, not only the phone's.
 	$effect(() => followThemeChoice(userPrefersMode.current));
 
-	// The engine follows the session, not the route. `mountSync` is idempotent, so
-	// re-running this effect (e.g. on a token refresh) cannot start a second loop.
+	// Whether a session is valid, as its own signal: `$authState` is a new
+	// object on every set, and Svelte counts a store's object as changed each
+	// time, so effects reading it directly re-ran on every token save.
+	const sessionValid = $derived($authState.isValid);
+
+	// The engine follows the session, not the route.
 	$effect(() => {
-		if ($authState.isValid) mountSync(noticeToasts);
+		if (sessionValid) mountSync(noticeToasts);
 		else unmountSync();
 	});
 
@@ -173,7 +177,7 @@
 	// would not unhide it (§6.11). The refresh then delivers what a 401 held
 	// ([D-137]).
 	$effect(() => {
-		if ($authState.isValid)
+		if (sessionValid)
 			void suppression()
 				.then(({ refreshSuppressedMirror }) => refreshSuppressedMirror())
 				.catch(() => {});
@@ -183,7 +187,10 @@
 </script>
 
 <div class="app-shell" data-testid="app-shell">
-	<ModeWatcher />
+	<!-- static/theme.js sets the theme before the first paint; the inline head
+	     script mode-watcher would add never runs here (no SSR, and the CSP
+	     allows no inline code). -->
+	<ModeWatcher disableHeadScriptInjection />
 	{#if DemoBanner && localeLoaded && $authState.nickname !== null}<DemoBanner />{/if}
 	{#if localeLoaded && ($authState.nickname !== null || (publicRoute && booted))}
 		<svelte:boundary onerror={reportRenderError}>
