@@ -24,7 +24,7 @@ const ProviderName = "oidc"
 // matching the environment; it reads the collection because PocketBase's
 // auth-with-oauth2 route acts on it. `name` is the display label.
 func Live(app core.App) (name string, ok bool) {
-	col, err := app.FindCollectionByNameOrId("accounts")
+	col, err := app.FindCachedCollectionByNameOrId("accounts")
 	if err != nil || !col.IsAuth() || !col.OAuth2.Enabled {
 		return "", false
 	}

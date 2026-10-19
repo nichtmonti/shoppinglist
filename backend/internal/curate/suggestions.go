@@ -255,6 +255,7 @@ func NewCommand(app core.App) *cobra.Command {
 	asJSON := false
 	cmd := &cobra.Command{
 		Use:   "dictionary-suggestions",
+		Args:  cobra.NoArgs,
 		Short: "Print usage-derived item_dictionary candidates (read-only, §6.13)",
 		Long: "Scans non-deleted items across all lists for names with no match in " +
 			"item_dictionary, groups them by normalized name, and prints those seen on " +

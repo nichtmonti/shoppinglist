@@ -259,7 +259,7 @@ func (b importBackupPayload) toSeed() ([]seedCategory, []seedItem) {
 // templateSlugSet is the set of slugs the server itself mints, the allowlist
 // for an imported document's slugs ([D-08]).
 func templateSlugSet(app core.App) (map[string]struct{}, error) {
-	templates, err := app.FindRecordsByFilter("category_templates", "", "", 0, 0)
+	templates, err := app.FindAllRecords("category_templates")
 	if err != nil {
 		return nil, err
 	}

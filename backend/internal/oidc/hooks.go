@@ -104,7 +104,11 @@ func autoCreateRecord(e *core.RecordAuthWithOAuth2RequestEvent) error {
 			return err
 		}
 
+		// The rest of the chain runs in the transaction, as PocketBase's own
+		// hooks do it, and the event gets its app back after.
+		original := e.App
 		e.App = txApp
+		defer func() { e.App = original }()
 		e.Record = rec
 		e.IsNewRecord = true
 		if err := e.Next(); err != nil {

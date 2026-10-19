@@ -58,6 +58,7 @@ func NewCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   CommandName,
+		Args:  cobra.NoArgs,
 		Short: "Probe this instance's /api/health and exit 0 if it is serving",
 		Long: "One-shot HTTP probe of an already-running server, used as the " +
 			"container image's HEALTHCHECK (the release image is distroless — " +
