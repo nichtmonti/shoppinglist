@@ -1,7 +1,7 @@
 // List lifecycle: the transactional routes of §7.5 / §7.6 and the two direct-PB
 // writes of §11 (rename, leave). None of this rides the outbox, so all of it is
 // online-only ([D-09], §9.3): lists are set up online, shopping works offline.
-import { db } from '#lib/db.js';
+import { db, ownMembership } from '#lib/db.js';
 import { pb } from '#lib/pb.js';
 import { applyServerPatch, pullFromServer, purgeList, refreshRoster } from '#lib/sync/index.js';
 import { parseListBackup, type BackupCategory, type ListBackup } from '#lib/backup.js';
@@ -99,7 +99,7 @@ export async function joinList(token: string): Promise<string> {
  * queued ops.
  */
 export async function leaveList(listId: string): Promise<void> {
-	const own = (await db.memberships.where('list').equals(listId).toArray())[0];
+	const own = await ownMembership(listId);
 	const membershipId = own?.id ?? (await findOwnMembershipId(listId));
 	if (membershipId) {
 		// A retry after a lost response finds the membership already gone: the

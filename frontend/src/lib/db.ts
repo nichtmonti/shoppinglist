@@ -357,6 +357,13 @@ export async function getMeta<K extends MetaKey>(key: K): Promise<MetaValues[K] 
 	return row?.value as MetaValues[K] | undefined;
 }
 
+/** This device's membership row for a list, the newest: one left and
+ *  re-joined on another device has a second, stale row here until the next
+ *  sync drops it. */
+export async function ownMembership(listId: string): Promise<Membership | undefined> {
+	return (await db.memberships.where('list').equals(listId).sortBy('updated')).at(-1);
+}
+
 export async function setMeta<K extends MetaKey>(key: K, value: MetaValues[K]): Promise<void> {
 	await db.meta.put({ key, value });
 }

@@ -1,7 +1,7 @@
 // Schema smoke test for the Dexie database.
 import Dexie from 'dexie';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { AppDB, db, type Item, type PendingOp, getMeta, setMeta } from './db';
+import { AppDB, db, type Item, type PendingOp, getMeta, ownMembership, setMeta } from './db';
 import { wipeLocalAccountData } from '#lib/auth/account-data.js';
 
 // Helper for creating valid test items.
@@ -247,6 +247,42 @@ describe('db schema', () => {
 // The sign-out wipe ([D-21]'s argument, applied to Dexie). What it must drop is
 // the account's data; what it must KEEP is the two things that are not the
 // account's: the app's own shipped vocabulary, and the device's preferences.
+describe('ownMembership()', () => {
+	beforeEach(async () => {
+		await db.memberships.clear();
+	});
+
+	// A list left and re-joined on another device leaves this one a stale row
+	// until the next sync: leaving must delete the live one, not the stale one.
+	it('is the newest row for the list, whatever the ids', async () => {
+		await db.memberships.bulkPut([
+			{
+				id: 'a-old',
+				account: 'acc',
+				list: 'L',
+				created: 't0',
+				updated: '2026-10-01 10:00:00.000Z'
+			},
+			{
+				id: 'z-new',
+				account: 'acc',
+				list: 'L',
+				created: 't1',
+				updated: '2026-10-02 10:00:00.000Z'
+			},
+			{
+				id: 'b-other',
+				account: 'acc',
+				list: 'M',
+				created: 't1',
+				updated: '2026-10-03 10:00:00.000Z'
+			}
+		]);
+		expect((await ownMembership('L'))?.id).toBe('z-new');
+		expect(await ownMembership('none')).toBeUndefined();
+	});
+});
+
 describe('wipeLocalAccountData()', () => {
 	beforeEach(async () => {
 		await db.open();
