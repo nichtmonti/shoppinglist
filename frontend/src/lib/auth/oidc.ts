@@ -10,6 +10,7 @@ import { rememberLoginMethod } from './login-methods';
 import { WrongAccountError } from './wrong-account';
 import { t } from '../i18n';
 import { LocalizedError } from '../localized-error';
+import { httpStatus } from '../http-status';
 
 // The SDK's realtime OAuth2 form needs this page's live @oauth2 subscription
 // to receive {state, code}, so the provider opens in a POPUP rather than by
@@ -70,10 +71,7 @@ async function oidcReauth(provider: string, expectAccount: string): Promise<bool
 			if (orphan) {
 				// Best effort: the §13 orphan sweep takes an account with no
 				// lists if this does not get through.
-				await fetch('/api/account/delete', {
-					method: 'POST',
-					headers: authHeaders(client.authStore.token)
-				}).catch(() => undefined);
+				await client.send('/api/account/delete', { method: 'POST' }).catch(() => undefined);
 				rememberLoginMethod('passkey');
 			}
 			throw new WrongAccountError(orphan);
@@ -156,16 +154,19 @@ export async function linkOidc(provider: string): Promise<boolean> {
 	pendingClient = client;
 	try {
 		if ((await oidcExchange(client, provider)) === null) return false;
-		const res = await fetch('/api/account/link', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json', ...authHeaders(sessionToken) },
-			body: JSON.stringify({ token: client.authStore.token })
-		});
-		if (!res.ok) {
-			throw new LocalizedError(
-				t(res.status === 409 ? 'settings_link_oidc_in_use' : 'settings_link_oidc_failed')
-			);
-		}
+		// The session's token, as it was when the link began: the popup's
+		// sign-in went into the throwaway client.
+		await pb
+			.send('/api/account/link', {
+				method: 'POST',
+				headers: authHeaders(sessionToken),
+				body: { token: client.authStore.token }
+			})
+			.catch((e: unknown) => {
+				throw new LocalizedError(
+					t(httpStatus(e) === 409 ? 'settings_link_oidc_in_use' : 'settings_link_oidc_failed')
+				);
+			});
 	} finally {
 		if (pendingClient === client) pendingClient = null;
 		client.authStore.clear();
