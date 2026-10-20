@@ -138,6 +138,10 @@ func TestLoginBeginPlumbing(t *testing.T) {
 	if !strings.Contains(body, "publicKey") {
 		t.Errorf("login begin response missing publicKey assertion: %s", body)
 	}
+	// Required, from the config: a passkey sign-in is the user's own.
+	if !strings.Contains(body, `"userVerification":"required"`) {
+		t.Errorf("login begin does not require user verification: %s", body)
+	}
 }
 
 // TestFromEnvValidation (§5.7): refuse unset / raw-IP RP-IDs; accept a domain.

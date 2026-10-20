@@ -72,11 +72,12 @@ func Register(r *router.Router[*core.RequestEvent], publicFS fs.FS, camera bool)
 
 	r.BindFunc(func(e *core.RequestEvent) error {
 		h := e.Response.Header()
+		// PocketBase's default middleware already sends nosniff and
+		// Cross-Origin-Opener-Policy: same-origin; its X-Frame-Options is
+		// SAMEORIGIN, which this tightens.
 		h.Set("Referrer-Policy", "no-referrer")
-		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Permissions-Policy", permissions)
-		h.Set("Cross-Origin-Opener-Policy", "same-origin")
 
 		// PocketBase's dashboard gets only the baseline CSP: a PocketBase
 		// version bump must not be breakable by a policy of ours.

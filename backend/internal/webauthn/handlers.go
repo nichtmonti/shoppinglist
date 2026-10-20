@@ -270,9 +270,9 @@ func loginBegin(wa *wlib.WebAuthn) func(*core.RequestEvent) error {
 		if err := checkBrowserID(e, body.BrowserID, "browser_id"); err != nil {
 			return err
 		}
-		assertion, sd, err := wa.BeginDiscoverableLogin(
-			wlib.WithUserVerification(protocol.VerificationRequired),
-		)
+		// User verification is required by the config (New), which both
+		// ceremonies take it from.
+		assertion, sd, err := wa.BeginDiscoverableLogin()
 		if err != nil {
 			return e.InternalServerError("failed to begin login", err)
 		}
