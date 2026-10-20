@@ -10,16 +10,16 @@
 /backend/shoppinglist
 /backend/shoppinglist.exe
 # the gate's -tags no_ui build: API-only (no SPA), deliberately OFF the
-# backend/shoppinglist path that e2e/run-server.sh reuses — a raw playwright
+# backend/shoppinglist path the Playwright harnesses serve (e2e/server.ts) — a raw playwright
 # run must never health-check an empty-SPA binary left by --cold-without-e2e
 /backend/shoppinglist-no-ui
-# the demo binary and the SPA it embeds ([D-234], scripts/build-demo.sh)
+# the demo binary and the SPA it embeds ([D-234], task build-demo)
 /backend/shoppinglist-demo
 /backend/pb_public_demo/
 # CI's build of the tools/dex pin for the OIDC browser harness ([D-154])
 /backend/dex
 # air's build output for scripts/dev.sh ([D-71]) — kept off the
-# backend/shoppinglist path that e2e/run-server.sh reuses
+# backend/shoppinglist path the Playwright harnesses serve (e2e/server.ts)
 /backend/tmp/
 /backend/dist/
 # CI's per-pipeline Go module cache — workspace state, never committed ([D-60])
@@ -32,7 +32,7 @@ node_modules/
 
 # --- SvelteKit (frontend) -----------------------------------------------------
 /frontend/build/
-# the demo build's SPA ([D-234], scripts/build-demo.sh)
+# the demo build's SPA ([D-234], task build-demo)
 /frontend/build-demo/
 /frontend/.svelte-kit/
 /frontend/.svelte-kit-dev/

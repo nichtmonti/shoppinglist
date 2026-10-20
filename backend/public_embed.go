@@ -10,7 +10,7 @@ import (
 )
 
 // The SvelteKit SPA, compiled into the binary ([D-64]). backend/pb_public is
-// a gitignored build input from scripts/build-embedded-spa.sh; without it the
+// a gitignored build input from `task build-spa`; without it the
 // build fails, so commands that do not need the SPA use `-tags no_ui`
 // (public_noui.go).
 //

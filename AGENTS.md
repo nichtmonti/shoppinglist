@@ -176,8 +176,8 @@ e2e:<name>`) or by hand as below.
   Open states with `openGallery(page, {...})` and find items by
   `[data-item="<case id>"]`; never drive the toolbar. Vite is started with
   `node`, not `pnpm exec`, whose process group hung every run.
-- **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from
-  `scripts/build-demo.sh`.
+- **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from `task
+  build-demo`.
 
 A failed or timed-out test in the functional, arch or OIDC suite writes
 `page-diagnosis.md` next to Playwright's `error-context.md` ([D-247]); CI
@@ -252,8 +252,8 @@ pinned under `tools/`; a test helper imported by production code is how it
 happens.
 
 **A dependency change regenerates `docs/THIRD_PARTY_LICENSES.md` and
-`docs/sbom.cdx.json`**: `scripts/third-party-licenses.sh`
-(`--check` compares). CI fails a stale file or a licence off the allowlist;
+`docs/sbom.cdx.json`**: `task licenses` (`task licenses -- --check`
+compares). CI fails a stale file or a licence off the allowlist;
 the gate does not check it.
 
 **Ports.** Each harness has one port (above); the shots harness takes 8091

@@ -116,17 +116,20 @@ steps:
   # race the goreleaser step's reads of backend/pb_public.
 
   # Produces backend/pb_public and the demo's backend/pb_public_demo
-  # (scripts/build-embedded-spa.sh, the same builds the e2e workflow and the
-  # local harnesses embed) — never a binary. Split
+  # (`task build-spa`, the same builds the e2e workflow and the local
+  # harnesses embed) — never a binary. Split
   # from `release` because the frontend build needs Node and goreleaser's own
   # image has none; it runs in the CI image, as the suites do ([D-203]).
   release-frontend:
     image: localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
     commands:
+      # go-task as frontend.yaml installs it; .gomod and .task are gitignored,
+      # so goreleaser still sees a clean tree.
+      - export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod" && go -C tools/task install tool
       - (cd frontend && pnpm install --frozen-lockfile)
-      - scripts/build-embedded-spa.sh
+      - task build-spa
       # [D-234] The demo image's SPA, into its own pb_public_demo.
-      - SHOPPINGLIST_DEMO_BUILD=1 scripts/build-embedded-spa.sh
+      - task build-spa DEMO=1
 
   release:
     image: goreleaser/goreleaser:v2.18.3

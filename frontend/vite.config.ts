@@ -50,12 +50,12 @@ export default defineConfig(({ command, isPreview }) => {
 	// byte-identical: worker-src 'self'.
 	const workerSrc: Array<'self' | 'blob:'> = command === 'serve' ? ['self', 'blob:'] : ['self'];
 
-	// The demo build ([D-234]): scripts/build-demo.sh sets this. `#demo` is the
+	// The demo build ([D-234]): `task build-spa DEMO=1` sets this. `#demo` is the
 	// one door to the demo's client code, and only this build opens it: the
 	// package.json import resolves to src/lib/demo/on.ts under the `demo`
 	// condition, which only this build adds, and to src/lib/demo/off.ts
 	// everywhere else (TypeScript, Vitest, the normal build), so no demo code
-	// reaches a normal bundle (scripts/build-embedded-spa.sh checks). Its output
+	// reaches a normal bundle (`task build-spa` checks). Its output
 	// goes to build-demo/, which the demo binary embeds, so the two SPAs never mix.
 	const demoBuild = process.env.SHOPPINGLIST_DEMO_BUILD === '1';
 

@@ -1,8 +1,8 @@
+import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 // What every Playwright harness config shares: the port it runs on, the app
-// server it boots (run-server.sh) or the Vite dev server, and the browser
-// locale.
+// server it boots or the Vite dev server, and the browser locale.
 
 const REPO = resolve(import.meta.dirname, '..');
 
@@ -12,14 +12,36 @@ export function basePort(fallback: string): string {
 }
 
 /**
- * One app server on `port` (e2e/run-server.sh), with the WebAuthn RP set to
- * its own origin. `extra` adds or overrides environment variables. A harness
- * owns its whole origin, so it never adopts a running server: Playwright
- * refuses a port that already answers, scripts/dev.sh's included ([D-157]).
+ * One app server on `port`, with the WebAuthn RP set to its own origin.
+ * `extra` adds or overrides environment variables, and switches two of its own:
+ * `E2E_FRESH_DATA` starts from an empty database (a harness whose identities
+ * are fixed, as e2e/oidc's Dex users), `E2E_SUPERUSER` creates SUPERUSER.
+ * A harness owns its whole origin, so it never adopts a running server:
+ * Playwright refuses a port that already answers, scripts/dev.sh's included
+ * ([D-157]).
+ *
+ * The binary is SHOPPINGLIST_BIN, which every task sets, else
+ * backend/shoppinglist; nothing is built here.
  */
 export function appServer(port: string, extra: Record<string, string> = {}) {
+	const bin = extra.SHOPPINGLIST_BIN ?? process.env.SHOPPINGLIST_BIN ?? 'backend/shoppinglist';
+	if (!existsSync(resolve(REPO, bin))) {
+		throw new Error(
+			`no ${bin}: build it first (\`task build-app\`, the demo's \`task build-demo\`), ` +
+				'or run the harness through scripts/gate.sh e2e:<name>, which does'
+		);
+	}
+	// The data dir follows the port, so a run on another port starts clean
+	// rather than inheriting the default run's accounts.
+	const data = `/tmp/e2e_pbdata_${port}`;
+	const steps = [
+		extra.E2E_FRESH_DATA && `rm -rf ${data}`,
+		extra.E2E_SUPERUSER &&
+			`${bin} superuser upsert ${SUPERUSER.email} ${SUPERUSER.password} --dir=${data} >/dev/null`,
+		`exec ${bin} serve --http=127.0.0.1:${port} --dir=${data}`
+	];
 	return {
-		command: 'bash e2e/run-server.sh',
+		command: steps.filter(Boolean).join(' && '),
 		cwd: REPO,
 		url: `http://127.0.0.1:${port}/api/health`,
 		reuseExistingServer: false,
@@ -29,14 +51,11 @@ export function appServer(port: string, extra: Record<string, string> = {}) {
 		// SIGKILL ([D-203]).
 		gracefulShutdown: { signal: 'SIGTERM' as const, timeout: 10_000 },
 		env: {
-			E2E_PORT: port,
 			SHOPPINGLIST_RP_ID: 'localhost',
 			SHOPPINGLIST_RP_ORIGIN: `http://localhost:${port}`,
 			// tests/fixtures.ts gives every test its own client address in this
 			// header, so the per-IP budgets see separate people ([D-223]).
 			SHOPPINGLIST_TRUSTED_PROXY_HEADER: 'X-Forwarded-For',
-			E2E_SUPERUSER_EMAIL: SUPERUSER.email,
-			E2E_SUPERUSER_PASSWORD: SUPERUSER.password,
 			...extra
 		}
 	};
@@ -81,7 +100,7 @@ export function inviteOnlyServer(port: string) {
 export const INVITE_PORT = process.env.E2E_INVITE_PORT ?? '8089';
 
 /**
- * The superuser run-server.sh creates when the harness sets `E2E_SUPERUSER`:
+ * The superuser appServer creates when the harness sets `E2E_SUPERUSER`:
  * the functional suite's way to put a product photo in the barcode cache
  * (seedProductPhoto in tests/helpers.ts). The server listens on loopback only.
  */

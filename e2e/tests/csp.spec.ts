@@ -19,7 +19,7 @@ import { aimCamera, installCamera } from './camera';
 //  1. Nothing the app legitimately does is blocked. A CSP failure is a runtime
 //     failure with no build-time or type-level warning, so the only way to know
 //     is to drive the real flows against the real policy and watch the console.
-//     The e2e harness (run-server.sh) serves the real binary with its SPA
+//     The e2e harness (server.ts) serves the real binary with its SPA
 //     embedded, so what runs here is exactly what a deploy serves.
 //  2. The header and the meta tag say the same thing. A browser enforces both
 //     INDEPENDENTLY — a resource must satisfy each — so any drift between them

@@ -95,7 +95,7 @@ state ([details](AGENTS.md#checking-ui-work-with-screenshots)).
   `## Unreleased` in [`CHANGELOG.md`](CHANGELOG.md) in the same commit.
 - Run `pnpm format` (repo root) to format.
 - After adding, removing or updating a dependency, run
-  `scripts/third-party-licenses.sh` in the container and commit
+  `task licenses` in the container and commit
   `docs/THIRD_PARTY_LICENSES.md` and `docs/sbom.cdx.json`, or CI fails.
 
 ## CI
