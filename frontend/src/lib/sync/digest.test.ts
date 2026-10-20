@@ -439,7 +439,7 @@ describe('shared digest vectors (Go ↔ TypeScript agreement)', () => {
 
 	for (const v of vectors) {
 		it(`matches the fixture: ${v.note}`, async () => {
-			const d = digestOf(v.rows);
+			const d = await digestOf(v.rows);
 			expect(d.hash).toBe(v.hash);
 			expect(d.row_count).toBe(v.row_count);
 			expect(d.max_updated).toBe(v.max_updated);

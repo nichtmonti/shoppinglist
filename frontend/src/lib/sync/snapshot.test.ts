@@ -111,7 +111,7 @@ describe('snapshot.ts', () => {
 					diverged: ['list-1'],
 					server: [
 						{
-							...digestOf([]),
+							...(await digestOf([])),
 							list_id: 'list-1',
 							name: 'List',
 							membership: membershipFor('list-1')
@@ -419,7 +419,7 @@ describe('snapshot.ts', () => {
 	describe('reconcileDivergedLists ([D-40] timestamp delta)', () => {
 		// Build the server-side digest entry for a list from the rows the server holds.
 		async function serverEntry(rows: { id: string; updated: string }[]): Promise<DigestEntry> {
-			const d: Digest = digestOf(rows);
+			const d: Digest = await digestOf(rows);
 			return {
 				list_id: 'list-1',
 				row_count: d.row_count,
@@ -788,7 +788,7 @@ describe('snapshot.ts', () => {
 				{
 					diverged: ['list-1'],
 					server: [server],
-					local: new Map([['list-1', digestOf([])]])
+					local: new Map([['list-1', await digestOf([])]])
 				},
 				fetcher
 			);
@@ -802,7 +802,7 @@ describe('snapshot.ts', () => {
 	describe('post-reconcile convergence check (the lying-read tripwire)', () => {
 		// Build the server-side digest entry for a list from the rows the server holds.
 		async function serverEntry(rows: { id: string; updated: string }[]): Promise<DigestEntry> {
-			const d: Digest = digestOf(rows);
+			const d: Digest = await digestOf(rows);
 			return {
 				list_id: 'list-1',
 				row_count: d.row_count,

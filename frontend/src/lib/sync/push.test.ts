@@ -334,8 +334,8 @@ describe('push', () => {
 			// Not the enqueue-time base ('2', [D-40]'s best): the server's value now.
 			expect(row.quantity).toBe('5');
 			// And the digest already agrees — there is nothing left to re-pull.
-			const local = digestOf([{ id: row.id, updated: row.updated }]);
-			const server = digestOf([{ id: serverRow.id, updated: serverRow.updated }]);
+			const local = await digestOf([{ id: row.id, updated: row.updated }]);
+			const server = await digestOf([{ id: serverRow.id, updated: serverRow.updated }]);
 			expect(local.hash).toBe(server.hash);
 		});
 

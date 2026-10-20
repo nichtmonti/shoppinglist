@@ -446,24 +446,6 @@ export function sharedRest() {
 			rules: { 'no-restricted-imports': 'off' }
 		},
 		{
-			// The browser has these only in a secure context, and the demo also
-			// runs on plain http:// at a LAN address, where every call throws ([D-335]).
-			// Tests run in node, and the digest tests check against crypto.subtle.
-			files: ['src/**'],
-			ignores: ['**/*.test.ts'],
-			rules: {
-				'no-restricted-properties': [
-					'error',
-					{ object: 'crypto', property: 'randomUUID', message: "Use v4() from 'uuid'." },
-					{
-						object: 'crypto',
-						property: 'subtle',
-						message: 'Use @noble/hashes, as src/lib/sync/digest.ts does.'
-					}
-				]
-			}
-		},
-		{
 			// [D-221] Outside the engine the synced tables are read, never
 			// written. The engine, the store's own module (schema), the sign-out
 			// wipe (auth/account-data.ts) and the fixtures that seed it are exempt.

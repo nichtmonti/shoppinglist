@@ -14,6 +14,10 @@
 	import { createExampleLists, startDemo } from './start';
 
 	const action = new AsyncAction();
+	// [D-335] Over http:// at any address but localhost the browser withholds
+	// what the sync needs; say so rather than start a demo that cannot work.
+	const secure = window.isSecureContext;
+	const localUrl = `http://localhost${location.port ? `:${location.port}` : ''}`;
 
 	async function begin(): Promise<void> {
 		const joining = page.url.pathname.startsWith('/join');
@@ -31,12 +35,14 @@
 	class="mt-4"
 	data-testid="demo-start"
 	onclick={() => void action.run(begin)}
-	disabled={action.busy}
+	disabled={action.busy || !secure}
 	aria-busy={action.busy}
 >
 	{t('demo_start')}
 </Button>
 <Hint>{t('demo_start_note')}</Hint>
-{#if action.error}
+{#if !secure}
+	<ErrorText size="sm">{t('demo_insecure', { url: localUrl })}</ErrorText>
+{:else if action.error}
 	<ErrorText size="sm">{action.error}</ErrorText>
 {/if}

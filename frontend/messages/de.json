@@ -66,6 +66,7 @@
 	"demo_start_note": "Alles, was du hier einträgst, wird nach 24 Stunden gelöscht. Wir speichern nichts über dich.",
 	"demo_start_failed": "Die Demo konnte nicht starten. Bist du online?",
 	"demo_start_too_many": "Zu viele neue Demos von diesem Netz. Versuch es in ein paar Minuten noch einmal.",
+	"demo_insecure": "Der Browser sperrt unter dieser Adresse, was die Demo braucht. Öffne {url} auf dem Computer, auf dem sie läuft, oder nutze HTTPS.",
 	"demo_start_full": "Die Demo ist gerade voll. Versuch es später noch einmal.",
 	"demo_banner": "Demo: deine Daten werden nach 24 Stunden gelöscht",
 	"demo_banner_hours": [

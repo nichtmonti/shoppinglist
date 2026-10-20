@@ -65,6 +65,7 @@
 	"demo_start_failed": "The demo could not start. Are you online?",
 	"demo_start_too_many": "Too many new demos from this network. Try again in a few minutes.",
 	"demo_start_full": "The demo is full right now. Try again later.",
+	"demo_insecure": "The browser blocks what the demo needs on this address. Open {url} on the computer it runs on, or use HTTPS.",
 	"demo_banner": "Demo: your data is deleted after 24 hours",
 	"demo_banner_hours": [
 		{

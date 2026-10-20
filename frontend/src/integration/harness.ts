@@ -9,7 +9,6 @@
 // database NAME ('einkaufsliste_sync'), so the factory swap is what actually
 // separates them.
 import PocketBase from 'pocketbase';
-import { v4 } from 'uuid';
 import { vi } from 'vitest';
 
 import { BASE_URL, SUPERUSER_EMAIL, SUPERUSER_PASSWORD } from './config';
@@ -57,12 +56,12 @@ export interface Client {
 }
 
 // Record ids (items, categories) are client-generated (§8.2 outbox) with
-// uuid's v4() — so the harness's are too. (List ids are minted by the
+// crypto.randomUUID() — so the harness's are too. (List ids are minted by the
 // server, [D-08].) Using PocketBase-shaped ids here instead would hide any
 // id-format assumption on the server, which is exactly the class of drift this
 // suite exists to catch.
 export function newId(): string {
-	return v4();
+	return crypto.randomUUID();
 }
 
 // Authenticated once and reused for the whole run. PocketBase's own rate
