@@ -138,8 +138,14 @@
 						<ArrowDown class="shrink-0" />
 					</Button>
 				{/if}
+				<!-- Its keys are dragHandle's: Space or Enter starts the keyboard drag.
+				     A <button> would lose both drags, which skip clickable targets.
+				     The role and tabindex are the ones dragHandle sets at rest. -->
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<span
 					use:dragHandle
+					role="button"
+					tabindex="0"
 					class="arrange-handle grid size-11 shrink-0 touch-none place-items-center rounded-control text-muted-foreground hover:text-foreground"
 					aria-label={t('arrange_drag', { name })}
 					aria-pressed={selected === key}
