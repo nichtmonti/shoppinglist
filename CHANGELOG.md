@@ -8,6 +8,11 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+**For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it.
+
+- **A misspelt setting stops the server instead of being ignored.** `SHOPPINGLIST_SIGNUPS=closed`, say, used to start an instance with sign-up open; the log now names the variable and points to the list of settings ([D-336]).
+- **A `SHOPPINGLIST_RP_ID` written as a URL is named in the error**, with what to write instead (a bare domain such as `list.example.com`); before, the log showed a passkey library's message that named neither. The other passkey setting errors point to the deployment reference.
+- **The demo's start screen says it gives you three example lists**, not one.
 - **The demo says when it is opened at an address it cannot work on.** Over `http://` at a machine's IP or name (a phone on the home network, say), the browser withholds functions the app needs, so the example lists stayed empty and nothing typed in reached the server, with no sign of it. The start screen now says to open `http://localhost:<port>` on the computer the demo runs on, or to use HTTPS, and "Try it" stays off ([D-335]).
 - **The sync status no longer looks fine while the sync is broken.** When syncing fails three times in a row with nothing of yours waiting, the line under the list's name says how old what you see is ("As of …") at once instead of after 5 minutes, and the cloud turns into the clock. When the app itself is at fault rather than the connection or the server, it says "Sync error · reload", and its sheet offers "Reload" ([D-296]).
 - **"Try it" leaves you on the overview of the three example lists** instead of opening one of them ([D-234]).

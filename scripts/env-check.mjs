@@ -19,6 +19,8 @@
 //   - docs/deploy-reference.md names every setting, the compose-only ones too
 //   - every name .env.example offers is read by the server or by compose
 //   - README.md carries docker-compose.yml verbatim, so a copy of it runs
+//   - backend/settings.go, the names the server accepts at boot ([D-336]),
+//     lists exactly these settings and compose's own, then the tooling's
 //
 //   node scripts/env-check.mjs   exit 1 and list each mismatch (CI)
 import { execFileSync } from 'node:child_process';
@@ -30,7 +32,8 @@ const read = (f) => readFileSync(resolve(root, f), 'utf8');
 
 const goFiles = execFileSync('git', ['ls-files', 'backend/*.go'], { cwd: root, encoding: 'utf8' })
 	.split('\n')
-	.filter((f) => f && !f.endsWith('_test.go'));
+	// settings.go names them all, so it says nothing about what is read.
+	.filter((f) => f && !f.endsWith('_test.go') && f !== 'backend/settings.go');
 const serverReads = new Set();
 const demoReads = new Set();
 for (const f of goFiles) {
@@ -94,6 +97,29 @@ for (const name of new Set([...serverReads, ...demoReads, ...interpolated])) {
 	if (!new RegExp(`(?<![A-Z0-9_])${name}(?![A-Z0-9_])`).test(reference)) {
 		problems.push(`docs/deploy-reference.md does not mention ${name}`);
 	}
+}
+
+// The boot's list: the settings, then, after its "Not settings" comment, the
+// names the repo's tooling sets around the servers it starts.
+const [settingsPart, toolingPart = ''] = read('backend/settings.go').split('// Not settings');
+const names = (text) =>
+	new Set([...text.matchAll(/"(SHOPPINGLIST_[A-Z0-9_]+)"/g)].map((m) => m[1]));
+const accepted = names(settingsPart);
+const settings = new Set(
+	[...serverReads, ...demoReads, ...interpolated].filter((n) => n.startsWith('SHOPPINGLIST_'))
+);
+for (const name of settings) {
+	if (!accepted.has(name)) problems.push(`backend/settings.go does not accept ${name}, a setting`);
+}
+for (const name of accepted) {
+	if (!settings.has(name)) {
+		problems.push(
+			`backend/settings.go accepts ${name}, which neither the server nor compose reads`
+		);
+	}
+}
+for (const name of names(toolingPart)) {
+	if (settings.has(name)) problems.push(`backend/settings.go lists the setting ${name} as tooling`);
 }
 
 if (problems.length) {

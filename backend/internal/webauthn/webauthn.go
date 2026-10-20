@@ -39,6 +39,8 @@ const (
 	envRPOrigin = "SHOPPINGLIST_RP_ORIGIN"
 	// PasskeysEnv switches passkey login on or off ([D-76]).
 	PasskeysEnv = "SHOPPINGLIST_PASSKEYS"
+	// rpDocs is where an operator reads how to set the two.
+	rpDocs = "docs/deploy-reference.md#getting-rp-id-and-rp-origin-right"
 )
 
 // FromEnv reads and validates the Relying-Party settings. Its errors are fatal
@@ -76,10 +78,15 @@ func FromEnv() (*Config, error) {
 
 	rpid := envflag.Get(envRPID)
 	if rpid == "" {
-		return nil, fmt.Errorf("%s is not set — passkeys require a Relying-Party domain (see docs/internals/design.md §5.7)", envRPID)
+		return nil, fmt.Errorf("%s is not set — passkeys require the domain users open, such as list.example.com (%s)", envRPID, rpDocs)
 	}
 	if ip := net.ParseIP(rpid); ip != nil {
-		return nil, fmt.Errorf("%s (%q) is a raw IP — passkeys require a domain name (see docs/internals/design.md §5.7)", envRPID, rpid)
+		return nil, fmt.Errorf("%s (%q) is a raw IP — passkeys require a domain name (%s)", envRPID, rpid, rpDocs)
+	}
+	// go-webauthn's own refusal names neither the setting nor the fix.
+	if strings.ContainsAny(rpid, ":/ ") {
+		return nil, fmt.Errorf("%s (%q) must be a bare domain such as list.example.com, without https://, a port or a path (%s)",
+			envRPID, rpid, rpDocs)
 	}
 	origin := envflag.Get(envRPOrigin)
 	if origin == "" {

@@ -61,7 +61,7 @@
 	"install_fallback_other": "Fehlt die Option? Nicht jeder Browser kann Apps installieren. Chrome, Edge und Safari können es.",
 
 	"demo_title": "Einkaufsliste (Demo)",
-	"demo_intro": "Probier die App aus, ohne Konto und ohne Passkey: Du bekommst eine Beispielliste, die du frei bearbeiten kannst. Öffne den Einladungslink einer Liste auf einem zweiten Gerät, dann siehst du Änderungen dort sofort ankommen.",
+	"demo_intro": "Probier die App aus, ohne Konto und ohne Passkey: Du bekommst drei Beispiellisten, die du frei bearbeiten kannst. Öffne den Einladungslink einer Liste auf einem zweiten Gerät, dann siehst du Änderungen dort sofort ankommen.",
 	"demo_start": "Ausprobieren",
 	"demo_start_note": "Alles, was du hier einträgst, wird nach 24 Stunden gelöscht. Wir speichern nichts über dich.",
 	"demo_start_failed": "Die Demo konnte nicht starten. Bist du online?",

@@ -23,10 +23,12 @@ punctuation into one dash, so keep a linked heading free of punctuation. It
 also checks a `docs/…md#anchor` cited from code, config or a log message, and
 every `<img src>`.
 
-**A new setting goes in three places, and CI checks all three** (`node
+**A new setting goes in four places, and CI checks all four** (`node
 scripts/env-check.mjs`): a Go string constant that is exactly its name,
-`.env.example` (set or commented out, with what it does), and
-`docs/deploy-reference.md`. `docker-compose.yml` hands `.env` over whole
+`.env.example` (set or commented out, with what it does),
+`docs/deploy-reference.md`, and `backend/settings.go`, without which the
+server refuses to start while it is set ([D-336]). A new `SHOPPINGLIST_`
+variable for tooling goes in that file's tooling part. `docker-compose.yml` hands `.env` over whole
 (`env_file`), so it never names a setting. A name `.env.example` offers must
 be one the server or compose reads. The demo build's settings are exempt from
 `.env.example`, not from the docs.

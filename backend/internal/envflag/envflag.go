@@ -92,3 +92,23 @@ func RenamedPrefix(oldPrefix, newPrefix string, removed ...string) error {
 	return fmt.Errorf("the %s variables were renamed to %s; %s",
 		oldPrefix, newPrefix, strings.Join(parts, "; "))
 }
+
+// Unknown fails when a variable named with prefix is set but is none of
+// known: a misspelt name is otherwise ignored, and the lockdown it meant to
+// set stays off ([D-336]). One declared empty still boots, as in
+// RenamedPrefix. where says where the settings are listed.
+func Unknown(prefix string, known []string, where string) error {
+	var unknown []string
+	for _, kv := range os.Environ() {
+		name, value, _ := strings.Cut(kv, "=")
+		if strings.HasPrefix(name, prefix) && strings.TrimSpace(value) != "" && !slices.Contains(known, name) {
+			unknown = append(unknown, name)
+		}
+	}
+	if len(unknown) == 0 {
+		return nil
+	}
+	slices.Sort(unknown)
+	return fmt.Errorf("%s: no setting of this server has that name, so it would do nothing; "+
+		"correct the name or remove it (the settings are in %s)", strings.Join(unknown, ", "), where)
+}

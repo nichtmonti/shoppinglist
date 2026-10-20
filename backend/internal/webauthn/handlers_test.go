@@ -150,6 +150,14 @@ func TestFromEnvValidation(t *testing.T) {
 	if _, err := FromEnv(); err == nil {
 		t.Error("raw-IP RP_ID should be rejected")
 	}
+	// A URL where the domain belongs names the setting, not go-webauthn's field.
+	for _, bad := range []string{"https://shop.example.com", "shop.example.com:8443", "shop.example.com/list"} {
+		t.Setenv("SHOPPINGLIST_RP_ID", bad)
+		if _, err := FromEnv(); err == nil || !strings.Contains(err.Error(), "SHOPPINGLIST_RP_ID") ||
+			!strings.Contains(err.Error(), "bare domain") {
+			t.Errorf("RP_ID %q: error %v, want one naming the setting and a bare domain", bad, err)
+		}
+	}
 	t.Setenv("SHOPPINGLIST_RP_ID", "shop.example.com")
 	if _, err := FromEnv(); err != nil {
 		t.Errorf("domain RP_ID should be accepted: %v", err)

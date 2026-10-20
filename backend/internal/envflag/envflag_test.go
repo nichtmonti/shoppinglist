@@ -72,3 +72,25 @@ func TestAbsoluteURL(t *testing.T) {
 		}
 	}
 }
+
+// [D-336] A set name the server does not know fails the boot, named; one
+// declared empty does not, nor a known one.
+func TestUnknown(t *testing.T) {
+	t.Setenv("ENVFLAGTEST_SIGNUPS", "closed")
+	t.Setenv("ENVFLAGTEST_SIGNUP", "open")
+	t.Setenv("ENVFLAGTEST_EMPTY", " ")
+	known := []string{"ENVFLAGTEST_SIGNUP"}
+	err := Unknown("ENVFLAGTEST_", known, "docs/x.md")
+	if err == nil {
+		t.Fatal("a misspelt name was accepted; its setting would silently not apply")
+	}
+	if got := err.Error(); !strings.HasPrefix(got, "ENVFLAGTEST_SIGNUPS: ") || !strings.Contains(got, "docs/x.md") ||
+		strings.Contains(got, "EMPTY") || strings.Contains(got, "ENVFLAGTEST_SIGNUP:") {
+		t.Errorf("error %q, want ENVFLAGTEST_SIGNUPS alone named, and where the settings are", got)
+	}
+
+	t.Setenv("ENVFLAGTEST_SIGNUPS", "")
+	if err := Unknown("ENVFLAGTEST_", known, "docs/x.md"); err != nil {
+		t.Errorf("only known and empty names: %v, want nil", err)
+	}
+}

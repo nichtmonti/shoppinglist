@@ -59,7 +59,7 @@
 	"install_fallback_other": "Option missing? Not every browser can install apps. Chrome, Edge and Safari can.",
 
 	"demo_title": "Shopping list demo",
-	"demo_intro": "Try the app without an account or a passkey: you get an example list to change as you like. Open a list's invite link on a second device to watch changes arrive there at once.",
+	"demo_intro": "Try the app without an account or a passkey: you get three example lists to change as you like. Open a list's invite link on a second device to watch changes arrive there at once.",
 	"demo_start": "Try it",
 	"demo_start_note": "Everything you enter here is deleted after 24 hours. Nothing about you is stored.",
 	"demo_start_failed": "The demo could not start. Are you online?",

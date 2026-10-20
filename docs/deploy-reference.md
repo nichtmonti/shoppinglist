@@ -50,6 +50,12 @@ stack variables, not in a `.env` file beside the compose file, do not. Two
 `SHOPPINGLIST_VERSION` (the image tag, default `latest`) and
 `SHOPPINGLIST_BIND` (the published address, default `127.0.0.1:8090`).
 
+**A misspelt name stops the start.** The server refuses to start while a
+`SHOPPINGLIST_` variable is set that is none of the above, and names it: it
+would otherwise do nothing, and a lockdown such as `SHOPPINGLIST_SIGNUP=closed`
+written wrong would leave the instance open. A variable set to nothing is
+ignored.
+
 `.env.example` sets four values: the version and the domain, which you
 change, and invite-only sign-up and the trusted-proxy header, which suit an
 instance behind a reverse proxy. Everything else in it is commented out and

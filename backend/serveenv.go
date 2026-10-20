@@ -64,6 +64,11 @@ func parseServeEnv() (*serveEnv, error) {
 		"BEGIN_RATE_LIMIT", "FINISH_RATE_LIMIT", "LIST_CREATE_RATE_LIMIT"); err != nil {
 		return nil, err
 	}
+	// [D-336] A misspelt name would be ignored, and the lockdown it meant left off.
+	if err := envflag.Unknown("SHOPPINGLIST_", knownSettings,
+		"docs/deploy-reference.md#environment-variables"); err != nil {
+		return nil, err
+	}
 	// §5.7: with passkeys on, the RP-ID is mandatory and must be a domain
 	// (passkeys break otherwise). [D-76]: SHOPPINGLIST_PASSKEYS=off drops the
 	// requirement along with the routes.

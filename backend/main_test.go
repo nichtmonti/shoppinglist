@@ -114,6 +114,15 @@ func TestInvocations(t *testing.T) {
 			t.Errorf("superuser exit %d, want 0: %s", code, out)
 		}
 	})
+
+	// [D-336] A misspelt lockdown would otherwise leave sign-up open.
+	t.Run("a misspelt setting stops serve", func(t *testing.T) {
+		t.Setenv("SHOPPINGLIST_SIGNUPS", "closed")
+		if code, out := runMain(t, t.TempDir(), "--dev", "serve", "--http=127.0.0.1:1"); code != 1 ||
+			!strings.Contains(out, "SHOPPINGLIST_SIGNUPS: no setting") || !strings.Contains(out, "deploy-reference.md#environment-variables") {
+			t.Errorf("serve exit %d, want 1 naming SHOPPINGLIST_SIGNUPS and the settings: %s", code, out)
+		}
+	})
 }
 
 // startServe runs `serve` through main() in dir, on a free port, and returns
