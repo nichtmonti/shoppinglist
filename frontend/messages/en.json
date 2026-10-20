@@ -27,7 +27,7 @@
 	"auth_no_passkey_support": "Passkeys not supported",
 	"auth_no_passkey_support_body": "This browser does not support passkeys.",
 	"auth_add_passkey_failed": "Passkey could not be added.",
-	"auth_ceremony_already_registered": "This passkey is already registered.",
+	"auth_ceremony_already_registered": "A passkey for this nickname is already stored on this device.",
 	"auth_ceremony_cancelled": "Passkey prompt canceled.",
 	"auth_ceremony_failed": "That didn't work. Please try again.",
 	"auth_passkey_unknown": "This passkey no longer belongs to an account here; it may have been removed. Pick another one.",

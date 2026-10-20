@@ -29,7 +29,7 @@
 	"auth_no_passkey_support": "Passkeys nicht unterstützt",
 	"auth_no_passkey_support_body": "Dieser Browser unterstützt keine Passkeys.",
 	"auth_add_passkey_failed": "Passkey konnte nicht hinzugefügt werden.",
-	"auth_ceremony_already_registered": "Dieser Passkey ist bereits registriert.",
+	"auth_ceremony_already_registered": "Für diesen Spitznamen ist auf diesem Gerät schon ein Passkey gespeichert.",
 	"auth_ceremony_cancelled": "Passkey-Abfrage abgebrochen.",
 	"auth_ceremony_failed": "Das hat nicht geklappt. Versuch es bitte noch einmal.",
 	"auth_passkey_unknown": "Diesen Passkey gibt es für dein Konto nicht mehr, vielleicht wurde er entfernt. Wähle einen anderen.",

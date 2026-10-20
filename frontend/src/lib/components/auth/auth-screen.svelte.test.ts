@@ -116,7 +116,9 @@ describe('AuthScreen', () => {
 	});
 	it('renders the thrown ceremony message when registration fails', async () => {
 		vi.mocked(register).mockRejectedValue(
-			new LocalizedError('Dieser Passkey ist bereits registriert.')
+			new LocalizedError(
+				'Für diesen Spitznamen ist auf diesem Gerät schon ein Passkey gespeichert.'
+			)
 		);
 		await renderAuth();
 
@@ -124,7 +126,9 @@ describe('AuthScreen', () => {
 		await fireEvent.click(screen.getByRole('button', { name: 'Konto erstellen' }));
 
 		await waitFor(() =>
-			expect(screen.getByRole('alert').textContent).toBe('Dieser Passkey ist bereits registriert.')
+			expect(screen.getByRole('alert').textContent).toBe(
+				'Für diesen Spitznamen ist auf diesem Gerät schon ein Passkey gespeichert.'
+			)
 		);
 	});
 

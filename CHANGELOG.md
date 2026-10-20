@@ -11,7 +11,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **Leaving a list right after rejoining it on another device now really leaves it.** The app could pick the stale membership from before, so the list came back at the next sync.
 - **Signing out while the app was syncing can no longer leave the account's lists behind on the device.** The sync could write its list of memberships just after the sign-out had cleared them ([D-109]).
 - **Scanning works again after a first scan that failed offline,** without reloading the app. The decoder that failed to load stayed broken, and every later scan, online too, ended in "Barcodes can't be read right now. Type the name instead." ([D-95]).
-- **Adding a passkey on a device that already holds one for your account now says so** ("This passkey is already registered.") instead of quietly replacing the old one. The replaced passkey's entry stayed in "Passkeys" though it no longer worked, and counted as a way in, so the last working passkey could be removed.
+- **Adding a passkey on a device that already holds one for your account now says so** ("A passkey for this nickname is already stored on this device.") instead of quietly replacing the old one. The replaced passkey's entry stayed in "Passkeys" though it no longer worked, and counted as a way in, so the last working passkey could be removed.
 - **A hardware key whose counter once went backwards is no longer reported as possibly cloned at every later sign-in.** The server log warned on each login after the first warning, even once the counter advanced normally again.
 
 ## v0.16.3: product photos that reach the item however late they arrive, and a demo in both languages with photos of its own (2026-10)
