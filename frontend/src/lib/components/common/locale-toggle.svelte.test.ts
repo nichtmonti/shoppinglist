@@ -23,7 +23,7 @@ describe('LocaleToggle', () => {
 		// The group name is what a screen reader announces for the pair;
 		// the item labels are locale-independent ('Deutsch'/'English' in
 		// both catalogs), so the switch can be found before it is used.
-		expect(screen.getByRole('group', { name: 'Sprache' })).toBeDefined();
+		expect(screen.getByRole('radiogroup', { name: 'Sprache' })).toBeDefined();
 		expect(screen.getByRole('radio', { name: 'Deutsch' })).toBeDefined();
 		expect(screen.getByRole('radio', { name: 'English' })).toBeDefined();
 	});
