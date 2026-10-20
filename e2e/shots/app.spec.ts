@@ -524,7 +524,7 @@ for (const locale of LOCALES) {
 
 			if (want(16, 'previous')) {
 				await onList('list');
-				await page.getByText(msg(locale, 'history_previous_items')).first().click();
+				await page.getByRole('button', { name: msg(locale, 'history_previous_items') }).click();
 				await expect(page).toHaveURL(/\/previous/);
 				await settle(page);
 				await shoot(page, page, at(16, 'previous'));
