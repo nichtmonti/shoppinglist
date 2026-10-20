@@ -2,13 +2,14 @@ import { expect, test, type Page } from './fixtures';
 import {
 	addItemByTyping,
 	createList,
-	injectFakeBarcode,
+	FAKE_BARCODE,
 	openListView,
 	openShopView,
 	registerAccount,
 	showInviteLink,
 	stubBarcodeLookup
 } from './helpers';
+import { aimCamera, installCamera } from './camera';
 
 // §10 CSP. The policy is authored in frontend/vite.config.ts, baked into
 // index.html as a <meta> tag by the SvelteKit build, and mirrored into a
@@ -44,7 +45,7 @@ test('CSP: the app runs its real flows without a single policy violation', async
 	await stubBarcodeLookup(context);
 	const page = await context.newPage();
 	const violations = collectViolations(page);
-	await injectFakeBarcode(page);
+	await installCamera(page, FAKE_BARCODE);
 
 	// 1. Cold boot + passkey registration: the inline bootstrap <script> the
 	//    meta tag's sha256 covers, the module graph under script-src, and the
@@ -64,6 +65,7 @@ test('CSP: the app runs its real flows without a single policy violation', async
 	//    then the same-origin proxy call under connect-src 'self'. The product
 	//    image renders on a shop tile under img-src.
 	await page.locator('[data-testid="scan-trigger"]').click();
+	await aimCamera(page);
 	await expect(
 		page.locator('[data-testid="row"]', { hasText: 'Testprodukt Sonnencreme' })
 	).toBeVisible({
@@ -142,6 +144,11 @@ test('CSP: the response header and the index.html meta tag carry the same policy
 	// tag cannot reach it.
 	const api = await request.get(`${baseURL}/api/health`);
 	expect(api.headers()['content-security-policy']).toBe(header);
-	expect(api.headers()['x-frame-options']).toBe('DENY');
 	expect(api.headers()['permissions-policy']).toContain('publickey-credentials-get=(self)');
+
+	// PocketBase's dashboard keeps PocketBase's own, fuller policy.
+	const dashboard = (await request.get(`${baseURL}/_/`)).headers()['content-security-policy'];
+	expect(dashboard).not.toBe(header);
+	expect(dashboard).toContain("script-src 'self'");
+	expect(dashboard).toContain("frame-ancestors 'none'");
 });

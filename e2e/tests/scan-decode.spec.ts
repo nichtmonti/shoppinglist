@@ -9,11 +9,9 @@ import {
 	stubBarcodeLookup
 } from './helpers';
 
-// The barcode decoder, for real ([D-21]). scan.spec.ts skips it
-// (__e2eFakeBarcode) to test what a scan does; this is the one browser test
-// that decodes: a camera stream with a real EAN-13 in it (camera.ts), read by
-// the decoder the app ships — barcode-detector's glue and the zxing-wasm
-// binary Vite bundles. From v0.5.3 to [D-21] those two came from different
+// The barcode decoder, for real ([D-21]): a camera stream with a real EAN-13
+// in it (camera.ts), read by the decoder the app ships — barcode-detector's
+// glue and the zxing-wasm binary Vite bundles. From v0.5.3 to [D-21] those two came from different
 // zxing-wasm builds, every detect() threw "memory access out of bounds" (this
 // headless browser crashed the tab outright), and scanning was broken on every
 // browser — the ponyfill never defers to a native BarcodeDetector; no test

@@ -2,27 +2,26 @@ import { expect, test, type Page } from './fixtures';
 import {
 	createList,
 	disableConditionalMediation,
+	FAKE_BARCODE,
 	FAKE_IMAGE_URL,
-	injectFakeBarcode,
 	openListView,
 	openShopView,
 	registerAccount,
 	shareListWith,
 	stubBarcodeLookup
 } from './helpers';
+import { aimCamera, installCamera } from './camera';
 
 // A barcode scan (stubbed lookup) creates an item carrying barcode +
 // image_url, and the second client renders it as a picture (§9.2), keeps it
 // offline in the service worker's photo cache, and drops that cache when it
 // signs out (§5.6).
 //
-// Two things are stubbed, both explicitly out of scope for what this criterion
-// tests: the camera + WASM decode step (the `window.__e2eFakeBarcode` hook in
-// lib/scan/decode.ts, an E2E-only injection point that skips straight past the
-// camera to §9.2 step 2 — the decode itself is scan-decode.spec.ts's) and the backend barcode proxy (via page.route, so the
-// suite never depends on a real Open Food Facts call). Every other part of the
-// pipeline — resolve, scan-dedup, create, sync, and the second client's
-// rendering — runs for real.
+// Two things are stubbed: the camera, a canvas with the label on it
+// (camera.ts), which the app's own decoder reads, and the backend barcode
+// proxy (via page.route, so the suite never depends on a real Open Food Facts
+// call). Every other part of the pipeline — decode, resolve, scan-dedup,
+// create, sync, and the second client's rendering — runs for real.
 
 test('barcode scan creates an item with barcode + image_url; a second client renders the picture', async ({
 	browser
@@ -30,7 +29,7 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	const ctxA = await browser.newContext();
 	await stubBarcodeLookup(ctxA);
 	const pageA = await ctxA.newPage();
-	await injectFakeBarcode(pageA);
+	await installCamera(pageA, FAKE_BARCODE);
 	await registerAccount(pageA, 'Anna');
 	await createList(pageA, 'Wochenshop');
 	await openListView(pageA);
@@ -42,9 +41,10 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	await shareListWith(pageA, pageB);
 	await openListView(pageB);
 
-	// §9.2 pipeline: tap 📷 → the fake decode resolves instantly → cache miss →
+	// §9.2 pipeline: tap 📷 → aim at the label → decode → cache miss →
 	// stubbed proxy lookup → item created carrying barcode + image_url.
 	await pageA.locator('[data-testid="scan-trigger"]').click();
+	await aimCamera(pageA);
 	const rowA = pageA.locator('[data-testid="row"]', { hasText: 'Testprodukt Sonnencreme' });
 	await expect(rowA).toBeVisible({ timeout: 10_000 });
 

@@ -13,7 +13,7 @@ import { SUPERUSER } from '../server';
 // Shared flows for the E2E harnesses: accounts, lists, views, a second device,
 // the stored session, and the sync engine's own state.
 //
-// The barcode stub (FAKE_BARCODE / stubBarcodeLookup / injectFakeBarcode) also
+// The barcode stub (FAKE_BARCODE / stubBarcodeLookup) also
 // serves csp.spec.ts — the two must resolve the SAME product so the CSP run
 // exercises the exact code path the scan suite pins.
 
@@ -298,14 +298,6 @@ export async function stubBarcodeLookup(context: BrowserContext): Promise<void> 
 			})
 		})
 	);
-}
-
-/** Installs the page-level fake scanner code (see scan.spec.ts for why the
- *  scanner itself cannot be driven for real in Chromium). */
-export async function injectFakeBarcode(page: Page, code: string = FAKE_BARCODE): Promise<void> {
-	await page.addInitScript((c) => {
-		(window as unknown as { __e2eFakeBarcode: string }).__e2eFakeBarcode = c;
-	}, code);
 }
 
 // Forcing an expired session for the re-auth journeys (reauth.spec.ts,

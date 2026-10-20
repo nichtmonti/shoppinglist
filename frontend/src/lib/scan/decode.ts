@@ -70,14 +70,6 @@ export function isCameraScanSupported(): boolean {
 	return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 }
 
-// E2E-ONLY hook: e2e/tests/scan.spec.ts injects a decoded value and skips
-// straight to §9.2 step 2. Only page.addInitScript sets it, never the app.
-declare global {
-	interface Window {
-		__e2eFakeBarcode?: string;
-	}
-}
-
 export interface CameraScan {
 	/** Resolves with the first decoded barcode value. Rejects with
 	 * CameraPermissionDeniedError, CameraUnsupportedError, CameraDecodeError
@@ -97,10 +89,6 @@ function stopTracks(stream: MediaStream): void {
 
 /** Starts the camera into `video` and polls frames for a barcode (§9.2 step 1). */
 export function startCameraScan(video: HTMLVideoElement): CameraScan {
-	const fake = typeof window !== 'undefined' ? window.__e2eFakeBarcode : undefined;
-	if (fake) {
-		return { result: Promise.resolve(fake), stop: () => {} };
-	}
 	if (!isCameraScanSupported()) {
 		return { result: Promise.reject(new CameraUnsupportedError()), stop: () => {} };
 	}

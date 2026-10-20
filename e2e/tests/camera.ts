@@ -67,15 +67,14 @@ export async function installCamera(page: Page, code: string): Promise<void> {
 				ctx.fillText(`${code[0]}  ${code.slice(1, 7)}  ${code.slice(7)}`, x + labelW / 2, y + 305);
 				requestAnimationFrame(draw);
 			};
-			let stream: MediaStream | null = null;
+			// A fresh stream per call: the app stops a scan's tracks when it ends.
 			navigator.mediaDevices.getUserMedia = async () => {
-				if (!stream) {
+				if (!canvas.isConnected) {
 					canvas.style.cssText = 'position:fixed;left:-9999px;top:0';
 					document.documentElement.append(canvas);
 					requestAnimationFrame(draw);
-					stream = canvas.captureStream(30);
 				}
-				return stream;
+				return canvas.captureStream(30);
 			};
 		},
 		{ code, bits: ean13(code) }
