@@ -1,16 +1,13 @@
-// The active locale as a rune ([D-291]): `t()` and `getLocale()` read it, so
-// every string and `Intl` format rendered from them follows a language switch
-// in place, and no screen is remounted for it.
-import { getLocale as paraglideGetLocale } from '#lib/paraglide/runtime.js';
+// The active locale as a rune ([D-291]), and Paraglide's own: its getLocale
+// and setLocale are pointed here, so every message function, through t() or
+// not, and every `Intl` format follows a language switch in place, and no
+// screen is remounted for it. Imported for that effect by ./index.
+import { baseLocale, overwriteGetLocale, overwriteSetLocale } from '#lib/paraglide/runtime.js';
 import type { Locale } from './index';
 
-let current = $state<Locale>(paraglideGetLocale());
+let current = $state<Locale>(baseLocale);
 
-export const activeLocale = {
-	get value(): Locale {
-		return current;
-	},
-	set value(locale: Locale) {
-		current = locale;
-	}
-};
+overwriteGetLocale(() => current);
+overwriteSetLocale((locale) => {
+	current = locale;
+});

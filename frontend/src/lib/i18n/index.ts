@@ -2,13 +2,17 @@
 // Paraglide compiled from messages/{locale}.json into #lib/paraglide/
 // (generated).
 //
-// Locale strategy is `["globalVariable", "baseLocale"]`, no cookie or URL:
-// `meta.locale` (#lib/state/prefs.ts) is the one source of truth, and
-// Paraglide's own detection would compete with it.
+// No cookie or URL strategy: `meta.locale` (#lib/state/prefs.ts) is the one
+// source of truth, and Paraglide's own detection would compete with it. Its
+// getLocale and setLocale are the rune in ./active-locale.svelte ([D-291]).
 
 import { m } from '#lib/paraglide/messages.js';
-import { setLocale as paraglideSetLocale } from '#lib/paraglide/runtime.js';
-import { activeLocale } from './active-locale.svelte';
+import {
+	type Locale,
+	getLocale as paraglideGetLocale,
+	setLocale as paraglideSetLocale
+} from '#lib/paraglide/runtime.js';
+import './active-locale.svelte';
 import { calendarDaysBetween, DAY_MS, stampMs } from '#lib/time.js';
 
 type MessageParams = Record<string, string | number>;
@@ -21,31 +25,30 @@ export type MessageKey = keyof typeof m;
  * their per-key `Inputs` type, which the cast collapses.
  */
 export function t(key: MessageKey, params: MessageParams = {}): string {
-	const fn = m[key] as (inputs?: MessageParams, options?: { locale?: Locale }) => string;
-	return fn(params, { locale: activeLocale.value });
+	const fn = m[key] as (inputs?: MessageParams) => string;
+	return fn(params);
 }
 
 // ---- locale ------------------------------------------------------------
 
-export type Locale = 'de' | 'en';
+/** The app's locales, as Paraglide compiles them from project.inlang. */
+export type { Locale };
 
 /**
  * The active locale, for `Intl` formatting and seeded vocabulary (§12.2), and
  * reactive like `t()`. #lib/state/prefs.ts persists it in `meta.locale`.
  */
 export function getLocale(): Locale {
-	return activeLocale.value;
+	return paraglideGetLocale();
 }
 
 /**
- * Switches every rendered string in place ([D-291]). `reload: false`:
- * Paraglide's default full-page reload would re-run app boot and the sync
- * engine mount. Its own global follows only for code that calls a message
- * without `t()`.
+ * Switches every rendered string in place ([D-291]): the rune changes, and
+ * nothing reloads (Paraglide's own setLocale would reload the page, re-running
+ * app boot and the sync engine mount).
  */
 export function setLocale(locale: Locale): void {
-	activeLocale.value = locale;
-	void paraglideSetLocale(locale, { reload: false });
+	void paraglideSetLocale(locale);
 }
 
 /** navigator.language, but only when it asks for a locale this app HAS. */
