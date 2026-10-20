@@ -713,7 +713,7 @@ describe('ListView — detail sheet', () => {
 	});
 });
 
-describe('ListView — a swipe toward the row start removes ([D-289])', () => {
+describe('ListView — a swipe to the left removes ([D-289])', () => {
 	// happy-dom lays nothing out, so the row is 0px wide and the threshold is
 	// the 96px floor.
 	async function swipe(row: HTMLElement, dx: number, dy = 0): Promise<void> {
@@ -755,6 +755,21 @@ describe('ListView — a swipe toward the row start removes ([D-289])', () => {
 		// sheet. detail 1, as a browser's pointer click carries.
 		await fireEvent.click(within(row).getByRole('button', { name: 'Senf' }), { detail: 1 });
 		expect(screen.queryByRole('dialog')).toBeNull();
+
+		await waitFor(async () => {
+			const stored = (await db.items.get(item.id)) as Item;
+			expect(stored.deleted_at).not.toBeNull();
+		});
+	});
+
+	it('removes on a flick short of the threshold', async () => {
+		const item = makeItem({ list: LIST_ID, name: 'Senf' });
+		await seedList({ listId: LIST_ID, items: [item] });
+		await renderList();
+		const row = await rowOf('Senf');
+
+		// fireEvent's moves come microseconds apart: 60px is a flick.
+		await swipe(row, -60);
 
 		await waitFor(async () => {
 			const stored = (await db.items.get(item.id)) as Item;

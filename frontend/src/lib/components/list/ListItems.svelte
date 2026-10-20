@@ -29,7 +29,7 @@
 		onopen: (item: Item) => void;
 		/** Replaces the row's own quantity write; the gallery keeps it local. */
 		onquantity?: (item: Item, value: string) => void;
-		/** Given, a row swiped toward its start removes its item ([D-289]). */
+		/** Given, a row swiped left removes its item ([D-289]). */
 		onremove?: (item: Item) => void;
 		/** Rendered under a row, inside its slot. */
 		below?: Snippet<[Item]>;

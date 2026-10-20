@@ -1,9 +1,8 @@
-// A planning row removed by a swipe toward its start (§9.1 [D-289]): a
-// shortcut beside the detail sheet's trash, which stays the keyboard's and
-// assistive technology's path. @use-gesture's DragGesture tracks the pointer
-// (the axis, the capture, the speed, the click a drag must not become); this
-// decides what a release does and reports where the row is, and the row
-// paints it. Mouse and touch alike, so Playwright's mouse drives it.
+// A planning row removed by a swipe to the left (§9.1 [D-289]): a shortcut
+// beside the detail sheet's trash, which stays the keyboard's and assistive
+// technology's path. @use-gesture's DragGesture tracks the pointer (the axis,
+// the capture, the flick, the click a drag must not become); this decides how
+// far a release must go and reports where the row is, and the row paints it. Mouse and touch alike, so Playwright's mouse drives it.
 import { DragGesture } from '@use-gesture/vanilla';
 import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
@@ -17,9 +16,6 @@ export const COMMIT_SHARE = 0.4;
  *  trip across the screen. */
 export const COMMIT_MIN_PX = 96;
 export const COMMIT_MAX_PX = 160;
-/** A flick: at least this far, and this fast (px/ms) as it lets go. */
-export const FLICK_PX = 48;
-export const FLICK_SPEED = 0.5;
 /** Snap back, or slide out before the remove. */
 export const SETTLE_MS = 180;
 
@@ -40,24 +36,15 @@ interface Options {
 	update: (state: SwipeState) => void;
 }
 
-/** How far toward the start a release removes, for a row this wide. */
+/** How far left a release removes, for a row this wide. */
 export function threshold(width: number): number {
 	return Math.min(Math.max(width * COMMIT_SHARE, COMMIT_MIN_PX), COMMIT_MAX_PX);
-}
-
-/** Whether a release at `distance` (toward the start) at `speed` removes. */
-export function commits(distance: number, speed: number, width: number): boolean {
-	if (distance >= threshold(width)) return true;
-	return distance >= FLICK_PX && speed >= FLICK_SPEED;
 }
 
 export function swipeToRemove({ remove, update }: Options): Attachment<HTMLElement> {
 	return (node) => {
 		let timer: ReturnType<typeof setTimeout> | undefined;
 		let dragging = false;
-
-		// Toward the start: leftward, or rightward in a right-to-left row.
-		const sign = () => (getComputedStyle(node).direction === 'rtl' ? 1 : -1);
 
 		function settle(offset: number): void {
 			dragging = false;
@@ -66,18 +53,7 @@ export function swipeToRemove({ remove, update }: Options): Attachment<HTMLEleme
 
 		const gesture = new DragGesture(
 			node,
-			({
-				first,
-				last,
-				active,
-				canceled,
-				tap,
-				cancel,
-				event,
-				movement: [mx],
-				velocity: [vx],
-				direction: [dx]
-			}) => {
+			({ first, last, active, canceled, tap, cancel, event, movement: [mx], swipe: [flick] }) => {
 				// No remove on this row, or the quantity field, where a drag
 				// selects its text.
 				if (first && (!remove() || (event.target as Element).closest('input, textarea'))) {
@@ -89,11 +65,11 @@ export function swipeToRemove({ remove, update }: Options): Attachment<HTMLEleme
 					return;
 				}
 				const width = node.offsetWidth;
-				const distance = Math.max(0, mx * sign());
+				const distance = Math.max(0, -mx);
 				if (active) {
 					dragging = true;
 					update({
-						offset: distance * sign(),
+						offset: -distance,
 						dragging: true,
 						armed: distance >= threshold(width)
 					});
@@ -101,13 +77,13 @@ export function swipeToRemove({ remove, update }: Options): Attachment<HTMLEleme
 				}
 				if (!last || tap || !dragging) return;
 				const go = remove();
-				// The library's velocity is a magnitude; its direction says which way.
-				const speed = dx * sign() > 0 ? vx : 0;
-				if (event.type === 'pointercancel' || !go || !commits(distance, speed, width)) {
+				// Past the threshold, or flicked left: the library's swipe, over
+				// 50px at over 0.5px/ms within 250ms.
+				if (event.type === 'pointercancel' || !go || !(distance >= threshold(width) || flick < 0)) {
 					settle(0);
 					return;
 				}
-				settle(sign() * width);
+				settle(-width);
 				// After the slide-out; the row's slot then leaves with the item.
 				timer = setTimeout(go, dur(SETTLE_MS));
 			},

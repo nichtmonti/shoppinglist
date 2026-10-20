@@ -616,7 +616,7 @@ Categories exist for **ordering** the store walk, not for labelling. A list's ca
 - The **active (unchecked)** items in the shared order, collated with `Intl.Collator(locale, { sensitivity: "base", numeric: true })`.
 - This is the **only** place items are added and edited, and it has **no check-off controls**.
 - **Quantity** is free text, edited inline (Enter or a tap elsewhere saves, Esc drops) or in the item sheet ([D-20], [D-268]).
-- **The detail sheet** (rename, aisle, note, remove) opens from the row's name or its category chip ([D-134]). **Removal** is a tombstone with an undo toast, from the sheet ([D-119]) or by swiping the row toward its start ([D-289]).
+- **The detail sheet** (rename, aisle, note, remove) opens from the row's name or its category chip ([D-134]). **Removal** is a tombstone with an undo toast, from the sheet ([D-119]) or by swiping the row to the left ([D-289]).
 - The previous-items door below the rows is always shown and is the only route to that screen.
 
 **Empty states.** With every item checked, the list view shows an all-done line above the previous-items door. With no items, it points at the add field. (No lists: §9.3.)
