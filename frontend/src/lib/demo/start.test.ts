@@ -1,7 +1,7 @@
 // The demo's way in ([D-234]): what a refused start tells the visitor, what a
 // successful one stores, and when the banner says the account goes.
 import { existsSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const authStore = vi.hoisted(() => ({
 	isValid: false,
@@ -30,7 +30,6 @@ beforeEach(() => {
 	authStore.save.mockReset();
 	send.mockReset();
 });
-afterEach(() => vi.unstubAllGlobals());
 
 describe('startDemo', () => {
 	it('stores the session the server answers with, and says which language to name it in', async () => {

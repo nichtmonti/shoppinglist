@@ -1,15 +1,11 @@
 // §12.2's fallback for a user who has never chosen a language: the browser's
 // own preference when the app speaks it, else English.
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { detectLocale } from './index';
 
 function setBrowserLanguage(tag: string): void {
 	vi.stubGlobal('navigator', { language: tag });
 }
-
-afterEach(() => {
-	vi.unstubAllGlobals();
-});
 
 describe('detectLocale', () => {
 	it.each([

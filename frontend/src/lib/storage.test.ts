@@ -1,11 +1,7 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { requestPersistentStorage } from './storage';
 
 describe('requestPersistentStorage', () => {
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
 	it('returns false when the Storage Manager API is unavailable', async () => {
 		vi.stubGlobal('navigator', {});
 		await expect(requestPersistentStorage()).resolves.toBe(false);

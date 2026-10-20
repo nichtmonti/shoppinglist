@@ -139,7 +139,6 @@ describe('checkAndMirrorReference default transports', () => {
 		await db.item_dictionary.clear();
 		await db.meta.clear();
 		vi.restoreAllMocks();
-		vi.unstubAllGlobals();
 	});
 
 	it('the seed-version and reference reads keep their own timeout signal', async () => {
@@ -168,6 +167,5 @@ describe('checkAndMirrorReference default transports', () => {
 		expect(signals).toHaveLength(3);
 		pb.cancelAllRequests();
 		for (const signal of signals) expect(signal.aborted).toBe(false);
-		vi.unstubAllGlobals();
 	});
 });

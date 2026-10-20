@@ -44,7 +44,6 @@ beforeEach(async () => {
 });
 afterEach(() => {
 	vi.restoreAllMocks();
-	vi.unstubAllGlobals();
 });
 
 // --- W5 ------------------------------------------------------------------

@@ -147,7 +147,6 @@ describe('ShareSheet', () => {
 			expect(copy.textContent?.trim()).toBe('Kopieren');
 		} finally {
 			vi.useRealTimers();
-			vi.unstubAllGlobals();
 		}
 	});
 

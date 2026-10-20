@@ -253,6 +253,8 @@ export default defineConfig(({ command, isPreview }) => {
 					extends: './vite.config.ts',
 					test: {
 						name: 'server',
+						// Every vi.stubGlobal is undone before the next test.
+						unstubGlobals: true,
 						environment: 'node',
 						include: ['src/**/*.{test,spec}.{js,ts}'],
 						// Worker cap — see the root comment on maxWorkers.
@@ -277,6 +279,8 @@ export default defineConfig(({ command, isPreview }) => {
 					resolve: { conditions: ['browser'] },
 					test: {
 						name: 'client',
+						// Every vi.stubGlobal is undone before the next test.
+						unstubGlobals: true,
 						// happy-dom, not jsdom: the component suite runs about a
 						// quarter faster, and caught every planted focus/keyboard/ARIA bug
 						// the jsdom run did. It implements Web Animations, ResizeObserver
@@ -299,6 +303,8 @@ export default defineConfig(({ command, isPreview }) => {
 					extends: './vite.config.ts',
 					test: {
 						name: 'integration',
+						// Every vi.stubGlobal is undone before the next test.
+						unstubGlobals: true,
 						environment: 'node',
 						include: ['src/integration/**/*.test.ts'],
 						globalSetup: ['./src/integration/global-setup.ts'],

@@ -1,13 +1,9 @@
 // Handing a backup to the user: the share sheet, or a download.
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { BACKUP_FORMAT, BACKUP_VERSION, type ListBackup } from './backup';
 import { deliverBackup } from './deliver-backup';
 
 describe('deliverBackup', () => {
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
 	const emptyBackup: ListBackup = {
 		format: BACKUP_FORMAT,
 		version: BACKUP_VERSION,

@@ -1,7 +1,7 @@
 // §9.2 step 1's camera and decoder failures. happy-dom has no camera, so the
 // camera and the decoder chunk are both faked; what is under test is who
 // releases the tracks, and which error each failure becomes ([D-21], [D-95]).
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const decoder = {
 	// The decoder chunk failing to load: the offline first-scan shape, or a
@@ -68,10 +68,6 @@ beforeEach(async () => {
 	vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
 	vi.stubGlobal('requestAnimationFrame', (cb: () => void) => setTimeout(cb, 0));
 	vi.stubGlobal('cancelAnimationFrame', (id: number) => clearTimeout(id));
-});
-
-afterEach(() => {
-	vi.unstubAllGlobals();
 });
 
 describe('startCameraScan', () => {

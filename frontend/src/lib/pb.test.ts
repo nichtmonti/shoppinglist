@@ -1,9 +1,7 @@
 // pb.ts's whole-body rule: the SDK reads a 200 it could not finish as `{}`,
 // so a response cut short has to fail before the SDK sees it.
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { pb } from './pb';
-
-afterEach(() => vi.unstubAllGlobals());
 
 function answerWith(body: BodyInit) {
 	vi.stubGlobal(

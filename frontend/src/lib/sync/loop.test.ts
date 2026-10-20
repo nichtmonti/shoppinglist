@@ -151,9 +151,6 @@ describe('startSyncLoop: learning a list is gone', () => {
 		vi.stubGlobal('addEventListener', events.addEventListener.bind(events));
 		vi.stubGlobal('removeEventListener', events.removeEventListener.bind(events));
 	});
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
 
 	function startLoop(transport = vi.fn().mockResolvedValue({ results: [] })) {
 		const digestTransport = vi.fn().mockResolvedValue([]);
@@ -234,7 +231,6 @@ describe('startSyncLoop: nobody looking', () => {
 	});
 	afterEach(() => {
 		vi.restoreAllMocks();
-		vi.unstubAllGlobals();
 	});
 
 	function startLoop(here: { visible: boolean }, elsewhere: boolean, cycleMs = TICK) {
