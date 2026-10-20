@@ -33,8 +33,8 @@ vi.mock('#lib/state/online.js', async () => {
 });
 
 vi.mock('#lib/actions/invites.js', () => ({
-	currentInvite: vi.fn(() => new Promise(() => {})),
-	rotateInvite: vi.fn(),
+	activeInvite: vi.fn(() => new Promise(() => {})),
+	resetInvite: vi.fn(),
 	inviteUrl: (token: string) => `https://example.test/join#${token}`
 }));
 

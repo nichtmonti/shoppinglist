@@ -374,20 +374,6 @@ describe('wipeLocalAccountData()', () => {
 		expect(await getMeta('seed_version')).toBe('v3');
 	});
 
-	it("drops the cached invite tokens — the only plaintext copy of the lists' join credential", async () => {
-		// [D-148]: keyed per list, so not in ACCOUNT_META_KEYS — and left behind
-		// on the device after a sign-out until the wipe cleared them by prefix.
-		await setMeta('invite_token_list1', { id: 'inv1', token: 'secret-join-token' });
-		await setMeta('invite_token_list2', { id: 'inv2', token: 'another-token' });
-		await setMeta('locale', 'de');
-
-		await wipeLocalAccountData();
-
-		expect(await getMeta('invite_token_list1')).toBeUndefined();
-		expect(await getMeta('invite_token_list2')).toBeUndefined();
-		expect(await getMeta('locale')).toBe('de');
-	});
-
 	it('keeps device preferences but drops the account-bound meta keys', async () => {
 		await setMeta('locale', 'de');
 		await setMeta('list_view', 'shop');
@@ -595,5 +581,43 @@ describe('the v7 migration', () => {
 		expect((await v7.meta.get('ui_density'))?.value).toBe('list');
 		expect((await v7.meta.get('list_view'))?.value).toBe('shop');
 		v7.close();
+	});
+});
+
+describe('the v8 migration', () => {
+	const NAME = 'invite-token-migration-test';
+	afterEach(async () => {
+		await Dexie.delete(NAME);
+	});
+
+	it('deletes the invite tokens this device cached, the only plaintext join credentials ([D-294])', async () => {
+		const v7 = new Dexie(NAME);
+		v7.version(7).stores({
+			items: 'id, list, [list+shelf+shelf_at]',
+			list_categories: 'id, list',
+			lists: 'id',
+			memberships: 'id, list',
+			roster: 'id, list',
+			category_templates: 'slug',
+			item_dictionary: 'id',
+			pending_ops: 'op_id, record_id, collection, list_id',
+			meta: 'key',
+			scanned_products: 'barcode',
+			server_items: 'id, list',
+			server_list_categories: 'id, list'
+		});
+		await v7.open();
+		await v7.table('meta').bulkPut([
+			{ key: 'invite_token_list1', value: { id: 'inv1', token: 'secret-join-token' } },
+			{ key: 'invite_token_list2', value: { id: 'inv2', token: 'another-token' } },
+			{ key: 'locale', value: 'de' }
+		]);
+		v7.close();
+
+		const v8 = new AppDB(NAME);
+		await v8.open();
+		expect(await v8.meta.where('key').startsWith('invite_token_').count()).toBe(0);
+		expect((await v8.meta.get('locale'))?.value).toBe('de');
+		v8.close();
 	});
 });

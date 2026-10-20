@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **An invitation link created before v0.13.5 is no longer shown on the phone that created it either.** Like everyone else on the list, press "Reset link" there for a new one. Such links expire 30 days after they were made, so few are still valid.
 - **"Cancel" during a sign-in with your identity provider now also closes its window.** It stayed open behind the app.
 - **The "Install Shopping list" card no longer disappears when the browser is put in full screen.** A full-screen browser tab read as the installed app.
 - **PocketBase's dashboard (`/_/`) and the files it serves get PocketBase's own Content-Security-Policy again.** The app's headers had replaced the dashboard's with one that only forbade framing, and gave product photos the app's policy instead of PocketBase's sandbox.

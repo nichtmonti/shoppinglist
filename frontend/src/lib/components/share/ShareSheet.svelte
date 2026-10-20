@@ -10,9 +10,8 @@
 
   Any member reads the live link's token: the server keeps it beside the hash
   it looks invites up by, behind the member-only rules, and blanks it on
-  revocation ([D-294]). A link minted before that has no token, so only its
-  minter's device cache ([D-148]) shows its URL until "Link zurücksetzen"
-  mints one (#lib/actions/invites).
+  revocation ([D-294]). A link minted before that has no token, so it shows
+  no URL until "Link zurücksetzen" mints one (#lib/actions/invites).
 -->
 <script lang="ts">
 	import OfflineHint from '#lib/components/common/OfflineHint.svelte';
@@ -28,9 +27,9 @@
 	import { refreshRoster } from '#lib/sync/index.js';
 	import { online } from '#lib/state/online.js';
 	import {
-		currentInvite,
+		activeInvite,
+		resetInvite,
 		revokeInvite,
-		rotateInvite,
 		inviteUrl,
 		type Invite
 	} from '#lib/actions/invites.js';
@@ -94,7 +93,7 @@
 
 	async function loadShareData(listId: string): Promise<void> {
 		lastRun = 'load';
-		const a = await inviteAction.run(() => currentInvite(listId));
+		const a = await inviteAction.run(() => activeInvite(listId));
 		if (!a.ok) return;
 		invite = a.value;
 		linkless = !a.value;
@@ -143,7 +142,7 @@
 		// place, as every confirm does.
 		const attempt = await inviteAction.run(async () => {
 			try {
-				const inv = await rotateInvite(listId);
+				const inv = await resetInvite(listId);
 				invite = inv;
 				linkless = false;
 				tab = 'link';

@@ -4,10 +4,7 @@
 // live link's token for every member ([D-294]) and one active link per list.
 // The token travels in the URL fragment, so it never reaches access logs or
 // Referer headers (§7.1, §10).
-import { getMeta, setMeta } from '#lib/db.js';
-import { inviteTokenKey } from '#lib/auth/account-data.js';
 import { pb } from '#lib/pb.js';
-import { sessionScope } from '#lib/auth/session.js';
 
 export interface Invite {
 	id: string;
@@ -31,7 +28,11 @@ export function tokenFromInput(input: string): string {
 	return hash >= 0 ? trimmed.slice(hash + 1) : trimmed;
 }
 
-/** The list's current non-revoked, non-expired invite, if any. */
+/**
+ * The list's current non-revoked, non-expired invite, if any: what the share
+ * sheet presents, with its token for any member ([D-294]). Reading never
+ * mints: a revoked link stays revoked until a member creates one ([D-330]).
+ */
 export async function activeInvite(listId: string): Promise<Invite | null> {
 	const rows = await pb.collection('invites').getFullList({
 		filter: pb.filter('list = {:list} && revoked = false', { list: listId }),
@@ -76,49 +77,4 @@ export async function revokeInvite(listId: string): Promise<void> {
 /** "Link zurücksetzen": the server rotates on a mint, in one transaction [D-31]. */
 export async function resetInvite(listId: string): Promise<Invite> {
 	return createInvite(listId);
-}
-
-// ---- what the share sheet shows ---------------------------------------------
-
-/**
- * The invite the share sheet presents: the list's active one, with its token
- * for any member ([D-294]), or null when the list has none. Opening the sheet
- * never mints: a revoked link stays revoked until a member creates one ([D-330]).
- */
-export async function currentInvite(listId: string): Promise<Invite | null> {
-	const active = await activeInvite(listId);
-	if (!active || active.token) return active;
-	const cached = await cachedInviteToken(listId, active.id);
-	return cached ? { ...active, token: cached } : active;
-}
-
-/**
- * "Link zurücksetzen" and "Link erstellen" as the share sheet runs them:
- * rotate, and remember the new token.
- */
-export async function rotateInvite(listId: string): Promise<Invite> {
-	// A mint answering after sign-out must not cache its token for the next
-	// account ([D-148], §5.6 [D-109]).
-	const session = sessionScope();
-	const invite = await resetInvite(listId);
-	if (session.owned()) await cacheInviteToken(listId, invite);
-	return invite;
-}
-
-// ---- the invite-token cache ------------------------------------------------
-// A link minted before [D-294] has no token on the server, so the device that
-// minted it keeps showing it from here, pinned to the invite's id so a
-// rotation elsewhere is not offered a stale one. Cleared on sign-out
-// ([D-148]). Goes once those links have expired (30 days, §7.1).
-
-/** Remembers the token of an invite this device just minted. */
-export async function cacheInviteToken(listId: string, invite: Invite): Promise<void> {
-	if (!invite.token) return;
-	await setMeta(inviteTokenKey(listId), { id: invite.id, token: invite.token });
-}
-
-/** The cached token for `inviteId` on this list, or null if this device never minted it. */
-export async function cachedInviteToken(listId: string, inviteId: string): Promise<string | null> {
-	const cached = await getMeta(inviteTokenKey(listId));
-	return cached && cached.id === inviteId ? cached.token : null;
 }

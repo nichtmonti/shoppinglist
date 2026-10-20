@@ -14,15 +14,15 @@ vi.mock('#lib/toasts.js', async () =>
 	(await import('#lib/test-kit/toasts-mock.js')).toastsModuleMock({ showToast })
 );
 
-// The sheet reaches invites through three calls: currentInvite (what to show
-// on open), rotateInvite ("Link zurücksetzen", "Link erstellen") and
+// The sheet reaches invites through three calls: activeInvite (what to show
+// on open), resetInvite ("Link zurücksetzen", "Link erstellen") and
 // revokeInvite ("Link zurückziehen"). Which invite and token those pick — none
-// when the list has no link, the cached token, none for another device's — is
+// when the list has no link, the server's token, none for a link older than it — is
 // asserted in src/lib/actions/invites.test.ts; here they are the sheet's inputs.
 vi.mock('#lib/actions/invites.js', async () => ({
 	...(await vi.importActual<typeof import('#lib/actions/invites.js')>('#lib/actions/invites.js')),
-	currentInvite: vi.fn(),
-	rotateInvite: vi.fn(),
+	activeInvite: vi.fn(),
+	resetInvite: vi.fn(),
 	revokeInvite: vi.fn(),
 	inviteUrl: (token: string) => `https://example.test/join#${token}`,
 	tokenFromInput: (s: string) => s
@@ -30,7 +30,7 @@ vi.mock('#lib/actions/invites.js', async () => ({
 
 import { db } from '#lib/db.js';
 import { resetDb, makeMembership } from '#lib/test-kit/db.js';
-import { currentInvite, revokeInvite, rotateInvite, type Invite } from '#lib/actions/invites.js';
+import { activeInvite, revokeInvite, resetInvite, type Invite } from '#lib/actions/invites.js';
 import { refreshRoster } from '#lib/sync/roster.js';
 import ShareSheet from './ShareSheet.svelte';
 
@@ -68,7 +68,7 @@ describe('ShareSheet', () => {
 				joined: '2026-01-05T00:00:00.000Z'
 			}
 		]);
-		vi.mocked(currentInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
+		vi.mocked(activeInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
 
 		render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
 
@@ -82,7 +82,7 @@ describe('ShareSheet', () => {
 			expect(screen.getByText('https://example.test/join#tok-abc')).toBeDefined();
 		});
 
-		expect(vi.mocked(currentInvite)).toHaveBeenCalledWith('list-1');
+		expect(vi.mocked(activeInvite)).toHaveBeenCalledWith('list-1');
 
 		// The Link/QR switch is the app's segmented band, as tabs over their
 		// panel, and it shows which side is chosen. The QR side renders only
@@ -118,7 +118,7 @@ describe('ShareSheet', () => {
 				joined: '2026-01-01T00:00:00.000Z'
 			}
 		]);
-		vi.mocked(currentInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
+		vi.mocked(activeInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
 
 		render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
 
@@ -130,7 +130,7 @@ describe('ShareSheet', () => {
 
 	// One timer per confirmation: an earlier copy's must not end a later one's.
 	it('shows "Link kopiert" for its full time after a second copy', async () => {
-		vi.mocked(currentInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
+		vi.mocked(activeInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
 		const writeText = vi.fn().mockResolvedValue(undefined);
 		vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
 		render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
@@ -157,7 +157,7 @@ describe('ShareSheet', () => {
 		vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
 		try {
 			await db.memberships.put(makeMembership({ list: 'list-1', account: 'account-1' }));
-			vi.mocked(currentInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
+			vi.mocked(activeInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
 			const sheet = render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
 			const calls = () => vi.mocked(refreshRoster).mock.calls.length;
 			expect(calls()).toBe(1);
@@ -187,7 +187,7 @@ describe('ShareSheet', () => {
 			nickname: '',
 			joined: '2026-01-05T00:00:00.000Z'
 		});
-		vi.mocked(currentInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
+		vi.mocked(activeInvite).mockResolvedValue(invite({ token: 'tok-abc' }));
 
 		render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
 
@@ -199,10 +199,10 @@ describe('ShareSheet', () => {
 
 	it('"Link zurücksetzen" mints a new invite', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
-		vi.mocked(currentInvite).mockResolvedValue(
+		vi.mocked(activeInvite).mockResolvedValue(
 			invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' })
 		);
-		vi.mocked(rotateInvite).mockResolvedValue(
+		vi.mocked(resetInvite).mockResolvedValue(
 			invite({
 				id: 'inv-2',
 				list: 'list-2',
@@ -219,7 +219,7 @@ describe('ShareSheet', () => {
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Link zurücksetzen' }));
 		// [D-293] It retires the link already sent, so it is confirmed first.
-		expect(vi.mocked(rotateInvite)).not.toHaveBeenCalled();
+		expect(vi.mocked(resetInvite)).not.toHaveBeenCalled();
 		const confirm = await screen.findByRole('alertdialog');
 		expect(confirm.textContent).toContain('funktioniert dann nicht mehr');
 		await fireEvent.click(within(confirm).getByRole('button', { name: 'Zurücksetzen' }));
@@ -232,7 +232,7 @@ describe('ShareSheet', () => {
 		expect(showToast).toHaveBeenCalledWith(
 			'Neuer Link erstellt. Der alte funktioniert nicht mehr.'
 		);
-		expect(vi.mocked(rotateInvite)).toHaveBeenCalledWith('list-2');
+		expect(vi.mocked(resetInvite)).toHaveBeenCalledWith('list-2');
 		// The old link must be gone from the screen too — resetting is the way a
 		// user kills a link they already sent someone, so continuing to offer it
 		// for copying would defeat the whole action.
@@ -241,11 +241,11 @@ describe('ShareSheet', () => {
 
 	it('"Link zurückziehen" leaves no link, and "Link erstellen" makes one ([D-310])', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
-		vi.mocked(currentInvite).mockResolvedValue(
+		vi.mocked(activeInvite).mockResolvedValue(
 			invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' })
 		);
 		vi.mocked(revokeInvite).mockResolvedValue();
-		vi.mocked(rotateInvite).mockResolvedValue(
+		vi.mocked(resetInvite).mockResolvedValue(
 			invite({ id: 'inv-2', list: 'list-2', token: 'tok-new' })
 		);
 
@@ -270,7 +270,7 @@ describe('ShareSheet', () => {
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Link erstellen' }));
 		expect(await screen.findByText('https://example.test/join#tok-new')).toBeDefined();
-		expect(vi.mocked(rotateInvite)).toHaveBeenCalledWith('list-2');
+		expect(vi.mocked(resetInvite)).toHaveBeenCalledWith('list-2');
 		expect(screen.queryByText(/Link zurückgezogen/)).toBeNull();
 	});
 
@@ -278,7 +278,7 @@ describe('ShareSheet', () => {
 	// until a member creates one, here or anywhere else.
 	it('offers "Link erstellen" on reopening after a revoke, and mints nothing', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
-		vi.mocked(currentInvite).mockResolvedValue(
+		vi.mocked(activeInvite).mockResolvedValue(
 			invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' })
 		);
 		vi.mocked(revokeInvite).mockResolvedValue();
@@ -289,7 +289,7 @@ describe('ShareSheet', () => {
 		await fireEvent.click(await screen.findByRole('button', { name: 'Zurückziehen' }));
 		await waitFor(() => expect(showToast).toHaveBeenCalled());
 
-		vi.mocked(currentInvite).mockResolvedValue(null);
+		vi.mocked(activeInvite).mockResolvedValue(null);
 		await rerender({ open: false, listId: 'list-2', onclose: vi.fn() });
 		await rerender({ open: true, listId: 'list-2', onclose: vi.fn() });
 
@@ -297,12 +297,12 @@ describe('ShareSheet', () => {
 		expect(screen.getByRole('button', { name: 'Link erstellen' })).toBeDefined();
 		expect(screen.queryByText(/Link zurückgezogen/)).toBeNull();
 		expect(screen.queryByText('https://example.test/join#tok-old')).toBeNull();
-		expect(vi.mocked(rotateInvite)).not.toHaveBeenCalled();
+		expect(vi.mocked(resetInvite)).not.toHaveBeenCalled();
 	});
 
 	it('keeps the link and the revoke when revoking fails, since revoking twice is harmless', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
-		vi.mocked(currentInvite).mockResolvedValue(
+		vi.mocked(activeInvite).mockResolvedValue(
 			invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' })
 		);
 		vi.mocked(revokeInvite).mockRejectedValue(new Error('Serverfehler'));
@@ -323,10 +323,10 @@ describe('ShareSheet', () => {
 
 	it('reports the error, drops the link, and still offers the retry when a reset fails', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
-		vi.mocked(currentInvite).mockResolvedValue(
+		vi.mocked(activeInvite).mockResolvedValue(
 			invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' })
 		);
-		vi.mocked(rotateInvite).mockRejectedValue(new Error('Serverfehler'));
+		vi.mocked(resetInvite).mockRejectedValue(new Error('Serverfehler'));
 
 		render(ShareSheet, { open: true, listId: 'list-2', onclose: vi.fn() });
 
@@ -346,7 +346,7 @@ describe('ShareSheet', () => {
 		expect(screen.queryByText('https://example.test/join#tok-old')).toBeNull();
 		// …but the retry is right there, the confirmation's own button — and it
 		// mints for real on the second attempt.
-		vi.mocked(rotateInvite).mockResolvedValue(
+		vi.mocked(resetInvite).mockResolvedValue(
 			invite({ id: 'inv-2', list: 'list-2', token: 'tok-new' })
 		);
 		await fireEvent.click(within(dialog).getByRole('button', { name: 'Zurücksetzen' }));
@@ -360,7 +360,7 @@ describe('ShareSheet', () => {
 	it('offers reset (no copyable link) for a link minted before the server kept its token', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-3', account: 'account-1' }));
 		// No `token` field: this device never minted it and has no cached copy.
-		vi.mocked(currentInvite).mockResolvedValue(invite({ id: 'inv-9', list: 'list-3' }));
+		vi.mocked(activeInvite).mockResolvedValue(invite({ id: 'inv-9', list: 'list-3' }));
 
 		render(ShareSheet, { open: true, listId: 'list-3', onclose: vi.fn() });
 
@@ -378,7 +378,7 @@ describe('ShareSheet', () => {
 	// the reset, which would retire a link already sent, is not offered for it.
 	it('offers to load again, not to reset, when the link cannot be loaded', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
-		vi.mocked(currentInvite)
+		vi.mocked(activeInvite)
 			.mockRejectedValueOnce(Object.assign(new Error('Something went wrong.'), { status: 0 }))
 			.mockResolvedValueOnce(invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' }));
 
@@ -393,7 +393,7 @@ describe('ShareSheet', () => {
 		await waitFor(() => {
 			expect(screen.getByText('https://example.test/join#tok-old')).toBeDefined();
 		});
-		expect(vi.mocked(rotateInvite)).not.toHaveBeenCalled();
+		expect(vi.mocked(resetInvite)).not.toHaveBeenCalled();
 	});
 
 	// The home's sheet is one instance re-pointed at each list: the previous
@@ -403,21 +403,21 @@ describe('ShareSheet', () => {
 			makeMembership({ list: 'list-1', account: 'account-1' }),
 			makeMembership({ list: 'list-2', account: 'account-1' })
 		]);
-		vi.mocked(currentInvite).mockResolvedValueOnce(invite({ list: 'list-1', token: 'tok-one' }));
+		vi.mocked(activeInvite).mockResolvedValueOnce(invite({ list: 'list-1', token: 'tok-one' }));
 
 		const { rerender } = render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
 		expect(await screen.findByText('https://example.test/join#tok-one')).toBeDefined();
 
 		let answerTwo!: (inv: Invite) => void;
-		vi.mocked(currentInvite).mockReturnValueOnce(new Promise((r) => (answerTwo = r)));
+		vi.mocked(activeInvite).mockReturnValueOnce(new Promise((r) => (answerTwo = r)));
 		await rerender({ open: true, listId: 'list-2', onclose: vi.fn() });
 		expect(screen.queryByText('https://example.test/join#tok-one')).toBeNull();
 
 		// A late answer for list-1 must not overwrite list-2's.
 		let answerOneAgain!: (inv: Invite) => void;
-		vi.mocked(currentInvite).mockReturnValueOnce(new Promise((r) => (answerOneAgain = r)));
+		vi.mocked(activeInvite).mockReturnValueOnce(new Promise((r) => (answerOneAgain = r)));
 		await rerender({ open: true, listId: 'list-1', onclose: vi.fn() });
-		vi.mocked(currentInvite).mockResolvedValueOnce(
+		vi.mocked(activeInvite).mockResolvedValueOnce(
 			invite({ id: 'inv-2', list: 'list-2', token: 'tok-two' })
 		);
 		await rerender({ open: true, listId: 'list-2', onclose: vi.fn() });

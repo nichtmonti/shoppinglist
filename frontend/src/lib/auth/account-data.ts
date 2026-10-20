@@ -19,7 +19,7 @@ import { invalidateLiveCaches } from '#lib/state/live.js';
  *  - seed_version: the shipped vocabulary's, the same for every account.
  *  - the rest are device preferences (§9.3, §12.2).
  */
-const ACCOUNT_BOUND: Record<Exclude<MetaKey, `invite_token_${string}`>, boolean> = {
+const ACCOUNT_BOUND: Record<MetaKey, boolean> = {
 	last_synced_at: true,
 	memberships_synced_at: true,
 	suppressed_names: true,
@@ -40,18 +40,6 @@ const ACCOUNT_META_KEYS = Object.entries(ACCOUNT_BOUND).flatMap(([key, bound]) =
 );
 
 /**
- * The per-list invite-token cache (#lib/actions/invites): the one plaintext
- * copy of a credential that lets anyone join the list, wiped by prefix
- * ([D-148]).
- */
-export const INVITE_TOKEN_META_PREFIX = 'invite_token_';
-
-/** The invite-token cache's key for one list. */
-export function inviteTokenKey(listId: string): `invite_token_${string}` {
-	return `${INVITE_TOKEN_META_PREFIX}${listId}`;
-}
-
-/**
  * Drop every trace of the signed-in account's data from this device, or the
  * next account to sign in here inherits it: lists, items, roster nicknames,
  * scanned products and the outbox (`pending_ops` has no account column, so
@@ -68,8 +56,7 @@ export async function wipeLocalAccountData(): Promise<void> {
 		await Promise.all([
 			...tables.map((table) => table.clear()),
 			db.scanned_products.clear(),
-			db.meta.bulkDelete(ACCOUNT_META_KEYS),
-			db.meta.where('key').startsWith(INVITE_TOKEN_META_PREFIX).delete()
+			db.meta.bulkDelete(ACCOUNT_META_KEYS)
 		]);
 	});
 	// Live stores cache their last value; without this the next account's first
