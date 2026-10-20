@@ -29,14 +29,6 @@ func NewMux(t *testing.T, register func(r *router.RouterGroup[*core.RequestEvent
 	if err != nil {
 		t.Fatalf("NewRouter: %v", err)
 	}
-	// Full §10 buckets per test router. The limiters are package-level and key
-	// on the caller IP, which is 192.0.2.1 for EVERY httptest request in the
-	// process — so without this a budget is shared by a whole package: a test
-	// that deliberately exhausts one 429s the next test to touch that route,
-	// and a route whose budget is smaller than the number of times its suite
-	// exercises it could not be given a budget at all. Before register(), so a
-	// RegisterRoutes that re-arms a budget from env (webauthn) still wins.
-	security.ResetLimiters()
 	for _, m := range root {
 		router.BindFunc(m)
 	}

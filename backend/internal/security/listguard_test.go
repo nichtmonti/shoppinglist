@@ -1,7 +1,6 @@
 // External test package (package security_test, not security): these two
-// files drive real routers through internal/testutil, and testutil now calls
-// security.ResetLimiters — an in-package test file importing it would be an
-// import cycle. Both files only ever exercise exported API, which is the
+// files drive real routers through internal/testutil, which imports
+// security — an in-package test file importing it would be an import cycle. Both files only ever exercise exported API, which is the
 // reason they can move and headers_test.go/admin_test.go cannot.
 package security_test
 

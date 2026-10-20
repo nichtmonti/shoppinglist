@@ -185,7 +185,6 @@ func serveMux(t *testing.T, app core.App, env *serveEnv, before func(*router.Rou
 	}
 	registerRoutes(r, env)
 	registerDomainHooks(app, env)
-	security.ResetLimiters()
 	mux, err := r.BuildMux()
 	if err != nil {
 		t.Fatal(err)

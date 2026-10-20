@@ -26,7 +26,6 @@ func TestScannerOffKeepsPhotosAndDropsTheLookup(t *testing.T) {
 		t.Fatal(err)
 	}
 	RegisterPhotoRoute(security.AppRoutes(r))
-	security.ResetLimiters()
 	off, err := r.BuildMux()
 	if err != nil {
 		t.Fatal(err)

@@ -2,7 +2,6 @@ package security
 
 import (
 	"net/netip"
-	"sync"
 	"time"
 
 	"github.com/pocketbase/pocketbase/core"
@@ -46,8 +45,8 @@ type budget struct {
 	max    int
 }
 
-// policy is the single table of §10 budgets. SetBudget overrides a row (tests)
-// or adds one (the demo build's, so this table never names its route).
+// policy is the single table of §10 budgets. A budget outside it, the demo
+// build's or a test's, goes through Limit, so this table never names its route.
 var policy = map[budgetName]budget{
 	RateSyncPush:      {5 * time.Minute, 300},
 	RatePasskeyBegin:  {time.Minute, 30},
@@ -82,59 +81,26 @@ var policy = map[budgetName]budget{
 //   - GET /api/seed-version, a constant.
 //   - GET /api/auth/methods, one cached lookup (§5.9).
 //
-// mu guards limiters (and policy, via SetBudget).
-var mu sync.Mutex
-
-// limiters holds one limiter per budget, built lazily from policy.
-var limiters = map[budgetName]*ratelimit.Limiter{}
-
-// limiterFor returns the limiter for name. It panics on an unknown name, a
-// programmer error never reachable from client input.
-func limiterFor(name budgetName) *ratelimit.Limiter {
-	mu.Lock()
-	defer mu.Unlock()
-	if l, ok := limiters[name]; ok {
-		return l
-	}
+// RateLimit returns middleware enforcing the named §10 budget per IP. It
+// panics at bind time on an unknown name: inside a request the router's
+// recover would turn it into a bare 500.
+func RateLimit(name budgetName) func(*core.RequestEvent) error {
 	b, ok := policy[name]
 	if !ok {
 		panic("security: unknown rate-limit budget " + name)
 	}
-	l := ratelimit.New(b.window, b.max)
-	limiters[name] = l
-	return l
+	return Limit(name, b.window, b.max)
 }
 
-// SetBudget sets a budget's window and max, adding the row if it is new, and
-// re-arms its limiter with a fresh one.
-func SetBudget(name budgetName, window time.Duration, max int) {
-	mu.Lock()
-	defer mu.Unlock()
-	policy[name] = budget{window, max}
-	limiters[name] = ratelimit.New(window, max)
-}
-
-// ResetLimiters discards every recorded hit, re-arming all budgets from the
-// policy table on next use.
-//
-// Test support (internal/testutil.NewMux), never called from a serving
-// process: every httptest request shares one IP, so without it one test that
-// exhausts a bucket would 429 the next.
-func ResetLimiters() {
-	mu.Lock()
-	defer mu.Unlock()
-	clear(limiters)
-}
-
-// RateLimit returns middleware enforcing the named §10 budget per IP. The
-// per-request lookup goes through limiters so SetBudget and ResetLimiters can
-// re-arm a bound route's budget.
-func RateLimit(name budgetName) func(*core.RequestEvent) error {
-	// Panic on an unknown name at bind time: inside a request the router's
-	// recover would turn it into a bare 500.
-	limiterFor(name)
+// Limit is RateLimit for a budget of max calls per window that is not in the
+// table. Each app keeps its limiters in its own store, as PocketBase keeps
+// its own, so a test's app starts with full buckets; routes naming one
+// budget share it.
+func Limit(name budgetName, window time.Duration, max int) func(*core.RequestEvent) error {
+	key := "shoppinglist.ratelimit." + string(name)
 	return func(e *core.RequestEvent) error {
-		if !limiterFor(name).Allow(clientKey(e.RealIP())) {
+		l := e.App.Store().GetOrSet(key, func() any { return ratelimit.New(window, max) }).(*ratelimit.Limiter)
+		if !l.Allow(clientKey(e.RealIP())) {
 			return e.TooManyRequestsError("too many attempts, slow down", nil)
 		}
 		return e.Next()
