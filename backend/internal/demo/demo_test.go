@@ -19,8 +19,19 @@ import (
 
 	"shoppinglist/internal/account"
 	"shoppinglist/internal/lists"
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/testutil"
 )
+
+// FromEnv reads the settings as the demo build's start does, for the tests that
+// set them.
+func FromEnv(passkeys, oidc bool) (Config, error) {
+	d, err := settings.ReadDemo()
+	if err != nil {
+		return Config{}, err
+	}
+	return FromSettings(d, passkeys, oidc)
+}
 
 func TestFromEnv(t *testing.T) {
 	t.Run("passkeys on is refused", func(t *testing.T) {

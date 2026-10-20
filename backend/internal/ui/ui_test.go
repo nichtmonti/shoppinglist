@@ -11,8 +11,18 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 
+	"shoppinglist/internal/settings"
 	_ "shoppinglist/migrations" // register collection migrations for RunAllMigrations
 )
+
+// ShellFromEnv reads the settings as the start does, for the tests that set them.
+func ShellFromEnv() (Shell, error) {
+	s, err := settings.ReadServe()
+	if err != nil {
+		return Shell{}, err
+	}
+	return ShellFromSettings(s)
+}
 
 // A stand-in for the SvelteKit build: the CSP meta tag whose exact bytes
 // internal/security mirrors as a header, plus the inline bootstrap script that

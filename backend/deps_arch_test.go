@@ -94,7 +94,7 @@ func TestOnlyTheDemoBuildLinksTheDemo(t *testing.T) {
 func TestInternalLayering(t *testing.T) {
 	base := []string{
 		"applog", "envflag", "fieldcontract", "listcap", "members", "normalize", "oidclogin",
-		"randid", "ratelimit", "records", "security", "seed/candidates", "tombstone",
+		"randid", "ratelimit", "records", "security", "seed/candidates", "settings", "tombstone",
 	}
 	features := map[string][]string{
 		"account": nil, "barcode": nil, "bootenv": nil, "clienterrors": nil, "curate": nil,

@@ -19,9 +19,23 @@ import (
 	"shoppinglist/internal/fieldcontract"
 	"shoppinglist/internal/randid"
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/signup"
 	"shoppinglist/internal/testutil"
 )
+
+// FromEnv reads the settings as the start does, for the tests that set them.
+func FromEnv() (*Config, error) {
+	s, err := settings.ReadServe()
+	if err != nil {
+		return nil, err
+	}
+	b, err := settings.ReadBoot()
+	if err != nil {
+		return nil, err
+	}
+	return FromSettings(s, b)
+}
 
 // setupWebauthnApp bootstraps a temp app with migrations + the four passkey
 // routes mounted, returning the app and a dispatchable mux.

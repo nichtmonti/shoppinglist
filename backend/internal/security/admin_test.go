@@ -9,8 +9,15 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/testutil/testapp"
 )
+
+// AdminUIFromEnv reads the switch as the start does, for the tests that set it.
+func AdminUIFromEnv() (bool, error) {
+	s, err := settings.ReadServe()
+	return bool(s.AdminUI), err
+}
 
 // setupLockdownApp mirrors setupApp (headers_test.go) but mounts the admin
 // lockdown, plus stand-ins for the two upstream surfaces it hides: PocketBase's

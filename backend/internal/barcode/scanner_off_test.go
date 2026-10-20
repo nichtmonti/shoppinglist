@@ -8,7 +8,14 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 )
+
+// ScannerFromEnv reads the switch as the start does, for the tests that set it.
+func ScannerFromEnv() (bool, error) {
+	s, err := settings.ReadServe()
+	return bool(s.Scanner), err
+}
 
 // [D-218] With the scanner off only the photo route is mounted: the lookup —
 // the one thing that calls Open Food Facts — is gone, while a photo stored

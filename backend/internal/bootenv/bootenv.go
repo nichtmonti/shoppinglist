@@ -19,15 +19,7 @@ import (
 
 	"shoppinglist/internal/applog"
 	"shoppinglist/internal/envflag"
-)
-
-// SQLITE_PRAGMAS is deliberately unprefixed: it names the sqlite driver's own
-// DSN knobs.
-const (
-	pragmaEnv       = "SQLITE_PRAGMAS"
-	AppURLEnv       = "SHOPPINGLIST_APP_URL"
-	trustedProxyEnv = "SHOPPINGLIST_TRUSTED_PROXY_HEADER"
-	leftmostIPEnv   = "SHOPPINGLIST_TRUSTED_PROXY_LEFTMOST"
+	"shoppinglist/internal/settings"
 )
 
 // readerPoolCap is the DataMaxOpenConns applied when SQLITE_PRAGMAS is set.
@@ -57,9 +49,10 @@ func Connect(dbPath string) (*dbx.DB, error) {
 }
 
 // pragmaSuffix returns SQLITE_PRAGMAS normalized to a leading "?", or "" when
-// unset.
+// unset. A bad boot setting is ApplySettings' to report, at bootstrap.
 func pragmaSuffix() string {
-	v := envflag.Get(pragmaEnv)
+	b, _ := settings.ReadBoot()
+	v := b.SQLitePragmas
 	if v == "" {
 		return ""
 	}
@@ -93,6 +86,10 @@ const AppName = "Shoppinglist"
 // when something changed, so a boot is not a write. A set variable wins over
 // the admin UI, and an invalid one is a boot error naming it ([D-61]).
 func ApplySettings(app core.App) error {
+	b, err := settings.ReadBoot()
+	if err != nil {
+		return err
+	}
 	s := app.Settings()
 
 	var changed bool
@@ -103,9 +100,9 @@ func ApplySettings(app core.App) error {
 		changed = true
 	}
 
-	if v := envflag.Get(AppURLEnv); v != "" {
+	if v := b.AppURL; v != "" {
 		if err := envflag.AbsoluteURL(v); err != nil {
-			return fmt.Errorf("%s: %w", AppURLEnv, err)
+			return fmt.Errorf("%s: %w", settings.AppURLEnv, err)
 		}
 		if s.Meta.AppURL != v {
 			s.Meta.AppURL = v
@@ -123,13 +120,10 @@ func ApplySettings(app core.App) error {
 	// $proxy_add_x_forwarded_for idiom) the leftmost value is whatever the caller
 	// sent, and every rate limit becomes bypassable by spoofing it
 	// (docs/deploy-reference.md#only-if-you-run-a-proxy-chain).
-	leftmost, err := envflag.OnOff(leftmostIPEnv, false)
-	if err != nil {
-		return err
-	}
-	header := envflag.Get(trustedProxyEnv)
-	if header == "" && envflag.Get(leftmostIPEnv) != "" {
-		applog.Warn(app, leftmostIPEnv+" has no effect without "+trustedProxyEnv, nil)
+	leftmost := b.TrustedProxyLeftmost.On()
+	header, headerEnv := b.TrustedProxyHeader, settings.TrustedProxyHeaderEnv
+	if header == "" && b.TrustedProxyLeftmost != nil {
+		applog.Warn(app, settings.TrustedProxyLeftmostEnv+" has no effect without "+headerEnv, nil)
 	}
 
 	if header == "" && len(s.TrustedProxy.Headers) > 0 {
@@ -141,7 +135,7 @@ func ApplySettings(app core.App) error {
 			"though %s is unset: a value from an earlier start or the dashboard is still in its settings. "+
 			"Without a reverse proxy that sets this header, any client can send it and pick its own rate limit; "+
 			"clear the header in the dashboard (/_/, Settings, Application, IP proxy headers)",
-			strings.Join(s.TrustedProxy.Headers, ", "), trustedProxyEnv), nil)
+			strings.Join(s.TrustedProxy.Headers, ", "), headerEnv), nil)
 	} else if header != "" {
 		// Canonicalized so the stored setting reads as the admin UI writes it.
 		header = http.CanonicalHeaderKey(header)

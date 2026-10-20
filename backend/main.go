@@ -27,6 +27,7 @@ import (
 	"shoppinglist/internal/lists"
 	"shoppinglist/internal/oidc"
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/sync"
 	"shoppinglist/internal/ui"
 	"shoppinglist/internal/upgradebackup"
@@ -238,10 +239,10 @@ func registerDomainHooks(app core.App, env *serveEnv) {
 
 // startBanner is whether serve prints PocketBase's start banner, which names
 // the dashboard at /_/: not when SHOPPINGLIST_ADMIN_UI=off has removed it. A
-// bad value shows it, as resolveServeEnv fails the boot anyway.
+// bad setting shows it, as resolveServeEnv fails the boot anyway.
 func startBanner() bool {
-	on, err := security.AdminUIFromEnv()
-	return on || err != nil
+	s, err := settings.ReadServe()
+	return bool(s.AdminUI) || err != nil
 }
 
 // installerFunc wraps PocketBase's first-boot superuser installer callback so

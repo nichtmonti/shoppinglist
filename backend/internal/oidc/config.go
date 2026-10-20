@@ -25,17 +25,18 @@ import (
 
 	"shoppinglist/internal/envflag"
 	"shoppinglist/internal/oidclogin"
+	"shoppinglist/internal/settings"
 )
 
 const (
-	oidcEnv             = "SHOPPINGLIST_OIDC"
-	oidcClientIDEnv     = "SHOPPINGLIST_OIDC_CLIENT_ID"
-	oidcClientSecretEnv = "SHOPPINGLIST_OIDC_CLIENT_SECRET"
-	oidcAuthURLEnv      = "SHOPPINGLIST_OIDC_AUTH_URL"
-	oidcTokenURLEnv     = "SHOPPINGLIST_OIDC_TOKEN_URL"
-	oidcUserinfoURLEnv  = "SHOPPINGLIST_OIDC_USERINFO_URL"
-	oidcNameEnv         = "SHOPPINGLIST_OIDC_NAME"
-	oidcIssuerEnv       = "SHOPPINGLIST_OIDC_ISSUER"
+	oidcEnv             = settings.OIDCEnv
+	oidcClientIDEnv     = settings.OIDCClientIDEnv
+	oidcClientSecretEnv = settings.OIDCClientSecretEnv
+	oidcAuthURLEnv      = settings.OIDCAuthURLEnv
+	oidcTokenURLEnv     = settings.OIDCTokenURLEnv
+	oidcUserinfoURLEnv  = settings.OIDCUserinfoURLEnv
+	oidcNameEnv         = settings.OIDCNameEnv
+	oidcIssuerEnv       = settings.OIDCIssuerEnv
 )
 
 // oidcProviderName is PocketBase's generic OpenID Connect provider
@@ -62,7 +63,7 @@ type Config struct {
 	DisplayName string
 }
 
-// FromEnv parses the OIDC variables. nil means OIDC is off.
+// FromSettings checks the OIDC settings. nil means OIDC is off.
 //
 // SHOPPINGLIST_OIDC=on requires the client id and secret and either
 // SHOPPINGLIST_OIDC_ISSUER or all three endpoint URLs; a half-configured set
@@ -70,24 +71,21 @@ type Config struct {
 // switch value. Connection variables set while the switch is unset also fail
 // it ([D-76]): silently switching off a login the operator configured would
 // lock its users out. With `off` they are ignored.
-func FromEnv() (*Config, error) {
-	clientID := envflag.Get(oidcClientIDEnv)
-	secret := envflag.Get(oidcClientSecretEnv)
-	authURL := envflag.Get(oidcAuthURLEnv)
-	tokenURL := envflag.Get(oidcTokenURLEnv)
-	userinfoURL := envflag.Get(oidcUserinfoURLEnv)
-	issuer := envflag.Get(oidcIssuerEnv)
+func FromSettings(s settings.Serve) (*Config, error) {
+	oc := s.OIDCConnection
+	clientID, secret, authURL, tokenURL, userinfoURL, issuer :=
+		oc.ClientID, oc.ClientSecret, oc.AuthURL, oc.TokenURL, oc.UserinfoURL, oc.Issuer
 	anySet := clientID != "" || secret != "" || issuer != "" || authURL != "" || tokenURL != "" || userinfoURL != ""
 
-	if envflag.Get(oidcEnv) == "" {
+	if s.OIDC == nil {
 		if anySet {
 			return nil, fmt.Errorf("%s is not set, but %s and its siblings are: set %s=on to keep the OIDC login, or %s=off to turn it off",
 				oidcEnv, oidcClientIDEnv, oidcEnv, oidcEnv)
 		}
 		return nil, nil
 	}
-	if on, err := envflag.OnOff(oidcEnv, false); err != nil || !on {
-		return nil, err
+	if !s.OIDC.On() {
+		return nil, nil
 	}
 
 	explicit := authURL != "" || tokenURL != "" || userinfoURL != ""
@@ -129,7 +127,7 @@ func FromEnv() (*Config, error) {
 		}
 	}
 
-	name := envflag.Get(oidcNameEnv)
+	name := oc.Name
 	if name == "" {
 		name = "OIDC"
 	}
@@ -145,7 +143,7 @@ func FromEnv() (*Config, error) {
 	}, nil
 }
 
-// Apply makes the accounts collection's OAuth2 config match env, FromEnv's
+// Apply makes the accounts collection's OAuth2 config match env, FromSettings'
 // result (nil: OIDC off). It writes nothing when nothing changed ([D-65]).
 // With OIDC on, the OIDC provider row is replaced wholesale and other
 // providers are kept; with it off, OAuth2 is switched off as a whole and the

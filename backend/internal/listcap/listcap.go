@@ -6,19 +6,16 @@
 package listcap
 
 import (
-	"shoppinglist/internal/envflag"
 	"shoppinglist/internal/fieldcontract"
+	"shoppinglist/internal/settings"
 )
 
 // Env lets a deployment move the items cap.
-const Env = "SHOPPINGLIST_MAX_ITEMS_PER_LIST"
+const Env = settings.MaxItemsPerListEnv
 
-// ListsEnv lets a deployment move the [D-219] lists cap.
-const ListsEnv = "SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT"
-
-// DefaultMaxLists is the lists cap of a deployment that did not set ListsEnv.
-// Not in the shared contract: the client learns it from the refusal.
-const DefaultMaxLists = 25
+// ListsEnv lets a deployment move the [D-219] lists cap, whose default is not
+// in the shared contract: the client learns it from the refusal.
+const ListsEnv = settings.MaxListsPerAccountEnv
 
 // Caps are a deployment's movable caps.
 type Caps struct {
@@ -31,19 +28,12 @@ type Caps struct {
 }
 
 // Default is the caps of a deployment that moved neither.
-func Default() Caps {
-	return Caps{Items: fieldcontract.MaxItemsPerList(), Lists: DefaultMaxLists}
-}
+func Default() Caps { return FromSettings(settings.ServeDefaults()) }
 
-// FromEnv parses Env and ListsEnv. Unset keeps the default; a non-number or
-// anything below 1 is a boot error.
-func FromEnv() (Caps, error) {
-	items, err := envflag.PositiveInt(Env, fieldcontract.MaxItemsPerList(), "items per list")
-	if err != nil {
-		return Caps{}, err
-	}
-	lists, err := envflag.PositiveInt(ListsEnv, DefaultMaxLists, "lists per account")
-	return Caps{Items: items, Lists: lists}, err
+// FromSettings takes Env and ListsEnv; the settings refuse a non-number or
+// anything below 1.
+func FromSettings(s settings.Serve) Caps {
+	return Caps{Items: int(s.MaxItemsPerList), Lists: int(s.MaxListsPerAccount)}
 }
 
 // ImportMax is how many items one backup may bring on this deployment: the

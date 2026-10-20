@@ -16,9 +16,9 @@ import (
 
 	"github.com/pocketbase/pocketbase/core"
 
-	"shoppinglist/internal/envflag"
 	"shoppinglist/internal/invites"
 	"shoppinglist/internal/randid"
+	"shoppinglist/internal/settings"
 )
 
 // Mode is SHOPPINGLIST_SIGNUP's value.
@@ -31,15 +31,13 @@ const (
 )
 
 // Env is the variable the mode is read from.
-const Env = "SHOPPINGLIST_SIGNUP"
+const Env = settings.SignupEnv
 
-// ModeFromEnv parses SHOPPINGLIST_SIGNUP. Unset means open. An unrecognised
-// value is an error, not a fallback: a typo of `closed` must not boot wide
-// open.
-func ModeFromEnv() (Mode, error) {
-	switch v := strings.ToLower(envflag.Get(Env)); v {
-	case "":
-		return Open, nil
+// ParseMode parses SHOPPINGLIST_SIGNUP's value; the settings default it to
+// open. An unrecognised value is an error, not a fallback: a typo of `closed`
+// must not boot wide open.
+func ParseMode(v string) (Mode, error) {
+	switch v = strings.ToLower(v); v {
 	case string(Open), string(Closed), string(Invite):
 		return Mode(v), nil
 	default:

@@ -12,6 +12,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/signup"
 	"shoppinglist/internal/testutil"
 	wa "shoppinglist/internal/webauthn"
@@ -35,13 +36,13 @@ import (
 // account from the credential's owner rather than the unsigned,
 // client-supplied userHandle.
 func TestExploitFullAccountTakeover(t *testing.T) {
-	t.Setenv("SHOPPINGLIST_RP_ID", "localhost")
-	t.Setenv("SHOPPINGLIST_RP_ORIGIN", "https://localhost")
+	set := settings.ServeDefaults()
+	set.RPID, set.RPOrigin = "localhost", "https://localhost"
 
 	app := testutil.NewApp(t)
-	cfg, err := wa.FromEnv()
+	cfg, err := wa.FromSettings(set, settings.Boot{})
 	if err != nil {
-		t.Fatalf("FromEnv: %v", err)
+		t.Fatalf("FromSettings: %v", err)
 	}
 	w, err := wa.New(cfg)
 	if err != nil {

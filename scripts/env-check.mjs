@@ -5,11 +5,10 @@
 // explains: a setting the code reads but neither names is one nobody finds,
 // and a name .env.example offers that nothing reads does nothing.
 //
-// "Read by the server" is every Go string literal that is exactly a
-// SHOPPINGLIST_… or SQLITE_… name, outside tests, which is how every reader
-// names its variable (envflag takes the name as a constant). The demo build's
-// own settings (internal/demo) are not offered in .env.example, which runs the
-// real image; they only have to be documented.
+// "Read by the server" is every `env` tag in backend/internal/settings, the one
+// declaration of the settings ([D-337]); its test renders the reference's
+// tables from it. The demo build's own settings (its Demo struct) are not
+// offered in .env.example, which runs the real image.
 //
 // Checks:
 //   - docker-compose.yml hands .env to the app, and maps no server setting
@@ -17,10 +16,12 @@
 //   - .env.example offers every setting the server reads, set or commented
 //     out, except the few the reference alone explains
 //   - docs/deploy-reference.md names every setting, the compose-only ones too
+//   - no server code names a SHOPPINGLIST_ variable the settings do not
+//     declare: a setting is read through internal/settings or not at all
 //   - every name .env.example offers is read by the server or by compose
 //   - README.md carries docker-compose.yml verbatim, so a copy of it runs
-//   - backend/settings.go, the names the server accepts at boot ([D-336]),
-//     lists exactly these settings and compose's own, then the tooling's
+//   - settings.Others, the names the start's check passes without reading
+//     ([D-336]), lists exactly compose's own, then the tooling's
 //
 //   node scripts/env-check.mjs   exit 1 and list each mismatch (CI)
 import { execFileSync } from 'node:child_process';
@@ -30,17 +31,16 @@ import { dirname, resolve } from 'node:path';
 const root = resolve(dirname(new URL(import.meta.url).pathname), '..');
 const read = (f) => readFileSync(resolve(root, f), 'utf8');
 
-const goFiles = execFileSync('git', ['ls-files', 'backend/*.go'], { cwd: root, encoding: 'utf8' })
-	.split('\n')
-	// settings.go names them all, so it says nothing about what is read.
-	.filter((f) => f && !f.endsWith('_test.go') && f !== 'backend/settings.go');
-const serverReads = new Set();
-const demoReads = new Set();
-for (const f of goFiles) {
-	for (const [, name] of read(f).matchAll(/"((?:SHOPPINGLIST|SQLITE)_[A-Z0-9_]*[A-Z0-9])"/g)) {
-		(f.startsWith('backend/internal/demo/') ? demoReads : serverReads).add(name);
-	}
-}
+const settingsFile = 'backend/internal/settings/settings.go';
+const settingsGo = read(settingsFile);
+const tags = (text) => new Set([...text.matchAll(/env:"([A-Z_][A-Z0-9_]*)"/g)].map((m) => m[1]));
+const demoStruct = settingsGo.match(/^type Demo struct \{\n[\s\S]*?^\}/m)?.[0] ?? '';
+const demoReads = tags(demoStruct);
+const serverReads = new Set([...tags(settingsGo)].filter((n) => !demoReads.has(n)));
+const quoted = (text) =>
+	new Set([...text.matchAll(/"((?:SHOPPINGLIST|SQLITE)_[A-Z0-9_]*[A-Z0-9])"/g)].map((m) => m[1]));
+const othersBlock = settingsGo.match(/^var Others = \[\]string\{\n[\s\S]*?^\}/m)?.[0] ?? '';
+const [composePart, toolingPart = ''] = othersBlock.split('// Not settings');
 
 // Read by Go's net/http, not by name in the app.
 const stdlib = new Set(['HTTPS_PROXY', 'HTTP_PROXY', 'NO_PROXY']);
@@ -99,27 +99,32 @@ for (const name of new Set([...serverReads, ...demoReads, ...interpolated])) {
 	}
 }
 
-// The boot's list: the settings, then, after its "Not settings" comment, the
-// names the repo's tooling sets around the servers it starts.
-const [settingsPart, toolingPart = ''] = read('backend/settings.go').split('// Not settings');
-const names = (text) =>
-	new Set([...text.matchAll(/"(SHOPPINGLIST_[A-Z0-9_]+)"/g)].map((m) => m[1]));
-const accepted = names(settingsPart);
-const settings = new Set(
-	[...serverReads, ...demoReads, ...interpolated].filter((n) => n.startsWith('SHOPPINGLIST_'))
-);
-for (const name of settings) {
-	if (!accepted.has(name)) problems.push(`backend/settings.go does not accept ${name}, a setting`);
-}
-for (const name of accepted) {
-	if (!settings.has(name)) {
-		problems.push(
-			`backend/settings.go accepts ${name}, which neither the server nor compose reads`
-		);
+// What the start passes without reading: compose's own, then the tooling's.
+const composeOwn = quoted(composePart);
+for (const name of interpolated) {
+	if (name.startsWith('SHOPPINGLIST_') && !composeOwn.has(name)) {
+		problems.push(`settings.Others does not pass ${name}, which docker-compose.yml fills in`);
 	}
 }
-for (const name of names(toolingPart)) {
-	if (settings.has(name)) problems.push(`backend/settings.go lists the setting ${name} as tooling`);
+for (const name of composeOwn) {
+	if (!interpolated.has(name))
+		problems.push(`settings.Others passes ${name} as compose's, which compose does not read`);
+}
+const known = new Set([...serverReads, ...demoReads, ...composeOwn, ...quoted(toolingPart)]);
+for (const name of quoted(toolingPart)) {
+	if (serverReads.has(name) || demoReads.has(name))
+		problems.push(`settings.Others lists the setting ${name} as tooling`);
+}
+// A setting is read through internal/settings or not at all.
+const goFiles = execFileSync('git', ['ls-files', 'backend/*.go'], { cwd: root, encoding: 'utf8' })
+	.split('\n')
+	.filter((f) => f && !f.endsWith('_test.go'));
+for (const f of goFiles) {
+	for (const name of quoted(read(f))) {
+		if (name.startsWith('SHOPPINGLIST_') && !known.has(name)) {
+			problems.push(`${f} names ${name}, which internal/settings does not declare`);
+		}
+	}
 }
 
 if (problems.length) {

@@ -8,24 +8,16 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
 
-	"shoppinglist/internal/envflag"
+	"shoppinglist/internal/settings"
 )
 
 // AdminUIEnv switches remote administration off.
-const AdminUIEnv = "SHOPPINGLIST_ADMIN_UI"
+const AdminUIEnv = settings.AdminUIEnv
 
 // superuserAPIPrefix is the dashboard's auth API. Blocking it is the cheap
 // path; RegisterSuperuserAuthGuard makes the block airtight, since the
 // collection can also be addressed by its system id.
 const superuserAPIPrefix = "/api/collections/_superusers/"
-
-// AdminUIFromEnv parses SHOPPINGLIST_ADMIN_UI, reporting whether remote
-// administration stays enabled. Unset means on. An unrecognised value is
-// fatal ([D-61]): a deployment that meant "off" must not boot believing it is
-// locked down.
-func AdminUIFromEnv() (bool, error) {
-	return envflag.OnOff(AdminUIEnv, true)
-}
 
 // RegisterAdminLockdown makes PocketBase's dashboard and its auth API vanish.
 //

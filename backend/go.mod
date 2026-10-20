@@ -19,6 +19,7 @@ go 1.27
 toolchain go1.27.2
 
 require (
+	github.com/caarlos0/env/v11 v11.4.1
 	github.com/fxamacker/cbor/v2 v2.9.6
 	github.com/go-webauthn/webauthn v0.18.2
 	github.com/pocketbase/dbx v1.12.0

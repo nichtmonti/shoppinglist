@@ -29,6 +29,18 @@
 		},
 		{
 			"type": "library",
+			"bom-ref": "pkg:golang/github.com/caarlos0/env/v11@v11.4.1",
+			"name": "github.com/caarlos0/env/v11",
+			"version": "v11.4.1",
+			"purl": "pkg:golang/github.com/caarlos0/env/v11@v11.4.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
 			"bom-ref": "pkg:golang/github.com/disintegration/imaging@v1.6.2",
 			"name": "github.com/disintegration/imaging",
 			"version": "v1.6.2",

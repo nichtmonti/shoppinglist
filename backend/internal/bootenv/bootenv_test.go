@@ -12,6 +12,14 @@ import (
 	"shoppinglist/internal/testutil"
 )
 
+// The names an operator sets, as the deployment reference lists them.
+const (
+	pragmaEnv       = "SQLITE_PRAGMAS"
+	AppURLEnv       = "SHOPPINGLIST_APP_URL"
+	trustedProxyEnv = "SHOPPINGLIST_TRUSTED_PROXY_HEADER"
+	leftmostIPEnv   = "SHOPPINGLIST_TRUSTED_PROXY_LEFTMOST"
+)
+
 func TestPragmaSuffix(t *testing.T) {
 	cases := []struct{ in, want string }{
 		{"", ""},

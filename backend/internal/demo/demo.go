@@ -25,24 +25,17 @@ import (
 
 	"shoppinglist/internal/account"
 	"shoppinglist/internal/applog"
-	"shoppinglist/internal/envflag"
 	"shoppinglist/internal/fieldcontract"
 	"shoppinglist/internal/randid"
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 )
 
 const (
 	// MaxAccountsEnv bounds how many demo accounts exist at once.
-	MaxAccountsEnv = "SHOPPINGLIST_DEMO_MAX_ACCOUNTS"
-	// DefaultMaxAccounts is the cap when MaxAccountsEnv is unset: far above a
-	// day of real visitors, far below what fills a small disk.
-	DefaultMaxAccounts = 200
-	// StartsPerIPEnv is how many demos one address may start per startWindow
-	// ([D-235]). The :demo image raises it, since on the visitor's own machine
-	// every start comes from one address.
-	StartsPerIPEnv = "SHOPPINGLIST_DEMO_STARTS_PER_IP"
-	// DefaultStartsPerIP is the per-address budget when StartsPerIPEnv is unset.
-	DefaultStartsPerIP = 3
+	MaxAccountsEnv = settings.DemoMaxAccountsEnv
+	// StartsPerIPEnv is how many demos one address may start per startWindow.
+	StartsPerIPEnv = settings.DemoStartsPerIPEnv
 
 	sweepJobID    = "__shoppinglist_demo_sweep__"
 	sweepSchedule = "*/10 * * * *" // every 10 minutes: an account outlives Lifetime by at most that
@@ -52,6 +45,12 @@ const (
 	startBudget   = "demo_start"
 	startWindow   = 10 * time.Minute
 	startsRefusal = "the demo is full right now, try again later"
+)
+
+// The caps when their settings are unset.
+var (
+	DefaultMaxAccounts = int(settings.DemoDefaults().MaxAccounts)
+	DefaultStartsPerIP = int(settings.DemoDefaults().StartsPerIP)
 )
 
 // Lifetime is how long a demo account lives, counted from its creation. The
@@ -67,9 +66,9 @@ type Config struct {
 	StartsPerIP int
 }
 
-// FromEnv validates that the instance is set up as a demo and reads its caps.
-// It fails the boot with passkeys or oidc on ([D-61]).
-func FromEnv(passkeys, oidc bool) (Config, error) {
+// FromSettings validates that the instance is set up as a demo and takes its
+// caps. It fails the boot with passkeys or oidc on ([D-61]).
+func FromSettings(d settings.Demo, passkeys, oidc bool) (Config, error) {
 	if passkeys {
 		return Config{}, fmt.Errorf("the demo build needs SHOPPINGLIST_PASSKEYS=off: its accounts are deleted after %d hours, "+
 			"and a passkey would leave a dead entry in every visitor's password manager", int(Lifetime.Hours()))
@@ -78,15 +77,7 @@ func FromEnv(passkeys, oidc bool) (Config, error) {
 		return Config{}, fmt.Errorf("the demo build needs SHOPPINGLIST_OIDC off: every account on a demo instance " +
 			"is deleted by age, a real login included")
 	}
-	n, err := envflag.PositiveInt(MaxAccountsEnv, DefaultMaxAccounts, "demo accounts")
-	if err != nil {
-		return Config{}, err
-	}
-	starts, err := envflag.PositiveInt(StartsPerIPEnv, DefaultStartsPerIP, "demo starts per address per 10 minutes")
-	if err != nil {
-		return Config{}, err
-	}
-	return Config{MaxAccounts: n, StartsPerIP: starts}, nil
+	return Config{MaxAccounts: int(d.MaxAccounts), StartsPerIP: int(d.StartsPerIP)}, nil
 }
 
 // Describe is the boot log's line for a demo instance.

@@ -12,8 +12,8 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
 
-	"shoppinglist/internal/envflag"
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 )
 
 var barcodePattern = regexp.MustCompile(`^[0-9]{8,14}$`)
@@ -31,13 +31,7 @@ type product struct {
 }
 
 // ScannerEnv switches the barcode scanner off for a deployment ([D-218]).
-const ScannerEnv = "SHOPPINGLIST_SCANNER"
-
-// ScannerFromEnv parses ScannerEnv ("on"/"off"). Unset means on; anything
-// else fails the boot ([D-61]).
-func ScannerFromEnv() (bool, error) {
-	return envflag.OnOff(ScannerEnv, true)
-}
+const ScannerEnv = settings.ScannerEnv
 
 // RegisterRoutes mounts GET /api/barcode/{ean}, cached server-side, and the
 // photo route it points at.

@@ -6,8 +6,18 @@ import (
 
 	"github.com/pocketbase/pocketbase/core"
 
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/testutil"
 )
+
+// FromEnv reads the settings as the start does, for the tests that set them.
+func FromEnv() (*Config, error) {
+	s, err := settings.ReadServe()
+	if err != nil {
+		return nil, err
+	}
+	return FromSettings(s)
+}
 
 // clearOidcEnv isolates each case from the other six vars (tests share one
 // process env; empty reads as unset in FromEnv).

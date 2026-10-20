@@ -19,23 +19,25 @@ There is no database URL (SQLite lives in the data volume), no secret key
 (PocketBase generates its own) and no port setting (the image listens on
 `:8090`; remap it with Docker's `-p`).
 
+<!-- settings table: Serve Boot (rendered from backend/internal/settings/settings.go by its test) -->
 | Variable | Default | What it does |
 |---|---|---|
 | `SHOPPINGLIST_RP_ID` | *required with passkeys* | The bare domain the app is served on, e.g. `list.example.com`: no scheme, port or path, and not an IP. [Effectively permanent.](#getting-rp-id-and-rp-origin-right) |
 | `SHOPPINGLIST_RP_ORIGIN` | `https://<RP_ID>` | The exact origin in the address bar, scheme and non-default port included. Set it only when that is not `https://` + the RP-ID. |
 | `SHOPPINGLIST_SIGNUP` | `open` (`.env.example`: `invite`) | `closed` refuses new passkey accounts; `invite` admits them only through an invite link. [Details](#restricting-who-can-sign-up). |
 | `SHOPPINGLIST_PASSKEYS` | `on` | `off` turns passkey login off; needs `SHOPPINGLIST_OIDC=on`. [Details](#choosing-the-login-methods). |
-| `SHOPPINGLIST_OIDC` | `off` | `on` turns sign-in through your OpenID Connect provider on. [Details](#oidc-login). |
-| `SHOPPINGLIST_OIDC_*` | | The provider connection: `_CLIENT_ID`, `_CLIENT_SECRET`, `_ISSUER`, optional `_NAME`; for a provider without discovery, `SHOPPINGLIST_OIDC_AUTH_URL`, `SHOPPINGLIST_OIDC_TOKEN_URL` and `SHOPPINGLIST_OIDC_USERINFO_URL` instead of `_ISSUER`. [Details](#oidc-login). |
+| `SHOPPINGLIST_OIDC` | `off` | `on` turns sign-in through your OpenID Connect provider on. [Details](#oidc-login). Unset while the connection below is set stops the start, so a configured login is not switched off by omission. |
+| `SHOPPINGLIST_OIDC_*` |  | The provider connection: `SHOPPINGLIST_OIDC_CLIENT_ID`, `SHOPPINGLIST_OIDC_CLIENT_SECRET`, `SHOPPINGLIST_OIDC_ISSUER`, optional `SHOPPINGLIST_OIDC_NAME`; for a provider without discovery, `SHOPPINGLIST_OIDC_AUTH_URL`, `SHOPPINGLIST_OIDC_TOKEN_URL` and `SHOPPINGLIST_OIDC_USERINFO_URL` instead of the issuer. [Details](#oidc-login). |
 | `SHOPPINGLIST_ADMIN_UI` | `on` | `off` removes the `/_/` dashboard and every superuser login over HTTP. [Details](#turning-off-remote-administration). |
-| `SHOPPINGLIST_TRUSTED_PROXY_HEADER` | *unset* (`.env.example`: `X-Forwarded-For`) | The header your reverse proxy puts the client IP in, usually `X-Forwarded-For`. Without it every user shares one rate limit. Unset keeps a header an earlier start stored (the log warns); clear it in the dashboard. [Details](#1-send-the-app-the-real-client-ip). |
-| `SHOPPINGLIST_TRUSTED_PROXY_LEFTMOST` | `off` | `on` reads the header's leftmost value. Only for a [proxy chain](#only-if-you-run-a-proxy-chain) whose every hop overwrites the header. |
 | `SHOPPINGLIST_SCANNER` | `on` | `off` removes the barcode scanner and its camera permission; the server then never contacts Open Food Facts. Photos already stored keep showing. |
 | `SHOPPINGLIST_MAX_ITEMS_PER_LIST` | `5000` | Most items one list holds, bought and removed ones included. Below `2000` it also caps one import. Lowering it deletes nothing. |
 | `SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT` | `25` | Most lists one account can be on, its own and joined ones. Joining is never refused. Lowering it removes no one. |
-| `SHOPPINGLIST_APP_URL` | `http://localhost:8090` | PocketBase's "app URL". With passkeys off, the app's origin when `SHOPPINGLIST_RP_ORIGIN` is unset. |
 | `SHOPPINGLIST_SOURCE_URL` | this repository | Where the settings screen's "Source code" link points. Running a **modified** version, the AGPL-3.0 requires pointing it at your source. The barcode lookup names it to Open Food Facts too, in its User-Agent. |
+| `SHOPPINGLIST_APP_URL` | `http://localhost:8090` | PocketBase's "app URL". With passkeys off, the app's origin when `SHOPPINGLIST_RP_ORIGIN` is unset. |
+| `SHOPPINGLIST_TRUSTED_PROXY_HEADER` | *unset* (`.env.example`: `X-Forwarded-For`) | The header your reverse proxy puts the client IP in, usually `X-Forwarded-For`. Without it every user shares one rate limit. Unset keeps a header an earlier start stored (the log warns); clear it in the dashboard. [Details](#1-send-the-app-the-real-client-ip). |
+| `SHOPPINGLIST_TRUSTED_PROXY_LEFTMOST` | `off` | `on` reads the header's leftmost value. Only for a [proxy chain](#only-if-you-run-a-proxy-chain) whose every hop overwrites the header. |
 | `SQLITE_PRAGMAS` | *stock* | Only for a data directory on NFS or virtiofs. [Details](#sqlite-on-network-storage). |
+<!-- settings table end -->
 
 Every `SHOPPINGLIST_*` value is checked at boot: a typo such as
 `SHOPPINGLIST_SIGNUP=false` stops the server with a message, rather than
@@ -366,12 +368,16 @@ account deleted after 24 hours. It is made for one person on their own
 machine, so it lets one address start 1,000 demos per 10 minutes. To offer it
 publicly, behind the same kind of reverse proxy, set:
 
+<!-- settings table: Demo (rendered from backend/internal/settings/settings.go by its test) -->
 | Variable | Default | What it does |
 |---|---|---|
 | `SHOPPINGLIST_DEMO_STARTS_PER_IP` | `1000` in the image, `3` without it | How many demos one address may start per 10 minutes. Set `3` for a public demo. |
 | `SHOPPINGLIST_DEMO_MAX_ACCOUNTS` | `200` | How many demo accounts may exist at once; a start beyond it is refused until old ones expire. |
-| `SHOPPINGLIST_APP_URL` | `http://localhost:8090` | The demo's address, e.g. `https://demo.example.com`. |
-| `SHOPPINGLIST_TRUSTED_PROXY_HEADER` | *unset* | `X-Forwarded-For`, as for a real instance. |
+<!-- settings table end -->
+
+Set `SHOPPINGLIST_APP_URL` to the demo's address, e.g.
+`https://demo.example.com`, and `SHOPPINGLIST_TRUSTED_PROXY_HEADER` to
+`X-Forwarded-For`, as for a real instance.
 
 ### Health checks
 

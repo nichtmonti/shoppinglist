@@ -4,7 +4,17 @@ import (
 	"testing"
 
 	"shoppinglist/internal/fieldcontract"
+	"shoppinglist/internal/settings"
 )
+
+// FromEnv reads the caps as the start does, for the tests that set them.
+func FromEnv() (Caps, error) {
+	s, err := settings.ReadServe()
+	return FromSettings(s), err
+}
+
+// DefaultMaxLists is the lists cap with nothing set.
+var DefaultMaxLists = Default().Lists
 
 // Env: unset keeps the contract's number, and a value that is not a whole
 // number of at least 1 fails rather than falling back. There is no other

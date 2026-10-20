@@ -17,6 +17,7 @@ import (
 	"shoppinglist/internal/listcap"
 	"shoppinglist/internal/oidc"
 	"shoppinglist/internal/security"
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/signup"
 	"shoppinglist/internal/ui"
 	"shoppinglist/internal/webauthn"
@@ -65,14 +66,24 @@ func parseServeEnv() (*serveEnv, error) {
 		return nil, err
 	}
 	// [D-336] A misspelt name would be ignored, and the lockdown it meant left off.
-	if err := envflag.Unknown("SHOPPINGLIST_", knownSettings,
+	if err := envflag.Unknown("SHOPPINGLIST_", append(settings.Names(), settings.Others...),
 		"docs/deploy-reference.md#environment-variables"); err != nil {
+		return nil, err
+	}
+	// [D-337] Every setting, read once; a value of the wrong kind stops here,
+	// all of them named at once.
+	set, err := settings.ReadServe()
+	if err != nil {
+		return nil, err
+	}
+	boot, err := settings.ReadBoot()
+	if err != nil {
 		return nil, err
 	}
 	// §5.7: with passkeys on, the RP-ID is mandatory and must be a domain
 	// (passkeys break otherwise). [D-76]: SHOPPINGLIST_PASSKEYS=off drops the
 	// requirement along with the routes.
-	wacfg, err := webauthn.FromEnv()
+	wacfg, err := webauthn.FromSettings(set, boot)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +95,7 @@ func parseServeEnv() (*serveEnv, error) {
 	}
 	// [D-76]: SHOPPINGLIST_OIDC, validated here; oidc.Apply writes it to the
 	// accounts collection once that exists.
-	oidcCfg, err := oidc.FromEnv()
+	oidcCfg, err := oidc.FromSettings(set)
 	if err != nil {
 		return nil, err
 	}
@@ -100,26 +111,16 @@ func parseServeEnv() (*serveEnv, error) {
 			webauthn.PasskeysEnv)
 	}
 	// §10: remote administration is a deployment choice, not a build-time one.
-	adminUI, err := security.AdminUIFromEnv()
-	if err != nil {
-		return nil, err
-	}
-	scanner, err := barcode.ScannerFromEnv()
-	if err != nil {
-		return nil, err
-	}
+	adminUI, scanner := bool(set.AdminUI), bool(set.Scanner)
 	// §12.2 + §6.10: what the SPA is told about this deployment.
-	shell, err := ui.ShellFromEnv()
+	shell, err := ui.ShellFromSettings(set)
 	if err != nil {
 		return nil, err
 	}
 	shell.ScannerOff = !scanner
 	// [D-181] The SPA is embedded, so the binary's version is the SPA's.
 	shell.Version = versionString()
-	caps, err := listcap.FromEnv()
-	if err != nil {
-		return nil, err
-	}
+	caps := listcap.FromSettings(set)
 	// [D-217] Only a moved cap is stamped for the client's import check.
 	if caps.Items != fieldcontract.MaxItemsPerList() {
 		shell.MaxItemsPerList = &caps.Items
@@ -171,9 +172,9 @@ func logServeEnv(env *serveEnv) {
 			"and an import brings at most %d (%s) — the default is %d",
 			env.caps.Items, env.caps.ImportMax(), listcap.Env, fieldcontract.MaxItemsPerList())
 	}
-	if env.caps.Lists != listcap.DefaultMaxLists {
+	if env.caps.Lists != listcap.Default().Lists {
 		log.Printf("shoppinglist: an account can be on at most %d lists (%s) — the default is %d",
-			env.caps.Lists, listcap.ListsEnv, listcap.DefaultMaxLists)
+			env.caps.Lists, listcap.ListsEnv, listcap.Default().Lists)
 	}
 }
 

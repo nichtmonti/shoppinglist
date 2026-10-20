@@ -10,6 +10,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
 
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/testutil"
 )
 
@@ -197,6 +198,15 @@ func TestNoSetupLinkOnceAnAccountExists(t *testing.T) {
 	if _, ok, err := NewGate(Invite).StartSetup(app); ok || err != nil {
 		t.Errorf("StartSetup with an account: ok=%v, err=%v; want no link", ok, err)
 	}
+}
+
+// ModeFromEnv reads the mode as the start does, for the tests that set it.
+func ModeFromEnv() (Mode, error) {
+	s, err := settings.ReadServe()
+	if err != nil {
+		return "", err
+	}
+	return ParseMode(s.Signup)
 }
 
 func TestModeFromEnv(t *testing.T) {

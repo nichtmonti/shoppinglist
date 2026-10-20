@@ -1,7 +1,6 @@
-// Package envflag parses the deployment's environment variables under one
-// convention ([D-61]): unset or whitespace (how compose passes "not
-// configured") keeps the default, and any value the app cannot use fails the
-// boot with the variable named.
+// Package envflag holds the environment checks that are not one setting's
+// value ([D-61]): the names set that no setting has, and what a URL setting
+// must look like. The settings themselves are internal/settings' ([D-337]).
 package envflag
 
 import (
@@ -9,42 +8,8 @@ import (
 	"net/url"
 	"os"
 	"slices"
-	"strconv"
 	"strings"
 )
-
-// Get returns env's value with surrounding whitespace removed.
-func Get(env string) string {
-	return strings.TrimSpace(os.Getenv(env))
-}
-
-// OnOff parses an on/off switch, case ignored; unset is def.
-func OnOff(env string, def bool) (bool, error) {
-	switch v := strings.ToLower(Get(env)); v {
-	case "":
-		return def, nil
-	case "on":
-		return true, nil
-	case "off":
-		return false, nil
-	default:
-		return false, fmt.Errorf("%s (%q) must be \"on\" or \"off\"", env, v)
-	}
-}
-
-// PositiveInt parses a whole number of at least 1; unset returns def. unit
-// names what the number counts, for the error message.
-func PositiveInt(env string, def int, unit string) (int, error) {
-	raw := Get(env)
-	if raw == "" {
-		return def, nil
-	}
-	n, err := strconv.Atoi(raw)
-	if err != nil || n < 1 {
-		return 0, fmt.Errorf("%s (%q) must be a whole number >= 1 (%s)", env, raw, unit)
-	}
-	return n, nil
-}
 
 // AbsoluteURL refuses anything but an absolute http or https URL. It is
 // stricter than PocketBase's own validation (which accepts scheme-less hosts)

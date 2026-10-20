@@ -21,7 +21,7 @@ import (
 )
 
 // Passkeys is the instance's passkey configuration as the methods endpoint
-// reports it, passed in from webauthn.FromEnv.
+// reports it, passed in from webauthn.FromSettings.
 type Passkeys struct {
 	Enabled bool `json:"enabled"`
 	// Signup reports whether a visitor may create a NEW account with a

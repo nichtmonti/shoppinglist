@@ -17,7 +17,7 @@ import (
 // [D-217] Under a list cap lower than the backup cap, an import may bring only
 // as many items as the cap: up to it imports, one past it is refused.
 func TestImportList_FollowsLoweredCap(t *testing.T) {
-	app, mux := setupListsAppWith(t, listcap.Caps{Items: 3, Lists: listcap.DefaultMaxLists})
+	app, mux := setupListsAppWith(t, listcap.Caps{Items: 3, Lists: listcap.Default().Lists})
 	_, tok := testutil.CreateAccount(t, app, "Alice")
 
 	backup := validBackup() // three items
@@ -39,7 +39,7 @@ func TestImportList_FollowsLoweredCap(t *testing.T) {
 // they do not count against the copy.
 func TestCloneList_FollowsLoweredCap(t *testing.T) {
 	for _, tc := range []struct{ cap, want int }{{2, http.StatusOK}, {1, http.StatusBadRequest}} {
-		app, mux := setupListsAppWith(t, listcap.Caps{Items: tc.cap, Lists: listcap.DefaultMaxLists})
+		app, mux := setupListsAppWith(t, listcap.Caps{Items: tc.cap, Lists: listcap.Default().Lists})
 		aliceID, tok := testutil.CreateAccount(t, app, "Alice")
 		srcID := testutil.CreateList(t, app, "Familie")
 		testutil.AddMembership(t, app, aliceID, srcID)

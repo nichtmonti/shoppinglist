@@ -33,6 +33,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/router"
 
 	"shoppinglist/internal/envflag"
+	"shoppinglist/internal/settings"
 )
 
 // The meta names and the default source link are a contract with
@@ -73,7 +74,7 @@ var shellMeta = func() (m struct {
 // which the AGPL-3.0 requires to point at a modified instance's own source
 // ([D-211]). Unset, it is shell-meta.json's default_source_url, this
 // project's.
-const SourceURLEnv = "SHOPPINGLIST_SOURCE_URL"
+const SourceURLEnv = settings.SourceURLEnv
 
 // Shell is everything stamped into the shell document. A nil/empty field means
 // "the operator set nothing", and the client uses its compiled default.
@@ -119,11 +120,11 @@ func meta(name, content string) string {
 	return `<meta name="` + html.EscapeString(name) + `" content="` + html.EscapeString(content) + `" />`
 }
 
-// ShellFromEnv reads SHOPPINGLIST_SOURCE_URL, the one shell variable this
+// ShellFromSettings takes SHOPPINGLIST_SOURCE_URL, the one shell setting this
 // package owns; a value that is not an absolute http(s) URL fails the boot
 // ([D-61]).
-func ShellFromEnv() (Shell, error) {
-	source := envflag.Get(SourceURLEnv)
+func ShellFromSettings(s settings.Serve) (Shell, error) {
+	source := s.SourceURL
 	if source == "" {
 		source = shellMeta.DefaultSourceURL
 	} else if err := envflag.AbsoluteURL(source); err != nil {

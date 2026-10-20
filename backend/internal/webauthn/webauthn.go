@@ -14,7 +14,7 @@ import (
 	"github.com/go-webauthn/webauthn/webauthn"
 
 	"shoppinglist/internal/bootenv"
-	"shoppinglist/internal/envflag"
+	"shoppinglist/internal/settings"
 	"shoppinglist/internal/signup"
 )
 
@@ -34,49 +34,48 @@ type Config struct {
 	Signup signup.Mode
 }
 
+// rpDocs is where an operator reads how to set the RP-ID and origin.
+const rpDocs = "docs/deploy-reference.md#getting-rp-id-and-rp-origin-right"
+
 const (
-	envRPID     = "SHOPPINGLIST_RP_ID"
-	envRPOrigin = "SHOPPINGLIST_RP_ORIGIN"
+	envRPID     = settings.RPIDEnv
+	envRPOrigin = settings.RPOriginEnv
+	envAppURL   = settings.AppURLEnv
 	// PasskeysEnv switches passkey login on or off ([D-76]).
-	PasskeysEnv = "SHOPPINGLIST_PASSKEYS"
-	// rpDocs is where an operator reads how to set the two.
-	rpDocs = "docs/deploy-reference.md#getting-rp-id-and-rp-origin-right"
+	PasskeysEnv = settings.PasskeysEnv
 )
 
-// FromEnv reads and validates the Relying-Party settings. Its errors are fatal
-// at boot: an unrecognised switch value, with passkeys on an RP-ID that is
-// unset or a raw IP (passkeys break on either, §5.7), with passkeys off no
-// origin, and an RP_ORIGIN that is not an origin.
-func FromEnv() (*Config, error) {
-	// Unset means on: passkeys are the app's own login, and an instance must
-	// not lose them by omission.
-	enabled, err := envflag.OnOff(PasskeysEnv, true)
-	if err != nil {
-		return nil, err
-	}
-	signupMode, err := signup.ModeFromEnv()
+// FromSettings validates the Relying-Party settings. Its errors are fatal at
+// boot: with passkeys on an RP-ID that is unset or a raw IP (passkeys break on
+// either, §5.7), with passkeys off no origin, and an RP_ORIGIN that is not an
+// origin.
+func FromSettings(s settings.Serve, b settings.Boot) (*Config, error) {
+	// Default on: passkeys are the app's own login, and an instance must not
+	// lose them by omission.
+	enabled := bool(s.Passkeys)
+	signupMode, err := signup.ParseMode(s.Signup)
 	if err != nil {
 		return nil, err
 	}
 	if !enabled {
-		origin := envflag.Get(envRPOrigin)
+		origin := s.RPOrigin
 		if origin != "" {
 			if origin, err = checkOrigin(origin, ""); err != nil {
 				return nil, err
 			}
 		}
 		if origin == "" {
-			origin = envflag.Get(bootenv.AppURLEnv)
+			origin = b.AppURL
 		}
 		origin = strings.TrimRight(origin, "/")
 		if origin == "" {
 			return nil, fmt.Errorf("%s=off needs the app's origin from %s or %s (CORS and the first-boot installer URL use it)",
-				PasskeysEnv, envRPOrigin, bootenv.AppURLEnv)
+				PasskeysEnv, envRPOrigin, envAppURL)
 		}
 		return &Config{Enabled: false, RPOrigin: origin, Signup: signupMode}, nil
 	}
 
-	rpid := envflag.Get(envRPID)
+	rpid := s.RPID
 	if rpid == "" {
 		return nil, fmt.Errorf("%s is not set — passkeys require the domain users open, such as list.example.com (%s)", envRPID, rpDocs)
 	}
@@ -88,7 +87,7 @@ func FromEnv() (*Config, error) {
 		return nil, fmt.Errorf("%s (%q) must be a bare domain such as list.example.com, without https://, a port or a path (%s)",
 			envRPID, rpid, rpDocs)
 	}
-	origin := envflag.Get(envRPOrigin)
+	origin := s.RPOrigin
 	if origin == "" {
 		origin = "https://" + rpid
 	} else if origin, err = checkOrigin(origin, rpid); err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/router"
 
 	"shoppinglist/internal/demo"
+	"shoppinglist/internal/settings"
 )
 
 // The demo build ([D-234]): `go build -tags demo`. The normal build gets
@@ -17,7 +18,13 @@ const demoBuild = true
 
 type demoConfig = demo.Config
 
-func demoFromEnv(passkeys, oidc bool) (demoConfig, error) { return demo.FromEnv(passkeys, oidc) }
+func demoFromEnv(passkeys, oidc bool) (demoConfig, error) {
+	d, err := settings.ReadDemo()
+	if err != nil {
+		return demoConfig{}, err
+	}
+	return demo.FromSettings(d, passkeys, oidc)
+}
 
 func demoLogLine(cfg demoConfig) string { return demo.Describe(cfg) }
 
