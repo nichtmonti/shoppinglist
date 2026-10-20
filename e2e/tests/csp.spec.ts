@@ -85,7 +85,7 @@ test('CSP: the app runs its real flows without a single policy violation', async
 	await page.getByTestId('list-menu').click();
 	await page.getByRole('button', { name: 'Teilen & Mitglieder' }).click();
 	await showInviteLink(page);
-	await page.getByRole('radio', { name: 'QR', exact: true }).click();
+	await page.getByRole('tab', { name: 'QR', exact: true }).click();
 	await expect(page.locator('[data-testid="qr"] svg')).toBeVisible({ timeout: 10_000 });
 	await page.keyboard.press('Escape');
 

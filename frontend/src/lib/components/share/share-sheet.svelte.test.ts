@@ -84,17 +84,18 @@ describe('ShareSheet', () => {
 
 		expect(vi.mocked(currentInvite)).toHaveBeenCalledWith('list-1');
 
-		// The Link/QR switch is the app's segmented band (role radio, like the
-		// list's view toggle), and it shows which side is chosen. The QR side
-		// renders only once chosen.
-		const linkChoice = screen.getByRole('radio', { name: 'Einladungslink' });
-		const qrChoice = screen.getByRole('radio', { name: 'QR' });
-		expect(linkChoice.getAttribute('aria-checked')).toBe('true');
-		expect(qrChoice.getAttribute('aria-checked')).toBe('false');
+		// The Link/QR switch is the app's segmented band, as tabs over their
+		// panel, and it shows which side is chosen. The QR side renders only
+		// once chosen.
+		const linkChoice = screen.getByRole('tab', { name: 'Einladungslink' });
+		const qrChoice = screen.getByRole('tab', { name: 'QR' });
+		expect(linkChoice.getAttribute('aria-selected')).toBe('true');
+		expect(qrChoice.getAttribute('aria-selected')).toBe('false');
+		expect(screen.getByRole('tabpanel').textContent).toContain('https://example.test/join#tok-abc');
 		expect(screen.queryByText('Scannen zum Beitreten')).toBeNull();
 		await fireEvent.click(qrChoice);
-		await waitFor(() => expect(qrChoice.getAttribute('aria-checked')).toBe('true'));
-		expect(linkChoice.getAttribute('aria-checked')).toBe('false');
+		await waitFor(() => expect(qrChoice.getAttribute('aria-selected')).toBe('true'));
+		expect(linkChoice.getAttribute('aria-selected')).toBe('false');
 		expect(screen.getByText('Scannen zum Beitreten')).toBeDefined();
 		expect(screen.queryByText('https://example.test/join#tok-abc')).toBeNull();
 	});

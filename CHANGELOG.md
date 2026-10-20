@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **The segmented choices behave as their kind does.** The list's "Shopping"/"Editing" switch and the language and theme choices in settings now choose with the arrow keys, as radio buttons do. The share sheet's "Invite link"/"QR" switch is announced as tabs over their panel.
 - **Leaving a list right after rejoining it on another device now really leaves it.** The app could pick the stale membership from before, so the list came back at the next sync.
 - **Signing out while the app was syncing can no longer leave the account's lists behind on the device.** The sync could write its list of memberships just after the sign-out had cleared them ([D-109]).
 - **Scanning works again after a first scan that failed offline,** without reloading the app. The decoder that failed to load stayed broken, and every later scan, online too, ended in "Barcodes can't be read right now. Type the name instead." ([D-95]).

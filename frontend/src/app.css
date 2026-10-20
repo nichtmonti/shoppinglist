@@ -22,6 +22,10 @@
 @import './lib/components/shop/shop-layout.css';
 
 @custom-variant dark (&:is(.dark *));
+/* A segmented control's chosen segment, whichever bits-ui primitive draws it:
+   RadioGroup marks it checked, Tabs active. */
+@custom-variant chosen (&:is([data-state='checked'], [data-state='active']));
+@custom-variant unchosen (&:is([data-state='unchecked'], [data-state='inactive']));
 
 /*
  * The category tint ramp.
