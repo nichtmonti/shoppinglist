@@ -123,10 +123,13 @@ describe('syncLine', () => {
 	// The app's own failure is no passing outage: it says so, whatever waits.
 	it('calls the sync broken after three failures of the app itself', () => {
 		const broken = { started_at: ago(5_000), failures: 3, reason: 'app' as const };
-		expect(syncLine(input({}, broken))).toEqual({ kind: 'broken' });
+		expect(syncLine(input({}, broken))).toEqual({ kind: 'broken', here: true });
 		expect(syncLine(input({ pending: 2, oldestQueuedAt: NOW - 1_000 }, broken))).toEqual({
-			kind: 'broken'
+			kind: 'broken',
+			here: true
 		});
+		// Another tab leads: a reload here would not help.
+		expect(syncLine(input({ leading: false }, broken))).toEqual({ kind: 'broken', here: false });
 		expect(syncLine(input({}, { ...broken, failures: 2 }))).toEqual({ kind: 'normal' });
 	});
 

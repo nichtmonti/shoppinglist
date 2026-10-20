@@ -1,7 +1,7 @@
 import { db, getMeta, setMeta } from '../db';
 import type { CategoryTemplate, ItemDictionary } from '../db';
 import { pb } from '../pb';
-import { apiFetch } from './http';
+import { apiJson } from './http';
 
 // Both default transports carry a timeout, like every other request the cycle makes: the
 // mirror check runs inside the cycle, and cycles and drains serialize behind one another
@@ -12,11 +12,10 @@ const REFERENCE_TIMEOUT_MS = 30_000;
 // Fetch the server seed version ({version: string}) via GET /api/seed-version (auth required).
 export type SeedVersionTransport = () => Promise<string>;
 async function defaultSeedVersionTransport(): Promise<string> {
-	const resp = await apiFetch('/api/seed-version', {
+	const data = (await apiJson('/api/seed-version', {
 		label: 'seed-version',
 		timeoutMs: SEED_VERSION_TIMEOUT_MS
-	});
-	const data = (await resp.json()) as { version: string };
+	})) as { version: string };
 	return data.version;
 }
 

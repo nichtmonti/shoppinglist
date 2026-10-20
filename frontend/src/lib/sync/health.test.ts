@@ -10,7 +10,7 @@ describe('failureOf', () => {
 		expect(failureOf(Object.assign(new Error('x'), { status: 0 }))).toBe('connection');
 	});
 
-	// apiFetch gives a request without an answer status 0 (http.test.ts).
+	// apiJson gives a request without an answer status 0 (http.test.ts).
 	it('reads an error without a status as the app’s own', () => {
 		expect(failureOf(new TypeError("Cannot read properties of undefined (reading 'digest')"))).toBe(
 			'app'

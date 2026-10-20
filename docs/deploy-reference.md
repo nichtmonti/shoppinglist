@@ -387,8 +387,8 @@ docker compose exec shoppinglist /shoppinglist healthcheck
    It admits one account and is gone once that exists. Under `open`, just
    create one.
 3. **Create the superuser** with `superuser upsert` ([above](#running-it)).
-   Alternatively, PocketBase logs a one-time `/_/#/pbinstall/<token>` link at
-   first start, valid for 30 minutes. This account can read and change every
+   Alternatively, with the dashboard on, PocketBase logs a one-time
+   `/_/#/pbinstall/<token>` link at first start, valid for 30 minutes. This account can read and change every
    list and account and is password-based, so give it a long random password.
 4. **Set the trusted-proxy header** ([step 1](#1-send-the-app-the-real-client-ip)),
    if it is not in `.env` already.

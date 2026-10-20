@@ -155,6 +155,7 @@
 	"sync_stuck_action": "Neu laden",
 	"sync_line_broken": "Sync-Fehler · neu laden",
 	"sync_broken_title": "Die Synchronisierung klappt nicht",
+	"sync_broken_other_tab_body": "Ein anderer Tab der App gleicht für dieses Gerät ab, und dort schlägt es jedes Mal fehl. Lade diesen Tab neu oder schließe ihn; deine Änderungen bleiben erhalten.",
 	"sync_broken_body": "In der App ist bei jedem Versuch etwas schiefgegangen, deshalb wird gerade nichts abgeglichen, in keine Richtung. Neu laden behebt das meistens, und deine Änderungen bleiben erhalten.",
 	"sync_offline_body": "Was du änderst, bleibt auf diesem Gerät und geht raus, sobald wieder eine Verbindung da ist.",
 

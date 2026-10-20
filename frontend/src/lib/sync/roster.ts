@@ -1,5 +1,5 @@
 import { db, rosterKey, type RosterEntry } from '../db';
-import { apiFetch } from './http';
+import { apiJson } from './http';
 import { sessionScope } from '../auth/session';
 
 export interface RosterMember {
@@ -11,12 +11,11 @@ export interface RosterMember {
 export type RosterTransport = (listId: string) => Promise<RosterMember[]>;
 
 async function defaultRosterTransport(listId: string): Promise<RosterMember[]> {
-	const resp = await apiFetch(`/api/lists/${encodeURIComponent(listId)}/members`, {
+	return (await apiJson(`/api/lists/${encodeURIComponent(listId)}/members`, {
 		label: 'roster',
 		// A conflict toast waits on this lookup (nicknameFor), so it must not hang.
 		timeoutMs: 10_000
-	});
-	return (await resp.json()) as RosterMember[];
+	})) as RosterMember[];
 }
 
 // Refresh the cached roster for a list: replace all of this list's roster entries with the

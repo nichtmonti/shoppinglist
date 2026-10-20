@@ -108,8 +108,9 @@ docker compose run --rm --entrypoint /shoppinglist shoppinglist \
 ```
 
 You need it for the dashboard at `https://<your domain>/_/`, where backups and
-settings are changed. Instead of the command, the log's one-time `/_/#/pbinstall/…` link
-does the same within 30 minutes of the first start.
+settings are changed. Instead of the command, the log's one-time
+`/_/#/pbinstall/…` link does the same within 30 minutes of the first start,
+while the dashboard is on.
 
 ## 4. Lock it down
 

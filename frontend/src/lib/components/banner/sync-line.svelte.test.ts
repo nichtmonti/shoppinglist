@@ -144,6 +144,17 @@ describe('SyncLine', () => {
 		expect(within(sheet).getByRole('button', { name: 'Neu laden' })).toBeTruthy();
 	});
 
+	it('sends the user to the leading tab when the sync is broken there', async () => {
+		(leading as unknown as Writable<boolean>).set(false);
+		await health({ started_at: isoAgo(3_000), failures: 3, reason: 'app' });
+		render(SyncLine, { listId: LIST, members: MEMBERS, onmembers: vi.fn() });
+
+		await fireEvent.click(await screen.findByTestId('sync-line'));
+		const sheet = await screen.findByRole('dialog', { name: 'Die Synchronisierung klappt nicht' });
+		expect(sheet.textContent).toContain('Ein anderer Tab der App');
+		expect(within(sheet).queryByRole('button', { name: 'Neu laden' })).toBeNull();
+	});
+
 	it('says how old what is shown is, in grey, when the server has not answered', async () => {
 		await health({
 			ok_at: isoAgo(25 * 60_000),

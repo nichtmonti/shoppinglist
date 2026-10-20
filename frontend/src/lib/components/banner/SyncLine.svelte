@@ -66,12 +66,15 @@
 					action: { label: t('sync_stale_action'), run: () => syncNow() }
 				};
 			case 'broken':
+				// Only the leader syncs: a reload of another tab leaves the failing one ([D-288]).
 				return {
 					line: t('sync_line_broken'),
 					problem: true,
 					title: t('sync_broken_title'),
-					body: t('sync_broken_body'),
-					action: { label: t('sync_stuck_action'), run: () => location.reload() }
+					body: t(s.here ? 'sync_broken_body' : 'sync_broken_other_tab_body'),
+					...(s.here && {
+						action: { label: t('sync_stuck_action'), run: () => location.reload() }
+					})
 				};
 			case 'other_tab':
 				// No action: taking the lead could let a woken tab send beside this one ([D-288]).

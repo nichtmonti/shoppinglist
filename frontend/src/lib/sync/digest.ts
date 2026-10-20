@@ -1,11 +1,11 @@
 // The digest probe (§8.5 [D-40]).
 // A library, not crypto.subtle: the browser has that only in a secure context,
-// and the demo also runs on plain http:// at a LAN address.
+// and the demo also runs on plain http:// at a LAN address ([D-335]).
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import { db } from '../db';
 import type { DigestEntry } from './types';
-import { apiFetch } from './http';
+import { apiJson } from './http';
 
 export interface Digest {
 	row_count: number;
@@ -55,8 +55,10 @@ export type DigestTransport = () => Promise<DigestEntry[]>;
 async function defaultDigestTransport(): Promise<DigestEntry[]> {
 	// A 401 (RequireAuth) throws with its status, which the cycle reads to tell
 	// a rejected token from a transient failure.
-	const resp = await apiFetch('/api/sync/digest', { label: 'sync/digest', timeoutMs: 10_000 });
-	return (await resp.json()) as DigestEntry[];
+	return (await apiJson('/api/sync/digest', {
+		label: 'sync/digest',
+		timeoutMs: 10_000
+	})) as DigestEntry[];
 }
 
 export interface DivergenceResult {

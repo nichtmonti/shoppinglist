@@ -2,7 +2,7 @@
 import { collectionTables, db, shadowTable, type OpLayer, type PendingOp } from '../db';
 import { recompute } from './apply';
 import { asLayered, isSignal, materialize } from './materialize';
-import { apiFetch } from './http';
+import { apiJson } from './http';
 import { pendingOpsOrdered } from './outbox';
 import { normalizeRecord } from './record';
 import { MAX_OPS_PER_PUSH } from '#lib/field-contract.js';
@@ -15,13 +15,12 @@ export type PushTransport = (ops: PushOp[]) => Promise<{ results: PushResult[] }
 
 // The real transport: POST /api/sync/push as the signed-in account.
 async function defaultTransport(ops: PushOp[]): Promise<{ results: PushResult[] }> {
-	const resp = await apiFetch('/api/sync/push', {
+	return (await apiJson('/api/sync/push', {
 		label: 'sync/push',
 		method: 'POST',
 		body: { ops },
 		timeoutMs: 15_000
-	});
-	return (await resp.json()) as { results: PushResult[] };
+	})) as { results: PushResult[] };
 }
 
 export interface DrainOptions extends SyncNotices {

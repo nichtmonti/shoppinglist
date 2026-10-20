@@ -31,7 +31,8 @@ export type SyncLine =
 	| { kind: 'other_tab' }
 	| { kind: 'stuck' }
 	| { kind: 'failing'; reason: Exclude<SyncFailure, 'app'>; count: number }
-	| { kind: 'broken' }
+	/** `here`: this tab leads, so a reload here can help ([D-288]). */
+	| { kind: 'broken'; here: boolean }
 	| { kind: 'stale'; since: string | null };
 
 export interface SyncInput {
@@ -81,7 +82,7 @@ export function syncLine(input: SyncInput): SyncLine {
 	if (input.health.failures < FAILING_AFTER) return { kind: 'normal' };
 	// The app's own failure repeats on every try, wherever the server is.
 	const reason = input.health.reason ?? 'server';
-	if (reason === 'app') return { kind: 'broken' };
+	if (reason === 'app') return { kind: 'broken', here: input.leading };
 	if (input.pending > 0) return { kind: 'failing', reason, count: input.pending };
 	return { kind: 'stale', since: okAt };
 }

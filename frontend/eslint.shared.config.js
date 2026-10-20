@@ -447,7 +447,7 @@ export function sharedRest() {
 		},
 		{
 			// The browser has these only in a secure context, and the demo also
-			// runs on plain http:// at a LAN address, where every call throws.
+			// runs on plain http:// at a LAN address, where every call throws ([D-335]).
 			// Tests run in node, and the digest tests check against crypto.subtle.
 			files: ['src/**'],
 			ignores: ['**/*.test.ts'],

@@ -3,7 +3,7 @@ import type { SyncCollection } from './types';
 import { applyServerRows, forgetServerRows } from './apply';
 import { localDigest, type Digest } from './digest';
 import type { DigestEntry } from './types';
-import { apiFetch } from './http';
+import { apiJson } from './http';
 import { sessionScope, type SessionScope } from '../auth/session';
 
 /** A list's rows as the server sent them; applyServerRows normalizes them. */
@@ -27,11 +27,10 @@ export type SnapshotIdsFetcher = (listId: string) => Promise<SnapshotIds>;
 // list or a rejected token with an empty 200 the sweep would read as "empty
 // list"; this route answers 401/403.
 async function getSnapshot(listId: string, query: string, what: string) {
-	const resp = await apiFetch(`/api/sync/snapshot/${encodeURIComponent(listId)}${query}`, {
+	const body = (await apiJson(`/api/sync/snapshot/${encodeURIComponent(listId)}${query}`, {
 		label: 'sync/snapshot',
 		timeoutMs: 10_000
-	});
-	const body = (await resp.json()) as { items?: unknown; categories?: unknown };
+	})) as { items?: unknown; categories?: unknown };
 	if (!Array.isArray(body.items) || !Array.isArray(body.categories)) {
 		throw new Error(`sync/snapshot: response is not ${what}`);
 	}

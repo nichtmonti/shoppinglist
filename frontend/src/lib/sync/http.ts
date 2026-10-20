@@ -22,28 +22,30 @@ export interface ApiFetchOptions {
 export type ApiError = Error & { status: number };
 
 /**
- * Fetch one of the app's own routes as the signed-in account and return the
- * response, which is always 2xx. A non-2xx answer throws an ApiError carrying
- * the status, so a caller can tell a rejected token (401) from a transient
- * failure, and no answer (the network, the timeout) one with status 0, as
- * PocketBase's SDK does: an error without a status is then the app's own. A
- * 401 also marks the session expired (§5.8): the SDK's auth store does not
- * notice a token the server stopped accepting.
+ * Fetch one of the app's own routes as the signed-in account and return its
+ * JSON body. A non-2xx answer throws an ApiError carrying the status, so a
+ * caller can tell a rejected token (401) from a transient failure. No usable
+ * answer throws one with status 0, as PocketBase's SDK does: no response, a
+ * body cut off or timed out, or one that is not JSON (a captive portal's
+ * page). An error without a status is then the app's own. A 401 also marks the
+ * session expired (§5.8): the SDK's auth store does not notice a token the
+ * server stopped accepting.
  */
-export async function apiFetch(path: string, opts: ApiFetchOptions): Promise<Response> {
+export async function apiJson(path: string, opts: ApiFetchOptions): Promise<unknown> {
 	const headers: Record<string, string> = authHeaders();
 	if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
+	const noAnswer = (cause: unknown): never => {
+		const error: ApiError = Object.assign(new Error(`${opts.label} failed: no answer`, { cause }), {
+			status: 0
+		});
+		throw error;
+	};
 	const resp = await fetch(path, {
 		method: opts.method ?? 'GET',
 		headers,
 		body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
 		signal: AbortSignal.timeout(opts.timeoutMs)
-	}).catch((cause: unknown) => {
-		const error: ApiError = Object.assign(new Error(`${opts.label} failed: no answer`, { cause }), {
-			status: 0
-		});
-		throw error;
-	});
+	}).catch(noAnswer);
 	if (!resp.ok) {
 		if (resp.status === 401) markAuthExpired();
 		const error: ApiError = Object.assign(new Error(`${opts.label} failed: ${resp.status}`), {
@@ -51,5 +53,5 @@ export async function apiFetch(path: string, opts: ApiFetchOptions): Promise<Res
 		});
 		throw error;
 	}
-	return resp;
+	return resp.json().catch(noAnswer);
 }
