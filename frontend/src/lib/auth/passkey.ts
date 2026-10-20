@@ -163,6 +163,8 @@ async function finishCeremony(
 		{ headers: { 'X-Browser-Id': bid } },
 		(status) => refused(status) ?? new LocalizedError(t('auth_ceremony_failed'))
 	);
+	// The SDK answers a 2xx body it cannot parse with {}: no token, no session.
+	if (!data.token) throw new LocalizedError(t('auth_ceremony_failed'));
 	// A re-auth that picked another account's passkey (a shared device) is not
 	// kept: it would sync as that account over this one's local data ([D-76]).
 	if (expectAccount && data.record?.id !== expectAccount) throw new WrongAccountError(false);

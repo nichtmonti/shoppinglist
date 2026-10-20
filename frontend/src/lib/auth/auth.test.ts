@@ -746,7 +746,9 @@ describe('isCeremonyDismissal()', () => {
 								reject(named('AbortError'));
 							});
 						})
-					: Promise.resolve(jsonResponse({ publicKey: {} }))
+					: Promise.resolve(
+							jsonResponse({ publicKey: {}, token: 'new-token', record: { id: 'acct-1' } })
+						)
 			)
 		);
 		vi.mocked(startAuthentication).mockResolvedValue({ id: 'cred-1' } as Awaited<
