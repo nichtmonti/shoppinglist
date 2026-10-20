@@ -3,6 +3,8 @@ package randid
 import (
 	"strings"
 	"testing"
+
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 )
 
 // LookupHash refuses what no link carries before hashing it ([D-08]).
@@ -13,7 +15,7 @@ func TestLookupHash(t *testing.T) {
 		}
 	}
 	token := Token()
-	if h, ok := LookupHash(token); !ok || h != HashToken(token) {
-		t.Errorf("LookupHash(Token()) = %q, %v; want its HashToken", h, ok)
+	if h, ok := LookupHash(token); !ok || h != pbsecurity.SHA256(token) {
+		t.Errorf("LookupHash(Token()) = %q, %v; want its sha256", h, ok)
 	}
 }

@@ -60,6 +60,12 @@ func TestBeginLeavesNoAccountRows(t *testing.T) {
 	if n, _ := app.CountRecords("accounts"); n != 0 {
 		t.Errorf("accounts after begin-without-finish = %d, want 0", n)
 	}
+	// A discoverable key, in both the Level 2 and the Level 1 form (§5.3).
+	for _, want := range []string{`"residentKey":"required"`, `"requireResidentKey":true`} {
+		if !strings.Contains(rec.Body.String(), want) {
+			t.Errorf("register begin lacks %s: %s", want, rec.Body.String())
+		}
+	}
 }
 
 // TestReplayedFinishRejected: a finish consumes the session (single-use, §5.5),
@@ -144,15 +150,18 @@ func TestLoginBeginPlumbing(t *testing.T) {
 	}
 }
 
-// TestFromEnvValidation (§5.7): refuse unset / raw-IP RP-IDs; accept a domain.
+// TestFromEnvValidation (§5.7): refuse unset / raw-IP RP-IDs, the second
+// by go-webauthn and naming the setting; accept a domain.
 func TestFromEnvValidation(t *testing.T) {
 	t.Setenv("SHOPPINGLIST_RP_ID", "")
 	if _, err := FromEnv(); err == nil {
 		t.Error("unset RP_ID should be rejected")
 	}
 	t.Setenv("SHOPPINGLIST_RP_ID", "192.168.1.5")
-	if _, err := FromEnv(); err == nil {
-		t.Error("raw-IP RP_ID should be rejected")
+	if cfg, err := FromEnv(); err != nil {
+		t.Fatal(err)
+	} else if _, err := New(cfg); err == nil || !strings.Contains(err.Error(), "SHOPPINGLIST_RP_ID") {
+		t.Errorf("raw-IP RP_ID: err = %v, want a refusal naming SHOPPINGLIST_RP_ID", err)
 	}
 	t.Setenv("SHOPPINGLIST_RP_ID", "shop.example.com")
 	if _, err := FromEnv(); err != nil {

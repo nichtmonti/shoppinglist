@@ -11,9 +11,9 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
 
-	"shoppinglist/internal/randid"
 	"shoppinglist/internal/testutil"
 )
 
@@ -103,7 +103,7 @@ func newInvite(t *testing.T, app core.App, list *core.Record, rawToken string, o
 	}
 	rec := core.NewRecord(col)
 	rec.Set("list", list.Id)
-	rec.Set("token_hash", randid.HashToken(rawToken))
+	rec.Set("token_hash", pbsecurity.SHA256(rawToken))
 	rec.Set("revoked", opts.revoked)
 	if opts.expired {
 		past, err := types.ParseDateTime("2020-01-01 10:00:00.000Z")

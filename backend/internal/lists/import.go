@@ -9,7 +9,6 @@ import (
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	"shoppinglist/internal/fieldcontract"
-	"shoppinglist/internal/randid"
 )
 
 // The backup envelope and count caps come from internal/fieldcontract,
@@ -79,7 +78,7 @@ func (h handlers) importList(e *core.RequestEvent) error {
 		name = body.Backup.DisplayName
 	}
 	cats, items := body.Backup.toSeed()
-	listRec, err := populateList(e.App, h.caps.Lists, randid.ID(), e.Auth.Id, name, cats, items)
+	listRec, err := populateList(e.App, h.caps.Lists, e.Auth.Id, name, cats, items)
 	if err != nil {
 		return populateFailed(e, err, h.caps.Lists, "failed to import list")
 	}
@@ -230,8 +229,8 @@ func (b importBackupPayload) toSeed() ([]seedCategory, []seedItem) {
 		//lint:ignore S1016 deliberate: the field list is the allowlist, not boilerplate
 		cats = append(cats, seedCategory{
 			Key:       cat.Key,
-			Slug:      cat.Slug,
-			Name:      cat.Name,
+			Slug:      strOrEmpty(cat.Slug),
+			Name:      strOrEmpty(cat.Name),
 			Icon:      cat.Icon,
 			Color:     cat.Color,
 			SortOrder: cat.SortOrder,
@@ -242,15 +241,15 @@ func (b importBackupPayload) toSeed() ([]seedCategory, []seedItem) {
 	for _, item := range b.Items {
 		items = append(items, seedItem{
 			Name:         item.Name,
-			NameDE:       item.NameDE,
-			NameEN:       item.NameEN,
+			NameDE:       strOrEmpty(item.NameDE),
+			NameEN:       strOrEmpty(item.NameEN),
 			Quantity:     item.Quantity,
-			Note:         item.Note,
-			CategoryKey:  item.CategoryKey,
-			Barcode:      item.Barcode,
+			Note:         strOrEmpty(item.Note),
+			CategoryKey:  strOrEmpty(item.CategoryKey),
+			Barcode:      strOrEmpty(item.Barcode),
 			Checked:      item.Checked != nil && *item.Checked, // absent means never ticked
-			CheckedAt:    item.CheckedAt,
-			LastBoughtAt: item.LastBoughtAt,
+			CheckedAt:    timeOrZero(item.CheckedAt),
+			LastBoughtAt: timeOrZero(item.LastBoughtAt),
 		})
 	}
 	return cats, items
@@ -268,6 +267,14 @@ func templateSlugSet(app core.App) (map[string]struct{}, error) {
 		set[tpl.GetString("slug")] = struct{}{}
 	}
 	return set, nil
+}
+
+// timeOrZero dereferences a nullable date payload field.
+func timeOrZero(t *types.DateTime) types.DateTime {
+	if t == nil {
+		return types.DateTime{}
+	}
+	return *t
 }
 
 // strOrEmpty dereferences a nullable string payload field.

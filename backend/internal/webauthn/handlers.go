@@ -156,7 +156,6 @@ func registerBegin(wa *wlib.WebAuthn, gate *signup.Gate) func(*core.RequestEvent
 		// which would leave a credentials row no key can use, and the
 		// last-passkey guard counting it.
 		creation, sd, err := wa.BeginRegistration(user,
-			wlib.WithResidentKeyRequirement(protocol.ResidentKeyRequirementRequired),
 			wlib.WithExclusions(wlib.Credentials(user.WebAuthnCredentials()).CredentialDescriptors()))
 		if err != nil {
 			return e.InternalServerError("failed to begin registration", err)

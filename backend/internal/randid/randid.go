@@ -4,9 +4,10 @@ package randid
 
 import (
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 )
 
 // Hex returns n bytes from crypto/rand as 2n hex characters. rand.Read never
@@ -42,22 +43,16 @@ func Token() string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-// HashToken is the hex sha256 a link's token is looked up by.
-func HashToken(token string) string {
-	sum := sha256.Sum256([]byte(token))
-	return hex.EncodeToString(sum[:])
-}
-
 // maxTokenLen bounds a token from a request before it is hashed ([D-08]);
 // Token's are 43 characters. Generous rather than exact, and refused as
 // invalid, not malformed, so it is no oracle for "wrong shape".
 const maxTokenLen = 64
 
-// LookupHash is HashToken for a token from a request: ok=false for an empty
+// LookupHash is the hex sha256 a link's token is looked up by, for a token from a request: ok=false for an empty
 // one or one longer than any link carries, which no link opens.
 func LookupHash(token string) (string, bool) {
 	if token == "" || len(token) > maxTokenLen {
 		return "", false
 	}
-	return HashToken(token), true
+	return pbsecurity.SHA256(token), true
 }

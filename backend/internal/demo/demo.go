@@ -98,7 +98,9 @@ func Describe(cfg Config) string {
 // RegisterRoutes mounts POST /api/demo/start.
 func RegisterRoutes(r *router.RouterGroup[*core.RequestEvent], cfg Config) {
 	security.SetBudget(startBudget, startWindow, cfg.StartsPerIP)
-	r.POST("/api/demo/start", start(cfg)).BindFunc(security.RateLimit(startBudget))
+	r.POST("/api/demo/start", start(cfg)).
+		BindFunc(security.RateLimit(startBudget)).
+		Bind(apis.RequireGuestOnly())
 }
 
 // Register turns request logging off, stores the example products and
@@ -143,9 +145,6 @@ type startBody struct {
 // PocketBase's own auth response as after a passkey sign-up.
 func start(cfg Config) func(*core.RequestEvent) error {
 	return func(e *core.RequestEvent) error {
-		if e.Auth != nil {
-			return e.BadRequestError("already signed in", nil)
-		}
 		var body startBody
 		if err := e.BindBody(&body); err != nil {
 			return e.BadRequestError("invalid request body", err)

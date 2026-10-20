@@ -1,13 +1,12 @@
 package barcode
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	"shoppinglist/internal/fieldcontract"
@@ -116,8 +115,7 @@ func fillAndSaveCache(app core.App, rec *core.Record, found *fetchedProduct) err
 // the old one: the rotation deletes the file behind it ([D-21]), so the new
 // photo waits until no item does.
 func setPhoto(app core.App, rec *core.Record, data []byte, ext string) error {
-	sum := sha256.Sum256(data)
-	hash := hex.EncodeToString(sum[:])
+	hash := pbsecurity.SHA256(string(data))
 	rotate := rec.GetString("photo") == "" || rec.GetString("photo_token") == ""
 	if !rotate && rec.GetString("photo_hash") != hash {
 		shown, err := photoShown(app, rec.GetString("photo_token"))
@@ -129,8 +127,8 @@ func setPhoto(app core.App, rec *core.Record, data []byte, ext string) error {
 	if !rotate {
 		return nil
 	}
-	// Not the PocketBase record id, which is not cryptographically random; see
-	// migration 1778000005 for why the route is open.
+	// Not the record id: the token rotates with the bytes. See migration
+	// 1778000005 for why the route is open.
 	token := randid.ID()
 	// Named after the token, not the barcode: PocketBase echoes the filename
 	// in Content-Disposition, which would leak the product.

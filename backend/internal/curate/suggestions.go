@@ -234,12 +234,8 @@ func EmitJSON(w io.Writer, groups []Group, live map[string]bool) error {
 		if !ok {
 			continue // no live category — appendseed would reject the item
 		}
-		en := g.RawName
-		if en == "" {
-			en = g.Name // defensive: a Group not built by Suggestions still yields a valid name
-		}
 		doc.Items = append(doc.Items, candidates.Item{
-			NamesI18n:       candidates.LocaleNames{En: []string{en}},
+			NamesI18n:       candidates.LocaleNames{En: []string{g.RawName}},
 			DefaultCategory: slug,
 		})
 	}

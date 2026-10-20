@@ -44,10 +44,11 @@ func atListLimit(txApp core.App, accountID string, maxLists int) (bool, error) {
 
 // seedCategory is one category to copy into a fresh list. Key is the
 // CALLER-LOCAL join key; populateList returns the new record ids keyed by it.
+// An empty text or a zero time is what PocketBase stores for an unset column.
 type seedCategory struct {
 	Key       string
-	Slug      *string // nil ⇒ leave null (renders localized template default, §6.7)
-	Name      *string // nil ⇒ leave null
+	Slug      string // "" ⇒ no template: Name, or the §6.7 localized default
+	Name      string
 	Icon      string
 	Color     string
 	SortOrder int
@@ -55,16 +56,16 @@ type seedCategory struct {
 
 type seedItem struct {
 	Name         string
-	NameDE       *string // nil ⇒ null; the scanned product's localized names [D-21]
-	NameEN       *string // nil ⇒ null
+	NameDE       string // the scanned product's localized names [D-21]
+	NameEN       string
 	Quantity     string
-	Note         *string         // nil ⇒ null
-	CategoryKey  *string         // references seedCategory.Key; nil or unknown key ⇒ null ⇒ §6.6 Others fallback
-	Barcode      *string         // nil ⇒ null; the photo follows it [D-266]
-	Checked      bool            // copied verbatim by clone/stateful import [D-72]; zero ⇒ fresh unchecked
-	CheckedAt    *types.DateTime // only meaningful with Checked; nil ⇒ leave zero
-	LastBoughtAt *types.DateTime // copied independently — the §6.10 purchase history, survives unchecking
-	PrevBoughtAt *types.DateTime // clone only: the date a tick replaced [D-303]; a backup never carries it
+	Note         string
+	CategoryKey  string         // references seedCategory.Key; "" or unknown ⇒ the §6.6 Others fallback
+	Barcode      string         // the photo follows it [D-266]
+	Checked      bool           // copied verbatim by clone/stateful import [D-72]; zero ⇒ fresh unchecked
+	CheckedAt    types.DateTime // only meaningful with Checked
+	LastBoughtAt types.DateTime // copied independently — the §6.10 purchase history, survives unchecking
+	PrevBoughtAt types.DateTime // clone only: the date a tick replaced [D-303]; a backup never carries it
 }
 
 // populateList creates, in ONE transaction (§7.5 [D-72]), the lists
@@ -73,10 +74,10 @@ type seedItem struct {
 // carries it). Returns the saved lists record, a 400 for an invalid name, or
 // errListLimit at the [D-219] lists cap.
 //
-// listID is minted by the caller with randid.ID ([D-08]): lists are not
-// client-writable ([D-08]), unlike item and category ids (see internal/sync's
+// Every id is PocketBase's own, from crypto/rand ([D-08]): lists are not
+// client-writable, unlike item and category ids (see internal/sync's
 // recordIDPattern).
-func populateList(app core.App, maxLists int, listID, accountID, name string, cats []seedCategory, items []seedItem) (*core.Record, error) {
+func populateList(app core.App, maxLists int, accountID, name string, cats []seedCategory, items []seedItem) (*core.Record, error) {
 	if msg := listNameProblem(name); msg != "" {
 		return nil, router.NewBadRequestError(msg, nil)
 	}
@@ -96,12 +97,12 @@ func populateList(app core.App, maxLists int, listID, accountID, name string, ca
 			return err
 		}
 		listRec = core.NewRecord(listsCol)
-		listRec.Id = listID
 		listRec.Set("name", name) // checked above: SaveNoValidate skips field validation
 		if err := txApp.SaveNoValidate(listRec); err != nil {
 			return err
 		}
 
+		listID := listRec.Id
 		if _, err := members.Add(txApp, accountID, listID); err != nil {
 			return err
 		}
@@ -117,12 +118,8 @@ func populateList(app core.App, maxLists int, listID, accountID, name string, ca
 			catRec.Set("icon", cat.Icon)
 			catRec.Set("color", cat.Color)
 			catRec.Set("sort_order", cat.SortOrder)
-			if cat.Slug != nil {
-				catRec.Set("slug", *cat.Slug)
-			}
-			if cat.Name != nil {
-				catRec.Set("name", *cat.Name)
-			}
+			catRec.Set("slug", cat.Slug)
+			catRec.Set("name", cat.Name)
 			if err := txApp.SaveNoValidate(catRec); err != nil {
 				return err
 			}
@@ -141,33 +138,15 @@ func populateList(app core.App, maxLists int, listID, accountID, name string, ca
 			itemRec.Set("name", item.Name)
 			itemRec.Set("quantity", item.Quantity)
 			itemRec.Set("modified_by", accountID)
-			if item.NameDE != nil {
-				itemRec.Set("name_de", *item.NameDE)
-			}
-			if item.NameEN != nil {
-				itemRec.Set("name_en", *item.NameEN)
-			}
-			if item.Note != nil {
-				itemRec.Set("note", *item.Note)
-			}
-			if item.Barcode != nil {
-				itemRec.Set("barcode", *item.Barcode)
-			}
-			if item.CategoryKey != nil {
-				if id, ok := keyMap[*item.CategoryKey]; ok {
-					itemRec.Set("category_key", id)
-				}
-			}
+			itemRec.Set("name_de", item.NameDE)
+			itemRec.Set("name_en", item.NameEN)
+			itemRec.Set("note", item.Note)
+			itemRec.Set("barcode", item.Barcode)
+			itemRec.Set("category_key", keyMap[item.CategoryKey])
 			itemRec.Set("checked", item.Checked)
-			if item.CheckedAt != nil {
-				itemRec.Set("checked_at", *item.CheckedAt)
-			}
-			if item.LastBoughtAt != nil {
-				itemRec.Set("last_bought_at", *item.LastBoughtAt)
-			}
-			if item.PrevBoughtAt != nil {
-				itemRec.Set("prev_bought_at", *item.PrevBoughtAt)
-			}
+			itemRec.Set("checked_at", item.CheckedAt)
+			itemRec.Set("last_bought_at", item.LastBoughtAt)
+			itemRec.Set("prev_bought_at", item.PrevBoughtAt)
 			if err := txApp.SaveNoValidate(itemRec); err != nil {
 				return err
 			}
