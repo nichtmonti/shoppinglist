@@ -225,6 +225,16 @@ in `commands` goes without braces. A `"${BASE%%:*}"` once became `""` in
 [D-252]'s table saying which standard tool it stands in for, or why there is
 none; a new one adds its row, and a deleted one takes its row with it.
 
+**The library's own tool, never a hand-built one.** Before writing a helper,
+an event listener, an observer, a retry or wait loop, a fetch wrapper or an
+effect that keeps state in sync, look for the feature in the installed
+library's source and types (`node_modules`, the Go module cache), not in
+memory of an older version: PocketBase and its SDK, Svelte and SvelteKit,
+bits-ui, Dexie, SimpleWebAuthn, Playwright and testing-library cover most of
+them. A hand-built copy is one more mechanism to get subtly wrong, and in
+review it is a finding, not a style note. Keep one only where the library is
+not equivalent, with that reason in one line beside it.
+
 **Tool versions live in `tools/`, one Go module per tool** ([D-75],
 `tools/README.md`): `go -C tools/<name> install tool` with no `@version`, the
 module is the pin (Dex runs as `go -C tools/dex tool dex`). diff-cover, the one
