@@ -79,9 +79,11 @@
 	let trimmed = $derived(draft.trim());
 	// Never disabled for an empty field: a disabled button cannot say what it
 	// waits for, so pressed early it says so under the field ([D-325]).
-	let missing = $state(false);
-	$effect(() => {
-		if (trimmed) missing = false;
+	// Set by a press on an empty field; the next change to the text takes it
+	// back (a writable $derived).
+	let missing = $derived.by(() => {
+		void trimmed;
+		return false;
 	});
 
 	function submit(event: Event) {
