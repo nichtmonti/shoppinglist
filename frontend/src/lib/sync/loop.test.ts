@@ -43,7 +43,8 @@ describe('startSyncLoop failure retry', () => {
 	function loopWithTransientFailure() {
 		let shouldFail = true;
 		const digestTransport = vi.fn(async () => {
-			if (shouldFail) throw new Error('transient');
+			// No answer, as apiFetch throws it.
+			if (shouldFail) throw Object.assign(new Error('transient'), { status: 0 });
 			return [];
 		});
 		const stop = startSyncLoop({

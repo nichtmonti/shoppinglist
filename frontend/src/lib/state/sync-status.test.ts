@@ -2,14 +2,7 @@
 // wins, and "synchronisiert" is said only while it is true.
 import { describe, expect, it } from 'vitest';
 import { NO_HEALTH, type SyncHealth } from '#lib/sync/index.js';
-import {
-	syncLine,
-	syncStatusOf,
-	IN_FLIGHT_MS,
-	STALE_MS,
-	STUCK_MS,
-	type SyncInput
-} from './sync-status';
+import { syncLine, syncStatusOf, IN_FLIGHT_MS, STUCK_MS, type SyncInput } from './sync-status';
 
 const NOW = Date.parse('2026-10-10T12:00:00.000Z');
 const ago = (ms: number) => new Date(NOW - ms).toISOString();
@@ -117,10 +110,24 @@ describe('syncLine', () => {
 		).toMatchObject({ kind: 'failing' });
 	});
 
-	it('says how old what is shown is after 5 minutes of failed tries', () => {
-		expect(
-			syncLine(input({}, { ok_at: ago(STALE_MS), started_at: ago(5_000), failures: 4 }))
-		).toEqual({ kind: 'stale', since: ago(STALE_MS) });
+	// Nothing of the user's waits, but what others change is not arriving.
+	it('says how old what is shown is after three failed tries with nothing waiting', () => {
+		const health = { ok_at: ago(20_000), started_at: ago(5_000), reason: 'connection' as const };
+		expect(syncLine(input({}, { ...health, failures: 2 }))).toEqual({ kind: 'normal' });
+		expect(syncLine(input({}, { ...health, failures: 3 }))).toEqual({
+			kind: 'stale',
+			since: ago(20_000)
+		});
+	});
+
+	// The app's own failure is no passing outage: it says so, whatever waits.
+	it('calls the sync broken after three failures of the app itself', () => {
+		const broken = { started_at: ago(5_000), failures: 3, reason: 'app' as const };
+		expect(syncLine(input({}, broken))).toEqual({ kind: 'broken' });
+		expect(syncLine(input({ pending: 2, oldestQueuedAt: NOW - 1_000 }, broken))).toEqual({
+			kind: 'broken'
+		});
+		expect(syncLine(input({}, { ...broken, failures: 2 }))).toEqual({ kind: 'normal' });
 	});
 
 	// A tab back from the background syncs at once: until it has tried and
@@ -136,10 +143,10 @@ describe('syncLine', () => {
 			syncLine(
 				input(
 					{ lastSyncedAt: ago(60_000) },
-					{ ok_at: ago(STALE_MS * 2), started_at: ago(5_000), failures: 2 }
+					{ ok_at: ago(600_000), started_at: ago(5_000), failures: 3 }
 				)
 			)
-		).toEqual({ kind: 'normal' });
+		).toEqual({ kind: 'stale', since: ago(60_000) });
 	});
 });
 
@@ -169,9 +176,13 @@ describe('syncStatusOf', () => {
 		expect(chip({ pending: 2 }, { failures: 3 })).toBe('pending');
 	});
 
-	it('wears the clock when the line says stale', () => {
-		const stale = { failures: 4, ok_at: ago(STALE_MS) };
+	it('wears the clock when the line says stale or broken', () => {
+		const stale = { failures: 4, ok_at: ago(60_000) };
 		expect(chip({}, stale)).toBe('stale');
+		expect(chip({}, { ...stale, reason: 'app' })).toBe('stale');
+		expect(chip({ pending: 1, oldestQueuedAt: NOW - 1_000 }, { ...stale, reason: 'app' })).toBe(
+			'pending'
+		);
 		// Before the stored state is read, nothing is said from defaults.
 		expect(syncStatusOf(input({}, stale), false)).toEqual({
 			line: { kind: 'normal' },

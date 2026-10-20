@@ -22,8 +22,6 @@ export const STUCK_MS = 20_000;
 /** An exchange still under way after this long belongs to a page that froze:
  *  every request times out well inside it (a cycle's push and digest, 25 s). */
 export const IN_FLIGHT_MS = 60_000;
-/** No answer this long, while tries fail, makes what is shown stale. */
-export const STALE_MS = 5 * 60_000;
 /** Failed tries in a row before it says so: one is retried after 5 s anyway. */
 export const FAILING_AFTER = 3;
 
@@ -32,7 +30,8 @@ export type SyncLine =
 	| { kind: 'offline'; since: string | null }
 	| { kind: 'other_tab' }
 	| { kind: 'stuck' }
-	| { kind: 'failing'; reason: SyncFailure; count: number }
+	| { kind: 'failing'; reason: Exclude<SyncFailure, 'app'>; count: number }
+	| { kind: 'broken' }
 	| { kind: 'stale'; since: string | null };
 
 export interface SyncInput {
@@ -79,17 +78,12 @@ export function syncLine(input: SyncInput): SyncLine {
 	) {
 		return { kind: input.leading ? 'stuck' : 'other_tab' };
 	}
-	if (input.pending > 0 && input.health.failures >= FAILING_AFTER) {
-		return { kind: 'failing', reason: input.health.reason ?? 'server', count: input.pending };
-	}
-	if (
-		input.pending === 0 &&
-		input.health.failures > 0 &&
-		(okAt === null || input.now - Date.parse(okAt) >= STALE_MS)
-	) {
-		return { kind: 'stale', since: okAt };
-	}
-	return { kind: 'normal' };
+	if (input.health.failures < FAILING_AFTER) return { kind: 'normal' };
+	// The app's own failure repeats on every try, wherever the server is.
+	const reason = input.health.reason ?? 'server';
+	if (reason === 'app') return { kind: 'broken' };
+	if (input.pending > 0) return { kind: 'failing', reason, count: input.pending };
+	return { kind: 'stale', since: okAt };
 }
 
 /** The §12.1 chip's state ([D-102]): one glyph, the line says the rest. */
@@ -116,7 +110,7 @@ export function syncStatusOf(input: SyncInput, loaded = true): SyncStatus {
 			? 'expired'
 			: input.pending > 0
 				? 'pending'
-				: line.kind === 'stale'
+				: line.kind === 'stale' || line.kind === 'broken'
 					? 'stale'
 					: 'synced';
 	return { line, chip, pending: input.pending };

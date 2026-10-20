@@ -1,7 +1,7 @@
 <!--
   The line under a list's name ([D-296]): its members, or, when the sync is
   not fine, what is wrong. Amber when something of the user's is not getting
-  out, grey for news with nothing at risk. A tap opens what it says: the
+  out or the app itself fails, grey for news with nothing at risk. A tap opens what it says: the
   members open „Teilen & Mitglieder“, a status the sheet that says why and
   offers the one thing that helps. One line in both languages: the copy is
   cut to fit a 360px phone.
@@ -64,6 +64,14 @@
 					title: t('sync_stale_title'),
 					body: t('sync_stale_body'),
 					action: { label: t('sync_stale_action'), run: () => syncNow() }
+				};
+			case 'broken':
+				return {
+					line: t('sync_line_broken'),
+					problem: true,
+					title: t('sync_broken_title'),
+					body: t('sync_broken_body'),
+					action: { label: t('sync_stuck_action'), run: () => location.reload() }
 				};
 			case 'other_tab':
 				// No action: taking the lead could let a woken tab send beside this one ([D-288]).

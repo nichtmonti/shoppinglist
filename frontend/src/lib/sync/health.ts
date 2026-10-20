@@ -6,7 +6,7 @@ import { db, getMeta, setMeta } from '#lib/db.js';
 import { httpStatus } from '#lib/http-status.js';
 
 /** Why a send or a cycle failed, as far as the user can act on it. */
-export type SyncFailure = 'connection' | 'server' | 'rate';
+export type SyncFailure = 'connection' | 'server' | 'rate' | 'app';
 
 export interface SyncHealth {
 	ok_at: string | null; // the last exchange that worked
@@ -29,12 +29,13 @@ export const NO_HEALTH: SyncHealth = {
 /** A send the server answered without a result for: its fault, not the network's. */
 export const NO_RESULT = Object.assign(new Error('no result'), { status: 500 });
 
-/** A 429 is the rate limit, any other answer the server; no answer is the connection. */
+/** A 429 is the rate limit, any other answer the server, no answer (status
+ *  0) the connection; an error with no status at all is the app's own. */
 export function failureOf(error: unknown): SyncFailure {
 	const status = httpStatus(error);
+	if (status === undefined) return 'app';
 	if (status === 429) return 'rate';
-	if (status !== undefined && status > 0) return 'server';
-	return 'connection';
+	return status > 0 ? 'server' : 'connection';
 }
 
 async function update(change: (prev: SyncHealth) => SyncHealth): Promise<void> {

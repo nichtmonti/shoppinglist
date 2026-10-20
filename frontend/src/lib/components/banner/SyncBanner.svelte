@@ -69,14 +69,16 @@
 				: t('banner_offline')
 			: bannerState === 'pending'
 				? t('banner_pending', { count: pending })
-				: bannerState === 'stale'
-					? t('sync_stale_sentence', {
-							when:
-								status.line.kind === 'stale' && status.line.since
-									? relativeTime(status.line.since)
-									: t('sync_line_never')
-						})
-					: t('banner_synced')
+				: status.line.kind === 'broken'
+					? t('sync_broken_title')
+					: bannerState === 'stale'
+						? t('sync_stale_sentence', {
+								when:
+									status.line.kind === 'stale' && status.line.since
+										? relativeTime(status.line.since)
+										: t('sync_line_never')
+							})
+						: t('banner_synced')
 	);
 
 	// The chip has nowhere to render an error; Reauth toasts its failures

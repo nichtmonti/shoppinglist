@@ -9,6 +9,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 ## Unreleased
 
 - **The demo works at any address, not only at `localhost` or over HTTPS.** Opened as `http://` plus a machine's IP or name (a phone on the home network, say), the browser withholds two functions the app used, so the example lists stayed empty and nothing typed in reached the server. The app now brings its own ([D-234]).
+- **The sync status no longer looks fine while the sync is broken.** When syncing fails three times in a row with nothing of yours waiting, the line under the list's name says how old what you see is ("As of …") at once instead of after 5 minutes, and the cloud turns into the clock. When the app itself is at fault rather than the connection or the server, it says "Sync error · reload", and its sheet offers "Reload" ([D-296]).
 - **"Try it" leaves you on the overview of the three example lists** instead of opening one of them ([D-234]).
 - **With `SHOPPINGLIST_ADMIN_UI=off`, and in the demo, the server log no longer offers a superuser.** Gone are the link to the removed dashboard, PocketBase's line naming it and, in the demo, the hint to run `superuser upsert`; a line says where the server is reachable instead. An instance with the dashboard keeps its one-time setup link.
 

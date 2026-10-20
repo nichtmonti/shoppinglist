@@ -17,15 +17,18 @@ export interface ApiFetchOptions {
 	body?: unknown;
 }
 
-/** An error for a non-2xx answer; `status` is what isAuthRejected reads. */
+/** An error for a non-2xx answer, or status 0 for none; `status` is what
+ *  isAuthRejected and the sync status (health.ts) read. */
 export type ApiError = Error & { status: number };
 
 /**
  * Fetch one of the app's own routes as the signed-in account and return the
  * response, which is always 2xx. A non-2xx answer throws an ApiError carrying
  * the status, so a caller can tell a rejected token (401) from a transient
- * failure. A 401 also marks the session expired (§5.8): the SDK's auth store
- * does not notice a token the server stopped accepting.
+ * failure, and no answer (the network, the timeout) one with status 0, as
+ * PocketBase's SDK does: an error without a status is then the app's own. A
+ * 401 also marks the session expired (§5.8): the SDK's auth store does not
+ * notice a token the server stopped accepting.
  */
 export async function apiFetch(path: string, opts: ApiFetchOptions): Promise<Response> {
 	const headers: Record<string, string> = authHeaders();
@@ -35,6 +38,11 @@ export async function apiFetch(path: string, opts: ApiFetchOptions): Promise<Res
 		headers,
 		body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
 		signal: AbortSignal.timeout(opts.timeoutMs)
+	}).catch((cause: unknown) => {
+		const error: ApiError = Object.assign(new Error(`${opts.label} failed: no answer`, { cause }), {
+			status: 0
+		});
+		throw error;
 	});
 	if (!resp.ok) {
 		if (resp.status === 401) markAuthExpired();

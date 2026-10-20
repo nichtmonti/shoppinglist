@@ -7,8 +7,14 @@ describe('failureOf', () => {
 	it('reads a 429 as the rate limit, another answer as the server, none as the connection', () => {
 		expect(failureOf(Object.assign(new Error('x'), { status: 429 }))).toBe('rate');
 		expect(failureOf(Object.assign(new Error('x'), { status: 502 }))).toBe('server');
-		expect(failureOf(new TypeError('Failed to fetch'))).toBe('connection');
-		expect(failureOf(new DOMException('timed out', 'TimeoutError'))).toBe('connection');
+		expect(failureOf(Object.assign(new Error('x'), { status: 0 }))).toBe('connection');
+	});
+
+	// apiFetch gives a request without an answer status 0 (http.test.ts).
+	it('reads an error without a status as the app’s own', () => {
+		expect(failureOf(new TypeError("Cannot read properties of undefined (reading 'digest')"))).toBe(
+			'app'
+		);
 	});
 });
 
@@ -24,7 +30,7 @@ describe('recordExchange', () => {
 		await recordStart(at(5));
 		await recordExchange(Object.assign(new Error('x'), { status: 503 }), at(6));
 		await recordStart(at(10));
-		await recordExchange(new TypeError('Load failed'), at(11));
+		await recordExchange(Object.assign(new Error('no answer'), { status: 0 }), at(11));
 
 		let health = await getMeta(SYNC_HEALTH_KEY);
 		expect(health).toEqual({

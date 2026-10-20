@@ -132,6 +132,18 @@ describe('SyncLine', () => {
 		expect((await screen.findByTestId('sync-line')).textContent).toContain('App hängt · neu laden');
 	});
 
+	it('says the sync is broken, in amber, when the app itself fails, and offers a reload', async () => {
+		await health({ started_at: isoAgo(3_000), failures: 3, reason: 'app' });
+		render(SyncLine, { listId: LIST, members: MEMBERS, onmembers: vi.fn() });
+
+		const line = await screen.findByTestId('sync-line');
+		expect(line.textContent).toContain('Sync-Fehler · neu laden');
+		expect(line.className).toContain('text-amber');
+		await fireEvent.click(line);
+		const sheet = await screen.findByRole('dialog', { name: 'Die Synchronisierung klappt nicht' });
+		expect(within(sheet).getByRole('button', { name: 'Neu laden' })).toBeTruthy();
+	});
+
 	it('says how old what is shown is, in grey, when the server has not answered', async () => {
 		await health({
 			ok_at: isoAgo(25 * 60_000),

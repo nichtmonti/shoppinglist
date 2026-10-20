@@ -151,6 +151,9 @@
 	"sync_stuck_title": "The app is stuck",
 	"sync_stuck_body": "It hasn't tried to sync for over 20 seconds. Reloading usually fixes it, and your changes are kept.",
 	"sync_stuck_action": "Reload",
+	"sync_line_broken": "Sync error · reload",
+	"sync_broken_title": "Sync isn't working",
+	"sync_broken_body": "Something in the app went wrong on every try, so nothing is synced right now, in either direction. Reloading usually fixes it, and your changes are kept.",
 	"sync_offline_body": "What you change stays on this device and goes out as soon as there is a connection again.",
 
 	"categories_title": "Categories",
