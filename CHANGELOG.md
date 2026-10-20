@@ -8,9 +8,10 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
-**For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it.
+**For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it. If you filter or alert on the server's warnings in the container log, match their new form (below).
 
 - **A misspelt setting stops the server instead of being ignored.** `SHOPPINGLIST_SIGNUPS=closed`, say, used to start an instance with sign-up open; the log now names the variable and points to the list of settings ([D-336]).
+- **The server's warnings and errors in the container log are in the standard `key=value` form**, with their level: `level=WARN msg="shoppinglist: …" key=value` instead of `shoppinglist: WARNING …`. A filter or alert that matched the old wording needs the new one; the lines that say how the server is configured at start keep their form.
 - **When several settings are wrong, the server names all of them at once** instead of stopping at the first ([D-337]).
 - **The settings table in the deployment reference comes from the code**, so its defaults are the ones the server applies. The four settings every command reads (`SHOPPINGLIST_APP_URL`, the two trusted-proxy ones, `SQLITE_PRAGMAS`) now close the table, and the demo's table lists only its own two settings ([D-337]).
 - **A `SHOPPINGLIST_RP_ID` written as a URL is named in the error**, with what to write instead (a bare domain such as `list.example.com`); before, the log showed a passkey library's message that named neither. The other passkey setting errors point to the deployment reference.

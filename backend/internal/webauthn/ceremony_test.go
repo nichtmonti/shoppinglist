@@ -445,7 +445,7 @@ func TestRefusedCeremonySaysOnlyThatItFailed(t *testing.T) {
 		}
 	}
 	for _, ceremony := range []string{"registration", "login"} {
-		if !strings.Contains(logs.String(), "passkey "+ceremony+" refused reason=\"Error validating origin :: Expected Values: [https://localhost], Received: https://localhost.evil.example") {
+		if !strings.Contains(logs.String(), "passkey "+ceremony+" refused\" reason=\"Error validating origin :: Expected Values: [https://localhost], Received: https://localhost.evil.example") {
 			t.Errorf("the server log lacks the %s's refused origin: %q", ceremony, logs.String())
 		}
 	}

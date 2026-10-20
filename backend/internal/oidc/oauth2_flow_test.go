@@ -300,7 +300,7 @@ func TestOAuth2ExchangeFailureIsLoggedWithItsCause(t *testing.T) {
 		t.Fatalf("exchange with a wrong secret = %d, want 400: %s", code, body)
 	}
 	got := logged.String()
-	for _, want := range []string{"WARNING OIDC sign-in failed", `error="Failed to fetch OAuth2 token."`,
+	for _, want := range []string{`level=WARN msg="shoppinglist: OIDC sign-in failed after the provider accepted it"`, `error="Failed to fetch OAuth2 token."`,
 		`cause="token endpoint answered 401 Unauthorized, invalid_client"`, `check="the client secret`, "/api/oauth2-redirect"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("log %q lacks %q", got, want)

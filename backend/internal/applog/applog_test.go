@@ -2,6 +2,7 @@ package applog_test
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -19,10 +20,10 @@ func TestEventsReachTheContainerLog(t *testing.T) {
 	applog.Warn(app, "counter did not advance", nil, "sign_count", 0)
 	applog.Info(app, "seed applied", "version", "10")
 
-	want := "shoppinglist: orphan_sweep failed: boom account=abc123\n" +
-		"shoppinglist: WARNING counter did not advance sign_count=0\n" +
-		"shoppinglist: seed applied version=10"
-	if got := strings.TrimSpace(logs.String()); got != want {
+	want := `level=ERROR msg="shoppinglist: orphan_sweep failed" error=boom account=abc123` + "\n" +
+		`level=WARN msg="shoppinglist: counter did not advance" sign_count=0` + "\n" +
+		`level=INFO msg="shoppinglist: seed applied" version=10`
+	if got := untimed(logs.String()); got != want {
 		t.Errorf("container log = %q, want %q", got, want)
 	}
 }
@@ -36,8 +37,14 @@ func TestValuesStayOnTheirLine(t *testing.T) {
 	applog.Error(app, "sweep failed", errors.Join(errors.New("a"), errors.New("b")),
 		"reason", "x account=forged", "empty", "")
 
-	want := `shoppinglist: sweep failed: "a\nb" reason="x account=forged" empty=""`
-	if got := strings.TrimSpace(logs.String()); got != want {
+	want := `level=ERROR msg="shoppinglist: sweep failed" error="a\nb" reason="x account=forged" empty=""`
+	if got := untimed(logs.String()); got != want {
 		t.Errorf("container log = %q, want %q", got, want)
 	}
+}
+
+// untimed is the captured lines without slog's leading time=…, which changes
+// with every run.
+func untimed(s string) string {
+	return regexp.MustCompile(`(?m)^time=\S+ `).ReplaceAllString(strings.TrimSpace(s), "")
 }

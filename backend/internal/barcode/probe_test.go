@@ -95,7 +95,7 @@ func TestWarnIfUnreachableWarnsOnceAfterTheLastAttempt(t *testing.T) {
 	waits := 0
 	logged := stubProbeWait(t, func() { waits++ })
 	WarnIfUnreachable(testutil.NewApp(t))
-	if waits != probeAttempts-1 || strings.Count(logged.String(), "WARNING") != 1 {
+	if waits != probeAttempts-1 || strings.Count(logged.String(), "level=WARN") != 1 {
 		t.Fatalf("waited %d times and logged %q, want %d waits and one warning", waits, logged, probeAttempts-1)
 	}
 }

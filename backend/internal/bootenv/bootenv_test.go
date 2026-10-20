@@ -350,7 +350,7 @@ func TestApplySettingsWarnsOfAStoredHeaderWithoutTheVariable(t *testing.T) {
 	if err := ApplySettings(app); err != nil {
 		t.Fatalf("apply: %v", err)
 	}
-	if !strings.Contains(out.String(), "WARNING the app trusts the X-Forwarded-For header") {
+	if !strings.Contains(out.String(), `level=WARN msg="shoppinglist: the app trusts the X-Forwarded-For header`) {
 		t.Errorf("no warning for a stored header without the variable: %q", out.String())
 	}
 }

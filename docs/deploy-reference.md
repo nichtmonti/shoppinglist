@@ -175,7 +175,7 @@ With passkeys off, `SHOPPINGLIST_RP_ID` is not needed, but
 `SHOPPINGLIST_SIGNUP` has no effect.
 
 Switching a login off strands the accounts that have only that login, and the
-boot log counts them ("WARNING 3 account(s) have no OIDC login…"). Before
+boot log counts them (`level=WARN msg="shoppinglist: 3 account(s) have no OIDC login…`). Before
 turning passkeys off, have everyone link their account in settings while both
 are on; before turning OIDC off, have OIDC-only accounts add a passkey.
 

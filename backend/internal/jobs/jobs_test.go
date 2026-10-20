@@ -36,7 +36,7 @@ func TestFailedBackupIsLogged(t *testing.T) {
 	if err := app.CreateBackup(context.Background(), "nightly.zip"); err == nil {
 		t.Fatal("CreateBackup succeeded, want the hook's error")
 	}
-	if got := logged.String(); !strings.Contains(got, `backup failed: "disk full" name=nightly.zip`) {
+	if got := logged.String(); !strings.Contains(got, `level=ERROR msg="shoppinglist: backup failed" error="disk full" name=nightly.zip`) {
 		t.Errorf("container log = %q, want the failed backup named", got)
 	}
 }
