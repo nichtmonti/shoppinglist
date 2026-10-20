@@ -47,12 +47,15 @@ const linkClients = vi.hoisted(
 );
 vi.mock('pocketbase', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('pocketbase')>();
-	class LinkClient {
-		authStore: import('pocketbase').BaseAuthStore;
+	// The real client, with the OIDC collection and cancelRequest faked: its
+	// send goes through the stubbed fetch, as the passkey ceremonies' does.
+	class LinkClient extends actual.default {
 		cancelRequest = vi.fn();
-		send = vi.fn(async () => ({}));
-		constructor(_baseURL: string, store: import('pocketbase').BaseAuthStore) {
-			this.authStore = store;
+		send = vi.fn((path: string, options?: object) =>
+			actual.default.prototype.send.call(this, path, options ?? {})
+		);
+		constructor(baseURL: string, store: import('pocketbase').BaseAuthStore) {
+			super(baseURL, store);
 			linkClients.push(this);
 		}
 		collection() {

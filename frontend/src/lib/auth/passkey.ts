@@ -1,7 +1,13 @@
 // Passkey registration / login ceremonies (§5.4) built on
 // @simplewebauthn/browser, which is imported DYNAMICALLY at ceremony time so
 // the app entry does not carry it on every boot.
+import PocketBase, { BaseAuthStore, ClientResponseError } from 'pocketbase';
 import { authHeaders, pb } from '../pb';
+import { httpStatus } from '../http-status';
+import type {
+	PublicKeyCredentialCreationOptionsJSON,
+	PublicKeyCredentialRequestOptionsJSON
+} from '@simplewebauthn/browser';
 import { markAuthExpired } from './state';
 import { rememberLoginMethod } from './login-methods';
 import { WrongAccountError } from './wrong-account';
@@ -115,24 +121,48 @@ function forgetPasskey(rpId: string | undefined, credentialId: string): void {
 		.catch(() => {});
 }
 
+// The ceremony requests go out on a client of their own, whose auth store stays
+// empty: register/begin with the session's token adds to the signed-in account
+// (backend/internal/webauthn/handlers.go), so a request says who it is only
+// where it means to, through its own headers.
+const ceremonies = new PocketBase(pb.baseURL, new BaseAuthStore());
+
+/**
+ * POSTs one ceremony step. An abort (a newer ceremony, the screen leaving)
+ * rethrows the browser's AbortError for the callers' classification; any other
+ * failure is `fail`'s error for its HTTP status (0 without an answer).
+ */
+async function ceremonyPost<T>(
+	path: string,
+	body: unknown,
+	init: { headers?: Record<string, string>; signal?: AbortSignal },
+	fail: (status: number) => Error
+): Promise<T> {
+	try {
+		return await ceremonies.send<T>(path, { method: 'POST', body, requestKey: null, ...init });
+	} catch (e) {
+		if (e instanceof ClientResponseError && e.isAbort) throw e.originalError ?? e;
+		throw fail(httpStatus(e) ?? 0);
+	}
+}
+
 async function finishCeremony(
 	route: string,
 	bid: string,
 	response: unknown,
 	expectAccount?: string,
-	// A refusal the caller can name; null for the generic message.
-	refused: (finish: Response) => Error | null = () => null
+	// A refusal the caller can name, by status; null for the generic message.
+	refused: (status: number) => Error | null = () => null
 ): Promise<void> {
-	const finish = await fetch(route, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json', 'X-Browser-Id': bid },
-		body: JSON.stringify(response)
-	});
-	if (!finish.ok) throw refused(finish) ?? new LocalizedError(t('auth_ceremony_failed'));
-	const data = (await finish.json()) as {
+	const data = await ceremonyPost<{
 		token: string;
 		record: Parameters<typeof pb.authStore.save>[1];
-	};
+	}>(
+		route,
+		response,
+		{ headers: { 'X-Browser-Id': bid } },
+		(status) => refused(status) ?? new LocalizedError(t('auth_ceremony_failed'))
+	);
 	// A re-auth that picked another account's passkey (a shared device) is not
 	// kept: it would sync as that account over this one's local data ([D-76]).
 	if (expectAccount && data.record?.id !== expectAccount) throw new WrongAccountError(false);
@@ -147,18 +177,16 @@ async function finishCeremony(
 async function runRegistration(
 	bid: string,
 	request: { headers: Record<string, string>; body: Record<string, string> },
-	beginError: (begin: Response) => Error,
+	beginError: (status: number) => Error,
 	ceremonyFailed: () => Error
 ): Promise<unknown> {
 	const ctl = startCeremony();
-	const begin = await fetch('/api/passkey/register/begin', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json', ...request.headers },
-		body: JSON.stringify({ browser_id: bid, ...request.body }),
-		signal: ctl.signal
-	});
-	if (!begin.ok) throw beginError(begin);
-	const opts = await begin.json();
+	const opts = await ceremonyPost<{ publicKey: PublicKeyCredentialCreationOptionsJSON }>(
+		'/api/passkey/register/begin',
+		{ browser_id: bid, ...request.body },
+		{ headers: request.headers, signal: ctl.signal },
+		beginError
+	);
 	try {
 		return await (await loadWebauthn()).startRegistration({ optionsJSON: opts.publicKey });
 	} catch (e) {
@@ -185,10 +213,10 @@ export async function register(nickname: string, link?: SignupLink): Promise<voi
 		{ headers: {}, body: { nickname, ...link } },
 		// 403 is the signup gate (SHOPPINGLIST_SIGNUP), a standing state not worth
 		// retrying; with a link in hand it means the link is no longer valid.
-		(begin) =>
+		(status) =>
 			new LocalizedError(
 				t(
-					begin.status !== 403
+					status !== 403
 						? 'auth_register_begin_failed'
 						: link
 							? 'auth_register_link_invalid'
@@ -198,8 +226,8 @@ export async function register(nickname: string, link?: SignupLink): Promise<voi
 		() => new LocalizedError(t('auth_ceremony_failed'))
 	);
 	// The link checked at begin can be revoked during the ceremony ([D-241]).
-	await finishCeremony('/api/passkey/register/finish', bid, attResp, undefined, (finish) =>
-		finish.status === 403 && link ? new LocalizedError(t('auth_register_link_invalid')) : null
+	await finishCeremony('/api/passkey/register/finish', bid, attResp, undefined, (status) =>
+		status === 403 && link ? new LocalizedError(t('auth_register_link_invalid')) : null
 	);
 }
 
@@ -223,8 +251,8 @@ export async function addPasskey(friendlyName: string): Promise<void> {
 	const attResp = await runRegistration(
 		bid,
 		{ headers: authHeaders(), body: { friendly_name: friendlyName } },
-		(begin) => {
-			if (begin.status !== 401) return failed();
+		(status) => {
+			if (status !== 401) return failed();
 			// The token no longer verifies (signed out everywhere): ask for a
 			// sign-in instead of a passkey for an account that is not signed in.
 			markAuthExpired();
@@ -238,12 +266,12 @@ export async function addPasskey(friendlyName: string): Promise<void> {
 	if (!pb.authStore.isValid || !pb.authStore.token) {
 		throw new LocalizedError(t('auth_not_authenticated'));
 	}
-	const finish = await fetch('/api/passkey/register/finish', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json', 'X-Browser-Id': bid, ...authHeaders() },
-		body: JSON.stringify(attResp)
-	});
-	if (!finish.ok) throw failed();
+	await ceremonyPost(
+		'/api/passkey/register/finish',
+		attResp,
+		{ headers: { 'X-Browser-Id': bid, ...authHeaders() } },
+		failed
+	);
 }
 
 export interface LoginOptions {
@@ -275,14 +303,12 @@ export async function login({
 	// startCeremony(), and .cause keeps the DOMException for
 	// isCeremonyDismissal().
 	try {
-		const begin = await fetch('/api/passkey/login/begin', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ browser_id: bid }),
-			signal: ctl.signal
-		});
-		if (!begin.ok) throw new LocalizedError(t('auth_login_begin_failed'));
-		const opts = await begin.json();
+		const opts = await ceremonyPost<{ publicKey: PublicKeyCredentialRequestOptionsJSON }>(
+			'/api/passkey/login/begin',
+			{ browser_id: bid },
+			{ signal: ctl.signal },
+			() => new LocalizedError(t('auth_login_begin_failed'))
+		);
 		const asnResp = await (
 			await loadWebauthn()
 		).startAuthentication({
@@ -290,8 +316,8 @@ export async function login({
 			useBrowserAutofill: conditional
 		});
 		try {
-			await finishCeremony('/api/passkey/login/finish', bid, asnResp, expectAccount, (finish) =>
-				finish.status === 404 ? new UnknownPasskeyError(t('auth_passkey_unknown')) : null
+			await finishCeremony('/api/passkey/login/finish', bid, asnResp, expectAccount, (status) =>
+				status === 404 ? new UnknownPasskeyError(t('auth_passkey_unknown')) : null
 			);
 		} catch (e) {
 			if (e instanceof UnknownPasskeyError) {
