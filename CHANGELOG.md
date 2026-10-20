@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **PocketBase's dashboard (`/_/`) and the files it serves get PocketBase's own Content-Security-Policy again.** The app's headers had replaced the dashboard's with one that only forbade framing, and gave product photos the app's policy instead of PocketBase's sandbox.
 - **The segmented choices behave as their kind does.** The list's "Shopping"/"Editing" switch and the language and theme choices in settings now choose with the arrow keys, as radio buttons do. The share sheet's "Invite link"/"QR" switch is announced as tabs over their panel.
 - **Leaving a list right after rejoining it on another device now really leaves it.** The app could pick the stale membership from before, so the list came back at the next sync.
 - **Signing out while the app was syncing can no longer leave the account's lists behind on the device.** The sync could write its list of memberships just after the sign-out had cleared them ([D-109]).

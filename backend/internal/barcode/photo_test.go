@@ -220,6 +220,9 @@ func TestLookupStoresPhotoAndServesItFromOurOrigin(t *testing.T) {
 	if cc := photoRes.Header().Get("Cache-Control"); !strings.Contains(cc, "immutable") {
 		t.Errorf("Cache-Control = %q, want immutable", cc)
 	}
+	if csp := photoRes.Header().Get("Content-Security-Policy"); !strings.Contains(csp, "sandbox") {
+		t.Errorf("Content-Security-Policy = %q, want PocketBase's file sandbox", csp)
+	}
 
 	// The upstream photo is fetched once, on the cache miss — never per view.
 	if _, second := lookup(t, mux, token, "4006381333931"); second.ImageURL != body.ImageURL {

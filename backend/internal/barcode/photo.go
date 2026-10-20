@@ -137,6 +137,8 @@ func photoHandler(e *core.RequestEvent) error {
 	// sets only headers still missing, so this one goes first and is taken
 	// back on a failure, which must not be cached for a year.
 	e.Response.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	// Serve's own sandboxed policy, not the app's, for a file.
+	e.Response.Header().Del("Content-Security-Policy")
 	if err := fsys.Serve(e.Response, e.Request, rec.BaseFilesPath()+"/"+name, name); err != nil {
 		e.Response.Header().Del("Cache-Control")
 		if errors.Is(err, filesystem.ErrNotFound) {

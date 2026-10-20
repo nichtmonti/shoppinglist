@@ -12,8 +12,7 @@ import (
 )
 
 // baselineCSP is the policy served when no built index.html is available to
-// read a full policy from (dev, tests, an unbuilt tree), and under
-// PocketBase's own dashboard.
+// read a full policy from (dev, tests, an unbuilt tree).
 const baselineCSP = "frame-ancestors 'none'"
 
 // permissionsPolicy is the §10 permission enumeration, stated so that adding
@@ -48,8 +47,6 @@ var metaCSPPattern = regexp.MustCompile(
 //   - X-Content-Type-Options: nosniff. The auth token lives in IndexedDB
 //     (§5.6), so any script execution on this origin is a full account
 //     compromise.
-//   - X-Frame-Options: DENY, against clickjacking the destructive one-tap
-//     controls.
 //   - Cross-Origin-Opener-Policy: same-origin. Safe with OAuth2 ([D-76]): its
 //     popup handshake rides the realtime SSE topic, not window.opener; but
 //     nothing may poll `popup.closed`, which then reads true mid-sign-in
@@ -62,8 +59,13 @@ var metaCSPPattern = regexp.MustCompile(
 // index.html with the hash of the inline bootstrap script. A browser enforces
 // meta and header policies independently, so a hand-written header would block
 // that script, only in production; e2e/tests/csp.spec.ts asserts they agree.
-// The header adds `frame-ancestors 'none'` (which a meta CSP cannot express)
-// and covers non-document responses the meta tag cannot.
+// The header adds `frame-ancestors 'none'` (which a meta CSP cannot express),
+// against clickjacking the destructive one-tap controls, and covers
+// non-document responses the meta tag cannot.
+//
+// PocketBase sets its own policy where none is set yet: a full one for its
+// dashboard, and a sandbox for the files it serves (/api/files, and the
+// product photos through the same Serve). Those keep theirs.
 //
 // camera is false when the scanner is off ([D-218]).
 func Register(r *router.Router[*core.RequestEvent], publicFS fs.FS, camera bool) {
@@ -72,22 +74,20 @@ func Register(r *router.Router[*core.RequestEvent], publicFS fs.FS, camera bool)
 
 	r.BindFunc(func(e *core.RequestEvent) error {
 		h := e.Response.Header()
-		// PocketBase's default middleware already sends nosniff and
-		// Cross-Origin-Opener-Policy: same-origin; its X-Frame-Options is
-		// SAMEORIGIN, which this tightens.
+		// PocketBase's default middleware already sends nosniff,
+		// Cross-Origin-Opener-Policy: same-origin and X-Frame-Options, which
+		// the CSP's frame-ancestors overrides.
 		h.Set("Referrer-Policy", "no-referrer")
-		h.Set("X-Frame-Options", "DENY")
 		h.Set("Permissions-Policy", permissions)
-
-		// PocketBase's dashboard gets only the baseline CSP: a PocketBase
-		// version bump must not be breakable by a policy of ours.
-		if isDashboardPath(e.Request.URL.Path) {
-			h.Set("Content-Security-Policy", baselineCSP)
-		} else {
+		if !keepsPocketBaseCSP(e.Request.URL.Path) {
 			h.Set("Content-Security-Policy", appCSP)
 		}
 		return e.Next()
 	})
+}
+
+func keepsPocketBaseCSP(path string) bool {
+	return isDashboardPath(path) || strings.HasPrefix(path, "/api/files/")
 }
 
 func isDashboardPath(path string) bool {
