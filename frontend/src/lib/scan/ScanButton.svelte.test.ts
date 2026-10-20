@@ -376,6 +376,9 @@ describe('ScanButton', () => {
 
 		vi.mocked(startCameraScan).mockReturnValue({ result: new Promise(() => {}), stop: vi.fn() });
 		await openScanner();
+		// Real time: the timer waited out was scheduled while findBy* polled,
+		// which a fake clock would stall. scan-session.svelte.test.ts proves the
+		// same on a fake clock, one level down.
 		await new Promise((r) => setTimeout(r, 1400));
 
 		expect(screen.getByText('Barcode ins Bild halten')).toBeDefined();
