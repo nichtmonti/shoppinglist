@@ -695,7 +695,7 @@ Every cryptographic primitive the app relies on, who owns it and what it protect
 | Passkey ceremonies (§5.4) | WebAuthn assertions: the algorithms go-webauthn accepts by default (ES256, RS256, EdDSA among them), no attestation requested, user verification required | go-webauthn | sign-in; the server stores only public keys |
 | Ceremony challenge (§5.5) | 32 random bytes from go-webauthn, single-use, ~5 min | go-webauthn | replay of a ceremony |
 | Auth tokens (§5.6) | JWT, HS256, keyed by the account's `tokenKey` + the collection's secret, 90 days | PocketBase | every API call; rotating `tokenKey` revokes all of an account's tokens |
-| Invite tokens (§7.1, §10) | 32 bytes `crypto/rand`, base64url; stored as SHA-256 hex, looked up by hash (`randid.Token`, `randid.HashToken`) | `internal/invites` | joining a list; a database leak reveals no usable link |
+| Invite tokens (§7.1, §10) | 32 bytes `crypto/rand`, base64url (`randid.Token`); looked up by its SHA-256 hex, and a live link's token kept beside it for every member ([D-294]) | `internal/invites` | joining a list; a revoked or expired link opens nothing |
 | Setup link ([D-241]) | 32 bytes `crypto/rand`, base64url, as invite tokens; SHA-256 in memory only, compared with `crypto/subtle` | `internal/signup` | the first account of an invite-only instance |
 | Server-minted ids, photo tokens, handles | `crypto/rand` (`internal/randid`: 128 bits for ids and photo tokens, 64 for handles) | `internal/randid` | unguessable list ids and photo URLs (§10); PocketBase's own id generator is `math/rand` and never used where guessing matters |
 | Client-minted ids (items, categories, op ids, `browser_id`) | `crypto.randomUUID()` (122 random bits) | browser | collisions and guessable ids |

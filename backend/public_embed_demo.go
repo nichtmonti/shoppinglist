@@ -10,7 +10,7 @@ import (
 )
 
 // The demo build's SPA ([D-234]): public_embed.go's twin, reading
-// backend/pb_public_demo (scripts/build-demo.sh), a directory of its own so a
+// backend/pb_public_demo (`task build-demo`), a directory of its own so a
 // normal `go build` can never embed the demo SPA.
 //
 //go:embed all:pb_public_demo

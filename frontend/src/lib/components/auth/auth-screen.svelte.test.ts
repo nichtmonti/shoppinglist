@@ -170,6 +170,21 @@ describe('AuthScreen — discovering an existing passkey', () => {
 		await waitFor(() => expect(vi.mocked(login)).toHaveBeenCalledWith({ conditional: true }));
 	});
 
+	// A screen that left before its methods arrived (a sign-in another way, a
+	// navigation) starts no offer that nothing would cancel.
+	it('starts no ceremony when the screen left before its methods arrived', async () => {
+		let answer!: (methods: ReturnType<typeof defaultAuthMethods>) => void;
+		vi.mocked(fetchAuthMethods).mockReturnValue(new Promise((r) => (answer = r)));
+		const { unmount } = render(AuthScreen);
+
+		unmount();
+		answer(defaultAuthMethods());
+		await waitFor(() => expect(vi.mocked(canUsePasskeyAutofill)).toHaveBeenCalled());
+		await tick();
+
+		expect(vi.mocked(login)).not.toHaveBeenCalled();
+	});
+
 	// The autofill dropdown binds to an input whose `autocomplete` ENDS in
 	// "webauthn"; @simplewebauthn refuses to start the ceremony without one.
 	it('anchors the ceremony on a webauthn-autofill field', async () => {

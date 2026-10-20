@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **A passkey sign-in the server cannot start now says so** ("Sign-in could not be started."), when there were too many attempts or the server cannot be reached. It said "That didn't work. Please try again.", which pointed at the passkey.
 - **An invitation link created before v0.13.5 is no longer shown on the phone that created it either.** Like everyone else on the list, press "Reset link" there for a new one. Such links expire 30 days after they were made, so few are still valid.
 - **"Cancel" during a sign-in with your identity provider now also closes its window.** It stayed open behind the app.
 - **The "Install Shopping list" card no longer disappears when the browser is put in full screen.** A full-screen browser tab read as the installed app.

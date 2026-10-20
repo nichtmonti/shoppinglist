@@ -29,6 +29,8 @@ export class DndList<T> {
 		});
 	}
 
+	// Methods, so `items` above may read them: a field initializer may not
+	// read the private fields the constructor sets.
 	#rows(): T[] {
 		return this.#source();
 	}
@@ -61,7 +63,13 @@ export class DndList<T> {
 	finalize = (e: CustomEvent<DndEvent<DndItem<T>>>): void => {
 		this.items = dndMirror(e.detail.items);
 		const newOrder = this.items.map((item) => item.id);
-		if (newOrder.join() !== this.#rows().map(this.#idOf).join()) this.#onreorder(newOrder);
+		if (
+			newOrder.join() !==
+			this.#rows()
+				.map((row) => this.#id(row))
+				.join()
+		)
+			this.#onreorder(newOrder);
 	};
 
 	/** The zone options, plus the caller's own. One flip duration for zone and

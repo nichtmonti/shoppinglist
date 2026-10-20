@@ -594,6 +594,14 @@ describe('oidcLogin({ expectAccount }) — re-auth keeps the account', () => {
 	});
 });
 
+describe('login() — a refused begin', () => {
+	it('says sign-in could not be started, not that the passkey failed', async () => {
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ message: 'too many' }, 429));
+
+		await expect(login()).rejects.toThrow('auth_login_begin_failed');
+	});
+});
+
 describe('login({ expectAccount }) — passkey re-auth keeps the account', () => {
 	beforeEach(() => {
 		authStore.record = { id: 'acct-1' };

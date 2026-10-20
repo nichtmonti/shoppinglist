@@ -322,7 +322,8 @@ export async function login({
 			throw e;
 		}
 	} catch (e) {
-		if (e instanceof WrongAccountError || e instanceof UnknownPasskeyError) throw e;
+		// Named already (a refused begin or finish, an unknown passkey): as it is.
+		if (e instanceof WrongAccountError || e instanceof LocalizedError) throw e;
 		throw Object.assign(classifyCeremonyError(e) ?? new LocalizedError(t('auth_ceremony_failed')), {
 			cause: e
 		});
