@@ -71,16 +71,6 @@
 	);
 
 	onMount(() => {
-		// Mobile Safari applies `:active` to non-anchors only when the document
-		// has a touch listener; without it the tile press-scale does nothing on
-		// an iPhone. Empty on purpose.
-		document.addEventListener('touchstart', () => {}, { passive: true });
-
-		// §6.11 [D-137]: a suggestion hidden or restored offline is delivered when
-		// the connection comes back, not only at the next app start.
-		const onOnline = () => void suppression().then(({ flushSuppressed }) => flushSuppressed());
-		window.addEventListener('online', onOnline);
-
 		// Read the list-view pref from boot, so opening a list from the home
 		// finds it already answered rather than waiting a frame on it ([D-196]).
 		const unsubscribeView = listView.subscribe(() => {});
@@ -114,7 +104,6 @@
 			);
 		})();
 		return () => {
-			window.removeEventListener('online', onOnline);
 			unsubscribeView();
 			stopInstall();
 		};
@@ -185,6 +174,16 @@
 
 	onDestroy(() => unmountSync());
 </script>
+
+<!-- §6.11 [D-137]: a suggestion hidden or restored offline is delivered when
+     the connection comes back, not only at the next app start. -->
+<svelte:window
+	ononline={() => void suppression().then(({ flushSuppressed }) => flushSuppressed())}
+/>
+<!-- Mobile Safari applies `:active` to non-anchors only when the document has a
+     touch listener; without it the tile press-scale does nothing on an iPhone.
+     Empty on purpose (and passive, as Svelte makes touchstart). -->
+<svelte:document ontouchstart={() => {}} />
 
 <div class="app-shell" data-testid="app-shell">
 	<!-- static/theme.js sets the theme before the first paint; the inline head

@@ -9,6 +9,9 @@
 // Module state, because the event arrives before the banner and the settings
 // card that offer it exist.
 
+import { on } from 'svelte/events';
+import { MediaQuery } from 'svelte/reactivity';
+
 interface BeforeInstallPromptEvent extends Event {
 	prompt(): Promise<void>;
 	userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
@@ -16,49 +19,40 @@ interface BeforeInstallPromptEvent extends Event {
 
 export type InstallPlatform = 'ios' | 'android' | 'other';
 
-export const install = $state({
-	/** The captured `beforeinstallprompt`, while it is unspent. */
-	deferred: null as BeforeInstallPromptEvent | null,
-	/** Running from the home screen rather than in a browser tab. */
-	standalone: false,
-	/** `appinstalled` fired in this tab: the app is installed, this tab is not it. */
-	installed: false
-});
-
 const STANDALONE = '(display-mode: standalone), (display-mode: fullscreen)';
 
-function readStandalone(): boolean {
-	// iOS Safari's own flag predates its display-mode media query support.
-	const ios = (navigator as Navigator & { standalone?: boolean }).standalone === true;
-	return ios || (globalThis.matchMedia?.(STANDALONE).matches ?? false);
+class Install {
+	/** The captured `beforeinstallprompt`, while it is unspent. */
+	deferred = $state<BeforeInstallPromptEvent | null>(null);
+	/** `appinstalled` fired in this tab: the app is installed, this tab is not it. */
+	installed = $state(false);
+	// Created on first read: it calls matchMedia, which only a browser has.
+	#displayMode: MediaQuery | null = null;
+
+	/** Running from the home screen rather than in a browser tab. iOS Safari's
+	 *  own flag predates its display-mode media query support. */
+	get standalone(): boolean {
+		if ((navigator as Navigator & { standalone?: boolean }).standalone === true) return true;
+		return (this.#displayMode ??= new MediaQuery(STANDALONE)).current;
+	}
 }
+
+export const install = new Install();
 
 /** Registers the install listeners; returns their cleanup. Called once, at boot. */
 export function listenForInstall(): () => void {
-	install.standalone = readStandalone();
-
-	function onBeforeInstallPrompt(event: Event): void {
-		// Instead of the browser's own mini-infobar: our banner and card offer it.
-		event.preventDefault();
-		install.deferred = event as BeforeInstallPromptEvent;
-	}
-	function onInstalled(): void {
-		install.deferred = null;
-		install.installed = true;
-	}
-	const media = globalThis.matchMedia?.(STANDALONE) ?? null;
-	function onDisplayMode(): void {
-		install.standalone = readStandalone();
-	}
-
-	window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-	window.addEventListener('appinstalled', onInstalled);
-	media?.addEventListener('change', onDisplayMode);
-	return () => {
-		window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-		window.removeEventListener('appinstalled', onInstalled);
-		media?.removeEventListener('change', onDisplayMode);
-	};
+	const stops = [
+		on(window, 'beforeinstallprompt', (event) => {
+			// Instead of the browser's own mini-infobar: our banner and card offer it.
+			event.preventDefault();
+			install.deferred = event as BeforeInstallPromptEvent;
+		}),
+		on(window, 'appinstalled', () => {
+			install.deferred = null;
+			install.installed = true;
+		})
+	];
+	return () => stops.forEach((stop) => stop());
 }
 
 /**

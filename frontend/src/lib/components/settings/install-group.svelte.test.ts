@@ -27,7 +27,7 @@ beforeEach(() => {
 afterEach(() => {
 	stop();
 	vi.restoreAllMocks();
-	Object.assign(install, { deferred: null, standalone: false, installed: false });
+	Object.assign(install, { deferred: null, installed: false });
 });
 
 describe('InstallGroup', () => {
@@ -75,8 +75,13 @@ describe('InstallGroup', () => {
 	});
 
 	it('is not there when the app runs from the home screen', () => {
-		install.standalone = true;
-		render(InstallGroup);
-		expect(screen.queryByText(t('settings_install_title'))).toBeNull();
+		// iOS Safari's flag, the one the media query cannot stand in for.
+		Object.defineProperty(navigator, 'standalone', { value: true, configurable: true });
+		try {
+			render(InstallGroup);
+			expect(screen.queryByText(t('settings_install_title'))).toBeNull();
+		} finally {
+			Reflect.deleteProperty(navigator, 'standalone');
+		}
 	});
 });
