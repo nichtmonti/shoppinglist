@@ -122,10 +122,7 @@
 		></button>
 		{@render body(true)}
 		{#if opens}
-			<ChevronRight
-				class="size-4 shrink-0 text-muted-foreground"
-				aria-hidden="true"
-			/>
+			<ChevronRight class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
 		{/if}
 	</div>
 {:else}

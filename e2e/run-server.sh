@@ -33,10 +33,4 @@ if [ -n "${E2E_SUPERUSER:-}" ]; then
 	"$BINARY" superuser upsert "$E2E_SUPERUSER_EMAIL" "$E2E_SUPERUSER_PASSWORD" --dir="$DATA_DIR" >/dev/null
 fi
 
-# A harness that reads what the server logs (the invite-only instance's setup
-# link, [D-241]) names a file for it; the output still reaches Playwright.
-if [ -n "${E2E_SERVER_LOG:-}" ]; then
-	: >"$E2E_SERVER_LOG"
-	exec "$BINARY" serve --http="127.0.0.1:${PORT}" --dir="$DATA_DIR" > >(tee -a "$E2E_SERVER_LOG") 2>&1
-fi
 exec "$BINARY" serve --http="127.0.0.1:${PORT}" --dir="$DATA_DIR"

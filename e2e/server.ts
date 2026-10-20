@@ -1,4 +1,3 @@
-import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 // What every Playwright harness config shares: the port it runs on, the app
@@ -7,40 +6,23 @@ import { join, resolve } from 'node:path';
 
 const REPO = resolve(import.meta.dirname, '..');
 
-// The ports of scripts/dev.sh (backend 8090, Vite 5173). A harness owns its
-// whole origin — the passkey ceremonies are signed against RP_ORIGIN below —
-// so a run on a dev port would reuse the dev server and every ceremony would
-// fail on an origin mismatch. Refusing them is what lets the harnesses run
-// while dev.sh is up ([D-157]).
-const DEV_PORTS = ['8090', '5173'];
-
-/** The harness's port: E2E_PORT, else `fallback`. Refuses the dev ports. */
+/** The harness's port: E2E_PORT, else `fallback`. */
 export function basePort(fallback: string): string {
-	const port = process.env.E2E_PORT ?? fallback;
-	if (DEV_PORTS.includes(port)) {
-		throw new Error(
-			`E2E_PORT=${port} is a scripts/dev.sh port; Playwright would reuse the dev ` +
-				`server and every passkey ceremony would fail on its origin. Use ${fallback}.`
-		);
-	}
-	return port;
+	return process.env.E2E_PORT ?? fallback;
 }
 
 /**
  * One app server on `port` (e2e/run-server.sh), with the WebAuthn RP set to
- * its own origin. `extra` adds or overrides environment variables;
- * `reuseExisting` adopts a server already answering on the port.
+ * its own origin. `extra` adds or overrides environment variables. A harness
+ * owns its whole origin, so it never adopts a running server: Playwright
+ * refuses a port that already answers, scripts/dev.sh's included ([D-157]).
  */
-export function appServer(
-	port: string,
-	extra: Record<string, string> = {},
-	{ reuseExisting = false }: { reuseExisting?: boolean } = {}
-) {
+export function appServer(port: string, extra: Record<string, string> = {}) {
 	return {
 		command: 'bash e2e/run-server.sh',
 		cwd: REPO,
 		url: `http://127.0.0.1:${port}/api/health`,
-		reuseExistingServer: reuseExisting,
+		reuseExistingServer: false,
 		timeout: 180_000,
 		// A stop it can finish: a binary built with -cover writes what the
 		// suite reached only on a normal exit, and Playwright's default is
@@ -82,19 +64,21 @@ export function viteDevServer(port: string, instance: string) {
 }
 
 /**
- * The invite-only instance the functional suite boots beside its own server
- * ([D-241]): SHOPPINGLIST_SIGNUP=invite on an empty database, whose output
- * run-server.sh copies to `log` — the setup link it prints at boot is
- * invite-signup.spec.ts's way in.
+ * An invite-only app server ([D-241]): SHOPPINGLIST_SIGNUP=invite on an empty
+ * database. It is up once it has printed the first account's setup link, which
+ * Playwright's own `wait` copies to process.env.SETUP_LINK for the specs.
  */
-export function inviteOnlyServer() {
-	const port = process.env.E2E_INVITE_PORT ?? '8089';
+export function inviteOnlyServer(port: string) {
 	return {
-		port,
-		origin: `http://localhost:${port}`,
-		log: join(tmpdir(), `shoppinglist-invite-${port}.log`)
+		...appServer(port, { SHOPPINGLIST_SIGNUP: 'invite', E2E_FRESH_DATA: '1' }),
+		// The link, not the health URL: Playwright takes whichever comes first.
+		url: undefined,
+		wait: { stderr: /(?<setup_link>https?:\/\/\S+\/#setup=[\w-]+)/ }
 	};
 }
+
+/** The functional suite's invite-only instance, beside its own server. */
+export const INVITE_PORT = process.env.E2E_INVITE_PORT ?? '8089';
 
 /**
  * The superuser run-server.sh creates when the harness sets `E2E_SUPERUSER`:

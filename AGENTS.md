@@ -259,9 +259,9 @@ the gate does not check it.
 **Ports.** Each harness has one port (above); the shots harness takes 8091
 (`app`), 8092 (`gallery`) and 8087, 8086 and Dex on 5558 (`docs`); 8099 is the
 integration server. `scripts/dev.sh` holds 8090 (origin `:5173`, Dex on 5556
-with `--oidc`), and `basePort()` in `e2e/server.ts` refuses both:
-Playwright's `reuseExistingServer` would adopt the dev server and every passkey
-ceremony would fail on an origin mismatch.
+with `--oidc`). No harness reuses a running server, so Playwright refuses a
+port that answers: adopting the dev server, every passkey ceremony would fail
+on an origin mismatch.
 
 **The gate runs beside `scripts/dev.sh`** ([D-157]) because the dev server
 generates into `frontend/.svelte-kit-dev` and the Paraglide CLI and plugin
