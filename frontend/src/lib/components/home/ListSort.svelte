@@ -14,7 +14,10 @@
 	import ArrowDownUp from '@lucide/svelte/icons/arrow-down-up';
 	import GripVertical from '@lucide/svelte/icons/grip-vertical';
 
-	let { onarrange }: { onarrange?: () => void } = $props();
+	let {
+		onarrange,
+		trigger = $bindable(null)
+	}: { onarrange?: () => void; trigger?: HTMLElement | null } = $props();
 
 	let options = $derived([
 		{ value: 'activity', label: t('home_sort_activity'), icon: ArrowDownClock },
@@ -30,6 +33,7 @@
 </script>
 
 <SortMenu
+	bind:trigger
 	value={$listSort}
 	{options}
 	onselect={select}

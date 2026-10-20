@@ -23,7 +23,8 @@
 		label,
 		testid,
 		action,
-		group
+		group,
+		trigger = $bindable(null)
 	}: {
 		value: T;
 		options: Option[];
@@ -42,6 +43,8 @@
 			options: { value: string; label: string; icon: Component }[];
 			onselect: (value: string) => void;
 		};
+		/** The trigger button, for a caller that moves focus back to it. */
+		trigger?: HTMLElement | null;
 	} = $props();
 
 	let selected = $derived(options.find((option) => option.value === value) ?? options[0]);
@@ -63,6 +66,7 @@
 
 <DropdownMenu.Root>
 	<DropdownMenu.Trigger
+		bind:ref={trigger}
 		class={buttonVariants({ variant: 'ghost', size: 'icon' })}
 		aria-label={triggerLabel}
 		data-testid={testid}
