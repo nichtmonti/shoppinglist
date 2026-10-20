@@ -717,7 +717,17 @@ describe('ListView — a swipe toward the row start removes ([D-289])', () => {
 	// happy-dom lays nothing out, so the row is 0px wide and the threshold is
 	// the 96px floor.
 	async function swipe(row: HTMLElement, dx: number, dy = 0): Promise<void> {
-		const at = { clientX: 300, clientY: 100, pointerId: 1, isPrimary: true, button: 0 };
+		// A mouse's events, as Playwright's swipe sends them; every browser
+		// pointer event names its type.
+		const at = {
+			clientX: 300,
+			clientY: 100,
+			pointerId: 1,
+			isPrimary: true,
+			button: 0,
+			buttons: 1,
+			pointerType: 'mouse'
+		};
 		await fireEvent.pointerDown(row, at);
 		for (const step of [0.25, 0.5, 0.75, 1]) {
 			await fireEvent.pointerMove(row, {
@@ -741,8 +751,9 @@ describe('ListView — a swipe toward the row start removes ([D-289])', () => {
 		const row = await rowOf('Senf');
 
 		await swipe(row, -160);
-		// The click that ends the drag lands on the name: it must not open the sheet.
-		await fireEvent.click(within(row).getByRole('button', { name: 'Senf' }));
+		// The click that ends the drag lands on the name: it must not open the
+		// sheet. detail 1, as a browser's pointer click carries.
+		await fireEvent.click(within(row).getByRole('button', { name: 'Senf' }), { detail: 1 });
 		expect(screen.queryByRole('dialog')).toBeNull();
 
 		await waitFor(async () => {

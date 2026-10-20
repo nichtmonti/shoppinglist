@@ -13,7 +13,7 @@ linux/arm64, as GoReleaser builds it) and the npm packages whose code, styles,
 fonts or images end up in the web app compiled into that binary (`vite build`
 of frontend/). Development and test tooling is not shipped and not listed.
 
-Components: 39 Go, 36 npm, 1 embedded in a listed package.
+Components: 39 Go, 38 npm, 1 embedded in a listed package.
 
 ## Notes
 
@@ -91,6 +91,8 @@ Components: 39 Go, 36 npm, 1 embedded in a listed package.
 | @lucide/svelte | 1.58.0 | ISC AND MIT | Copyright (c) 2026 Lucide Icons and Contributors<br>Copyright (c) 2013-present Cole Bemis |
 | @simplewebauthn/browser | 14.0.0 | MIT | Copyright (c) 2020 Matthew Miller |
 | @sveltejs/kit | 3.1.0 | MIT | Copyright (c) 2020 [these people](https://github.com/sveltejs/kit/graphs/contributors) |
+| @use-gesture/core | 10.3.1 | MIT | Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com> |
+| @use-gesture/vanilla | 10.3.1 | MIT | Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com> |
 | barcode-detector | 3.2.2 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
 | bits-ui | 2.19.5 | MIT | Copyright (c) 2023 Hunter Johnston |
 | clsx | 2.1.1 | MIT | Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com) |
@@ -3485,13 +3487,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### MIT: github.com/golang-jwt/jwt/v5, github.com/philhofer/fwd, @sveltejs/kit and 3 more
+### MIT: github.com/golang-jwt/jwt/v5, github.com/philhofer/fwd, @sveltejs/kit and 5 more
 
 Applies to:
 
 - github.com/golang-jwt/jwt/v5 v5.3.1 (LICENSE): Copyright (c) 2012 Dave Grijalva; Copyright (c) 2021 golang-jwt maintainers
 - github.com/philhofer/fwd v1.2.0 (LICENSE.md): Copyright (c) 2014-2015, Philip Hofer
 - @sveltejs/kit 3.1.0 (LICENSE): Copyright (c) 2020 [these people](https://github.com/sveltejs/kit/graphs/contributors)
+- @use-gesture/core 10.3.1 (LICENSE): Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com>
+- @use-gesture/vanilla 10.3.1 (LICENSE): Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com>
 - devalue 5.9.4 (LICENSE): Copyright (c) 2018-19 [these people](https://github.com/rich-harris/devalue/graphs/contributors)
 - qrcode-generator 2.0.4 (MIT terms): Copyright (c) 2009 Kazuhiko Arase
 - svelte 5.57.2 (LICENSE.md): Copyright (c) 2016-2025 [Svelte Contributors](https://github.com/sveltejs/svelte/graphs/contributors)
