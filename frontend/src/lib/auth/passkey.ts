@@ -1,6 +1,7 @@
 // Passkey registration / login ceremonies (§5.4) built on
 // @simplewebauthn/browser, which is imported DYNAMICALLY at ceremony time so
 // the app entry does not carry it on every boot.
+import { v4 } from 'uuid';
 import { authHeaders, pb } from '../pb';
 import { markAuthExpired, syncAuthState } from './state';
 import { rememberLoginMethod } from './login-methods';
@@ -24,7 +25,7 @@ function loadWebauthn(): Promise<typeof import('@simplewebauthn/browser')> {
 function browserId(): string {
 	let id = readStored('browser_id');
 	if (!id) {
-		id = crypto.randomUUID();
+		id = v4();
 		writeStored('browser_id', id);
 	}
 	return id;

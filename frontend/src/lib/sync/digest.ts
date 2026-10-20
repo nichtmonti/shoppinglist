@@ -1,16 +1,11 @@
 // The digest probe (§8.5 [D-40]).
+// A library, not crypto.subtle: the browser has that only in a secure context,
+// and the demo also runs on plain http:// at a LAN address.
+import { sha256 } from '@noble/hashes/sha2.js';
+import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import { db } from '../db';
 import type { DigestEntry } from './types';
 import { apiFetch } from './http';
-
-// SHA-256 hex helper — matches Go's sha256.Sum256 hex output.
-async function sha256Hex(s: string): Promise<string> {
-	const data = new TextEncoder().encode(s);
-	const buf = await crypto.subtle.digest('SHA-256', data);
-	return Array.from(new Uint8Array(buf))
-		.map((b) => b.toString(16).padStart(2, '0'))
-		.join('');
-}
 
 export interface Digest {
 	row_count: number;
@@ -23,11 +18,15 @@ export interface Digest {
  * row_count and the greatest `updated` (§8.5). Byte-identical to `digestOf` in
  * backend/internal/sync/digest.go, both pinned by `seed/digest-vectors.json`.
  */
-export async function digestOf(rows: { id: string; updated: string }[]): Promise<Digest> {
+export function digestOf(rows: { id: string; updated: string }[]): Digest {
 	const pairs = rows.map((r) => `${r.id}:${r.updated}`).sort();
 	let max_updated = '';
 	for (const r of rows) if (r.updated > max_updated) max_updated = r.updated;
-	return { row_count: rows.length, max_updated, hash: await sha256Hex(pairs.join('\n')) };
+	return {
+		row_count: rows.length,
+		max_updated,
+		hash: bytesToHex(sha256(utf8ToBytes(pairs.join('\n'))))
+	};
 }
 
 // One list's digest over its shadow rows, the server state as this device heard

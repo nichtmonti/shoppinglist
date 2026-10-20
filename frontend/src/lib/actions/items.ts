@@ -4,6 +4,7 @@
 // writes a row the outbox never pushes, and the next repair snapshot (§8.5)
 // reverts it. The §9.1 undo toasts live here too, so the views cannot drift on
 // the copy or on which actions get a safety net.
+import { v4 } from 'uuid';
 import { db, type Item } from '#lib/db.js';
 import {
 	createRecord,
@@ -40,7 +41,7 @@ export interface NewItemFields {
  * the surviving row, so never cache the returned id across a sync cycle.
  */
 export async function addItem(listId: string, fields: NewItemFields): Promise<string> {
-	const id = crypto.randomUUID();
+	const id = v4();
 	await createRecord(
 		'items',
 		listId,

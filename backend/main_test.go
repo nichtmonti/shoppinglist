@@ -16,6 +16,7 @@ import (
 
 	"shoppinglist/internal/listcap"
 	"shoppinglist/internal/signup"
+	"shoppinglist/internal/webauthn"
 )
 
 // The wrapper must hand PocketBase's installer callback the real
@@ -27,7 +28,8 @@ func TestInstallerOriginFunc(t *testing.T) {
 		return nil
 	}
 
-	wrapped := installerOriginFunc(inner, "https://list.example.com")
+	env := &serveEnv{wacfg: &webauthn.Config{RPOrigin: "https://list.example.com"}, adminUI: true}
+	wrapped := installerFunc(inner, env)
 	if err := wrapped(nil, nil, "http://0.0.0.0:8090"); err != nil {
 		t.Fatalf("wrapped: %v", err)
 	}
@@ -36,8 +38,13 @@ func TestInstallerOriginFunc(t *testing.T) {
 	}
 
 	// The installer can be disabled (nil func) — the wrap must not invent one.
-	if installerOriginFunc(nil, "https://list.example.com") != nil {
+	if installerFunc(nil, env) != nil {
 		t.Error("nil inner must stay nil")
+	}
+	// With the dashboard off, its link would be a 404.
+	env.adminUI = false
+	if installerFunc(inner, env) != nil {
+		t.Error("SHOPPINGLIST_ADMIN_UI=off must drop the installer")
 	}
 }
 
@@ -61,8 +68,13 @@ func TestInvocations(t *testing.T) {
 		if got := allowedOrigin(t, base, refused); got != "" {
 			t.Errorf("CORS for %s = %q, want it refused", refused, got)
 		}
-		if out := stop(); !strings.Contains(out, bootLine) {
+		out := stop()
+		if !strings.Contains(out, bootLine) || !strings.Contains(out, "started at "+appOrigin) {
 			t.Errorf("serve printed no boot lines: %s", out)
+		}
+		// The dashboard is off: no banner naming it, no installer link to it.
+		if strings.Contains(out, "Dashboard:") || strings.Contains(out, "pbinstall") {
+			t.Errorf("serve pointed at the removed dashboard: %s", out)
 		}
 	}
 	t.Run("serve", func(t *testing.T) { serves(t, appOrigin, other, "serve") })

@@ -13,7 +13,7 @@ linux/arm64, as GoReleaser builds it) and the npm packages whose code, styles,
 fonts or images end up in the web app compiled into that binary (`vite build`
 of frontend/). Development and test tooling is not shipped and not listed.
 
-Components: 39 Go, 36 npm, 1 embedded in a listed package.
+Components: 39 Go, 38 npm, 1 embedded in a listed package.
 
 ## Notes
 
@@ -89,6 +89,7 @@ Components: 39 Go, 36 npm, 1 embedded in a listed package.
 | @fontsource-variable/readex-pro | 5.3.0 | OFL-1.1 | Copyright 2019 The Readex Pro Project Authors (https://github.com/ThomasJockin/readexpro) |
 | @inlang/paraglide-js | 2.29.0 | MIT | Copyright (c) 2025 Opral US Inc. |
 | @lucide/svelte | 1.58.0 | ISC AND MIT | Copyright (c) 2026 Lucide Icons and Contributors<br>Copyright (c) 2013-present Cole Bemis |
+| @noble/hashes | 2.4.0 | MIT | Copyright (c) 2022 Paul Miller (https://paulmillr.com) |
 | @simplewebauthn/browser | 14.0.0 | MIT | Copyright (c) 2020 Matthew Miller |
 | @sveltejs/kit | 3.1.0 | MIT | Copyright (c) 2020 [these people](https://github.com/sveltejs/kit/graphs/contributors) |
 | barcode-detector | 3.2.2 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
@@ -117,6 +118,7 @@ Components: 39 Go, 36 npm, 1 embedded in a listed package.
 | tailwind-variants | 3.3.1 | MIT | Copyright (c) 2020 Tailwid Variants |
 | tailwindcss | 4.3.3 | MIT | Copyright (c) Tailwind Labs, Inc. |
 | tw-animate-css | 1.4.0 | MIT | Copyright (c) 2025 Wombosvideo |
+| uuid | 14.0.2 | MIT | Copyright (c) 2010-2020 Robert Kieffer and other contributors |
 | vaul-svelte | 1.0.0-next.7 | MIT | Copyright (c) 2023 Hunter Johnston<br>Copyright (c) 2023 Emil Kowalski |
 | zxing-wasm | 3.1.3 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
 
@@ -3362,7 +3364,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### MIT: github.com/asaskevich/govalidator, github.com/disintegration/imaging, github.com/domodwyer/mailyak/v3 and 11 more
+### MIT: @noble/hashes
+
+Applies to:
+
+- @noble/hashes 2.4.0 (LICENSE): Copyright (c) 2022 Paul Miller (https://paulmillr.com)
+
+```text
+The MIT License (MIT)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+### MIT: github.com/asaskevich/govalidator, github.com/disintegration/imaging, github.com/domodwyer/mailyak/v3 and 12 more
 
 Applies to:
 
@@ -3380,6 +3410,7 @@ Applies to:
 - pocketbase 0.28.1 (LICENSE.md): Copyright (c) 2022 - present, Gani Georgiev
 - style-to-object 1.0.14 (LICENSE): Copyright (c) 2017 Menglin "Mark" Xu <mark@remarkablemark.org>
 - tabbable 6.5.0 (LICENSE): Copyright (c) 2015 David Clark
+- uuid 14.0.2 (LICENSE.md): Copyright (c) 2010-2020 Robert Kieffer and other contributors
 
 ```text
 The MIT License (MIT)

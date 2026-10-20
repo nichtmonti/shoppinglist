@@ -5,15 +5,22 @@ import { expect, test } from '../tests/fixtures';
 import { expireStoredToken, inviteLinkFor, openListView } from '../tests/helpers';
 import type { Page } from '@playwright/test';
 
-/** Press "Ausprobieren" on a fresh visit and wait for the example list. */
+/** Press "Ausprobieren" on a fresh visit, which stays on the overview of the
+ *  example lists, and open the weekly shop. */
 async function startDemo(page: Page): Promise<void> {
 	await page.goto('/');
 	await page.getByTestId('demo-start').click();
-	await expect(page).toHaveURL(/\/list\/[^/]+$/, { timeout: 15_000 });
+	for (const name of ['Basics', 'Barbecue', 'Camping']) {
+		await expect(page.getByRole('link', { name: `${name} öffnen` })).toBeVisible({
+			timeout: 15_000
+		});
+	}
+	await expect(page).toHaveURL(/\/$/);
+	await page.getByRole('link', { name: 'Basics öffnen' }).click();
 	await expect(page.getByRole('button', { name: 'Basics', exact: true })).toBeVisible();
 }
 
-test('a visitor gets in with one button, to an example list and the demo notice', async ({
+test('a visitor gets in with one button, to the example lists and the demo notice', async ({
 	page
 }) => {
 	await page.goto('/');
@@ -39,10 +46,6 @@ test('a visitor gets in with one button, to an example list and the demo notice'
 	// Earlier purchases, so "Frühere Artikel" is not empty.
 	await page.getByRole('button', { name: /^Frühere Artikel/ }).click();
 	await expect(page.getByText('Olivenöl')).toBeVisible();
-	// More lists, so the home screen has more than one card.
-	await page.goto('/');
-	await expect(page.getByText('Camping')).toBeVisible();
-	await expect(page.getByText('Barbecue')).toBeVisible();
 });
 
 test('a second visitor joins through the invite and sees changes arrive', async ({

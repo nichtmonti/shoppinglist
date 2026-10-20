@@ -133,7 +133,8 @@ func logServeEnv(env *serveEnv) {
 	if !env.wacfg.Enabled && !demoBuild {
 		log.Printf("shoppinglist: passkeys off (%s=off) — sign-in is OIDC only", webauthn.PasskeysEnv)
 	}
-	if !env.adminUI {
+	// A demo instance has no administration to speak of ([D-234]).
+	if !env.adminUI && !demoBuild {
 		log.Printf("shoppinglist: remote administration disabled (%s=off) — "+
 			"the dashboard at /_/ returns 404 and superusers cannot authenticate over HTTP; "+
 			"run the `superuser` and `dictionary-suggestions` subcommands instead "+

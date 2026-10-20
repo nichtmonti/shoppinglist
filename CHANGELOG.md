@@ -8,6 +8,10 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **The demo works at any address, not only at `localhost` or over HTTPS.** Opened as `http://` plus a machine's IP or name (a phone on the home network, say), the browser withholds two functions the app used, so the example lists stayed empty and nothing typed in reached the server. The app now brings its own ([D-234]).
+- **"Try it" leaves you on the overview of the three example lists** instead of opening one of them ([D-234]).
+- **With `SHOPPINGLIST_ADMIN_UI=off`, and in the demo, the server log no longer offers a superuser.** Gone are the link to the removed dashboard, PocketBase's line naming it and, in the demo, the hint to run `superuser upsert`; a line says where the server is reachable instead. An instance with the dashboard keeps its one-time setup link.
+
 ## v0.16.3: product photos that reach the item however late they arrive, and a demo in both languages with photos of its own (2026-10)
 
 **For operators.** Nothing to do before upgrading. The server gets one more scheduled job, which retries a product photo that failed to download every 15 minutes for two days; it asks the same Open Food Facts photo hosts as before, so an egress allowlist needs no change.

@@ -2,6 +2,7 @@
 // #lib/actions/items.ts gives ([D-40]). A reorder is per-row updates, not one
 // batched op: §6.7 accepts that under the §8 merge, and the outbox coalesces
 // repeated edits to a row (§8.2).
+import { v4 } from 'uuid';
 import { collectionTables, db, type ListCategory } from '#lib/db.js';
 import { pb } from '#lib/pb.js';
 import {
@@ -25,7 +26,7 @@ export interface NewCategoryFields {
 
 /** Add a custom category (§6.7: "a member-added custom category"). `slug` stays null. */
 export async function addCategory(listId: string, fields: NewCategoryFields): Promise<string> {
-	const id = crypto.randomUUID();
+	const id = v4();
 	// No `slug`, not even null: it is server-owned ([D-08]), and naming it makes
 	// the server deny the whole create as field_unknown.
 	await createRecord('list_categories', listId, id, {

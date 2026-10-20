@@ -109,7 +109,7 @@ func main() {
 			}
 			// The default InstallerFunc is set before hooks run, so
 			// the wrap reliably sees it.
-			e.InstallerFunc = installerOriginFunc(e.InstallerFunc, env.wacfg.RPOrigin)
+			e.InstallerFunc = installerFunc(e.InstallerFunc, env)
 			registerRoutes(e.Router, env)
 			if err := e.Next(); err != nil {
 				return err
@@ -147,6 +147,11 @@ func main() {
 				return err
 			}
 			registerDomainHooks(e.App, env)
+			// Last, where PocketBase prints its start banner, which is off with
+			// the dashboard (startBanner).
+			if !env.adminUI {
+				log.Printf("shoppinglist: started at %s", env.wacfg.RPOrigin)
+			}
 			return nil
 		},
 	})
@@ -160,7 +165,7 @@ func main() {
 // them (what app.Start would add), and returns serve: main tells a serve
 // invocation by cobra's own reading of argv, and defaults its flags.
 func addCommands(app *pocketbase.PocketBase) *cobra.Command {
-	serve := cmd.NewServeCommand(app, true)
+	serve := cmd.NewServeCommand(app, startBanner())
 	app.RootCmd.AddCommand(serve, cmd.NewSuperuserCommand(app),
 		// §6.13 operator content-curation tooling: a CLI subcommand, not an
 		// HTTP route, since only the operator calls it.
@@ -231,17 +236,27 @@ func registerDomainHooks(app core.App, env *serveEnv) {
 	}
 }
 
-// installerOriginFunc wraps PocketBase's first-boot superuser installer
-// callback so it prints the deployment's origin rather than the bind address
-// (0.0.0.0 in the container). A nil inner stays nil.
-func installerOriginFunc(
+// startBanner is whether serve prints PocketBase's start banner, which names
+// the dashboard at /_/: not when SHOPPINGLIST_ADMIN_UI=off has removed it. A
+// bad value shows it, as resolveServeEnv fails the boot anyway.
+func startBanner() bool {
+	on, err := security.AdminUIFromEnv()
+	return on || err != nil
+}
+
+// installerFunc wraps PocketBase's first-boot superuser installer callback so
+// it prints the deployment's origin rather than the bind address (0.0.0.0 in
+// the container). With the dashboard off there is none: its link would be a
+// 404, and PocketBase would still mint the installer's own superuser. A nil
+// inner stays nil.
+func installerFunc(
 	inner func(app core.App, systemSuperuser *core.Record, baseURL string) error,
-	origin string,
+	env *serveEnv,
 ) func(app core.App, systemSuperuser *core.Record, baseURL string) error {
-	if inner == nil {
+	if inner == nil || !env.adminUI {
 		return nil
 	}
 	return func(app core.App, systemSuperuser *core.Record, _ string) error {
-		return inner(app, systemSuperuser, origin)
+		return inner(app, systemSuperuser, env.wacfg.RPOrigin)
 	}
 }

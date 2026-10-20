@@ -78,8 +78,8 @@ interface ExampleList {
 // Names and aisles as in backend/seed/items.json, covering quantities, notes,
 // an unknown item, scanned products, ticked ones and earlier purchases. Each
 // item carries both names, so it follows a language switch as a scanned
-// product does ([D-21]); a typed one would not. The weekly shop, last, is
-// where the visitor lands.
+// product does ([D-21]); a typed one would not. The weekly shop, last, heads
+// the overview.
 export const EXAMPLE_LISTS: readonly ExampleList[] = [
 	{
 		name: 'Camping',
@@ -188,23 +188,20 @@ const DAY_MS = 24 * 60 * MINUTE_MS;
 /**
  * Create the example lists through the list-backup import ([D-72]), the one
  * way in that keeps purchase dates, so earlier trips show under "Frühere
- * Artikel" with their own days. Returns the id of the last one, the weekly
- * shop, which the visitor is taken to.
+ * Artikel" with their own days.
  */
-export async function createExampleList(): Promise<string> {
+export async function createExampleLists(): Promise<void> {
 	const lang = getLocale();
 	const [products, categories] = await Promise.all([lookUpProducts(), templateCategories()]);
 	const slugs = new Set(categories.map((c) => c.key));
 	const now = Date.now();
-	let listId = '';
 	for (const example of EXAMPLE_LISTS) {
 		const rows = example.items.flatMap((item, i) => {
 			const row = exampleRow(item, products, lang, slugs, now - i * MINUTE_MS);
 			return row ? [row] : [];
 		});
-		listId = await importList(backupDocument(example.name, categories, rows), example.name);
+		await importList(backupDocument(example.name, categories, rows), example.name);
 	}
-	return listId;
 }
 
 /** The example products' lookups, by barcode: answered from the demo
