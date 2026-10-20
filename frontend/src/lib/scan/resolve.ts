@@ -16,7 +16,6 @@ export interface ResolvedProduct {
 
 const SUCCESS_CACHE_MS = 30 * 24 * 60 * 60 * 1000;
 const MISS_CACHE_MS = 24 * 60 * 60 * 1000;
-const inFlight = new Map<string, Promise<ResolvedProduct | null>>();
 
 export interface ResolveDeps {
 	transport?: LookupTransport;
@@ -34,21 +33,6 @@ export interface ResolveDeps {
 export async function resolveScannedProduct(
 	barcode: string,
 	deps: ResolveDeps = {}
-): Promise<ResolvedProduct | null> {
-	const running = inFlight.get(barcode);
-	if (running) return running;
-	const work = resolveScannedProductOnce(barcode, deps);
-	inFlight.set(barcode, work);
-	try {
-		return await work;
-	} finally {
-		if (inFlight.get(barcode) === work) inFlight.delete(barcode);
-	}
-}
-
-async function resolveScannedProductOnce(
-	barcode: string,
-	deps: ResolveDeps
 ): Promise<ResolvedProduct | null> {
 	const cached = await db.scanned_products.get(barcode);
 	const age = cached ? Date.now() - Date.parse(cached.looked_up_at) : Infinity;

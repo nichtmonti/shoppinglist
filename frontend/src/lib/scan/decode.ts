@@ -19,44 +19,24 @@
 //    otherwise every later scan, online too, would fail until a reload.
 //
 // The ponyfill and the 1MB .wasm load DYNAMICALLY at the first scan, so they do
-// not ride on every route with a scan button.
-
-let ponyfillModule: Promise<typeof import('barcode-detector/ponyfill')> | null = null;
-function loadPonyfill(): Promise<typeof import('barcode-detector/ponyfill')> {
-	// A rejected load must not stick: a transient chunk-fetch failure would
-	// otherwise break every later scan until reload.
-	return (ponyfillModule ??= import('barcode-detector/ponyfill').catch((err: unknown) => {
-		ponyfillModule = null;
-		throw err;
-	}));
-}
-
-let wasmUrlPromise: Promise<string> | null = null;
-function loadWasmUrl(): Promise<string> {
-	return (wasmUrlPromise ??= import('zxing-wasm/reader/zxing_reader.wasm?url')
-		.then((m) => m.default)
-		.catch((err: unknown) => {
-			wasmUrlPromise = null;
-			throw err;
-		}));
-}
+// not ride on every route with a scan button; the `?url` import is only the
+// file's address.
+import wasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url';
 
 // One object for the session: the ponyfill reuses its module while the
 // overrides it is given are the same, and instantiates again when they differ.
-let overrides: { locateFile: (path: string, prefix: string) => string } | null = null;
+const overrides = {
+	locateFile: (path: string, prefix: string) => (path.endsWith('.wasm') ? wasmUrl : prefix + path)
+};
 
 /** A detector on the bundled .wasm, instantiated once; a failed
  *  instantiation is dropped, so the next scan tries again. */
 async function createDetector(): Promise<
 	InstanceType<typeof import('barcode-detector/ponyfill').BarcodeDetector>
 > {
-	const [{ BarcodeDetector, prepareZXingModule, purgeZXingModule }, wasmUrl] = await Promise.all([
-		loadPonyfill(),
-		loadWasmUrl()
-	]);
-	overrides ??= {
-		locateFile: (path, prefix) => (path.endsWith('.wasm') ? wasmUrl : prefix + path)
-	};
+	const { BarcodeDetector, prepareZXingModule, purgeZXingModule } = await import(
+		'barcode-detector/ponyfill'
+	);
 	try {
 		await prepareZXingModule({ overrides, fireImmediately: true });
 	} catch {

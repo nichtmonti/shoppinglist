@@ -7,7 +7,6 @@ const decoder = {
 	// The decoder chunk failing to load: the offline first-scan shape, or a
 	// chunk fetch that failed before the service worker took control.
 	ponyfillFails: false,
-	wasmFails: false,
 	// The .wasm fetched but not instantiated: a first scan offline ([D-95]).
 	prepareFails: false,
 	prepare: vi.fn<(options: { overrides: object }) => Promise<void>>(),
@@ -30,10 +29,7 @@ function mockDecoderChunks(): void {
 			purgeZXingModule: decoder.purge
 		};
 	});
-	vi.doMock('zxing-wasm/reader/zxing_reader.wasm?url', () => {
-		if (decoder.wasmFails) throw new Error('asset load failed');
-		return { default: '/zxing_reader.wasm' };
-	});
+	vi.doMock('zxing-wasm/reader/zxing_reader.wasm?url', () => ({ default: '/zxing_reader.wasm' }));
 }
 
 function fakeCamera() {
@@ -57,7 +53,6 @@ beforeEach(async () => {
 	mockDecoderChunks();
 	decode = await import('./decode');
 	decoder.ponyfillFails = false;
-	decoder.wasmFails = false;
 	decoder.prepareFails = false;
 	decoder.prepare.mockReset().mockImplementation(async () => {
 		if (decoder.prepareFails) throw new Error('both async and sync fetching of the wasm failed');
@@ -167,18 +162,15 @@ describe('startCameraScan', () => {
 		await expect(scan.result).rejects.toMatchObject({ name: 'NotReadableError' });
 	});
 
-	it.each([
-		['decoder module', 'ponyfillFails'],
-		['.wasm', 'wasmFails']
-	] as const)('retries a %s that failed to load at the next scan', async (_, flag) => {
+	it('retries a decoder module that failed to load at the next scan', async () => {
 		getUserMedia.mockImplementation(() => Promise.resolve(fakeCamera().stream));
 		decoder.detect.mockResolvedValue([{ rawValue: '4006381333931' }]);
 
-		decoder[flag] = true;
+		decoder.ponyfillFails = true;
 		await expect(decode.startCameraScan(video).result).rejects.toThrow();
 
 		// Back online: the same session scans again without a reload.
-		decoder[flag] = false;
+		decoder.ponyfillFails = false;
 		await expect(decode.startCameraScan(video).result).resolves.toBe('4006381333931');
 	});
 });

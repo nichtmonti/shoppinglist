@@ -19,7 +19,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export type InstallPlatform = 'ios' | 'android' | 'other';
 
-const STANDALONE = '(display-mode: standalone), (display-mode: fullscreen)';
+const STANDALONE = '(display-mode: standalone)';
 
 class Install {
 	/** The captured `beforeinstallprompt`, while it is unspent. */

@@ -67,8 +67,8 @@ function assertMembershipData(recs: unknown): asserts recs is Membership[] {
 
 // Cycles run one after another in a tab. Leadership (§8.7) only separates
 // tabs; inside one, the loop's triggers and the inline calls from createList()
-// and joinList() would overlap, and the SDK cancels an in-flight request when
-// an identical one starts. A tail chain, not "join the queued cycle": each
+// and joinList() would overlap, and two drains would settle the same outbox
+// rows. A tail chain, not "join the queued cycle": each
 // caller brings its own CycleDeps.
 let cycleTail: Promise<unknown> = Promise.resolve();
 

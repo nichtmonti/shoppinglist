@@ -17,11 +17,11 @@ export function scalar(v: unknown): string {
 	}
 }
 
-// Coerce a PB value to a string ('' for null/undefined). A relation arrives as a string, a
-// single-element array, or (expanded) an object; it takes the same coercion as plain text.
+// A PB value as a string: '' for null/undefined, which a partial row from
+// materialize leaves out. Every relation here is single (MaxSelect 1) and
+// never expanded, so it arrives as a string like any text.
 export function str(v: unknown): string {
-	if (v == null) return '';
-	return Array.isArray(v) ? (v[0] != null ? scalar(v[0]) : '') : scalar(v);
+	return v == null ? '' : scalar(v);
 }
 
 // As str, with '' as null.
@@ -31,11 +31,11 @@ function strOrNull(v: unknown): string | null {
 }
 
 function bool(v: unknown): boolean {
-	return v === true || v === 'true' || v === 1;
+	return v === true;
 }
 
 function num(v: unknown): number {
-	return typeof v === 'number' ? v : typeof v === 'string' ? Number(v) || 0 : 0;
+	return typeof v === 'number' ? v : 0;
 }
 
 export function normalizeItem(r: Record<string, unknown>): Item {

@@ -15,15 +15,8 @@ import { readStored, writeStored } from '../safe-storage';
 import { t } from '../i18n';
 import { LocalizedError } from '../localized-error';
 
-// Parallel ceremonies share one module promise; a rejected load clears it so a
-// transient chunk-fetch failure does not poison passkeys until reload.
-let webauthnModule: Promise<typeof import('@simplewebauthn/browser')> | null = null;
-function loadWebauthn(): Promise<typeof import('@simplewebauthn/browser')> {
-	return (webauthnModule ??= import('@simplewebauthn/browser').catch((err: unknown) => {
-		webauthnModule = null;
-		throw err;
-	}));
-}
+// Loaded at the first ceremony, off the boot path.
+const loadWebauthn = () => import('@simplewebauthn/browser');
 
 // This browser's id, sent with every ceremony. With storage disabled it is a
 // fresh id per ceremony, which the server accepts like any other.
@@ -61,7 +54,8 @@ export function cancelConditionalLogin(): void {
 	if (!conditionalCeremony || conditionalCeremony !== activeCeremony) return;
 	conditionalCeremony.abort();
 	conditionalCeremony = activeCeremony = null;
-	void webauthnModule?.then(
+	// Loaded already: the conditional ceremony began with it.
+	void loadWebauthn().then(
 		({ WebAuthnAbortService }) => WebAuthnAbortService.cancelCeremony(),
 		() => {}
 	);

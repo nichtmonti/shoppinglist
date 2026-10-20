@@ -22,8 +22,9 @@ const OIDC_REQUEST_KEY = 'shoppinglist-oidc';
  * auth store. Resolves `true` once signed in, `false` when cancelled
  * (`cancelOidcLogin`).
  *
- * The popup is opened SYNCHRONOUSLY, before any await, and navigated later via
- * urlCallback: Safari refuses window.open once the user activation is gone.
+ * The SDK opens the popup itself, before its first await, as Safari requires
+ * of window.open, and closes it when the attempt ends; so this must be called
+ * on the click, with no await before it.
  *
  * Nothing watches the popup: COOP severs the opener's handle once it reaches
  * the provider, so `popup.closed` reads true mid-sign-in and a poll would
@@ -91,15 +92,10 @@ async function oidcExchange(
 	client: PocketBase,
 	provider: string
 ): Promise<RecordAuthResponse | null> {
-	const popup = window.open('', 'shoppinglist-oidc', 'popup=true,width=480,height=720');
-	if (!popup) throw new LocalizedError(t('auth_oidc_failed'));
 	try {
 		return await client.collection('accounts').authWithOAuth2({
 			provider,
-			requestKey: OIDC_REQUEST_KEY,
-			urlCallback: (url) => {
-				popup.location.href = url;
-			}
+			requestKey: OIDC_REQUEST_KEY
 		});
 	} catch (e) {
 		if (e instanceof ClientResponseError && e.isAbort) return null;

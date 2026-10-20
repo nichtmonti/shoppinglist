@@ -39,19 +39,15 @@ export function reportClientError(report: Omit<ClientErrorReport, 'version' | 'a
 		version: appVersion ?? 'dev',
 		agent: navigator.userAgent
 	};
-	try {
-		void fetch('/api/client-errors', {
-			method: 'POST',
-			keepalive: true,
-			headers: {
-				'Content-Type': 'application/json',
-				...authHeaders()
-			},
-			body: JSON.stringify(body)
-		}).catch(() => {});
-	} catch {
-		/* no fetch (SSR/tests) — nothing to report to */
-	}
+	void fetch('/api/client-errors', {
+		method: 'POST',
+		keepalive: true,
+		headers: {
+			'Content-Type': 'application/json',
+			...authHeaders()
+		},
+		body: JSON.stringify(body)
+	}).catch(() => {});
 }
 
 /** Test seam: forget which errors were already sent. */

@@ -14,17 +14,14 @@ let epoch = 0;
 
 const CHANNEL = 'shoppinglist_session';
 let channel: BroadcastChannel | null = null;
-let channelTried = false;
 const remoteListeners = new Set<() => void>();
 const startListeners = new Set<(accountId: string) => void>();
 
-// Lazily opened, absent in SSR/tests. Never closed: closing it on the last
-// listener would stop sign-outs reaching a tab that still has work in flight.
-function ensureChannel(): void {
-	if (channelTried) return;
-	channelTried = true;
-	if (typeof BroadcastChannel === 'undefined') return;
-	try {
+// Opened at first use, so the test seam can drop it. Never closed otherwise:
+// closing it on the last listener would stop sign-outs reaching a tab that
+// still has work in flight.
+function sessionChannel(): BroadcastChannel {
+	if (!channel) {
 		channel = new BroadcastChannel(CHANNEL);
 		channel.onmessage = (event: MessageEvent) => {
 			const data = event.data as { type?: string; id?: unknown } | null;
@@ -42,9 +39,8 @@ function ensureChannel(): void {
 				}
 			}
 		};
-	} catch {
-		/* no channel — this tab still gets the local half of the guarantee */
 	}
+	return channel;
 }
 
 /** A captured session: `owned()` stays true until that session ends. */
@@ -65,8 +61,7 @@ export function sessionScope(): SessionScope {
  */
 export function endSession(): void {
 	epoch++;
-	ensureChannel();
-	channel?.postMessage({ type: 'ended' });
+	sessionChannel().postMessage({ type: 'ended' });
 }
 
 /**
@@ -74,7 +69,7 @@ export function endSession(): void {
  * already bumped when it fires.
  */
 export function onRemoteSessionEnd(listener: () => void): () => void {
-	ensureChannel();
+	sessionChannel();
 	remoteListeners.add(listener);
 	return () => remoteListeners.delete(listener);
 }
@@ -84,13 +79,12 @@ export function onRemoteSessionEnd(listener: () => void): () => void {
  * token is stored, so a tab that reloads on the news reads that account.
  */
 export function announceSessionStart(accountId: string): void {
-	ensureChannel();
-	channel?.postMessage({ type: 'started', id: accountId });
+	sessionChannel().postMessage({ type: 'started', id: accountId });
 }
 
 /** Register a reaction to an account signed in in ANOTHER tab. */
 export function onRemoteSessionStart(listener: (accountId: string) => void): () => void {
-	ensureChannel();
+	sessionChannel();
 	startListeners.add(listener);
 	return () => startListeners.delete(listener);
 }
@@ -102,5 +96,4 @@ export function resetSessionForTest(): void {
 	startListeners.clear();
 	channel?.close();
 	channel = null;
-	channelTried = false;
 }

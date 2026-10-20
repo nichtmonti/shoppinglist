@@ -126,12 +126,8 @@ beforeEach(() => {
 		getItem: (key: string) => store.get(key) ?? null,
 		setItem: (key: string, value: string) => void store.set(key, value)
 	});
-	// oidcLogin() (used by linkOidc()) opens a real popup and drives the
-	// PocketBase SDK's OAuth2 flow — neither exists in this node test project,
-	// so both are stubbed. authWithOAuth2's mock implementation is set per-test.
-	vi.stubGlobal('window', {
-		open: vi.fn(() => ({ closed: false, close: vi.fn(), location: { href: '' } }))
-	});
+	// The SDK's OAuth2 flow, popup included, is stubbed: authWithOAuth2's
+	// mock implementation is set per-test.
 	oidcCollection.authWithOAuth2.mockReset();
 	send.mockReset();
 	authStore.save.mockClear();
