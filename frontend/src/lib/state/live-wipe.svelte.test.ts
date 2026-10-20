@@ -18,7 +18,7 @@ import { suppressedNames } from './suppression';
  *  store's `loaded` says so; a plain one holds the seeded rows, never empty. */
 async function readThenLeave<T>(store: LiveStore<T> | Readable<T>): Promise<T> {
 	const stopValue = store.subscribe(() => {});
-	if ('loaded' in store) await untilLoaded(store as LiveStore<unknown>);
+	if ('loaded' in store) await untilLoaded(store);
 	else
 		await vi.waitUntil(() => {
 			const value = get(store);

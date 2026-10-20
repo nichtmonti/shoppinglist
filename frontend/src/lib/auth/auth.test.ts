@@ -50,16 +50,16 @@ vi.mock('pocketbase', async (importOriginal) => {
 	// The real client, with the OIDC collection and cancelRequest faked: its
 	// send goes through the stubbed fetch, as the passkey ceremonies' does.
 	class LinkClient extends actual.default {
-		cancelRequest = vi.fn();
-		send = vi.fn((path: string, options?: object) =>
+		override cancelRequest = vi.fn();
+		override send = vi.fn((path: string, options?: object) =>
 			actual.default.prototype.send.call(this, path, options ?? {})
-		);
+		) as unknown as InstanceType<typeof actual.default>['send'];
+		override collection = (() => oidcCollection) as unknown as InstanceType<
+			typeof actual.default
+		>['collection'];
 		constructor(baseURL: string, store: import('pocketbase').BaseAuthStore) {
 			super(baseURL, store);
-			linkClients.push(this);
-		}
-		collection() {
-			return oidcCollection;
+			linkClients.push(this as unknown as (typeof linkClients)[number]);
 		}
 	}
 	return { ...actual, default: LinkClient };

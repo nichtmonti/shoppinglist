@@ -70,11 +70,16 @@
 		}
 	});
 
+
+	// svelte-check needs the cast (string is not T); the lint rule misses the
+	// generic and flags it.
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+	const choose = (v: string) => onchange(v as T);
 </script>
 
 <RadioGroup.Root
 	{value}
-	onValueChange={(v) => onchange(v as T)}
+	onValueChange={choose}
 	aria-label={label}
 	data-testid={testid}
 	class={cn(root({ variant }), klass)}
