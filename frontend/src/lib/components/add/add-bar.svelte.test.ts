@@ -1,6 +1,7 @@
 // The add box (§9 / §9.1): typeahead ranking and the dedup "already on the
 // list" jump. Also covers auto-categorisation, checked-item reactivation, and
 // both suppression paths (§6.11).
+import userEvent from '@testing-library/user-event';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -336,9 +337,9 @@ describe('AddBar — auto-categorisation on a dictionary hit', () => {
 			// it), so this must not be a descendant selector.
 			return document.querySelector('[data-ta-name="Gurke"]') as HTMLElement;
 		});
-		// bits-ui selects on pointerup, not click — happy-dom's fireEvent.click would
-		// miss the handler.
-		await fireEvent.pointerUp(option);
+		// A whole tap, as a browser sends it: bits-ui selects on its pointerup,
+		// which a bare click event never reaches.
+		await userEvent.setup().click(option);
 
 		await waitFor(async () => {
 			const rows = await db.items.where('list').equals(LIST_ID).toArray();
@@ -464,7 +465,9 @@ describe('AddBar — head-noun classification of a typed name (§9)', () => {
 
 		await openAndType(input, 'Kokos');
 		await chipFor('Kokosmilch');
-		await fireEvent.pointerUp(document.querySelector('[data-ta-name="Kokosmilch"]') as HTMLElement);
+		await userEvent
+			.setup()
+			.click(document.querySelector('[data-ta-name="Kokosmilch"]') as HTMLElement);
 
 		expect((await created('Kokosmilch')).category_key).toBe('cat-sweets');
 	});
@@ -570,7 +573,7 @@ describe('AddBar — dedup "already on the list" jump (§9.1)', () => {
 			return el as HTMLElement;
 		});
 		vi.mocked(showToast).mockClear();
-		await fireEvent.pointerUp(addRow);
+		await userEvent.setup().click(addRow);
 
 		// Both branches of commitAdd say "added" now, so both have to behave the
 		// same when the toast is tapped — an undo on one and not the other is the
@@ -654,7 +657,7 @@ describe('AddBar — an amount typed with the name', () => {
 			expect(el).not.toBeNull();
 			return el as HTMLElement;
 		});
-		await fireEvent.pointerUp(addRow);
+		await userEvent.setup().click(addRow);
 		await waitFor(async () => {
 			const rows = await db.items.where('list').equals(LIST_ID).toArray();
 			expect(rows.map((r) => [r.name, r.quantity])).toEqual([['Klebeband', '3']]);
@@ -835,9 +838,8 @@ describe('AddBar — tap-to-add for the typed text (touch path)', () => {
 			expect(el).not.toBeNull();
 			return el as HTMLElement;
 		});
-		// The as-typed row is a real Combobox option now, and bits-ui selects on
-		// pointerup, not click — happy-dom's fireEvent.click would miss the handler.
-		await fireEvent.pointerUp(addRow);
+		// The as-typed row is a real Combobox option, selected by a whole tap.
+		await userEvent.setup().click(addRow);
 
 		await waitFor(async () => {
 			const rows = await db.items.where('list').equals(LIST_ID).toArray();
