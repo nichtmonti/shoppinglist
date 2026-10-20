@@ -490,11 +490,11 @@ describe('ListsHome ordering modes', () => {
 		await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId('list-sort')));
 	});
 
-	// [D-237] On a touchscreen svelte-dnd-action swallows the tap's click, so
-	// the grip reads the tap off its pointer events; a mouse clicks right
-	// after them, and that click must not count the same tap twice. A screen
-	// reader's double-tap is a lone click, which must still toggle.
-	it('shows the arrows for a touch tap on the grip, which brings no click', async () => {
+	// [D-237] A touch on the grip is svelte-dnd-action's: its touchstart
+	// cancels the browser's click, and it sends one itself when the touch ends
+	// without a drag. That click, and a mouse's or a screen reader's, toggles
+	// the arrows once.
+	it('shows the arrows for a touch tap on the grip', async () => {
 		await putMyList('list-a', 'Zucker');
 		await putMyList('list-b', 'Äpfel');
 		render(ListsHome);
@@ -503,24 +503,16 @@ describe('ListsHome ordering modes', () => {
 		await fireEvent.click(await screen.findByRole('menuitem', { name: 'Reihenfolge ändern' }));
 		const grip = await screen.findByRole('button', { name: 'Äpfel verschieben' });
 		const arrows = () => screen.queryAllByRole('button', { name: /^Äpfel nach (oben|unten)$/ });
-		const nextTask = () => new Promise((resolve) => setTimeout(resolve));
 
-		// A finger: down and up in place, and no click.
-		await fireEvent.pointerDown(grip, { clientX: 20, clientY: 20, pointerType: 'touch' });
-		await fireEvent.pointerUp(grip, { clientX: 21, clientY: 20, pointerType: 'touch' });
+		// A finger: down and up in place, and no click of the browser's.
+		await fireEvent.touchStart(grip, { touches: [{ clientX: 20, clientY: 20 }] });
+		await fireEvent.touchEnd(grip, { touches: [] });
 		expect(arrows()).toHaveLength(2);
 		expect(grip.getAttribute('aria-pressed')).toBe('true');
 
-		// A screen reader's double-tap, later: a click alone puts them away.
-		await nextTask();
+		// A screen reader's double-tap, or a mouse: a click puts them away.
 		await fireEvent.click(grip);
 		expect(arrows()).toHaveLength(0);
-
-		// A mouse: the click that follows its pointer events is the same tap.
-		await fireEvent.pointerDown(grip, { clientX: 20, clientY: 20, pointerType: 'mouse' });
-		await fireEvent.pointerUp(grip, { clientX: 20, clientY: 20, pointerType: 'mouse' });
-		await fireEvent.click(grip);
-		expect(arrows()).toHaveLength(2);
 	});
 
 	// The mode is a history entry: the system back closes it (on the home, the
