@@ -9,11 +9,7 @@ const INVITE = inviteOnlyServer();
 
 export default defineConfig({
 	testDir: './tests',
-	// The sync-engine specs (especially logout-everywhere's second-device
-	// from-scratch boot) are sensitive to a transient failed sync cycle, which
-	// retries only at the 60s tick — longer than any test timeout. One retry
-	// lets that self-heal; a consistently broken test still fails twice.
-	retries: 1,
+	retries: 0,
 	// Sync-settle and second-device assertions need far more than Playwright's
 	// 5s/30s defaults on a slow CI runner. These are ceilings, not floors —
 	// passing assertions still resolve immediately.

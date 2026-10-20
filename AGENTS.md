@@ -179,9 +179,9 @@ e2e:<name>`) or by hand as below.
 - **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from
   `scripts/build-demo.sh`.
 
-A failed test in the functional, arch or OIDC suite writes `page-diagnosis.md`
-(and `page-diagnosis-watchdog.md` before a timeout) next to Playwright's
-`error-context.md` ([D-247]); CI prints both. The functional, OIDC and demo
+A failed or timed-out test in the functional, arch or OIDC suite writes
+`page-diagnosis.md` next to Playwright's `error-context.md` ([D-247]); CI
+prints both. The functional, OIDC and demo
 suites also keep the failed test's `trace.zip` (`npx playwright show-trace`).
 
 **The integration project has two layers, and only one may know the
