@@ -19,7 +19,9 @@ export interface LookupProduct {
 	category_slug: string | null;
 }
 
-/** Fetches one URL; injectable for tests. */
+/** Fetches one URL; injectable for tests. Not the SDK's send: it answers a 2xx
+ *  body that is not JSON (a captive portal's page) with {}, which would read as
+ *  a cached miss here, not as the error it is. */
 export type LookupTransport = (url: string) => Promise<Response>;
 
 // The proxy requires auth, read from the Authorization header only: without it

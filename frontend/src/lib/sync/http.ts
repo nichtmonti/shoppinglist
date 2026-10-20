@@ -1,5 +1,7 @@
 // The one authorized fetch the sync engine's default transports share: the
-// session's bearer token, a timeout, and one answer to a failed status.
+// session's bearer token, a timeout, and one answer to a failed status. Not the
+// SDK's send: it answers a 2xx body that is not JSON with {} instead of an
+// error, and the engine must never read a garbled digest as an empty one.
 import { markAuthExpired } from '../auth/state';
 import { authHeaders } from '../pb';
 
