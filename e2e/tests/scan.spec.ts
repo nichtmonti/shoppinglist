@@ -90,8 +90,11 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	// …so it is still there offline, after a reload. Not page.reload(): CDP's
 	// offline emulation can abort it before the worker sees it (pwa.spec.ts).
 	await ctxB.setOffline(true);
+	// Waited for from before the reload: waitForLoadState would see the old
+	// page, already loaded, and return at once.
+	const reloaded = pageB.waitForEvent('load');
 	await pageB.evaluate(() => location.reload());
-	await pageB.waitForLoadState('load');
+	await reloaded;
 	await openShopView(pageB);
 	const offlinePhoto = pageB
 		.locator('[data-testid="tile"]', { hasText: 'Testprodukt Sonnencreme' })

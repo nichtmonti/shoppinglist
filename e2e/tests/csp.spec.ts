@@ -93,8 +93,10 @@ test('CSP: the app runs its real flows without a single policy violation', async
 	//    precached assets coming back through it rather than off the network.
 	await page.evaluate(() => navigator.serviceWorker.ready);
 	await context.setOffline(true);
+	// Waited for from before the reload (pwa.spec.ts).
+	const reloaded = page.waitForEvent('load');
 	await page.evaluate(() => location.reload());
-	await page.waitForLoadState('load');
+	await reloaded;
 	await expect(page.locator('[data-testid="app-shell"]')).toBeVisible({ timeout: 15_000 });
 	await context.setOffline(false);
 

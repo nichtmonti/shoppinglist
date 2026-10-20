@@ -35,8 +35,11 @@ test('PWA: app shell cold-starts with the network disabled, and Chromium reports
 	// goes through the renderer's normal navigation/fetch pipeline instead,
 	// where the service worker DOES get first refusal — the real-world path an
 	// actual offline reload takes.
+	// Waited for from before the reload: waitForLoadState would see the old
+	// page, already loaded, and return at once.
+	const reloaded = page.waitForEvent('load');
 	await page.evaluate(() => location.reload());
-	await page.waitForLoadState('load');
+	await reloaded;
 
 	// The shell mounted — Svelte rendered *something* below the layout's own
 	// markup — entirely from cache, with no network at all.
@@ -65,7 +68,9 @@ for (const [what, answer] of [
 				// 'hang': never settled, as a connection that stalls.
 			}
 		);
+		const reloaded = page.waitForEvent('load');
 		await page.evaluate(() => location.reload());
+		await reloaded;
 
 		await expect(page.locator('[data-testid="app-shell"]')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByText('Bad Gateway')).toHaveCount(0);

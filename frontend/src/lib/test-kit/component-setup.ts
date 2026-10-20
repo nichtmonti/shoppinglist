@@ -1,14 +1,16 @@
 // Setup for the `client` vitest project (Svelte component tests).
 //
-// @testing-library/svelte only auto-registers its afterEach cleanup when vitest
-// runs with `globals: true`, which this project deliberately does not — so it is
-// wired explicitly here. Without it, components from one test stay mounted in
-// the happy-dom document and the next test's queries match the wrong element.
+// @testing-library/svelte's own setup and cleanup, which it registers by itself
+// only under `globals: true`, are wired here: setup() makes waitFor/findBy* and
+// fired events wait for Svelte to flush (act, flushSync); cleanup() unmounts,
+// or one test's components stay in the happy-dom document and the next test's
+// queries match the wrong element. Its vitest.js does the same, but the
+// class-conflict scan below must run before the unmount.
 // Component tests assert against German strings. Paraglide's `baseLocale` is
 // 'en' (docs/internals/design.md §12.2), the app's fresh-user default, not a
 // constraint on which locale tests assert against. Reset to 'de' before each test so a `setLocale('en')` inside one
 // test (e.g. a locale-switch test) can't leak into the next.
-import { cleanup, configure, waitFor } from '@testing-library/svelte';
+import { act, cleanup, configure, setup, waitFor } from '@testing-library/svelte';
 import { afterAll, afterEach, beforeEach, expect, vi } from 'vitest';
 import { setLocale } from '#lib/i18n/index.js';
 import { trackTimers } from '#lib/test-kit/timers.js';
@@ -22,7 +24,8 @@ import { conflictingClasses } from '#lib/utils.js';
 // polling ceiling.
 configure({ asyncUtilTimeout: 5000 });
 
-beforeEach(() => {
+beforeEach(async () => {
+	await setup();
 	setLocale('de');
 	// What a tab keeps for a reload (#lib/safe-storage) is per test.
 	sessionStorage.clear();
@@ -120,6 +123,7 @@ afterEach(async () => {
 		classWatch = null;
 	}
 	const conflicts = [...classConflicts].map(([className, what]) => `${what} in "${className}"`);
+	await act();
 	cleanup();
 
 	// bits-ui's body-scroll-lock schedules a 24ms cleanup timer when the last

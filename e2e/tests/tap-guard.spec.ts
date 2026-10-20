@@ -38,9 +38,18 @@ test("a tap on a tile another device's tick just slid into place ticks nothing",
 	await page.waitForFunction(() => !document.querySelector('[aria-label="Apfel, abhaken"]'), null, {
 		polling: 'raf'
 	});
-	// Late in the slide, when the tile is drawn (nearly) in the slot: at its
-	// start the flip still draws it where it was.
-	await page.waitForTimeout(200);
+	// Late in the slide, once the tile is drawn (nearly) in the slot: at its
+	// start the flip still draws it where it was. Watched every frame, not
+	// timed, so a slow machine neither taps too early (and misses it) nor too
+	// late (past the guard).
+	await page.waitForFunction(
+		({ x, y }) => {
+			const r = document.querySelector('[aria-label="Brot, abhaken"]')?.getBoundingClientRect();
+			return !!r && Math.abs(r.x - x) < 4 && Math.abs(r.y - y) < 4;
+		},
+		{ x: slot.x, y: slot.y },
+		{ polling: 'raf' }
+	);
 	await page.mouse.click(slot.x + slot.width / 2, slot.y + slot.height / 2);
 
 	await page.waitForTimeout(1000);

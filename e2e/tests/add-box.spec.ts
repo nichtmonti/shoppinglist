@@ -42,7 +42,7 @@ test('adding a name already on a long list scrolls to its row instead of adding 
 	await chooseItemSort(page, 'az');
 	for (let n = 1; n <= 30; n++) await addItemByTyping(page, `Posten-${n}`);
 	const rows = page.locator('[data-testid="row"]');
-	await expect.poll(() => rows.count(), { timeout: 15_000 }).toBe(30);
+	await expect(rows).toHaveCount(30, { timeout: 15_000 });
 
 	const last = itemRow(page, 'Posten-30');
 	await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
