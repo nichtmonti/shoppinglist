@@ -8,6 +8,7 @@
 	import type { Snippet } from 'svelte';
 	import type { SvelteSet } from 'svelte/reactivity';
 	import { cubicOut } from 'svelte/easing';
+	import { on } from 'svelte/events';
 	import type { CategoryTemplate, Item, ListCategory } from '#lib/db.js';
 	import { groupByAisle, sortByName } from '#lib/sorting.js';
 	import { categoryName, categoryOf } from '#lib/categories.js';
@@ -62,22 +63,15 @@
 	// inside its notification resizes only deeper boxes, tiles and aisles,
 	// which the browser delivers in the same frame. A size at the probe's depth
 	// or above changing there would be a ResizeObserver loop error.
-	let probe = $state<HTMLElement | null>(null);
-	let remeasure = $state(0);
-	$effect(() => {
-		const el = probe;
-		if (!el || typeof ResizeObserver === 'undefined') return;
-		const ro = new ResizeObserver(() => remeasure++);
-		ro.observe(el);
-		return () => ro.disconnect();
-	});
-	$effect(() => {
-		const fonts = document.fonts;
-		if (!fonts) return;
-		const loaded = () => remeasure++;
-		fonts.addEventListener('loadingdone', loaded);
-		return () => fonts.removeEventListener('loadingdone', loaded);
-	});
+	// The content box, not the border box: a text-size change moves the padding
+	// inside a width that stays.
+	let probeBox = $state<DOMRectReadOnly>();
+	let fontsLoaded = $state(0);
+	$effect(() =>
+		document.fonts ? on(document.fonts, 'loadingdone', () => fontsLoaded++) : undefined
+	);
+	// A new token whenever either changes; the tiles only watch it.
+	let remeasure = $derived([probeBox, fontsLoaded]);
 
 	// A tile's slide is also what the tap guard keys on ([D-213]): Svelte runs
 	// it only for a tile whose place changed.
@@ -148,7 +142,7 @@
 	</div>
 {/snippet}
 
-<div class="shop-probe" aria-hidden="true" bind:this={probe}></div>
+<div class="shop-probe" aria-hidden="true" bind:contentRect={probeBox}></div>
 <div class="shop-items">
 	<!-- Unreached when the route preloaded ([D-205]); the fallback for a
 	     read that outlasted the preload's cap. -->

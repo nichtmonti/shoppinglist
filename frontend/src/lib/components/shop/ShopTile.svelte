@@ -33,9 +33,9 @@
 		oncheck?: (event: MouseEvent) => void;
 		/** Opens the detail sheet; the door is its only trigger ([D-83]). */
 		oninfo?: () => void;
-		/** Bumped by ShopItems when the line the name is measured against can
-		 *  have changed: the shop's width, the text size, a font. */
-		remeasure?: number;
+		/** Changes when the line the name is measured against can have
+		 *  changed: the shop's width, the text size, a font (ShopItems). */
+		remeasure?: unknown;
 	}
 
 	let {
@@ -46,7 +46,7 @@
 		onphotoerror,
 		oncheck,
 		oninfo,
-		remeasure = 0
+		remeasure
 	}: Props = $props();
 
 	let model = $derived(tileModel(item, { photoFailed, row }));
