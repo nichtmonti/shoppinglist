@@ -224,9 +224,6 @@ func firstOverCap(collection string, values []fieldValue) string {
 func (b importBackupPayload) toSeed() ([]seedCategory, []seedItem) {
 	cats := make([]seedCategory, 0, len(b.Categories))
 	for _, cat := range b.Categories {
-		// Not `seedCategory(cat)`: a conversion would silently carry a column
-		// added to the wire payload into SaveNoValidate ([D-08]).
-		//lint:ignore S1016 deliberate: the field list is the allowlist, not boilerplate
 		cats = append(cats, seedCategory{
 			Key:       cat.Key,
 			Slug:      strOrEmpty(cat.Slug),
