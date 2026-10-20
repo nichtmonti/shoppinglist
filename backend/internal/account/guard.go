@@ -1,14 +1,14 @@
 // Package account implements the §4.5/§5.4/§5.9/§11 account lifecycle, its
 // guards and its routes:
 //
-//   - the §11 self-update allowlist on accounts;
+//   - the §11 self-update allowlist on accounts' record API;
 //   - the §5.4 last-credential delete guard ([D-32]);
 //   - the _externalAuths delete guard, leaving the [D-76] unlink as the only
 //     way to remove an OIDC login;
 //   - the account teardown (delete.go), sole holder of the credential-guard
 //     bypass;
 //   - the §5.6 token-key rotation (rotate.go) and the §5.9 [D-76] link
-//     (link.go), sole holders of the accounts-guard bypass;
+//     (link.go);
 //   - the §5.4 passkey rename (rename_credential.go);
 //   - the [D-309] sign-in time on every sign-in's token, which the delete
 //     checks (fresh.go).
@@ -16,7 +16,6 @@ package account
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
@@ -31,7 +30,7 @@ import (
 // the migrations (from OnServe).
 func Register(app core.App, opts Options) {
 	app.OnRecordAuthRequest("accounts").BindFunc(stampAuthTime)
-	app.OnRecordUpdate("accounts").BindFunc(accountsUpdateGuard)
+	app.OnRecordUpdateRequest("accounts").BindFunc(accountsUpdateGuard)
 	// Priority 100 runs inside the delete's transaction (opened at 99), so the
 	// count and the delete are atomic: counted outside, two concurrent deletes
 	// of the last two passkeys would both see two and both pass.
@@ -54,46 +53,25 @@ func externalAuthsDeleteGuard(e *core.RecordRequestEvent) error {
 	return e.ForbiddenError("remove the OIDC login from settings (POST /api/account/unlink)", nil)
 }
 
-// protectedAccountFields are the accounts columns that must NOT change via
-// the direct client update path (§11, §4.2). Everything else passes, which is
-// exactly the §11 allowlist: `nickname` and `suppressed_names` (§6.11).
-var protectedAccountFields = []string{"handle", "email", "verified", "tokenKey"}
-
-// accountsUpdateGuard enforces the §11 self-update allowlist, narrowing
-// accounts.UpdateRule (`id = @request.auth.id`): a change to any
-// protectedAccountFields entry is refused. nickname is also length-checked
-// ([D-08]).
-func accountsUpdateGuard(e *core.RecordEvent) error {
-	if e.Context != nil && e.Context.Value(acctGuardBypassKey{}) != nil {
-		return e.Next() // §5.6 token-key rotation route's own save — exempt
-	}
-
-	// [D-08] nickname is served to every co-member (§7.4); the contract's cap
-	// bounds it here and on the SaveNoValidate signup path alike.
+// accountsUpdateGuard completes the §11 self-update allowlist on the record
+// API, narrowing accounts.UpdateRule (`id = @request.auth.id`) to `nickname`
+// and `suppressed_names` (§6.11) ([D-32]). PocketBase's own form already
+// refuses `email` and `verified` to anyone without manage access and keeps
+// the hidden `tokenKey`; `handle`, the identity, is ours to refuse, from
+// everyone. nickname is also length-checked ([D-08]): it is served to every
+// co-member (§7.4), and the signup path checks it too. A request hook, so the
+// server's own saves (§5.6 rotation, the [D-76] link) pass.
+func accountsUpdateGuard(e *core.RecordRequestEvent) error {
 	orig := e.Record.Original()
+	if e.Record.GetString("handle") != orig.GetString("handle") {
+		return e.ForbiddenError(`field "handle" cannot be changed directly`, nil)
+	}
 	if nick := e.Record.GetString("nickname"); nick != orig.GetString("nickname") {
 		if msg := fieldcontract.OverCap("accounts", "nickname", nick); msg != "" {
-			return router.NewBadRequestError(msg, nil)
-		}
-	}
-
-	for _, f := range protectedAccountFields {
-		if e.Record.Get(f) != orig.Get(f) {
-			return router.NewForbiddenError(fmt.Sprintf("field %q cannot be changed directly", f), nil)
+			return e.BadRequestError(msg, nil)
 		}
 	}
 	return e.Next()
-}
-
-// acctGuardBypassKey scopes the accounts update-guard bypass. Unexported, so
-// only this package can mint a context that satisfies it ([D-32]). rotate.go
-// writes `tokenKey` (§5.6) and link.go `verified` ([D-76]) with it.
-type acctGuardBypassKey struct{}
-
-// bypassAccountsUpdateGuard returns a context that makes accountsUpdateGuard
-// skip its check. Used ONLY by rotate.go and link.go.
-func bypassAccountsUpdateGuard(ctx context.Context) context.Context {
-	return context.WithValue(ctx, acctGuardBypassKey{}, true)
 }
 
 // credGuardBypassKey scopes the last-credential guard bypass ([D-32]).

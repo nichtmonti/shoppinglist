@@ -18,7 +18,7 @@ func accountsUpdateRuleUp(app core.App) error {
 	if err != nil {
 		return err
 	}
-	// Go guard: account.accountsUpdateGuard (internal/account/guard.go).
+	// Narrowed by account.accountsUpdateGuard (internal/account/guard.go).
 	col.UpdateRule = new("id = @request.auth.id")
 	return app.Save(col)
 }

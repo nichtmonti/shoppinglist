@@ -127,31 +127,6 @@ func TestRotateTokenKeyIsPerAccount(t *testing.T) {
 	}
 }
 
-// TestRotateTokenKeyBypassDidNotWidenTheAllowlist (§11): the bypass is
-// context-scoped to rotate.go, so a client-supplied tokenKey change on the
-// direct own-row update path must still be refused. There is an argument for
-// letting a user change `handle` or `email` some day; there is none for
-// letting them choose their own tokenKey.
-func TestRotateTokenKeyBypassDidNotWidenTheAllowlist(t *testing.T) {
-	app := testutil.NewApp(t)
-	Register(app, Options{Passkeys: true})
-	acct, _ := createAccount(t, app, "Alice", "")
-	oldKey := acct.GetString("tokenKey")
-
-	acct.Set("tokenKey", "attackerchosentokenkeyvalue00000")
-	if err := app.Save(acct); err == nil {
-		t.Fatal("expected a direct tokenKey change via app.Save to be rejected by the guard")
-	}
-
-	updated, err := app.FindRecordById("accounts", acct.Id)
-	if err != nil {
-		t.Fatalf("find account: %v", err)
-	}
-	if got := updated.GetString("tokenKey"); got != oldKey {
-		t.Errorf("tokenKey = %q, want unchanged %q", got, oldKey)
-	}
-}
-
 // TestRotateTokenKeyCutsAnOpenRealtimeStream: "log out everywhere" must also
 // stop a realtime stream opened with an old token, or a stolen token keeps
 // receiving the list's changes until the stream drops (§5.6). PocketBase

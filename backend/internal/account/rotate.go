@@ -14,9 +14,7 @@ func rotateTokenKey(e *core.RequestEvent) error {
 	// The framework mints the new key on save; never hand-roll it.
 	e.Auth.RefreshTokenKey()
 
-	// tokenKey is protected; this route is its one legitimate writer.
-	ctx := bypassAccountsUpdateGuard(e.Request.Context())
-	if err := e.App.SaveWithContext(ctx, e.Auth); err != nil {
+	if err := e.App.Save(e.Auth); err != nil {
 		return e.InternalServerError("failed to rotate token key", err)
 	}
 
