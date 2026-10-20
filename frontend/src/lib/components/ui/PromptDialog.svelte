@@ -66,14 +66,7 @@
 	// Re-seed on each open only (`untrack`): the draft must not snap back under
 	// the user if another device renames the list mid-edit (§8.5).
 	$effect(() => {
-		if (open) {
-			draft = untrack(() => value);
-			// Select the seeded text, so a rename does not start with the caret at
-			// 0. A task, not a microtask: it must land after the Dialog's own focus
-			// call, which would collapse the selection.
-			const t = setTimeout(() => inputRef?.select());
-			return () => clearTimeout(t);
-		}
+		if (open) draft = untrack(() => value);
 	});
 
 	let trimmed = $derived(draft.trim());
@@ -104,7 +97,15 @@
 		if (!o) oncancel();
 	}}
 >
-	<DialogContent>
+	<!-- The field takes the opening focus with its text selected, so a rename
+	     does not start with the caret at 0. -->
+	<DialogContent
+		onOpenAutoFocus={(e) => {
+			e.preventDefault();
+			inputRef?.focus();
+			inputRef?.select();
+		}}
+	>
 		<DialogTitle>{title}</DialogTitle>
 		{#if description}
 			<DialogDescription class="-mt-2">{description}</DialogDescription>

@@ -69,7 +69,6 @@
 
 	// The hidden section starts open.
 	let hiddenOpen = $state(true);
-	const hiddenListId = $props.id();
 
 	// ---- arrange mode (§6.7, [D-90]) ----
 	// A history entry, so back closes the mode rather than leaving the screen.
@@ -212,25 +211,27 @@
 				label={t('categories_hidden_section')}
 				count={hidden.length}
 				bind:open={hiddenOpen}
-				controls={hiddenListId}
-			/>
-			<RuledRows id={hiddenListId} inset="var(--plate-rule-inset)" hidden={!hiddenOpen}>
-				{#each hidden as category (category.id)}
-					<div
-						class="hidden-row flex min-h-13 items-center gap-3 px-(--row-gutter) py-2"
-						data-category-id={category.id}
-						style={categoryStyle(category.color)}
-					>
-						<CategoryPlate icon={category.icon} />
-						<span class="h-name flex-1 text-sm font-book text-muted-foreground"
-							>{categoryName(category, templatesMap)}</span
-						>
-						<Button variant="outline" size="sm" onclick={() => void restoreCategory(category)}>
-							{t('categories_restore')}
-						</Button>
-					</div>
-				{/each}
-			</RuledRows>
+			>
+				{#snippet content(props)}
+					<RuledRows {...props} inset="var(--plate-rule-inset)">
+						{#each hidden as category (category.id)}
+							<div
+								class="hidden-row flex min-h-13 items-center gap-3 px-(--row-gutter) py-2"
+								data-category-id={category.id}
+								style={categoryStyle(category.color)}
+							>
+								<CategoryPlate icon={category.icon} />
+								<span class="h-name flex-1 text-sm font-book text-muted-foreground"
+									>{categoryName(category, templatesMap)}</span
+								>
+								<Button variant="outline" size="sm" onclick={() => void restoreCategory(category)}>
+									{t('categories_restore')}
+								</Button>
+							</div>
+						{/each}
+					</RuledRows>
+				{/snippet}
+			</SectionToggle>
 		</section>
 	{/if}
 

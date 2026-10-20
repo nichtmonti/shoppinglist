@@ -27,7 +27,7 @@
 		{sideOffset}
 		{side}
 		class={cn(
-			'inline-flex items-center gap-1.5 rounded-chip px-3 py-1.5 text-micro data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 z-(--layer-modal) w-fit max-w-xs origin-(--bits-tooltip-content-transform-origin) bg-foreground text-background',
+			'inline-flex items-center gap-1.5 rounded-chip px-3 py-1.5 text-micro data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 z-(--layer-modal) w-fit max-w-xs origin-(--bits-tooltip-content-transform-origin) bg-foreground text-background',
 			className
 		)}
 		{...restProps}
@@ -40,8 +40,6 @@
 						'size-2.5 translate-y-[calc(-50%-2px)] rotate-45 z-(--layer-modal) bg-foreground fill-foreground',
 						'data-[side=top]:translate-x-1/2 data-[side=top]:translate-y-[calc(-50%+2px)]',
 						'data-[side=bottom]:-translate-x-1/2 data-[side=bottom]:-translate-y-[calc(-50%+1px)]',
-						'data-[side=right]:translate-x-[calc(50%+2px)] data-[side=right]:translate-y-1/2',
-						'data-[side=left]:-translate-y-[calc(50%-3px)]',
 						arrowClasses
 					)}
 					{...props}

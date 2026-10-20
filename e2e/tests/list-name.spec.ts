@@ -24,7 +24,13 @@ test('the joiner sees the list by its name, and a rename reaches the other membe
 	await pageB.getByTestId('list-menu').click();
 	await pageB.getByRole('button', { name: 'Umbenennen', exact: true }).click();
 	const dialog = pageB.getByRole('dialog', { name: 'Umbenennen' });
-	await dialog.getByLabel('Name').fill('Getränke & Snacks');
+	// The field opens focused with its name selected, so typing replaces it.
+	const field = dialog.getByLabel('Name');
+	await expect(field).toBeFocused();
+	await expect
+		.poll(() => field.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd]))
+		.toEqual([0, 'Getränke'.length]);
+	await field.fill('Getränke & Snacks');
 	await dialog.getByRole('button', { name: 'Speichern' }).click();
 	await expect(pageB.getByRole('button', { name: 'Getränke & Snacks', exact: true })).toBeVisible();
 

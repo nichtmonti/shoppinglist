@@ -26,7 +26,7 @@
 		panel,
 		class: klass
 	}: {
-		value: T;
+		value?: T; // absent while nothing is chosen yet
 		options: Option[];
 		onchange: (value: T) => void;
 		label: string; // aria-label for the group

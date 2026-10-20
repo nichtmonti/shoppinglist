@@ -34,9 +34,8 @@ const overrides = {
 async function createDetector(): Promise<
 	InstanceType<typeof import('barcode-detector/ponyfill').BarcodeDetector>
 > {
-	const { BarcodeDetector, prepareZXingModule, purgeZXingModule } = await import(
-		'barcode-detector/ponyfill'
-	);
+	const { BarcodeDetector, prepareZXingModule, purgeZXingModule } =
+		await import('barcode-detector/ponyfill');
 	try {
 		await prepareZXingModule({ overrides, fireImmediately: true });
 	} catch {

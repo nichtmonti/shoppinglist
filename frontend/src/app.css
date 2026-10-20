@@ -163,9 +163,6 @@
 		background-size: calc(100% - var(--rule-inset, 0px)) 1px;
 		background-position: right top;
 	}
-	& > * + *:dir(rtl) {
-		background-position: left top;
-	}
 }
 
 /* A highlighted option in a list of rows (the typeahead): a 3px line on its

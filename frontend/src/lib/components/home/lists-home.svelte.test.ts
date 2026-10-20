@@ -581,7 +581,11 @@ describe('ListsHome ordering modes', () => {
 			new CustomEvent('finalize', {
 				bubbles: true,
 				detail: {
-					items: [{ id: 'list-c' }, { id: 'list-b' }, { id: 'list-a' }],
+					items: [
+						{ id: 'list-c', row: { list: 'list-c', name: 'Banane' } },
+						{ id: 'list-b', row: { list: 'list-b', name: 'Äpfel' } },
+						{ id: 'list-a', row: { list: 'list-a', name: 'Zucker' } }
+					],
 					info: { trigger: 'droppedIntoZone', id: 'list-c', source: 'pointer' }
 				}
 			})
@@ -603,19 +607,23 @@ describe('ListsHome ordering modes', () => {
 		await waitFor(() => expect(document.querySelectorAll('.arrange-row')).toHaveLength(3));
 
 		// What svelte-dnd-action dispatches the moment 'Äpfel' leaves the list:
-		// the grabbed item is replaced by a SHADOW item — a placeholder id plus
-		// the marker — and that shadow is the hole the row drops into. Mirroring
-		// the event down to bare ids would drop it, and the list would close up
-		// with nowhere to land until the drag crossed into another index.
+		// the grabbed item is replaced by a SHADOW item — a copy of it under a
+		// placeholder id, plus the marker — and that shadow is the hole the row
+		// drops into. Losing it, the list would close up with nowhere to land
+		// until the drag crossed into another index.
 		await fireEvent(
 			document.querySelector('.arrange-list') as Element,
 			new CustomEvent('consider', {
 				bubbles: true,
 				detail: {
 					items: [
-						{ id: 'list-a' },
-						{ id: SHADOW_PLACEHOLDER_ITEM_ID, [SHADOW_ITEM_MARKER_PROPERTY_NAME]: true },
-						{ id: 'list-c' }
+						{ id: 'list-a', row: { list: 'list-a', name: 'Zucker' } },
+						{
+							id: SHADOW_PLACEHOLDER_ITEM_ID,
+							row: { list: 'list-b', name: 'Äpfel' },
+							[SHADOW_ITEM_MARKER_PROPERTY_NAME]: true
+						},
+						{ id: 'list-c', row: { list: 'list-c', name: 'Banane' } }
 					],
 					info: { trigger: 'dragStarted', id: 'list-b', source: 'pointer' }
 				}

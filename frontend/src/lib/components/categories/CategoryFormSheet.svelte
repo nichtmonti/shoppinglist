@@ -175,10 +175,7 @@
 	<Field>
 		<FieldLabel id="ce-form-emoji">{t('categories_emoji')}</FieldLabel>
 		<RadioGroup.Root
-			value={draftIcon}
-			onValueChange={(v) => {
-				if (v) draftIcon = v;
-			}}
+			bind:value={draftIcon}
 			aria-labelledby="ce-form-emoji"
 			data-testid="emoji-grid"
 			orientation="horizontal"
@@ -197,10 +194,7 @@
 	<Field>
 		<FieldLabel id="ce-form-color">{t('categories_color')}</FieldLabel>
 		<RadioGroup.Root
-			value={draftColor}
-			onValueChange={(v) => {
-				if (v) draftColor = v;
-			}}
+			bind:value={draftColor}
 			aria-labelledby="ce-form-color"
 			data-testid="color-grid"
 			orientation="horizontal"

@@ -193,7 +193,6 @@
 			<RadioGroup.Root
 				value={drafts.category}
 				onValueChange={(v) => {
-					if (!v || v === drafts.category) return;
 					drafts.category = v;
 					if (item) void commit(item);
 				}}
