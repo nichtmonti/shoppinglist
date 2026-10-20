@@ -211,3 +211,27 @@ func mustItem(t *testing.T, app core.App, id string) *core.Record {
 	}
 	return rec
 }
+
+// With every slot taken, a download is not started and settles at once; the
+// retry job is left to fetch it.
+func TestADownloadWithoutASlotStartsNothing(t *testing.T) {
+	up := newUpstream(t)
+	app := testutil.NewApp(t)
+	for range maxPhotoDownloads {
+		downloadSlots <- struct{}{}
+	}
+	t.Cleanup(func() {
+		for range maxPhotoDownloads {
+			<-downloadSlots
+		}
+	})
+
+	select {
+	case <-downloadPhoto(app, downloadEAN, up.server.URL+"/photo"):
+	case <-time.After(5 * time.Second):
+		t.Fatal("a download without a slot did not settle at once")
+	}
+	if n := up.photoCount(); n != 0 {
+		t.Errorf("photo host asked %d times without a slot, want never", n)
+	}
+}

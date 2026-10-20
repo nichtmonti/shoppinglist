@@ -3,11 +3,11 @@ package barcode
 import (
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
+	"golang.org/x/sync/singleflight"
 
 	"shoppinglist/internal/applog"
 )
@@ -33,46 +33,31 @@ const (
 	photoRetryBatch  = 10
 )
 
-// downloads holds the download under way for each barcode, so a second
-// lookup or the retry job waits for it instead of starting another.
-var downloads = struct {
-	sync.Mutex
-	running map[string]chan struct{}
-	slots   chan struct{}
-}{running: map[string]chan struct{}{}, slots: make(chan struct{}, maxPhotoDownloads)}
+// downloads joins a second lookup or the retry job to the download under way
+// for its barcode instead of starting another; downloadSlots holds one token
+// per download under way.
+var (
+	downloads     singleflight.Group
+	downloadSlots = make(chan struct{}, maxPhotoDownloads)
+)
 
 // downloadPhoto starts downloading the photo at rawURL for barcode ean, unless
-// one is under way, and returns a channel closed once it is settled. A
-// download with no free slot is not started, and its channel is closed at
-// once. A server shutdown drops one under way, and the retry job picks the
-// photo up again.
-func downloadPhoto(app core.App, ean, rawURL string) <-chan struct{} {
-	downloads.Lock()
-	defer downloads.Unlock()
-	if done, ok := downloads.running[ean]; ok {
-		return done
-	}
-	done := make(chan struct{})
-	select {
-	case downloads.slots <- struct{}{}:
-	default:
-		close(done)
-		return done
-	}
-	downloads.running[ean] = done
-	go func() {
-		defer func() {
-			<-downloads.slots
-			downloads.Lock()
-			delete(downloads.running, ean)
-			downloads.Unlock()
-			close(done)
-		}()
+// one is under way, and returns a channel that receives once it is settled. A
+// download with no free slot is not started, and settles at once. A server
+// shutdown drops one under way, and the retry job picks the photo up again.
+func downloadPhoto(app core.App, ean, rawURL string) <-chan singleflight.Result {
+	return downloads.DoChan(ean, func() (any, error) {
+		select {
+		case downloadSlots <- struct{}{}:
+		default:
+			return nil, nil
+		}
+		defer func() { <-downloadSlots }()
 		if err := settlePhoto(app, ean, rawURL, fetchPhoto(rawURL)); err != nil {
 			applog.Error(app, "storing a product photo failed", err, "barcode", ean)
 		}
-	}()
-	return done
+		return nil, nil
+	})
 }
 
 // settlePhoto records a download on the barcode's cache row, unless the row
