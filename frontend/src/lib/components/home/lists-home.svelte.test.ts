@@ -720,7 +720,7 @@ describe('ListsHome leave (§7.2)', () => {
 
 		// The old native-dialog path could only fire a toast at an already-closed
 		// prompt; the sheet has to survive its own failure so the user can retry.
-		await waitFor(() => expect(within(dialog).getByRole('alert')).toBeDefined());
+		expect(await within(dialog).findByRole('alert')).toBeDefined();
 		expect(screen.getByRole('alertdialog', { name: 'Liste verlassen' })).toBeDefined();
 	});
 
@@ -961,14 +961,14 @@ describe('ListsHome — the sync chip rides in the home app bar ([D-130])', () =
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
 		render(ListsHome);
 
-		await waitFor(() => expect(screen.getByText('Wocheneinkauf')).toBeDefined());
+		expect(await screen.findByText('Wocheneinkauf')).toBeDefined();
 		expect(chip()).not.toBeNull();
 	});
 
 	it('carries it in the zero-list state too, where there is no list to open', async () => {
 		render(ListsHome);
 
-		await waitFor(() => expect(screen.getByText('Willkommen!')).toBeDefined());
+		expect(await screen.findByText('Willkommen!')).toBeDefined();
 		expect(chip()).not.toBeNull();
 	});
 });
@@ -984,7 +984,7 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 	it('says it is loading and offers no create/join until the pull answers', async () => {
 		render(ListsHome);
 
-		await waitFor(() => expect(screen.getByText('Deine Listen werden geladen …')).toBeDefined());
+		expect(await screen.findByText('Deine Listen werden geladen …')).toBeDefined();
 		expect(screen.queryByText('Willkommen!')).toBeNull();
 		expect(screen.queryByRole('button', { name: 'Neue Liste' })).toBeNull();
 		expect(screen.queryByRole('button', { name: 'Mit Einladung beitreten' })).toBeNull();
@@ -995,22 +995,22 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 
 	it('shows the lists as soon as they arrive, before the cycle is stamped', async () => {
 		render(ListsHome);
-		await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+		expect(await screen.findByTestId('home-loading')).toBeDefined();
 
 		await putMyList('list-a', 'Wocheneinkauf');
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
 
-		await waitFor(() => expect(screen.getByText('Wocheneinkauf')).toBeDefined());
+		expect(await screen.findByText('Wocheneinkauf')).toBeDefined();
 		expect(screen.queryByTestId('home-loading')).toBeNull();
 	});
 
 	it('turns into the welcome screen once an empty pull is recorded', async () => {
 		render(ListsHome);
-		await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+		expect(await screen.findByTestId('home-loading')).toBeDefined();
 
 		await markPulled();
 
-		await waitFor(() => expect(screen.getByText('Willkommen!')).toBeDefined());
+		expect(await screen.findByText('Willkommen!')).toBeDefined();
 		expect(screen.queryByTestId('home-loading')).toBeNull();
 	});
 
@@ -1035,7 +1035,7 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 		it('asks for the re-auth instead of loading forever', async () => {
 			render(ListsHome);
 
-			await waitFor(() => expect(screen.getByTestId('home-expired')).toBeDefined());
+			expect(await screen.findByTestId('home-expired')).toBeDefined();
 			expect(screen.queryByTestId('home-loading')).toBeNull();
 			// One way to sign in, not two: the chip's action is the prompt's button.
 			expect(screen.getAllByRole('button', { name: /anmelden/ })).toHaveLength(1);
@@ -1047,7 +1047,7 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 			online.set(false);
 			render(ListsHome);
 
-			await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+			expect(await screen.findByTestId('home-loading')).toBeDefined();
 			expect(screen.queryByTestId('home-expired')).toBeNull();
 		});
 	});
@@ -1056,12 +1056,12 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 		vi.useFakeTimers({ shouldAdvanceTime: true });
 		try {
 			render(ListsHome);
-			await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+			expect(await screen.findByTestId('home-loading')).toBeDefined();
 			expect(screen.queryByText(/länger als üblich/)).toBeNull();
 
 			await vi.advanceTimersByTimeAsync(8000);
 
-			await waitFor(() => expect(screen.getByText(/länger als üblich/)).toBeDefined());
+			expect(await screen.findByText(/länger als üblich/)).toBeDefined();
 		} finally {
 			vi.useRealTimers();
 		}

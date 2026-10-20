@@ -415,15 +415,15 @@ describe('JoinScreen — an expired session on a known device', () => {
 		auth.set({ nickname: null, isValid: false });
 		render(JoinScreen);
 
-		await waitFor(() =>
-			expect(screen.getByRole('button', { name: 'Konto erstellen und beitreten' })).toBeDefined()
-		);
+		expect(
+			await screen.findByRole('button', { name: 'Konto erstellen und beitreten' })
+		).toBeDefined();
 	});
 
 	it('shows the join form once the session is valid again', async () => {
 		auth.set({ nickname: 'Anna', isValid: true });
 		render(JoinScreen);
 
-		await waitFor(() => expect(screen.getByRole('button', { name: 'Beitreten' })).toBeDefined());
+		expect(await screen.findByRole('button', { name: 'Beitreten' })).toBeDefined();
 	});
 });

@@ -406,9 +406,7 @@ describe('ShareSheet', () => {
 		vi.mocked(currentInvite).mockResolvedValueOnce(invite({ list: 'list-1', token: 'tok-one' }));
 
 		const { rerender } = render(ShareSheet, { open: true, listId: 'list-1', onclose: vi.fn() });
-		await waitFor(() =>
-			expect(screen.getByText('https://example.test/join#tok-one')).toBeDefined()
-		);
+		expect(await screen.findByText('https://example.test/join#tok-one')).toBeDefined();
 
 		let answerTwo!: (inv: Invite) => void;
 		vi.mocked(currentInvite).mockReturnValueOnce(new Promise((r) => (answerTwo = r)));
@@ -423,9 +421,7 @@ describe('ShareSheet', () => {
 			invite({ id: 'inv-2', list: 'list-2', token: 'tok-two' })
 		);
 		await rerender({ open: true, listId: 'list-2', onclose: vi.fn() });
-		await waitFor(() =>
-			expect(screen.getByText('https://example.test/join#tok-two')).toBeDefined()
-		);
+		expect(await screen.findByText('https://example.test/join#tok-two')).toBeDefined();
 		answerOneAgain(invite({ list: 'list-1', token: 'tok-one' }));
 		answerTwo(invite({ id: 'inv-2b', list: 'list-2', token: 'tok-stale' }));
 		await new Promise((r) => setTimeout(r, 0));

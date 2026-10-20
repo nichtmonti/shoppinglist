@@ -271,7 +271,7 @@ describe('ListView — inline free-text quantity editor', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Bananen')).toBeDefined());
+		expect(await screen.findByText('Bananen')).toBeDefined();
 
 		const chip = screen.getByRole('button', { name: new RegExp(t('list_edit_quantity')) });
 		expect(chip.textContent?.trim()).toBe('6');
@@ -331,7 +331,7 @@ describe('ListView — inline free-text quantity editor', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Milch')).toBeDefined());
+		expect(await screen.findByText('Milch')).toBeDefined();
 
 		// Named for what it does in this state — "add", not "edit".
 		const chip = screen.getByRole('button', {
@@ -371,7 +371,7 @@ describe('ListView — planning mode boundary', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Milch')).toBeDefined());
+		expect(await screen.findByText('Milch')).toBeDefined();
 
 		expect(
 			screen.queryByRole('button', { name: t('shop_check_tile', { name: 'Milch' }) })
@@ -423,7 +423,7 @@ describe('ListView — detail sheet', () => {
 		});
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 		expect(screen.queryByRole('button', { name: t('list_remove', { name: 'Senf' }) })).toBeNull();
 
 		// The row name itself opens the sheet (the chip is the other door).
@@ -520,7 +520,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 
 		const openBtn = screen.getByRole('button', { name: 'Senf' });
 		await fireEvent.click(openBtn);
@@ -546,7 +546,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Senf' }));
 		const dialog = await screen.findByRole('dialog');
@@ -632,7 +632,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Senf' }));
 		const dialog = await screen.findByRole('dialog');
@@ -657,7 +657,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [oat, milk] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Hafermilch')).toBeDefined());
+		expect(await screen.findByText('Hafermilch')).toBeDefined();
 		await fireEvent.click(screen.getByRole('button', { name: 'Hafermilch' }));
 		const dialog = await screen.findByRole('dialog');
 		// The rows a rename is checked against load as the sheet opens.
@@ -698,7 +698,7 @@ describe('ListView — detail sheet', () => {
 		await itemSort.set('az');
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 		expect(screen.queryByRole('dialog')).toBeNull();
 
 		// findBy, not getBy: items and categories arrive on separate liveQueries,
