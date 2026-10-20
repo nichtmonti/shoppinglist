@@ -837,8 +837,8 @@ describe('ListsHome clone/export menu', () => {
 describe('ListsHome create/join/rename dialogs', () => {
 	it('creates a list from the in-app prompt rather than a native dialog', async () => {
 		// happy-dom has no native dialogs at all; give it one to spy on.
-		if (typeof window.prompt !== 'function') Object.assign(window, { prompt: () => null });
-		const promptSpy = vi.spyOn(window, 'prompt');
+		const promptSpy = vi.fn(() => null);
+		vi.stubGlobal('prompt', promptSpy);
 		vi.mocked(createList).mockResolvedValueOnce('list-new');
 		await putMyList('list-a', 'Alltag');
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
@@ -854,7 +854,6 @@ describe('ListsHome create/join/rename dialogs', () => {
 		// Trimmed on the way out, exactly as the prompt path did.
 		await waitFor(() => expect(vi.mocked(createList)).toHaveBeenCalledWith('Wocheneinkauf'));
 		expect(promptSpy).not.toHaveBeenCalled();
-		promptSpy.mockRestore();
 	});
 
 	// [D-325] The button stays enabled and says what is missing.
@@ -912,8 +911,8 @@ describe('ListsHome create/join/rename dialogs', () => {
 
 	it('asks for the invite in-app instead of via window.prompt', async () => {
 		// happy-dom has no native dialogs at all; give it one to spy on.
-		if (typeof window.prompt !== 'function') Object.assign(window, { prompt: () => null });
-		const promptSpy = vi.spyOn(window, 'prompt');
+		const promptSpy = vi.fn(() => null);
+		vi.stubGlobal('prompt', promptSpy);
 		await putMyList('list-a', 'Alltag');
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
 
@@ -927,7 +926,6 @@ describe('ListsHome create/join/rename dialogs', () => {
 		const dialog = await screen.findByRole('dialog', { name: 'Mit Einladung beitreten' });
 		expect(within(dialog).getByLabelText('Einladungslink oder Code')).toBeDefined();
 		expect(promptSpy).not.toHaveBeenCalled();
-		promptSpy.mockRestore();
 	});
 });
 

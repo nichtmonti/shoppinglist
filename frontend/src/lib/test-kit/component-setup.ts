@@ -4,8 +4,8 @@
 // only under `globals: true`, are wired here: setup() makes waitFor/findBy* and
 // fired events wait for Svelte to flush (act, flushSync); cleanup() unmounts,
 // or one test's components stay in the happy-dom document and the next test's
-// queries match the wrong element. Its vitest.js does the same, but the
-// class-conflict scan below must run before the unmount.
+// queries match the wrong element. Its vitest.js entry does the same, but the
+// overflow wait below must run after the unmount, ordered against it here.
 // Component tests assert against German strings. Paraglide's `baseLocale` is
 // 'en' (docs/internals/design.md §12.2), the app's fresh-user default, not a
 // constraint on which locale tests assert against. Reset to 'de' before each test so a `setLocale('en')` inside one

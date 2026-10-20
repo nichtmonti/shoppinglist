@@ -68,16 +68,15 @@ export async function record(
 	scene: (s: Scene) => Promise<void>
 ): Promise<Recording> {
 	const frames: Frame[][] = pages.map(() => []);
-	const sessions = await Promise.all(
-		pages.map(async (page, i) => {
-			const cdp = await page.context().newCDPSession(page);
-			cdp.on('Page.screencastFrame', ({ data, metadata, sessionId }) => {
-				frames[i].push({ t: (metadata.timestamp ?? Date.now() / 1000) * 1000, data });
-				void cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
-			});
-			await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 90 });
-			return cdp;
-		})
+	await Promise.all(
+		pages.map((page, i) =>
+			page.screencast.start({
+				quality: 90,
+				onFrame: ({ data, timestamp }) => {
+					frames[i].push({ t: timestamp, data: data.toString('base64') });
+				}
+			})
+		)
 	);
 	const captions: Recording['captions'] = [];
 	const taps: Recording['taps'] = [];
@@ -99,7 +98,7 @@ export async function record(
 		}
 	});
 	const end = Date.now();
-	await Promise.all(sessions.map((cdp) => cdp.send('Page.stopScreencast')));
+	await Promise.all(pages.map((page) => page.screencast.stop()));
 	return {
 		frames,
 		captions,

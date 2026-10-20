@@ -463,7 +463,7 @@ function watchSideEffects(page: Page): SideEffectWatch {
  * dismiss the thing that is open.
  */
 async function settleOverlays(page: Page): Promise<void> {
-	for (let attempt = 0; attempt < 12; attempt++) {
+	await expect(async () => {
 		const clear = await page.evaluate(() => {
 			const blocked = (el: Element | null): boolean =>
 				el !== null && getComputedStyle(el).pointerEvents === 'none';
@@ -480,9 +480,8 @@ async function settleOverlays(page: Page): Promise<void> {
 		});
 		if (clear) return;
 		await page.keyboard.press('Escape').catch(() => {});
-		await page.waitForTimeout(150);
-	}
-	throw new Error('overlays never cleared — something is open that Escape does not dismiss');
+		throw new Error('overlays never cleared — something is open that Escape does not dismiss');
+	}).toPass({ intervals: [150], timeout: 3_000 });
 }
 
 /**
@@ -525,9 +524,8 @@ async function waitForUrlStable(page: Page): Promise<void> {
  * overlay rather than navigate, and for those settleOverlays() alone restores
  * the surface.
  *
- * A control that DID navigate is brought back with a plain goto rather than
- * page.goBack(): an SPA's client-side history entry gives goBack() no load
- * event to resolve on.
+ * A control that DID navigate is brought back with a plain goto to the
+ * surface's own path, whatever history the control left behind.
  */
 export async function reachSurface(page: Page, path: string): Promise<void> {
 	// A control clicked a moment ago can still have a CLIENT-SIDE navigation in

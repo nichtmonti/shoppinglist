@@ -387,7 +387,6 @@ describe('startSyncLoop: a failed push', () => {
 		resetReferenceMirrorCheck();
 		await db.pending_ops.clear();
 		await db.memberships.clear();
-		const retryTimers = trackTimers((delay) => delay === 35);
 		const transport = vi.fn().mockRejectedValue(new Error('push timed out'));
 		const digestTransport = vi.fn().mockResolvedValue([]);
 		const stop = startSyncLoop({
@@ -422,7 +421,6 @@ describe('startSyncLoop: a failed push', () => {
 			});
 		} finally {
 			stop();
-			retryTimers.dispose();
 		}
 	});
 });
