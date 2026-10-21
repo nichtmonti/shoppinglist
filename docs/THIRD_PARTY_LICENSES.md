@@ -13,7 +13,7 @@ linux/arm64, as GoReleaser builds it) and the npm packages whose code, styles,
 fonts or images end up in the web app compiled into that binary (`vite build`
 of frontend/). Development and test tooling is not shipped and not listed.
 
-Components: 39 Go, 38 npm, 1 embedded in a listed package.
+Components: 40 Go, 38 npm, 1 embedded in a listed package.
 
 ## Notes
 
@@ -40,6 +40,7 @@ Components: 39 Go, 38 npm, 1 embedded in a listed package.
 | Component | Version | License | Copyright |
 | --- | --- | --- | --- |
 | github.com/asaskevich/govalidator | v0.0.0-20230301143203-a9d515a09cc2 | MIT | Copyright (c) 2014-2020 Alex Saskevich |
+| github.com/caarlos0/env/v11 | v11.4.1 | MIT | Copyright (c) 2015-2024 Carlos Alexandro Becker |
 | github.com/disintegration/imaging | v1.6.2 | MIT | Copyright (c) 2012 Grigory Dryapak |
 | github.com/domodwyer/mailyak/v3 | v3.6.2 | MIT | Copyright (c) 2016 Dom Dwyer |
 | github.com/dustin/go-humanize | v1.1.0 | MIT | Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net> |
@@ -3364,11 +3365,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### MIT: github.com/asaskevich/govalidator, github.com/disintegration/imaging, github.com/domodwyer/mailyak/v3 and 11 more
+### MIT: github.com/asaskevich/govalidator, github.com/caarlos0/env/v11, github.com/disintegration/imaging and 12 more
 
 Applies to:
 
 - github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 (LICENSE): Copyright (c) 2014-2020 Alex Saskevich
+- github.com/caarlos0/env/v11 v11.4.1 (LICENSE.md): Copyright (c) 2015-2024 Carlos Alexandro Becker
 - github.com/disintegration/imaging v1.6.2 (LICENSE): Copyright (c) 2012 Grigory Dryapak
 - github.com/domodwyer/mailyak/v3 v3.6.2 (LICENSE): Copyright (c) 2016 Dom Dwyer
 - github.com/fatih/color v1.19.0 (LICENSE.md): Copyright (c) 2013 Fatih Arslan
