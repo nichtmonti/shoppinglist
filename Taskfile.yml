@@ -111,7 +111,9 @@ tasks:
     # osv-scanner.toml applies only to lockfiles in its own directory, so the
     # root file would never see backend/go.mod. --no-ignore: a worktree sits
     # under .claude/worktrees, which the main checkout ignores, and osv reads
-    # that .gitignore and finds no lockfile at all. --no-call-analysis=go: the
+    # that .gitignore and finds no lockfile at all; with it, CI's module cache
+    # in the workspace (.gomod, go.yaml says why) would be scanned, test
+    # fixtures included, so it is excluded. --no-call-analysis=go: the
     # tools/<name> modules hold only `tool` directives, so osv's govulncheck
     # pass finds no packages there and exits 127; reachability for the app is
     # govulncheck's job ([D-201]).
@@ -125,7 +127,7 @@ tasks:
     cmds:
       - defer: *failed
       - go -C tools/osv-scanner install tool
-      - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go --no-ignore
+      - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go --no-ignore --experimental-exclude=.gomod
 
   repo-rules:
     desc: The repo's own rules, as CI checks them (decision index, doc links, CI image tag)
