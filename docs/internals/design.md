@@ -867,7 +867,7 @@ Scheduled in `internal/jobs`, each sweep written in the package that owns its ta
 
 **Standing rules:**
 - **Schema and rules are checked-in Go migrations**, the source of truth, never set in the admin UI.
-- **Every dependency is pinned to an exact version** when introduced, in each `package.json` as in the lockfiles (Renovate's `rangeStrategy: 'pin'`). An npm release, a transitive one too, is taken only once it is three days old (`minimumReleaseAge` in each `pnpm-workspace.yaml`, Renovate's `security:minimumReleaseAgeNpm`, [D-339]). The PocketBase version is pinned in `go.mod`, identical in CI and prod.
+- **Every dependency is pinned to an exact version** when introduced, in each `package.json` as in the lockfiles (Renovate's `rangeStrategy: 'pin'`). An npm release, a transitive one too, is taken only once it is three days old (`minimumReleaseAge` in each `pnpm-workspace.yaml`, Renovate's `security:minimumReleaseAgeNpm`, [D-339]), and only if published with no weaker provenance than its predecessors (`trustPolicy: no-downgrade`). The PocketBase version is pinned in `go.mod`, identical in CI and prod.
 - **Every custom route gets a “denied” test** beside its happy-path test.
 
 ---

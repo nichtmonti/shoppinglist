@@ -3,3 +3,7 @@
 # A release resolves only once it is three days old (minutes), transitives
 # included; renovate.json5 holds its updates to the same age.
 minimumReleaseAge: 4320
+# A release published with weaker evidence than an earlier one (trusted
+# publisher, then provenance, then none) is refused: what a hijacked npm
+# account publishes looks like that.
+trustPolicy: no-downgrade
