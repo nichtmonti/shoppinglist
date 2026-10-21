@@ -6,15 +6,27 @@ import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 const syncMocks = vi.hoisted(() => ({
 	subscribe: vi.fn(),
 	startSyncLoop: vi.fn(),
+	syncNow: vi.fn(),
+	runSyncCycle: vi.fn(),
 	refreshRoster: vi.fn()
 }));
 
 vi.mock('./sse', () => ({ subscribe: syncMocks.subscribe }));
-vi.mock('./loop', () => ({ startSyncLoop: syncMocks.startSyncLoop }));
+vi.mock('./loop', () => ({ startSyncLoop: syncMocks.startSyncLoop, syncNow: syncMocks.syncNow }));
+vi.mock('./cycle', () => ({ runSyncCycle: syncMocks.runSyncCycle }));
 vi.mock('./roster', () => ({ refreshRoster: syncMocks.refreshRoster }));
 
-import { mountSync, setActiveList, unmountSync } from './mount';
+import { mountSync, pullFromServer, setActiveList, unmountSync } from './mount';
 import { putMyList, resetDb } from '#lib/test-kit/db.js';
+
+// A list just made or joined is "not found" until a pull brings it in.
+describe('pullFromServer', () => {
+	it('asks the loop for a cycle when its pull fails, and resolves anyway', async () => {
+		syncMocks.runSyncCycle.mockRejectedValueOnce(new Error('offline'));
+		await expect(pullFromServer()).resolves.toBeUndefined();
+		expect(syncMocks.syncNow).toHaveBeenCalledOnce();
+	});
+});
 
 describe('active-list realtime subscription', () => {
 	beforeEach(async () => {

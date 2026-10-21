@@ -3,7 +3,7 @@
 // cycles (§7.4), and the notices the app hands in (the root layout's
 // #lib/state/sync-notices).
 import { db } from '#lib/db.js';
-import { startSyncLoop } from '#lib/sync/loop.js';
+import { startSyncLoop, syncNow } from '#lib/sync/loop.js';
 import { runSyncCycle } from '#lib/sync/cycle.js';
 import { subscribe } from '#lib/sync/sse.js';
 import { refreshRoster } from '#lib/sync/roster.js';
@@ -45,10 +45,12 @@ export function unmountSync(): void {
  * is the loop's, drained by the leader tab alone (§8.7 [D-109]) and with the
  * notices; drained here, a conflict or a denial would pass in silence. A list
  * the pull finds gone still raises §8.6's notice. Best-effort: the route has
- * already succeeded, and the loop repairs a failed pull.
+ * already succeeded. A failed pull asks the loop for a cycle at once, which
+ * retries within seconds, instead of leaving a list just made or joined
+ * "not found" until the loop's next tick.
  */
 export async function pullFromServer(): Promise<void> {
-	await runSyncCycle({ push: false, drain: notices }).catch(() => {});
+	await runSyncCycle({ push: false, drain: notices }).catch(() => syncNow());
 }
 
 /**
