@@ -60,6 +60,10 @@ test('re-add an item from the previous-items screen', async ({ page }) => {
 
 	// Re-add once more (a fresh toast replaces the spent one) so the removal
 	// flow below starts from the same on-the-list state it was written for.
+	// The row is back under the same spot, and a tap there this soon after
+	// the last one is the double tap the guard refuses ([D-213]); a person
+	// pauses longer than a test, so the page's clock steps past the guard.
+	await page.clock.runFor(1000);
 	await prevRow.click();
 	await expect(page.getByText('Noch keine früheren Artikel')).toBeVisible();
 
