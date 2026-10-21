@@ -139,7 +139,7 @@ the boot.
 
 | Auth screen | Settings, OIDC account | Settings, passkey account |
 |:-:|:-:|:-:|
-| <img src="images/oidc-signin.png" width="200" alt="The auth screen with a Continue with Dex button under the passkey sign-in"> | <img src="images/oidc-settings-linked.png" width="230" alt="The account settings: Connected with Dex as anna@example.com, with Remove sign-in"> | <img src="images/oidc-settings-link.png" width="230" alt="The account settings of a passkey account, offering Link with Dex"> |
+| <img src="images/oidc-signin.png" width="200" alt="The auth screen with a Continue with Dex button under the passkey sign-in"> | <img src="images/oidc-settings-linked.png" width="230" alt="The account settings: Connected with Dex as anna@example.com, with Remove sign-in"> | <img src="images/oidc-settings-link.png" width="230" alt="The account settings of a passkey account, offering Connect with Dex"> |
 
 - "Continue with ‹name›" on the auth screen. The first sign-in creates an
   account, named after the provider's name claim, username or the part of the
@@ -147,7 +147,7 @@ the boot.
   identity shown in settings is the provider's username, or the email when it
   has none.
 - "Connected with ‹name› as ‹identity›" in settings, shown only to that user.
-- "Link with ‹name›" in a passkey account's settings, which adds the
+- "Connect with ‹name›" in a passkey account's settings, which adds the
   provider login to that account and keeps its lists. "Remove sign-in"
   takes it off again once the account has a passkey.
 
@@ -213,8 +213,8 @@ register a passkey.
   under; changing it strands all of them, and everyone registers again.
 
 Before inviting anyone, register an account at your real domain, then **reload
-and sign in with the passkey**. Registration working and sign-in failing means
-`RP_ORIGIN` is wrong.
+and sign in with the passkey**. If either fails, `RP_ID` or `RP_ORIGIN` does
+not match the address bar.
 
 ## The reverse proxy is part of the security model
 
@@ -310,15 +310,18 @@ from.
 ### Without Docker
 
 The [releases page](https://codeberg.org/sclermont/shoppinglist/releases) has
-a single self-contained binary for `linux/amd64` and `arm64`:
+a zip for `linux/amd64` and `arm64` holding a single self-contained binary:
 
 ```sh
+unzip shoppinglist_*_linux_amd64.zip
 SHOPPINGLIST_RP_ID=list.example.com \
 ./shoppinglist serve --http=127.0.0.1:8090 --dir=/path/to/data
 ```
 
-`--dir` plays the part of the `/pb_data` volume; everything else on this page
-applies unchanged.
+`--dir` plays the part of the `/pb_data` volume. Nothing reads `.env` here:
+set the variables this page names in the binary's environment (a systemd
+unit's `EnvironmentFile=` takes the same file). Everything else applies
+unchanged.
 
 ### Bind-mounting a host directory instead of a named volume
 

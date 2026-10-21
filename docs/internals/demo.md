@@ -83,7 +83,7 @@ What is up to you:
   block.
 - **No backups.** A backup would keep what the sweep deletes. Also leave the
   data directory out of any server-wide backup.
-- **Error output.** The demo prints its errors to stdout; whatever collects that
+- **Error output.** The demo prints its errors to stderr; whatever collects that
   (journald, `docker logs`) keeps it on its own schedule. It contains no
   visitor data, only account ids.
 - **Imprint and privacy notice.** A public site run from Germany may need both,

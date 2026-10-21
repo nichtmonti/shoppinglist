@@ -92,8 +92,8 @@ test.beforeAll(async ({ browser }) => {
 });
 
 // The shared page is not a fixture, so the failure diagnosis ([D-247]) is
-// wired here: a failed test, or one about to time out, writes what the page
-// was doing to its page-diagnosis.md.
+// wired here: a failed or timed-out test, once it has ended, writes what the
+// page was doing to its page-diagnosis.md.
 let finishGuard: (() => Promise<void>) | null = null;
 test.beforeEach(({}, testInfo) => {
 	finishGuard = guardTest(page, testInfo);

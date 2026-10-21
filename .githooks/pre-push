@@ -15,7 +15,7 @@
 set -euo pipefail
 
 root=$(git rev-parse --show-toplevel)
-scan="go -C '$root/tools/gitleaks' install github.com/zricethezav/gitleaks/v8 &&
+scan="go -C '$root/tools/gitleaks' install tool &&
 	gitleaks git '$root' --no-banner --redact"
 
 if command -v go >/dev/null; then

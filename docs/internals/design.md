@@ -122,7 +122,7 @@ WebAuthnCredentials() []webauthn.Credential  // all passkeys for this account
 
 ### 5.3 Discoverable credentials are mandatory
 
-There is no username to type: registration **requires discoverable keys** (`residentKey: required`, `userVerification: required`), and login is **discoverable** (`BeginDiscoverableLogin` / `FinishPasskeyLogin`).
+There is no username to type: registration **requires discoverable keys** (`residentKey: required`, `userVerification: required`), and login is **discoverable** (`BeginDiscoverableLogin` / `ValidatePasskeyLogin`).
 
 ### 5.4 The four endpoints
 
@@ -131,9 +131,9 @@ Each wraps exactly one library call.
 | Endpoint | Wraps | Behaviour |
 |---|---|---|
 | `POST /api/passkey/register/begin` | `BeginRegistration` | **New account:** the signup gate (`SHOPPINGLIST_SIGNUP`, [D-61], [D-241]) must admit it: `open` does, `closed` answers 403, `invite` wants a live list invite token (`invite`) or, while no account exists, the boot's setup token (`setup`), whose hash the session keeps. Generates the account id + handle (**not persisted** until finish), takes the nickname. **Adding a passkey:** requires auth. Everything finish needs goes into the session record (§5.5). Returns creation options. |
-| `POST /api/passkey/register/finish` | `FinishRegistration` | Verify attestation; **persist account + credential in one transaction**. A new account asks the gate again inside that transaction, and one admitted by a list invite is saved **with its membership of that list** in the same transaction [D-241]. A new account gets a minted PB auth token; an added passkey returns `{ok: true}`. |
+| `POST /api/passkey/register/finish` | `CreateCredential` | Verify attestation; **persist account + credential in one transaction**. A new account asks the gate again inside that transaction, and one admitted by a list invite is saved **with its membership of that list** in the same transaction [D-241]. A new account gets a minted PB auth token; an added passkey returns `{ok: true}`. |
 | `POST /api/passkey/login/begin` | `BeginDiscoverableLogin` | Return request options, store `SessionData`. |
-| `POST /api/passkey/login/finish` | `FinishPasskeyLogin` | Verify assertion, resolve credential → account via the user handle, re-store `credential_json` (sign count) and `last_used_at`, mint and return a PB auth token. |
+| `POST /api/passkey/login/finish` | `ValidatePasskeyLogin` | Verify assertion, resolve credential → account via the user handle, re-store `credential_json` (sign count) and `last_used_at`, mint and return a PB auth token. |
 
 The client stores the token so `pb.authStore` populates like a normal PocketBase login.
 

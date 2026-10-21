@@ -71,7 +71,8 @@ included.
 ([D-177]).** It runs `task` (`Taskfile.yml`, go-task from `tools/task`,
 [D-177]) and takes the same arguments. A layer whose inputs have not changed
 since it last passed is skipped, so a docs edit runs only the repo's rule
-checks (decision index, doc links, settings, CI image tag) and a rerun
+checks (decision index, doc links, settings, CI image tag) beside the three
+that run every time (gitleaks, gofmt, prettier with its cache), and a rerun
 repeats only what failed; the rest scope themselves: the type-aware lint on
 the changed files, `vitest --changed`, Go's test cache, prettier's cache.
 Format, gitleaks, lint, check (and `tsc` over `e2e/`, whose types Playwright
@@ -183,7 +184,7 @@ e2e:<name>`) or by hand as below.
 - **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from `task
   build-demo`.
 
-A failed or timed-out test in the functional, arch or OIDC suite writes
+A failed or timed-out test in the functional, arch, OIDC or demo suite writes
 `page-diagnosis.md` next to Playwright's `error-context.md` ([D-247]); CI
 prints both. The functional, OIDC and demo
 suites also keep the failed test's `trace.zip` (`npx playwright show-trace`).
@@ -250,9 +251,10 @@ put a version in a command, a Dockerfile ARG or a CI `environment:` block.
 vet/test/build` fails with `pattern all:pb_public: no matching files found`.
 The e2e build deliberately omits it, because that binary carries the real UI.
 
-**Test-only code never ships.** `backend/deps_arch_test.go` fails if the
-binary links `testing`, `internal/testutil`/`dextest`/`sectest` or a tool
-pinned under `tools/`; a test helper imported by production code is how it
+**Test-only code never ships.** `backend/deps_arch_test.go` fails if a
+package in the binary outside the standard library imports `testing`, or the
+binary links `internal/testutil`/`dextest`/`sectest` or a tool pinned under
+`tools/`; a test helper imported by production code is how it
 happens.
 
 **A dependency change regenerates `docs/THIRD_PARTY_LICENSES.md` and

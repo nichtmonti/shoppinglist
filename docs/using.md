@@ -32,7 +32,7 @@ two accounts with the same nickname have different codes.
 ## Put it on your home screen
 
 Then it opens in one tap, full screen, like any app, and works without signal.
-The app offers this itself; *Settings → Install the app* shows how again.
+The app offers this itself; *Settings → Install Shopping list* shows how again.
 
 - **iPhone:** in Safari, tap **Share**, then **Add to Home Screen**, then
   **Add**. Open it from the new icon and sign in there once more.
@@ -79,7 +79,7 @@ it went somewhere it shouldn't, and **Revoke link** ends it without a new one.
 ## Coming from another app
 
 A list from another app, a note or a chat comes over as text. Share it from
-the other app and, on Android with the app installed, pick shoppinglist as the
+the other app and, on Android with the app installed, pick Shopping list as the
 target. Anywhere else, paste the text into **Import list** on the home screen,
 or paste it into a list's add field. Each line
 becomes an item and lands in its aisle; an amount such as "1 kg" becomes

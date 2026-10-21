@@ -36,8 +36,8 @@ const serverEnv = {
 	SHOPPINGLIST_TRUSTED_PROXY_HEADER: 'X-Forwarded-For'
 };
 
-// Resolve the backend binary. CI builds it in the Go step and passes the path
-// (the node image has no Go toolchain); locally we build on demand.
+// Resolve the backend binary. The gate and CI build it (`task build-backend`)
+// and pass the path; otherwise it is built here.
 function resolveBinary(outDir: string): string {
 	const override = process.env.SHOPPINGLIST_BIN;
 	if (override) return path.resolve(override);

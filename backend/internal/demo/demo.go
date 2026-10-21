@@ -5,7 +5,7 @@
 // deps_arch_test.go fails if it reaches a binary built without the tag. The
 // package itself carries no build tag, so `go test ./...` still tests it.
 //
-// FromEnv refuses passkeys and OIDC, so every account on a demo instance is a
+// FromSettings refuses passkeys and OIDC, so every account on a demo instance is a
 // throwaway one: that is what lets the sweep delete by age alone.
 package demo
 

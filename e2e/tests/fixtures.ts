@@ -27,8 +27,9 @@ export const test = base.extend({
 		const ip = `10.${100 + (testInfo.workerIndex % 100)}.${(serial >> 8) & 255}.${serial & 255}`;
 		await use({ ...extraHTTPHeaders, 'X-Forwarded-For': ip });
 	},
-	// Every test's page is watched, and a failure or a looming timeout writes
-	// what the page was doing to page-diagnosis.md ([D-247], ../diagnose.ts).
+	// Every test's page is watched, and a failed or timed-out test writes, once
+	// it has ended, what the page was doing to page-diagnosis.md ([D-247],
+	// ../diagnose.ts).
 	page: async ({ page }, use, testInfo) => {
 		const done = guardTest(page, testInfo);
 		await use(page);

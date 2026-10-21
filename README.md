@@ -152,7 +152,7 @@ This runs the newest release, so a restart can upgrade you; add
 one. Every other setting is in [`.env.example`](.env.example), and backups,
 upgrades and the admin account in [`docs/deploying.md`](docs/deploying.md).
 
-A plain binary for `linux/amd64` and `arm64` is on the
+A plain binary for `linux/amd64` and `arm64`, zipped, is on the
 [releases page](https://codeberg.org/sclermont/shoppinglist/releases).
 
 ## How it's built

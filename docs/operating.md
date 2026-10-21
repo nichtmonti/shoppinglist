@@ -46,9 +46,10 @@ server writes before an upgrade changes the database
 ([upgrades](deploy-reference.md#upgrades)). It keeps the newest three of
 those; "max backups to keep" applies only to the scheduled ones.
 
-**Restoring.** Stop the container. With the dashboard: `/_/` → Settings →
-Backups → *Restore*. Without it: empty the data directory except `backups/`,
-unzip the backup (or copy your copy) into it, and start again. The image has
+**Restoring.** With the dashboard: `/_/` → Settings → Backups → *Restore*,
+on the running server. Without it: stop the container, empty the data
+directory except `backups/`, unzip the backup (or copy your copy) into it, and
+start again. The image has
 no shell, so for a named volume do this from a throwaway container that mounts
 the same volume.
 
@@ -76,15 +77,16 @@ page shows) it holds the download's details.
 
 ## Cron jobs
 
-Five jobs run on their own; there is nothing to configure, but several delete
+Six jobs run on their own; there is nothing to configure, but several delete
 data for good. "Daily" is 03:00 UTC.
 
 | Job | Schedule | What it does |
 |---|---|---|
-| Tombstone cleanup | daily | **Deletes** items and categories removed more than 180 days ago, except items remembered under *Previous items* |
+| Tombstone cleanup | daily | **Deletes** items and categories removed more than 180 days ago, except items remembered under *Previous items* and the built-in aisles a list removed |
 | Invite sweep | daily | Deletes invite links that expired, or were revoked or replaced, more than 30 days ago |
 | Orphan sweep | daily | **Deletes** accounts that are on no list, are older than 60 days and have used no passkey in 60 days |
 | Barcode photo sweep | daily | Deletes product lookups and photos older than 180 days that no item still shows |
+| Barcode photo retry | every 15 minutes | Downloads again, from the Open Food Facts photo hosts, product photos whose download failed in the last 48 hours |
 | Merge-log sweep | daily | Deletes records of duplicate items merged during sync, after 180 days |
 
 A job that fails says so in the log

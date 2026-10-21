@@ -89,8 +89,8 @@ docker compose logs shoppinglist   # a container that exits names the reason her
 The log has a line `no accounts yet and SHOPPINGLIST_SIGNUP=invite — create
 the first account at https://…/#setup=…`. Open that link on your phone, create
 your account with a passkey, then **reload and sign in again with the
-passkey**. If registering works but signing in fails,
-`SHOPPINGLIST_RP_ORIGIN` does not match the address bar
+passkey**. If either fails, `SHOPPINGLIST_RP_ID` or `SHOPPINGLIST_RP_ORIGIN`
+does not match the address bar
 ([first boot in full](deploy-reference.md#first-boot)). The link works once
 and only until the first account exists; a restart before then prints a new
 one.
