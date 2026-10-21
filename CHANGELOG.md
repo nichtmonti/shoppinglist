@@ -10,6 +10,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 **For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` (and `SQLITE_PRAGMAS`, if you set it) is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it. If you filter or alert on the server's warnings in the container log, match their new form (below).
 
+- **The user guide says what needs a connection** (creating, joining, renaming or leaving a list, invite links, account changes, importing a backup, an unknown barcode), how to sign in through a household's own provider ("Continue with ‹name›"), and "My lists" for the app's start page; the README says where to switch the language.
 - **Citations in the docs and this changelog are links**: a decision such as [D-336] opens its entry in the decision log, and a section such as [§5.7] its heading in the design document.
 - **The operator docs state each fact once and link to it**, and correct three details: with `SHOPPINGLIST_ADMIN_UI=off` the dashboard's enrolment link is not printed at all, plain `http://` also works at a `*.localhost` name or any loopback address, and the release zip holds the licences and the operator docs beside the binary. The README points to [docs/operating.md](docs/operating.md#backups) for backups.
 - **`CONTRIBUTING.md` says what `task --list` shows** (the tasks to run, not every task) and links to where the test layers are listed.

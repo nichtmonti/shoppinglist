@@ -6,7 +6,7 @@ or, more often, an invite link to a list.
 ## What you need
 
 A phone or computer with a current browser: an iPhone or iPad with iOS 16.4 or
-newer, Android 10 or newer with a current Chrome, or a current Chrome, Edge,
+newer, an Android phone with a current Chrome, or a current Chrome, Edge,
 Firefox or Safari on a computer. No email address and no password.
 
 ## Getting in
@@ -21,6 +21,12 @@ fingerprint, face or screen lock, the same way it unlocks. There is nothing
 to remember. On an iPhone the passkey is kept in iCloud Keychain, on Android in
 Google Password Manager, so your other devices on the same account can usually
 use it too.
+
+If your household runs its own sign-in, such as Pocket ID or Keycloak, the
+screen also offers "Continue with ‹name›", and some instances offer only that.
+Your account then belongs to that sign-in, with its own password and recovery,
+and needs no passkey. Already signed in with a passkey, "Settings" →
+"Connect with ‹name›" adds it to the same account.
 
 Your nickname is all anyone sees of you, and only the people you share a list
 with see it.
@@ -63,13 +69,17 @@ the top of the list.
   and move to "Previous items" three hours after the last check-off, ready to put back
   on the list next time.
 
-**Without signal** everything keeps working. Changes that have not reached the
-others yet are counted at the top and go out on their own once you are back
-online.
+**Without signal** your lists keep working: adding, checking off and changing
+items. Changes that have not reached the others yet are counted at the top and
+go out on their own once you are back online. What changes a list itself or
+your account waits for a connection, and the app says so: creating, joining,
+renaming, duplicating or leaving a list, clearing its previous items, invite
+links, account changes, importing a backup, and a barcode the server has not
+looked up before.
 
 ## Sharing a list
 
-On the home screen, open a list's **⋮** menu and choose "Share & members".
+In "My lists", open a list's **⋮** menu and choose "Share & members".
 Send the invite link, or let someone scan its QR code. Everyone on a list sees
 every change within seconds. A link lasts 30 days; "Reset link" replaces it if
 it went somewhere it shouldn't, and "Revoke link" ends it without a new one.
@@ -80,7 +90,7 @@ it went somewhere it shouldn't, and "Revoke link" ends it without a new one.
 
 A list from another app, a note or a chat comes over as text. Share it from
 the other app and, on Android with the app installed, pick Shopping list as the
-target. Anywhere else, paste the text into "Import list" on the home screen,
+target. Anywhere else, paste the text into "Import list" in "My lists",
 or paste it into a list's add field. Each line
 becomes an item and lands in its aisle; an amount such as “1 kg” becomes
 its quantity. Before anything is added you see every item, can uncheck some,
@@ -95,6 +105,7 @@ sections. A backup from this app goes through "Choose a backup file…" under
 
 If your passkey is in iCloud Keychain or Google Password Manager, a new phone
 signed in to the same Apple or Google account can usually sign in right away.
+With your household's own sign-in, a new phone signs in with it as before.
 
 To be safe, add a second passkey: sign in on another device (a computer can use
 your phone's passkey through the QR code the browser offers), then choose

@@ -35,7 +35,7 @@ memory.
   <img src="docs/screenshots/plan.png" width="440" title="In the store: big tiles, in aisle order. At home: plan the list, quantities and notes." alt="The shopping view, big tiles under colored aisle headers, beside the editing view, rows grouped by aisle with quantities and notes">
   <img src="docs/screenshots/add.png" width="440" title="A few letters suggest the item and its aisle; an amount typed with it is the quantity. Or scan a barcode: the product, with its photo." alt="Typing an amount and a few letters opens suggestions, each with its aisle and the amount, beside a scanned product with its photo from Open Food Facts">
   <img src="docs/screenshots/item.png" width="440" title="Tap an item for its quantity, note and aisle. Invite your household by link or QR code." alt="An item's detail sheet with name, quantity, note and aisle, beside the share sheet with members and an invite as link or QR code">
-  <img src="docs/screenshots/lists.png" width="440" title="Several lists, shared or your own. Bought items move to the end. In German or English, light or dark." alt="The home screen with several lists, one shared, beside the end of the shopping view in German and dark mode: the last aisles, such as „Drogerie &amp; Körperpflege“, and the bought items, checked off, under „Erledigt“">
+  <img src="docs/screenshots/lists.png" width="440" title="Several lists, shared or your own. Bought items move to the end. In German or English, light or dark." alt="My lists, with several lists, one shared, beside the end of the shopping view in German and dark mode: the last aisles, such as „Drogerie &amp; Körperpflege“, and the bought items, checked off, under „Erledigt“">
   <br><sub>In the store and at home, adding by name or barcode, one item's details, sharing,
   several lists, the bought items, and the app in German and dark mode.</sub>
 </p>
@@ -51,7 +51,8 @@ memory.
 - **Offline first.** Every change is saved on the phone first and synced when
   there is a connection. Two people changing different fields of one item at
   once both keep their change.
-- **German and English.** The app follows the browser's language.
+- **German and English.** It starts in the browser's language, and
+  "Settings" → "Language" switches it.
 - **No passwords, no emails.** An account is a passkey and a nickname, and
   only the people you share a list with see the nickname. Unless you sign in
   with your own provider (below), which has its own sign-in.
@@ -192,7 +193,7 @@ A plain binary for `linux/amd64` and `arm64`, zipped, is on the
 
 ## Documentation
 
-- [Using it](docs/using.md): for your household. Getting in, the home screen,
+- [Using it](docs/using.md): for your household. Getting in, installing it,
   the two views, a lost phone.
 - [Deploying](docs/deploying.md): **start here.** Domain, settings, reverse
   proxy, first boot, upgrades, with a [full reference](docs/deploy-reference.md)
