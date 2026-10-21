@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Idempotent dev-environment hydration, run on every container create: the Go
 # modules, the pinned Go dev tools and the three pnpm projects. Installs from
-# the committed lockfiles; CI enforces frozenness strictly (docs/internals/design.md §14).
+# the committed lockfiles, as CI does (docs/internals/design.md §14).
 set -euo pipefail
 
 if [ -f backend/go.mod ]; then
@@ -33,21 +33,11 @@ for dir in tools/*/; do
   fi
 done
 
-# The root project holds the repo-wide formatter (prettier, `pnpm format`).
-if [ -f package.json ]; then
-  echo ">> pnpm install (root)"
-  pnpm install
-fi
-
-if [ -f frontend/package.json ]; then
-  echo ">> pnpm install (frontend)"
-  (cd frontend && pnpm install)
-fi
-
-if [ -f e2e/package.json ]; then
-  echo ">> pnpm install (e2e)"
-  (cd e2e && pnpm install)
-fi
+# The three pnpm projects (the root's prettier, frontend, e2e), installed as
+# the gate installs them: from the committed lockfiles, which a plain
+# `pnpm install` could rewrite.
+echo ">> task deps"
+task deps
 
 # [D-274] gitleaks before every push: the repo's hooks live in .githooks/.
 # The checkout's git config is shared with the host, so this enables the hook
