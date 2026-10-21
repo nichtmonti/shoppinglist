@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -161,12 +162,18 @@ const (
 
 // Others are the SHOPPINGLIST_ names the server sees but reads nothing from,
 // so the start's unknown-name check passes them ([D-336]).
-var Others = []string{
-	// docker-compose.yml's own, handed over with the rest of .env.
+var Others = slices.Concat(composeNames, toolingNames)
+
+// composeNames are docker-compose.yml's own, handed over with the rest of
+// .env.
+var composeNames = []string{
 	"SHOPPINGLIST_BIND",
 	"SHOPPINGLIST_VERSION",
-	// Not settings: the repo's tooling sets them around the servers it starts
-	// (the devcontainer, the gate, the harnesses, the builds).
+}
+
+// toolingNames are not settings: the repo's tooling sets them around the
+// servers it starts (the devcontainer, the gate, the harnesses, the builds).
+var toolingNames = []string{
 	"SHOPPINGLIST_BIN",
 	"SHOPPINGLIST_DEMO_BIN",
 	"SHOPPINGLIST_DEMO_BUILD",

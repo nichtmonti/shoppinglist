@@ -123,7 +123,7 @@ tasks:
       - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go --no-ignore
 
   repo-rules:
-    desc: The repo's own rules, as CI checks them (decision index, doc links, settings, CI image tag)
+    desc: The repo's own rules, as CI checks them (decision index, doc links, CI image tag)
     # About four seconds, every run, no sources, as gitleaks: doc-links reads
     # every tracked file, so no list here names its inputs. Without them here
     # a docs-only commit passed the gate and failed CI's frontend and ci-image
@@ -132,7 +132,6 @@ tasks:
       - defer: *failed
       - node scripts/decisions-index.mjs --check
       - node scripts/doc-links.mjs
-      - node scripts/env-check.mjs
       - scripts/ci-image-tag.sh --check
 
   licenses:
@@ -257,6 +256,8 @@ tasks:
       - docs/deploy-reference.md
       - .env.example
       - Dockerfile.demo
+      - docker-compose.yml
+      - README.md
       - exclude: backend/pb_data/**/*
       - exclude: backend/pb_public*/**/*
     cmds:
