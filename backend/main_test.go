@@ -105,6 +105,14 @@ func TestInvocations(t *testing.T) {
 		})
 	}
 
+	// Help serves nothing, so it needs no settings.
+	t.Run("serve --help without settings", func(t *testing.T) {
+		t.Setenv("SHOPPINGLIST_RP_ID", "")
+		if code, out := runMain(t, t.TempDir(), "serve", "--help"); code != 0 || !strings.Contains(out, "--https") {
+			t.Errorf("exit %d, want 0 with the serve flags: %s", code, out)
+		}
+	})
+
 	t.Run("a bad environment stops serve alone", func(t *testing.T) {
 		t.Setenv("SHOPPINGLIST_RP_ID", "")
 		if code, out := runMain(t, t.TempDir(), "--dev", "serve", "--http=127.0.0.1:1"); code != 1 || !strings.Contains(out, "SHOPPINGLIST_RP_ID") {

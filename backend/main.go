@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -72,8 +73,12 @@ func main() {
 	app := bootenv.NewApp()
 	app.RootCmd.Version = versionString()
 	serve := addCommands(app)
-	sub, _, _ := app.RootCmd.Find(os.Args[1:])
-	serving := sub == serve
+	sub, rest, _ := app.RootCmd.Find(os.Args[1:])
+	// `serve --help` prints the help and serves nothing, so it needs no
+	// settings. Cobra decides on help only inside Execute, after the
+	// bootstrap the environment check must come before.
+	helpAsked := slices.ContainsFunc(rest, func(a string) bool { return a == "-h" || a == "--help" })
+	serving := sub == serve && !helpAsked
 
 	bootenv.Register(app)
 

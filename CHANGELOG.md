@@ -10,6 +10,8 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 **For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` (and `SQLITE_PRAGMAS`, if you set it) is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it. If you filter or alert on the server's warnings in the container log, match their new form (below).
 
+- **`.env.example` no longer suggests trying the app on your LAN without a proxy** through `SHOPPINGLIST_BIND`. Over plain `http://` at any address but `localhost` the app does not work; the line now says to publish on every interface only for a reverse proxy on another machine.
+- **`shoppinglist serve --help` prints the help without any settings**; it asked for `SHOPPINGLIST_RP_ID` first.
 - **Built with Go 1.27.3**, which fixes a standard-library vulnerability (GO-2026-6809).
 - **A misspelt setting stops the server instead of being ignored.** `SHOPPINGLIST_SIGNUPS=closed`, say, used to start an instance with sign-up open; the log now names the variable and points to the list of settings. The same goes for a setting removed in an earlier release that is still set, and for `SQLITE_PRAGMA` written without its final S ([D-336]).
 - **The server's warnings and errors in the container log are in the standard `key=value` form**, with their level: `level=WARN msg="shoppinglist: …" key=value` instead of `shoppinglist: WARNING …`. A filter or alert that matched the old wording needs the new one; the lines that say how the server is configured at start keep their form.
