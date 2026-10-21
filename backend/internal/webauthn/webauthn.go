@@ -6,6 +6,7 @@ package webauthn
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"strings"
 
@@ -118,10 +119,37 @@ func checkOrigin(origin, rpid string) (string, error) {
 		return "", fmt.Errorf("%s (%q) is not on %s (%q): browsers refuse every passkey unless the RP-ID is the origin's host or a parent domain of it",
 			envRPOrigin, origin, envRPID, rpid)
 	}
-	if scheme == "http" && host != "localhost" && !strings.HasSuffix(host, ".localhost") {
+	if insecure(scheme, host) {
 		return "", fmt.Errorf("%s (%q) is plain http: browsers offer passkeys only over https (or on localhost)", envRPOrigin, origin)
 	}
 	return norm, nil
+}
+
+// SecureOrigin refuses an origin where browsers give the page no secure
+// context, plain http at any host but this machine's own: passkeys, the
+// service worker and the browser functions the sync needs exist only in one
+// ([D-335]). The origin is the one Config.RPOrigin holds.
+func SecureOrigin(origin string) error {
+	u, err := url.Parse(origin)
+	if err != nil {
+		return err
+	}
+	if insecure(strings.ToLower(u.Scheme), strings.ToLower(u.Hostname())) {
+		return fmt.Errorf("the app's address %q is plain http, where browsers withhold what the app needs: "+
+			"serve it over HTTPS and set %s or %s to the https:// address (%s)",
+			origin, envRPOrigin, envAppURL, rpDocs)
+	}
+	return nil
+}
+
+// insecure is plain http outside localhost and the loopback addresses, which
+// browsers count as secure.
+func insecure(scheme, host string) bool {
+	if scheme != "http" || host == "localhost" || strings.HasSuffix(host, ".localhost") {
+		return false
+	}
+	ip := net.ParseIP(host)
+	return ip == nil || !ip.IsLoopback()
 }
 
 // New builds the go-webauthn instance, requiring discoverable keys and user

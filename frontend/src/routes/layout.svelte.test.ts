@@ -130,3 +130,19 @@ describe('hidden suggestions (§6.11)', () => {
 		await waitFor(() => expect(refreshSuppressedMirror).toHaveBeenCalledTimes(1));
 	});
 });
+
+// [D-335] Over plain http:// at any address but localhost the app would look
+// fine and save nothing, so the page says so in place of everything.
+describe('outside a secure context', () => {
+	it('shows only the explanation, and starts no sync', async () => {
+		Object.defineProperty(window, 'isSecureContext', { value: false, configurable: true });
+		try {
+			render(Layout, { props: { children } });
+			// In whichever language an earlier test left stored.
+			expect((await screen.findByRole('alert')).textContent).toMatch(/http:\/\/localhost/);
+			expect(screen.queryByTestId('page')).toBeNull();
+		} finally {
+			Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true });
+		}
+	});
+});

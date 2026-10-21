@@ -105,6 +105,16 @@ func TestInvocations(t *testing.T) {
 		})
 	}
 
+	// [D-335] An address no browser gives a secure context stops the start.
+	t.Run("a plain-http address stops serve", func(t *testing.T) {
+		t.Setenv("SHOPPINGLIST_PASSKEYS", "off")
+		t.Setenv("SHOPPINGLIST_OIDC", "")
+		t.Setenv("SHOPPINGLIST_APP_URL", "http://192.168.1.5:8090")
+		if code, out := runMain(t, t.TempDir(), "--dev", "serve", "--http=127.0.0.1:1"); code != 1 || !strings.Contains(out, "is plain http") {
+			t.Errorf("serve exit %d, want 1 naming the plain-http address: %s", code, out)
+		}
+	})
+
 	// Help serves nothing, so it needs no settings.
 	t.Run("serve --help without settings", func(t *testing.T) {
 		t.Setenv("SHOPPINGLIST_RP_ID", "")

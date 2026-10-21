@@ -24,6 +24,10 @@ import { conflictingClasses } from '#lib/utils.js';
 // polling ceiling.
 configure({ asyncUtilTimeout: 5000 });
 
+// happy-dom has no isSecureContext; the tests stand in for a browser at
+// localhost, which is one ([D-335]). A test of the other case sets it false.
+Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true });
+
 beforeEach(async () => {
 	await setup();
 	setLocale('de');

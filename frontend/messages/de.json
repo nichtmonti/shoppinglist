@@ -66,7 +66,6 @@
 	"demo_start_note": "Alles, was du hier einträgst, wird nach 24 Stunden gelöscht. Wir speichern nichts über dich.",
 	"demo_start_failed": "Die Demo konnte nicht starten. Bist du online?",
 	"demo_start_too_many": "Zu viele neue Demos von diesem Netz. Versuch es in ein paar Minuten noch einmal.",
-	"demo_insecure": "Der Browser sperrt unter dieser Adresse, was die Demo braucht. Öffne {url} auf dem Computer, auf dem sie läuft, oder nutze HTTPS.",
 	"demo_start_full": "Die Demo ist gerade voll. Versuch es später noch einmal.",
 	"demo_banner": "Demo: deine Daten werden nach 24 Stunden gelöscht",
 	"demo_banner_hours": [
@@ -247,6 +246,8 @@
 	"common_error_session": "Deine Sitzung ist abgelaufen. Melde dich erneut an und versuch es dann noch einmal.",
 	"common_error_rate_limited": "Zu viele Versuche. Warte einen Moment und versuch es dann noch einmal.",
 	"error_page_body": "Diese Ansicht konnte nicht angezeigt werden. Der Fehler wurde gemeldet.",
+	"insecure_title": "Diese Adresse ist nicht sicher",
+	"insecure_body": "Der Browser sperrt hier, was die App braucht, weil die Adresse kein HTTPS ist. Öffne die App unter ihrer https://-Adresse oder unter {url} auf dem Computer, auf dem sie läuft.",
 	"local_save_failed": "Deine Änderung ließ sich auf diesem Gerät nicht speichern. Lade die App neu und versuche es noch einmal.",
 	"error_page_not_found": "Diese Seite gibt es nicht.",
 	"error_page_reload": "Neu laden",

@@ -210,6 +210,11 @@ register a passkey.
   work across subdomains.
 - **The domain is permanent.** Every passkey belongs to the RP-ID it was made
   under; changing it strands all of them, and everyone registers again.
+- **Plain `http://` only on this machine.** The server refuses to start while
+  its address (`RP_ORIGIN`, or `SHOPPINGLIST_APP_URL` with passkeys off) is
+  plain `http://` at anything but `localhost` or `127.0.0.1`: browsers withhold
+  what the app needs there. A visitor who reaches it over plain HTTP anyway
+  sees a page saying so instead of the app.
 
 Before inviting anyone, register an account at your real domain, then **reload
 and sign in with the passkey**. If either fails, `RP_ID` or `RP_ORIGIN` does

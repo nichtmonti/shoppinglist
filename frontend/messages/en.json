@@ -65,7 +65,6 @@
 	"demo_start_failed": "The demo could not start. Are you online?",
 	"demo_start_too_many": "Too many new demos from this network. Try again in a few minutes.",
 	"demo_start_full": "The demo is full right now. Try again later.",
-	"demo_insecure": "The browser blocks what the demo needs on this address. Open {url} on the computer it runs on, or use HTTPS.",
 	"demo_banner": "Demo: your data is deleted after 24 hours",
 	"demo_banner_hours": [
 		{
@@ -245,6 +244,8 @@
 	"common_error_session": "Your session has expired. Sign in again, then try again.",
 	"common_error_rate_limited": "Too many attempts. Wait a moment, then try again.",
 	"error_page_body": "This view could not be shown. The error has been reported.",
+	"insecure_title": "This address isn't secure",
+	"insecure_body": "The browser blocks what the app needs here, because the address isn't HTTPS. Open the app at its https:// address, or at {url} on the computer it runs on.",
 	"local_save_failed": "Your change could not be saved on this device. Reload the app and try again.",
 	"error_page_not_found": "This page does not exist.",
 	"error_page_reload": "Reload",

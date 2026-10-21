@@ -31,6 +31,7 @@
 	import { getLocale, setLocale } from '#lib/i18n/index.js';
 	import { goAcross, recordLinkOrigins } from '#lib/history-layers.svelte.js';
 	import ErrorView from '#lib/components/common/ErrorView.svelte';
+	import InsecureView from '#lib/components/common/InsecureView.svelte';
 	import { describeError, reportClientError } from '#lib/client-errors.js';
 	import { listenForInstall } from '#lib/install.svelte.js';
 	import { demo } from '#demo';
@@ -65,6 +66,11 @@
 		return describeError(error).message;
 	}
 
+	// [D-335] Where the browser gives the page no secure context, the app
+	// would look fine and save nothing: it says so in place of everything,
+	// and starts nothing but the language.
+	const secure = window.isSecureContext;
+
 	let booted = $state(false);
 	// Nothing renders before `setLocale()` has applied, so the first frame is
 	// not in the base locale for a moment. Separate from `booted`, which also
@@ -77,6 +83,10 @@
 	);
 
 	onMount(() => {
+		if (!secure) {
+			void loadLocale().then(() => (localeLoaded = true));
+			return;
+		}
 		// Read the list-view pref from boot, so opening a list from the home
 		// finds it already answered rather than waiting a frame on it ([D-196]).
 		const unsubscribeView = listView.subscribe(() => {});
@@ -144,7 +154,7 @@
 
 	// The engine follows the session, not the route.
 	$effect(() => {
-		if (sessionValid) mountSync(noticeToasts);
+		if (sessionValid && secure) mountSync(noticeToasts);
 		else unmountSync();
 	});
 
@@ -172,7 +182,7 @@
 	// would not unhide it (§6.11). The refresh then delivers what a 401 held
 	// ([D-137]).
 	$effect(() => {
-		if (sessionValid)
+		if (sessionValid && secure)
 			void suppression()
 				.then(({ refreshSuppressedMirror }) => refreshSuppressedMirror())
 				.catch(() => {});
@@ -184,7 +194,9 @@
 <!-- §6.11 [D-137]: a suggestion hidden or restored offline is delivered when
      the connection comes back, not only at the next app start. -->
 <svelte:window
-	ononline={() => void suppression().then(({ flushSuppressed }) => flushSuppressed())}
+	ononline={() => {
+		if (secure) void suppression().then(({ flushSuppressed }) => flushSuppressed());
+	}}
 />
 <!-- Mobile Safari applies `:active` to non-anchors only when the document has a
      touch listener; without it the tile press-scale does nothing on an iPhone.
@@ -196,21 +208,25 @@
 	     script mode-watcher would add never runs here (no SSR, and the CSP
 	     allows no inline code). -->
 	<ModeWatcher disableHeadScriptInjection />
-	{#if DemoBanner && localeLoaded && $authState.nickname !== null}<DemoBanner />{/if}
-	{#if localeLoaded && ($authState.nickname !== null || (publicRoute && booted))}
-		<svelte:boundary onerror={reportRenderError}>
-			{@render children()}
-			{#snippet failed(error, reset)}
-				<ErrorView detail={describeError(error).message} {reset} />
-			{/snippet}
-		</svelte:boundary>
-	{:else if booted}
-		{#await import('#lib/components/auth/AuthScreen.svelte') then { default: AuthScreen }}
-			<AuthScreen />
-		{:catch error}
-			<!-- Without the sign-in screen, a blank page: say it, and offer the reload. -->
-			<ErrorView detail={reportedDetail(error)} />
-		{/await}
+	{#if !secure}
+		{#if localeLoaded}<InsecureView />{/if}
+	{:else}
+		{#if DemoBanner && localeLoaded && $authState.nickname !== null}<DemoBanner />{/if}
+		{#if localeLoaded && ($authState.nickname !== null || (publicRoute && booted))}
+			<svelte:boundary onerror={reportRenderError}>
+				{@render children()}
+				{#snippet failed(error, reset)}
+					<ErrorView detail={describeError(error).message} {reset} />
+				{/snippet}
+			</svelte:boundary>
+		{:else if booted}
+			{#await import('#lib/components/auth/AuthScreen.svelte') then { default: AuthScreen }}
+				<AuthScreen />
+			{:catch error}
+				<!-- Without the sign-in screen, a blank page: say it, and offer the reload. -->
+				<ErrorView detail={reportedDetail(error)} />
+			{/await}
+		{/if}
 	{/if}
 </div>
 

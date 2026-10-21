@@ -572,3 +572,27 @@ func TestOversizeFinishIs413(t *testing.T) {
 		}
 	}
 }
+
+// [D-335] Plain http works only where browsers count it as secure: on this
+// machine's own names and loopback addresses.
+func TestSecureOrigin(t *testing.T) {
+	for origin, ok := range map[string]bool{
+		"https://list.example.com": true,
+		"https://192.168.1.5":      true,
+		"http://localhost:8090":    true,
+		"http://app.localhost":     true,
+		"http://127.0.0.1:8090":    true,
+		"http://[::1]:8090":        true,
+		"http://192.168.1.5:8090":  false,
+		"http://list.example.com":  false,
+		"http://raspberrypi.local": false,
+	} {
+		err := SecureOrigin(origin)
+		if (err == nil) != ok {
+			t.Errorf("SecureOrigin(%q) = %v, want ok=%v", origin, err, ok)
+		}
+		if err != nil && !strings.Contains(err.Error(), "SHOPPINGLIST_APP_URL") {
+			t.Errorf("SecureOrigin(%q) does not name the setting: %v", origin, err)
+		}
+	}
+}

@@ -110,6 +110,13 @@ func parseServeEnv() (*serveEnv, error) {
 	if err != nil {
 		return nil, err
 	}
+	// [D-335] An instance whose address is plain http works for no visitor.
+	// The demo says so on its start screen instead, so it runs at one too.
+	if !demoBuild {
+		if err := webauthn.SecureOrigin(wacfg.RPOrigin); err != nil {
+			return nil, err
+		}
+	}
 	if !wacfg.Enabled && !oidcOn && !demoBuild {
 		return nil, fmt.Errorf("no login method: %s=off needs SHOPPINGLIST_OIDC=on, or nobody can sign in",
 			webauthn.PasskeysEnv)
