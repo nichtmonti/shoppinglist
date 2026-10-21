@@ -55,7 +55,7 @@ describe('subscribe()', () => {
 		};
 		await subscribe('list-1');
 
-		const item = (id: string, list: unknown) => ({
+		const item = (id: string, list: string) => ({
 			id,
 			list,
 			name: id,
@@ -66,8 +66,7 @@ describe('subscribe()', () => {
 			deleted_at: null
 		});
 		listeners.get('items')!({ action: 'create', record: item('foreign', 'list-2') });
-		listeners.get('items')!({ action: 'create', record: item('foreign-array', ['list-2']) });
-		listeners.get('items')!({ action: 'create', record: item('own', ['list-1']) });
+		listeners.get('items')!({ action: 'create', record: item('own', 'list-1') });
 		const category = (id: string, list: string) => ({
 			id,
 			list,
@@ -88,7 +87,6 @@ describe('subscribe()', () => {
 			expect(await db.list_categories.get('cat-own')).toBeDefined();
 		});
 		expect(await db.items.get('foreign')).toBeUndefined();
-		expect(await db.items.get('foreign-array')).toBeUndefined();
 		expect(await db.list_categories.get('cat-foreign')).toBeUndefined();
 	});
 });

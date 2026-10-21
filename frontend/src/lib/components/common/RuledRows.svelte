@@ -25,9 +25,9 @@
 </script>
 
 <div
+	{...rest}
 	class={cn('ruled-rows flex flex-col', flush && '-mx-1.5', className)}
 	style="--rule-inset: {inset}"
-	{...rest}
 >
 	{@render children()}
 </div>

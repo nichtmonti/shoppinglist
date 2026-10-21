@@ -889,7 +889,7 @@ describe('ShopView — product details sheet', () => {
 		const dialog = await screen.findByRole('dialog', { name: t('shop_product_details') });
 
 		await updateSynced(item.id, { note: 'LSF 50' });
-		await waitFor(() => expect(within(dialog).getByText('LSF 50')).toBeDefined());
+		expect(await within(dialog).findByText('LSF 50')).toBeDefined();
 
 		await updateSynced(item.id, { checked: true, checked_at: new Date().toISOString() });
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

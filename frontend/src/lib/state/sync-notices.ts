@@ -109,13 +109,12 @@ export async function formatConflict(notice: ConflictNotice): Promise<string> {
 
 // The other tabs of this app: the notice is raised where the user is looking,
 // which may not be the leader ([D-293]).
-const otherTabs =
-	typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('sync-notices');
-if (otherTabs) otherTabs.onmessage = (event: MessageEvent<string>) => showNotice(event.data);
+const otherTabs = new BroadcastChannel('sync-notices');
+otherTabs.onmessage = (event: MessageEvent<string>) => showNotice(event.data);
 
 function raise(message: string): void {
 	showNotice(message);
-	otherTabs?.postMessage(message);
+	otherTabs.postMessage(message);
 }
 
 async function surfaceConflict(notice: ConflictNotice): Promise<void> {

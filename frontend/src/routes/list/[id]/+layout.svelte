@@ -52,7 +52,7 @@
 	let onListPage = $derived(page.route?.id === '/list/[id]');
 	// Nothing view-dependent renders before the pref has answered ([D-196]).
 	const viewLoaded = listView.loaded;
-	let viewValue = $derived<'shop' | 'list' | ''>($viewLoaded ? $listView : '');
+	let viewValue = $derived($viewLoaded ? $listView : undefined);
 	let settingsOpen = $state(false);
 	// One ListActions for the route and its sub-screens, with one set of
 	// dialogs ([D-270]). Leaving takes the list away, so the way out is home.
@@ -79,8 +79,7 @@
 	onDestroy(() => void setActiveList(null));
 
 	// The switch flips the device preference (§9.1).
-	function selectView(view: 'shop' | 'list' | '') {
-		if (!view) return; // Segmented already swallows the deselect; belt and braces
+	function selectView(view: 'shop' | 'list') {
 		void listView.set(view);
 	}
 </script>

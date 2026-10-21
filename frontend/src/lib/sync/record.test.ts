@@ -3,10 +3,10 @@ import { normalizeItem, normalizeCategory, normalizeRecord } from './record';
 
 describe('record.ts', () => {
 	describe('normalizeItem', () => {
-		it('coerces a PB-shaped record (list as ["<id>"], modified_by as string, note null, checked true as boolean, a date string) to the exact Item shape', () => {
+		it('takes a PB-shaped record (note null, a date string) to the exact Item shape', () => {
 			const pbRecord = {
 				id: 'item-1',
-				list: ['list-1'],
+				list: 'list-1',
 				name: 'Milk',
 				quantity: '2',
 				note: null,
@@ -43,7 +43,7 @@ describe('record.ts', () => {
 			});
 		});
 
-		it('handles list as a plain string too (not array)', () => {
+		it('takes a null relation as null', () => {
 			const pbRecord = {
 				id: 'item-2',
 				list: 'list-2',
@@ -96,15 +96,15 @@ describe('record.ts', () => {
 			});
 		});
 
-		it('handles null/undefined slug/name and string sort_order', () => {
+		it('handles null slug/name', () => {
 			const pbRecord = {
 				id: 'cat-2',
-				list: ['list-2'],
+				list: 'list-2',
 				slug: null,
 				name: null,
 				icon: '🍞',
 				color: '#ffff00',
-				sort_order: '5',
+				sort_order: 5,
 				updated: '2024-01-15T10:30:00.000Z',
 				created: '2024-01-01T00:00:00.000Z',
 				deleted_at: null
@@ -121,7 +121,7 @@ describe('record.ts', () => {
 		it('dispatches to normalizeItem for items', () => {
 			const pbRecord = {
 				id: 'item-1',
-				list: ['list-1'],
+				list: 'list-1',
 				name: 'Milk',
 				quantity: '2',
 				note: null,
@@ -166,17 +166,17 @@ describe('record.ts', () => {
 		it('is idempotent for its own output (items)', () => {
 			const wire = {
 				id: 'item-1',
-				list: ['list-1'], // expanded relation array → single id
+				list: 'list-1',
 				name: 'Milk',
 				quantity: 2, // number → string
 				note: '', // empty string → null
 				category_key: null,
-				checked: 1, // truthy number → boolean
+				checked: true,
 				checked_at: null,
 				last_bought_at: null,
 				barcode: null,
 				image_url: null,
-				modified_by: ['acc-1'],
+				modified_by: 'acc-1',
 				updated: 1710000000000, // epoch millis → string
 				created: '2024-01-01T00:00:00.000Z',
 				deleted_at: null
@@ -204,7 +204,7 @@ describe('record.ts', () => {
 				name: undefined, // absent → null
 				icon: undefined, // absent → ''
 				color: '#ffffff',
-				sort_order: '5', // string → number
+				sort_order: 5,
 				updated: '2024-01-15T10:30:00.000Z',
 				created: '2024-01-01T00:00:00.000Z',
 				deleted_at: null

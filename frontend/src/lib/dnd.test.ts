@@ -4,33 +4,36 @@
 // `isDndShadowItem: true`, a placeholder id — and that shadow is the hole the
 // card drops into. A mirror of the zone's items down to bare ids would drop the
 // marker (so the library could not find the shadow to hide it), and filtering
-// the unresolvable placeholder id away would render no row for it at all —
-// the list would close up under your finger. See #lib/dnd.
+// the placeholder id away would render no row for it at all — the list would
+// close up under your finger. See #lib/dnd.
 import { describe, it, expect } from 'vitest';
 import { SHADOW_ITEM_MARKER_PROPERTY_NAME, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
 import { dndItemsOf, dndMirror, dndRows, type DndItem } from './dnd';
 
 type Row = { id: string; name: string };
 
-const rows: Row[] = [
+const [zucker, aepfel, banane]: Row[] = [
 	{ id: 'a', name: 'Zucker' },
 	{ id: 'b', name: 'Äpfel' },
 	{ id: 'c', name: 'Banane' }
 ];
-const resolve = (id: string) => rows.find((r) => r.id === id);
 
-/** What the library dispatches on `consider` once 'b' has been picked up. */
-function midDrag(): DndItem[] {
+/** What the library dispatches on `consider` once 'b' has been picked up: its
+ *  shadow is a copy of 'b' under the placeholder id. */
+function midDrag(): DndItem<Row>[] {
 	return [
-		{ id: 'a' },
-		{ id: SHADOW_PLACEHOLDER_ITEM_ID, [SHADOW_ITEM_MARKER_PROPERTY_NAME]: true },
-		{ id: 'c' }
+		{ id: 'a', row: zucker },
+		{ id: SHADOW_PLACEHOLDER_ITEM_ID, row: aepfel, [SHADOW_ITEM_MARKER_PROPERTY_NAME]: true },
+		{ id: 'c', row: banane }
 	];
 }
 
 describe('dndItemsOf', () => {
-	it('builds the zone items array from domain ids', () => {
-		expect(dndItemsOf(['a', 'b'])).toEqual([{ id: 'a' }, { id: 'b' }]);
+	it('builds the zone items array from domain rows', () => {
+		expect(dndItemsOf([zucker, aepfel], (r) => r.id)).toEqual([
+			{ id: 'a', row: zucker },
+			{ id: 'b', row: aepfel }
+		]);
 	});
 });
 
@@ -48,9 +51,8 @@ describe('dndMirror', () => {
 });
 
 describe('dndRows', () => {
-	it('renders the dragged row in the shadow slot instead of dropping it', () => {
-		const out = dndRows(midDrag(), resolve, resolve('b'));
-		expect(out.map((r) => r.row.name)).toEqual(['Zucker', 'Äpfel', 'Banane']);
+	it('renders the dragged row in the shadow slot', () => {
+		expect(dndRows(midDrag()).map((r) => r.row.name)).toEqual(['Zucker', 'Äpfel', 'Banane']);
 	});
 
 	it('keys the shadow slot by the placeholder id, not the row id', () => {
@@ -58,22 +60,6 @@ describe('dndRows', () => {
 		// zone, and the library waits on that removal before it starts hit-testing
 		// the drag. Re-using 'b' as the key leaves the node in place and the drag
 		// never responds.
-		const out = dndRows(midDrag(), resolve, resolve('b'));
-		expect(out.map((r) => r.key)).toEqual(['a', SHADOW_PLACEHOLDER_ITEM_ID, 'c']);
-	});
-
-	it('drops the shadow slot only when nothing is being dragged', () => {
-		expect(dndRows(midDrag(), resolve, undefined).map((r) => r.key)).toEqual(['a', 'c']);
-	});
-
-	it('drops an id that no longer resolves (a row deleted mid-drag)', () => {
-		const out = dndRows([{ id: 'a' }, { id: 'gone' }, { id: 'c' }], resolve, undefined);
-		expect(out.map((r) => r.row.id)).toEqual(['a', 'c']);
-	});
-
-	it('passes a settled order straight through', () => {
-		const out = dndRows(dndItemsOf(['c', 'a', 'b']), resolve, undefined);
-		expect(out.map((r) => r.row.id)).toEqual(['c', 'a', 'b']);
-		expect(out.map((r) => r.key)).toEqual(['c', 'a', 'b']);
+		expect(dndRows(midDrag()).map((r) => r.key)).toEqual(['a', SHADOW_PLACEHOLDER_ITEM_ID, 'c']);
 	});
 });

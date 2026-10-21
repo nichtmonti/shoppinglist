@@ -21,10 +21,11 @@
 <script lang="ts">
 	import Waiting from '#lib/components/common/Waiting.svelte';
 	import Hint from '#lib/components/common/Hint.svelte';
-	import { onMount, tick } from 'svelte';
+	import { getAbortSignal, onMount, tick } from 'svelte';
 	import {
 		canUsePasskeyAutofill,
 		canUsePasskeys,
+		cancelConditionalLogin,
 		clearSetupToken,
 		fetchAuthMethods,
 		isAutofillUnsupported,
@@ -128,8 +129,15 @@
 			startConditionalLogin();
 		}
 	}
+	// Aborted when the screen leaves, so an answer that lands after that
+	// starts no autofill offer.
+	let screenLeft: AbortSignal | undefined;
 	onMount(() => {
+		screenLeft = getAbortSignal();
 		void loadMethods();
+		// A sign-in another way (OIDC, the demo) leaves the screen with the
+		// autofill offer still pending.
+		return cancelConditionalLogin;
 	});
 
 	// The provider popup is open (OidcButton then offers "Abbrechen").
@@ -161,6 +169,7 @@
 			} catch {
 				return;
 			}
+			if (screenLeft?.aborted) return;
 			try {
 				await login({ conditional: true });
 			} catch (e) {

@@ -593,6 +593,30 @@
 		},
 		{
 			"type": "library",
+			"bom-ref": "pkg:npm/%40use-gesture/core@10.3.1",
+			"name": "@use-gesture/core",
+			"version": "10.3.1",
+			"purl": "pkg:npm/%40use-gesture/core@10.3.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/%40use-gesture/vanilla@10.3.1",
+			"name": "@use-gesture/vanilla",
+			"version": "10.3.1",
+			"purl": "pkg:npm/%40use-gesture/vanilla@10.3.1",
+			"licenses": [
+				{
+					"expression": "MIT"
+				}
+			]
+		},
+		{
+			"type": "library",
 			"bom-ref": "pkg:npm/barcode-detector@3.2.2",
 			"name": "barcode-detector",
 			"version": "3.2.2",

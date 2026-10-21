@@ -240,8 +240,6 @@ func TestEmitJSONRoundTripsThroughAppendseedShape(t *testing.T) {
 		// Only non-resolvable labels: dropped entirely (appendseed would
 		// hard-error on an empty default_category).
 		{Name: "hummus", RawName: "Hummus", ListCount: 2, CategoryCount: map[string]int{customLabel: 2}},
-		// No RawName (defensive path): falls back to the normalized name.
-		{Name: "tulip", ListCount: 1, CategoryCount: map[string]int{"produce": 1}},
 		// A retired slug ([D-300]) never wins, however many votes it has.
 		{Name: "basil plant", RawName: "Basil plant", ListCount: 4, CategoryCount: map[string]int{"garden": 3, "produce": 1}},
 		// Only a retired slug: dropped like the custom-only group.
@@ -260,8 +258,8 @@ func TestEmitJSONRoundTripsThroughAppendseedShape(t *testing.T) {
 	if err := json.Unmarshal(buf.Bytes(), &doc); err != nil {
 		t.Fatalf("emitted JSON does not parse as appendseed candidates: %v\n%s", err, buf.String())
 	}
-	if len(doc.Items) != 4 {
-		t.Fatalf("want 4 emitted items (custom-only and retired-only groups dropped), got %d: %s", len(doc.Items), buf.String())
+	if len(doc.Items) != 3 {
+		t.Fatalf("want 3 emitted items (custom-only and retired-only groups dropped), got %d: %s", len(doc.Items), buf.String())
 	}
 	if len(doc.Categories) != 0 {
 		t.Errorf("want no categories emitted, got %d", len(doc.Categories))
@@ -270,8 +268,8 @@ func TestEmitJSONRoundTripsThroughAppendseedShape(t *testing.T) {
 	for _, it := range doc.Items {
 		byName[it.NamesI18n.En[0]] = it.DefaultCategory
 	}
-	if len(byName) != 4 {
-		t.Fatalf("want 4 distinct candidates, got %d: %s", len(byName), buf.String())
+	if len(byName) != 3 {
+		t.Fatalf("want 3 distinct candidates, got %d: %s", len(byName), buf.String())
 	}
 	if byName["Basil plant"] != "produce" {
 		t.Errorf("a retired slug must lose to a live one, got %q: %s", byName["Basil plant"], buf.String())
@@ -281,9 +279,6 @@ func TestEmitJSONRoundTripsThroughAppendseedShape(t *testing.T) {
 	}
 	if byName["Papaya"] != "produce" {
 		t.Errorf("1:1 tie should resolve to the alphabetically smaller slug (produce < snacks_sweets), got %q: %s", byName["Papaya"], buf.String())
-	}
-	if byName["tulip"] != "produce" {
-		t.Errorf("missing-RawName group should fall back to the normalized name and still emit, got %q: %s", byName["tulip"], buf.String())
 	}
 	if _, ok := byName["Hummus"]; ok {
 		t.Errorf("custom-only group must be dropped entirely (appendseed would hard-error): %s", buf.String())

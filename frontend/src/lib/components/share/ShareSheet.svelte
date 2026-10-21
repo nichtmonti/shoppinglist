@@ -10,9 +10,8 @@
 
   Any member reads the live link's token: the server keeps it beside the hash
   it looks invites up by, behind the member-only rules, and blanks it on
-  revocation ([D-294]). A link minted before that has no token, so only its
-  minter's device cache ([D-148]) shows its URL until "Link zurücksetzen"
-  mints one (#lib/actions/invites).
+  revocation ([D-294]). A link minted before that has no token, so it shows
+  no URL until "Link zurücksetzen" mints one (#lib/actions/invites).
 -->
 <script lang="ts">
 	import OfflineHint from '#lib/components/common/OfflineHint.svelte';
@@ -28,9 +27,9 @@
 	import { refreshRoster } from '#lib/sync/index.js';
 	import { online } from '#lib/state/online.js';
 	import {
-		currentInvite,
+		activeInvite,
+		resetInvite,
 		revokeInvite,
-		rotateInvite,
 		inviteUrl,
 		type Invite
 	} from '#lib/actions/invites.js';
@@ -94,7 +93,7 @@
 
 	async function loadShareData(listId: string): Promise<void> {
 		lastRun = 'load';
-		const a = await inviteAction.run(() => currentInvite(listId));
+		const a = await inviteAction.run(() => activeInvite(listId));
 		if (!a.ok) return;
 		invite = a.value;
 		linkless = !a.value;
@@ -112,13 +111,15 @@
 		linkless = false;
 		const refresh = () => void refreshRoster(listId).catch(() => {});
 		refresh();
+		// The timer and the teardown run untracked, so reading $online there
+		// never makes a reconnect start the sheet over.
 		const poll = setInterval(() => {
-			if (untrack(() => $online) && !document.hidden) refresh();
+			if ($online && !document.hidden) refresh();
 		}, ROSTER_POLL_MS);
 		return () => {
 			clearInterval(poll);
 			clearTimeout(copiedTimer);
-			if (untrack(() => $online)) refresh();
+			if ($online) refresh();
 		};
 	});
 
@@ -141,7 +142,7 @@
 		// place, as every confirm does.
 		const attempt = await inviteAction.run(async () => {
 			try {
-				const inv = await rotateInvite(listId);
+				const inv = await resetInvite(listId);
 				invite = inv;
 				linkless = false;
 				tab = 'link';
@@ -264,39 +265,42 @@
 						onchange={(v) => (tab = v)}
 						label={t('share_invite_link') + ' / ' + t('share_qr')}
 						testid="share-mode"
-					/>
-					{#if tab === 'link'}
-						<div class="flex flex-col gap-2">
-							<div
-								class={cn(fieldClass, 'invite-link font-mono text-sm text-muted-foreground')}
-								data-testid="invite-link"
-							>
-								<span class="block truncate" dir="ltr">{url}</span>
-							</div>
-							<!-- Sharing is the sheet's job, so it is the primary ([D-284]). -->
-							<div class="grid grid-cols-2 gap-2">
-								<Button onclick={() => void handleShare(url)}>
-									<Share aria-hidden="true" />
-									{t('share_share')}
-								</Button>
-								<Button variant="outline" onclick={() => void handleCopy(url)}>
-									<Copy aria-hidden="true" />
-									{copied ? t('share_copied') : t('share_copy')}
-								</Button>
-							</div>
-						</div>
-					{:else}
-						<div class="flex flex-col items-center gap-1.5">
-							<div
-								class="qr size-33 bg-surface border border-border rounded-card p-2 [&_svg]:block [&_svg]:size-full"
-								data-testid="qr"
-							>
-								<!-- eslint-disable-next-line svelte/no-at-html-tags -- our own qrcode-generator SVG over a URL we minted (crypto-random token, §7.1); never user-supplied HTML. -->
-								{#await qrMarkup then svg}{@html svg}{/await}
-							</div>
-							<Hint>{t('share_qr_caption')}</Hint>
-						</div>
-					{/if}
+					>
+						{#snippet panel(mode)}
+							{#if mode === 'link'}
+								<div class="flex flex-col gap-2">
+									<div
+										class={cn(fieldClass, 'invite-link font-mono text-sm text-muted-foreground')}
+										data-testid="invite-link"
+									>
+										<span class="block truncate" dir="ltr">{url}</span>
+									</div>
+									<!-- Sharing is the sheet's job, so it is the primary ([D-284]). -->
+									<div class="grid grid-cols-2 gap-2">
+										<Button onclick={() => void handleShare(url)}>
+											<Share aria-hidden="true" />
+											{t('share_share')}
+										</Button>
+										<Button variant="outline" onclick={() => void handleCopy(url)}>
+											<Copy aria-hidden="true" />
+											{copied ? t('share_copied') : t('share_copy')}
+										</Button>
+									</div>
+								</div>
+							{:else}
+								<div class="flex flex-col items-center gap-1.5">
+									<div
+										class="qr size-33 bg-surface border border-border rounded-card p-2 [&_svg]:block [&_svg]:size-full"
+										data-testid="qr"
+									>
+										<!-- eslint-disable-next-line svelte/no-at-html-tags -- our own qrcode-generator SVG over a URL we minted (crypto-random token, §7.1); never user-supplied HTML. -->
+										{#await qrMarkup then svg}{@html svg}{/await}
+									</div>
+									<Hint>{t('share_qr_caption')}</Hint>
+								</div>
+							{/if}
+						{/snippet}
+					</Segmented>
 				{:else}
 					<Hint>{t('share_link_unavailable')}</Hint>
 				{/if}

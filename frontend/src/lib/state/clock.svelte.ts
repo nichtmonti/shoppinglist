@@ -4,6 +4,8 @@
 // when the view's `nextChange` says, and when the tab becomes visible again
 // (a backgrounded tab's timers are throttled or frozen). Construct it during
 // component init: the scheduling is an effect.
+import { on } from 'svelte/events';
+
 // The longest setTimeout waits; a longer delay fires at once. A change further
 // out (a checked_at stamped ahead of a wrong device clock) re-arms on waking.
 const MAX_TIMEOUT_MS = 2 ** 31 - 1;
@@ -26,11 +28,9 @@ export class Now {
 		});
 		$effect(() => {
 			if (typeof document === 'undefined') return;
-			const onVisible = () => {
+			return on(document, 'visibilitychange', () => {
 				if (document.visibilityState === 'visible') this.value = Date.now();
-			};
-			document.addEventListener('visibilitychange', onVisible);
-			return () => document.removeEventListener('visibilitychange', onVisible);
+			});
 		});
 	}
 }

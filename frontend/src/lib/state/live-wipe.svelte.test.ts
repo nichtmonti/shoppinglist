@@ -4,25 +4,28 @@
 // next account's first read would be the cached value — list names on the
 // home screen included — until Dexie's first emission landed.
 import { get, type Readable } from 'svelte/store';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { db } from '#lib/db.js';
 import { wipeLocalAccountData } from '#lib/auth/account-data.js';
-import { putMyList, resetDb } from '#lib/test-kit/db.js';
+import { putMyList, resetDb, untilLoaded } from '#lib/test-kit/db.js';
 import { lastSyncedAt, listIndex, memberships } from './data';
 import type { LiveStore } from './live';
 import { listOrder } from './prefs';
 import { suppressedNames } from './suppression';
 
-/** Subscribes until the first real emission has landed, then leaves. */
+/** Subscribes until the first real emission has landed, then leaves: a live
+ *  store's `loaded` says so; a plain one holds the seeded rows, never empty. */
 async function readThenLeave<T>(store: LiveStore<T> | Readable<T>): Promise<T> {
-	const loaded = 'loaded' in store ? store.loaded : null;
 	const stopValue = store.subscribe(() => {});
-	const stopLoaded = loaded?.subscribe(() => {});
-	await new Promise((r) => setTimeout(r, 50));
+	if ('loaded' in store) await untilLoaded(store);
+	else
+		await vi.waitUntil(() => {
+			const value = get(store);
+			return Array.isArray(value) ? value.length > 0 : Boolean(value);
+		});
 	const value = get(store);
 	stopValue();
-	stopLoaded?.();
 	return value;
 }
 

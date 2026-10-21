@@ -7,6 +7,7 @@ import (
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/types"
 	"golang.org/x/sync/singleflight"
 
 	"shoppinglist/internal/applog"
@@ -117,7 +118,7 @@ func RetryPhotos(app core.App) error {
 	rows, err := app.FindRecordsByFilter("barcode_cache",
 		"found = true && image_url != '' && photo = '' && fetched_at > {:since}",
 		"-fetched_at", photoRetryBatch, 0,
-		dbx.Params{"since": time.Now().Add(-photoRetryWindow).UTC().Format("2006-01-02 15:04:05.000Z")})
+		dbx.Params{"since": time.Now().Add(-photoRetryWindow).UTC().Format(types.DefaultDateLayout)})
 	if err != nil {
 		return err
 	}

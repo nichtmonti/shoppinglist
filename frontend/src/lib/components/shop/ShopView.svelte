@@ -77,11 +77,13 @@
 	// start again at the app bar. The tile that takes its place gets it, else
 	// the one before, else "edit list" (WCAG 2.4.3). A tap moves it without
 	// scrolling, so the grid does not jump under a finger.
+	let addButton = $state<HTMLElement | null>(null);
 	function focusNeighbour(button: HTMLElement, pointer: boolean): void {
-		const checks = [...document.querySelectorAll<HTMLElement>('.shop-items .tile-check')];
+		// In the order the grid draws them, which only the DOM knows.
+		const grid = button.closest('.shop-items');
+		const checks = [...(grid?.querySelectorAll<HTMLElement>('.tile-check') ?? [])];
 		const at = checks.indexOf(button);
-		const next =
-			checks[at + 1] ?? checks[at - 1] ?? document.querySelector<HTMLElement>('.shop-add');
+		const next = checks[at + 1] ?? checks[at - 1] ?? addButton;
 		next?.focus({ preventScroll: pointer });
 	}
 
@@ -110,7 +112,7 @@
 
 	<!-- Above the done section: "edit list" acts on what is still to buy. -->
 	<div class="flex justify-center py-3.5">
-		<Button variant="outline" class="shop-add gap-2 px-5" onclick={startAdding}>
+		<Button bind:ref={addButton} variant="outline" class="gap-2 px-5" onclick={startAdding}>
 			<!-- A pencil, not a plus: it goes to edit the list ([D-213]). -->
 			<Pencil />
 			{t('shop_jump_to_add')}

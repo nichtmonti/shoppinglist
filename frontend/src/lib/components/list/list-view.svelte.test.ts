@@ -271,7 +271,7 @@ describe('ListView — inline free-text quantity editor', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Bananen')).toBeDefined());
+		expect(await screen.findByText('Bananen')).toBeDefined();
 
 		const chip = screen.getByRole('button', { name: new RegExp(t('list_edit_quantity')) });
 		expect(chip.textContent?.trim()).toBe('6');
@@ -331,7 +331,7 @@ describe('ListView — inline free-text quantity editor', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Milch')).toBeDefined());
+		expect(await screen.findByText('Milch')).toBeDefined();
 
 		// Named for what it does in this state — "add", not "edit".
 		const chip = screen.getByRole('button', {
@@ -371,7 +371,7 @@ describe('ListView — planning mode boundary', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Milch')).toBeDefined());
+		expect(await screen.findByText('Milch')).toBeDefined();
 
 		expect(
 			screen.queryByRole('button', { name: t('shop_check_tile', { name: 'Milch' }) })
@@ -423,7 +423,7 @@ describe('ListView — detail sheet', () => {
 		});
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 		expect(screen.queryByRole('button', { name: t('list_remove', { name: 'Senf' }) })).toBeNull();
 
 		// The row name itself opens the sheet (the chip is the other door).
@@ -520,7 +520,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 
 		const openBtn = screen.getByRole('button', { name: 'Senf' });
 		await fireEvent.click(openBtn);
@@ -546,7 +546,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Senf' }));
 		const dialog = await screen.findByRole('dialog');
@@ -632,7 +632,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [item] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Senf' }));
 		const dialog = await screen.findByRole('dialog');
@@ -657,7 +657,7 @@ describe('ListView — detail sheet', () => {
 		await seedList({ listId: LIST_ID, items: [oat, milk] });
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Hafermilch')).toBeDefined());
+		expect(await screen.findByText('Hafermilch')).toBeDefined();
 		await fireEvent.click(screen.getByRole('button', { name: 'Hafermilch' }));
 		const dialog = await screen.findByRole('dialog');
 		// The rows a rename is checked against load as the sheet opens.
@@ -698,7 +698,7 @@ describe('ListView — detail sheet', () => {
 		await itemSort.set('az');
 		await renderList();
 
-		await waitFor(() => expect(screen.getByText('Senf')).toBeDefined());
+		expect(await screen.findByText('Senf')).toBeDefined();
 		expect(screen.queryByRole('dialog')).toBeNull();
 
 		// findBy, not getBy: items and categories arrive on separate liveQueries,
@@ -713,11 +713,21 @@ describe('ListView — detail sheet', () => {
 	});
 });
 
-describe('ListView — a swipe toward the row start removes ([D-289])', () => {
+describe('ListView — a swipe to the left removes ([D-289])', () => {
 	// happy-dom lays nothing out, so the row is 0px wide and the threshold is
 	// the 96px floor.
 	async function swipe(row: HTMLElement, dx: number, dy = 0): Promise<void> {
-		const at = { clientX: 300, clientY: 100, pointerId: 1, isPrimary: true, button: 0 };
+		// A mouse's events, as Playwright's swipe sends them; every browser
+		// pointer event names its type.
+		const at = {
+			clientX: 300,
+			clientY: 100,
+			pointerId: 1,
+			isPrimary: true,
+			button: 0,
+			buttons: 1,
+			pointerType: 'mouse'
+		};
 		await fireEvent.pointerDown(row, at);
 		for (const step of [0.25, 0.5, 0.75, 1]) {
 			await fireEvent.pointerMove(row, {
@@ -741,9 +751,25 @@ describe('ListView — a swipe toward the row start removes ([D-289])', () => {
 		const row = await rowOf('Senf');
 
 		await swipe(row, -160);
-		// The click that ends the drag lands on the name: it must not open the sheet.
-		await fireEvent.click(within(row).getByRole('button', { name: 'Senf' }));
+		// The click that ends the drag lands on the name: it must not open the
+		// sheet. detail 1, as a browser's pointer click carries.
+		await fireEvent.click(within(row).getByRole('button', { name: 'Senf' }), { detail: 1 });
 		expect(screen.queryByRole('dialog')).toBeNull();
+
+		await waitFor(async () => {
+			const stored = (await db.items.get(item.id)) as Item;
+			expect(stored.deleted_at).not.toBeNull();
+		});
+	});
+
+	it('removes on a flick short of the threshold', async () => {
+		const item = makeItem({ list: LIST_ID, name: 'Senf' });
+		await seedList({ listId: LIST_ID, items: [item] });
+		await renderList();
+		const row = await rowOf('Senf');
+
+		// fireEvent's moves come microseconds apart: 60px is a flick.
+		await swipe(row, -60);
 
 		await waitFor(async () => {
 			const stored = (await db.items.get(item.id)) as Item;

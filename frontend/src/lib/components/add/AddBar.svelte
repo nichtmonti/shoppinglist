@@ -50,9 +50,11 @@
 		/** Whether the scan button is offered; defaults to the deployment's
 		 *  SHOPPINGLIST_SCANNER ([D-218]). */
 		scanner?: boolean;
+		/** The bar's rendered height, for the list's --addbar-h. */
+		height?: number;
 	}
 
-	let props: Props = $props();
+	let { height = $bindable(0), ...props }: Props = $props();
 	let scanner = $derived(props.scanner ?? scannerEnabled);
 
 	let query = $state('');
@@ -272,6 +274,7 @@
 		{/if}
 		<div
 			class="addbar relative flex h-(--band-h) items-center gap-2 px-3.5 bg-surface border-b border-border"
+			bind:offsetHeight={height}
 		>
 			<!-- The field, with its + and the scanner inside it ([D-277]): one
 			     filled shape that says "add" at rest, not an empty form box with a
@@ -321,17 +324,14 @@
 		</div>
 
 		{#if open}
-			<!-- The wrapper carries the aria-controls id: bits-ui's ContentStatic
-			     never puts an id prop on the listbox element. -->
-			<div id="add-typeahead">
-				<SuggestionList
-					{candidates}
-					quantity={typed.quantity}
-					onitempointerup={onItemPointerUp}
-					onitemclick={onItemClick}
-					onsuppress={(name) => void suppress(name)}
-				/>
-			</div>
+			<SuggestionList
+				id="add-typeahead"
+				{candidates}
+				quantity={typed.quantity}
+				onitempointerup={onItemPointerUp}
+				onitemclick={onItemClick}
+				onsuppress={(name) => void suppress(name)}
+			/>
 		{/if}
 	</div>
 </Combobox.Root>

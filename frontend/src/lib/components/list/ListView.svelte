@@ -88,21 +88,15 @@
 	// dropdown starts). Measured, because zoom and the touch-target floor change
 	// it, and a stale value hides part of every stuck aisle header.
 	let listRoot: HTMLDivElement | null = $state(null);
-	$effect(() => {
-		const root = listRoot;
-		if (!root) return;
-		const bar = root.querySelector<HTMLElement>('.addbar');
-		if (!bar) return;
-		const apply = () => root.style.setProperty('--addbar-h', `${bar.offsetHeight}px`);
-		apply();
-		const ro = new ResizeObserver(apply);
-		ro.observe(bar);
-		return () => ro.disconnect();
-	});
+	let addbarHeight = $state(0);
 </script>
 
-<div class="block" bind:this={listRoot}>
-	<AddBar {listId} onjump={handleJump} />
+<div
+	class="block"
+	bind:this={listRoot}
+	style:--addbar-h={addbarHeight ? `${addbarHeight}px` : undefined}
+>
+	<AddBar {listId} onjump={handleJump} bind:height={addbarHeight} />
 
 	<ListItems
 		loaded={itemsLoaded}

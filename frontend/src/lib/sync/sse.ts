@@ -35,9 +35,7 @@ export async function applyEvent(
 	});
 }
 
-// The list id an event's record belongs to. Reuses record.ts's relation coercion rather than
-// repeating it: a PB relation arrives as a string, a single-element array, or (when expanded)
-// an object, and getting that wrong here would silently drop every SSE event for the list.
+// The list id an event's record belongs to, through record.ts's coercion.
 function recordListId(record: unknown): string {
 	return str((record as Record<string, unknown>).list);
 }

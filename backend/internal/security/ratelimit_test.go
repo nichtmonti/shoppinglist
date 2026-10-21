@@ -15,12 +15,10 @@ import (
 	"shoppinglist/internal/testutil"
 )
 
-// setupRateLimitApp mounts a single test route behind security.RateLimit("test_budget"),
-// a budget registered by the test itself so the real eight §10 budgets are
-// never touched.
+// setupRateLimitApp mounts a single test route behind a budget of its own,
+// 3 a minute, so the real §10 budgets are never touched.
 func setupRateLimitApp(t *testing.T) http.Handler {
 	t.Helper()
-	security.SetBudget("test_budget", time.Minute, 3)
 	app := testutil.NewApp(t)
 	router, err := apis.NewRouter(app)
 	if err != nil {
@@ -29,7 +27,7 @@ func setupRateLimitApp(t *testing.T) http.Handler {
 	ok := func(e *core.RequestEvent) error {
 		return e.JSON(http.StatusOK, map[string]string{"ok": "true"})
 	}
-	router.POST("/api/test", ok).BindFunc(security.RateLimit("test_budget"))
+	router.POST("/api/test", ok).BindFunc(security.Limit("test_budget", time.Minute, 3))
 	mux, err := router.BuildMux()
 	if err != nil {
 		t.Fatalf("BuildMux: %v", err)
@@ -37,10 +35,9 @@ func setupRateLimitApp(t *testing.T) http.Handler {
 	return mux
 }
 
-// TestRateLimitBudgetAndRearm: the middleware enforces the registered budget
-// (3/min), and SetBudget re-arms a fresh bucket so a spent one cannot poison
-// the next router.
-func TestRateLimitBudgetAndRearm(t *testing.T) {
+// TestRateLimitBudgetPerApp: the middleware enforces the budget (3/min), and
+// a spent bucket belongs to its app: another app's router starts full.
+func TestRateLimitBudgetPerApp(t *testing.T) {
 	mux := setupRateLimitApp(t)
 	req := func() *httptest.ResponseRecorder {
 		r := httptest.NewRequest(http.MethodPost, "/api/test", nil)
@@ -56,10 +53,11 @@ func TestRateLimitBudgetAndRearm(t *testing.T) {
 	if rec := req(); rec.Code != http.StatusTooManyRequests {
 		t.Errorf("4th attempt status = %d, want 429: %s", rec.Code, rec.Body.String())
 	}
-	// Re-arm the same budget: the next request must be admitted again.
-	security.SetBudget("test_budget", time.Minute, 3)
-	if rec := req(); rec.Code != http.StatusOK {
-		t.Errorf("post-rearm attempt status = %d, want 200: %s", rec.Code, rec.Body.String())
+	fresh := setupRateLimitApp(t)
+	rec := httptest.NewRecorder()
+	fresh.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/api/test", nil))
+	if rec.Code != http.StatusOK {
+		t.Errorf("another app's first attempt status = %d, want 200: %s", rec.Code, rec.Body.String())
 	}
 }
 

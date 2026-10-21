@@ -85,9 +85,7 @@ describe('DeleteAccountGroup', () => {
 		render(DeleteAccountGroup);
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Konto endgültig löschen' }));
-		await waitFor(() =>
-			expect(screen.getByRole('button', { name: 'Konto löschen' })).toBeDefined()
-		);
+		expect(await screen.findByRole('button', { name: 'Konto löschen' })).toBeDefined();
 		expect(pbSend).not.toHaveBeenCalled();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Konto löschen' }));

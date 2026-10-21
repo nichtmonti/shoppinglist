@@ -64,7 +64,6 @@ beforeEach(() => {
 	seenOptions.length = 0;
 	seenElements.length = 0;
 	instances.length = 0;
-	vi.unstubAllGlobals();
 });
 
 function fireViewer(event: 'destroy'): void {

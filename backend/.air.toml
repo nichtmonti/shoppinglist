@@ -15,7 +15,7 @@ tmp_dir = "tmp"
 # on a clean tree. Dev serves the SPA from Vite with HMR and never from here.
 #
 # Output goes to tmp/, deliberately NOT to backend/shoppinglist: that path is
-# what e2e/run-server.sh reuses when it is executable, so a dev build sitting
+# what the Playwright harnesses serve (e2e/server.ts), so a dev build sitting
 # there would hand the Playwright suite a binary with an EMPTY embedded SPA.
 cmd = "go build -tags no_ui -o ./tmp/shoppinglist ."
 # `entrypoint`, not the soon-to-be-deprecated `bin`. `serve --http=…` is

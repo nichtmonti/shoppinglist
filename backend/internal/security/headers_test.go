@@ -60,7 +60,6 @@ func TestRegister_SetsSecurityHeadersOnEveryResponse(t *testing.T) {
 	want := map[string]string{
 		"Referrer-Policy":            "no-referrer",
 		"X-Content-Type-Options":     "nosniff",
-		"X-Frame-Options":            "DENY",
 		"Cross-Origin-Opener-Policy": "same-origin",
 	}
 
@@ -135,13 +134,14 @@ func TestRegister_CSPMirrorsIndexMetaTag(t *testing.T) {
 		}
 	})
 
-	// PocketBase's dashboard ships assets this policy was never written for.
-	t.Run("dashboard keeps the baseline only", func(t *testing.T) {
-		for _, url := range []string{"/_/", "/_/index.html"} {
+	// PocketBase sets its own policy where none is set: its dashboard's, and
+	// the sandbox on the files it serves.
+	t.Run("dashboard and files keep PocketBase's own", func(t *testing.T) {
+		for _, url := range []string{"/_/", "/_/index.html", "/api/files/c/r/f.png"} {
 			rec := httptest.NewRecorder()
 			mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, url, nil))
-			if got := rec.Header().Get("Content-Security-Policy"); got != baselineCSP {
-				t.Errorf("%s: Content-Security-Policy = %q, want %q", url, got, baselineCSP)
+			if got := rec.Header().Get("Content-Security-Policy"); got != "" {
+				t.Errorf("%s: Content-Security-Policy = %q, want none of ours", url, got)
 			}
 		}
 	})

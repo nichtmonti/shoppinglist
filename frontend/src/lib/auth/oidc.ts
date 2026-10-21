@@ -6,11 +6,11 @@ import PocketBase, {
 	type RecordAuthResponse
 } from 'pocketbase';
 import { authHeaders, pb } from '../pb';
-import { syncAuthState } from './state';
 import { rememberLoginMethod } from './login-methods';
 import { WrongAccountError } from './wrong-account';
 import { t } from '../i18n';
 import { LocalizedError } from '../localized-error';
+import { httpStatus } from '../http-status';
 
 // The SDK's realtime OAuth2 form needs this page's live @oauth2 subscription
 // to receive {state, code}, so the provider opens in a POPUP rather than by
@@ -22,8 +22,9 @@ const OIDC_REQUEST_KEY = 'shoppinglist-oidc';
  * auth store. Resolves `true` once signed in, `false` when cancelled
  * (`cancelOidcLogin`).
  *
- * The popup is opened SYNCHRONOUSLY, before any await, and navigated later via
- * urlCallback: Safari refuses window.open once the user activation is gone.
+ * The SDK opens the popup itself, before its first await, as Safari requires
+ * of window.open, and closes it when the attempt ends; so this must be called
+ * on the click, with no await before it.
  *
  * Nothing watches the popup: COOP severs the opener's handle once it reaches
  * the provider, so `popup.closed` reads true mid-sign-in and a poll would
@@ -36,7 +37,6 @@ export async function oidcLogin(
 ): Promise<boolean> {
 	if (expectAccount) return oidcReauth(provider, expectAccount);
 	if ((await oidcExchange(pb, provider)) === null) return false;
-	syncAuthState();
 	rememberLoginMethod('oidc');
 	return true;
 }
@@ -72,10 +72,7 @@ async function oidcReauth(provider: string, expectAccount: string): Promise<bool
 			if (orphan) {
 				// Best effort: the §13 orphan sweep takes an account with no
 				// lists if this does not get through.
-				await fetch('/api/account/delete', {
-					method: 'POST',
-					headers: authHeaders(client.authStore.token)
-				}).catch(() => undefined);
+				await client.send('/api/account/delete', { method: 'POST' }).catch(() => undefined);
 				rememberLoginMethod('passkey');
 			}
 			throw new WrongAccountError(orphan);
@@ -84,7 +81,6 @@ async function oidcReauth(provider: string, expectAccount: string): Promise<bool
 		if (pendingClient === client) pendingClient = null;
 	}
 	pb.authStore.save(client.authStore.token, client.authStore.record);
-	syncAuthState();
 	rememberLoginMethod('oidc');
 	return true;
 }
@@ -96,15 +92,10 @@ async function oidcExchange(
 	client: PocketBase,
 	provider: string
 ): Promise<RecordAuthResponse | null> {
-	const popup = window.open('', 'shoppinglist-oidc', 'popup=true,width=480,height=720');
-	if (!popup) throw new LocalizedError(t('auth_oidc_failed'));
 	try {
 		return await client.collection('accounts').authWithOAuth2({
 			provider,
-			requestKey: OIDC_REQUEST_KEY,
-			urlCallback: (url) => {
-				popup.location.href = url;
-			}
+			requestKey: OIDC_REQUEST_KEY
 		});
 	} catch (e) {
 		if (e instanceof ClientResponseError && e.isAbort) return null;
@@ -159,16 +150,19 @@ export async function linkOidc(provider: string): Promise<boolean> {
 	pendingClient = client;
 	try {
 		if ((await oidcExchange(client, provider)) === null) return false;
-		const res = await fetch('/api/account/link', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json', ...authHeaders(sessionToken) },
-			body: JSON.stringify({ token: client.authStore.token })
-		});
-		if (!res.ok) {
-			throw new LocalizedError(
-				t(res.status === 409 ? 'settings_link_oidc_in_use' : 'settings_link_oidc_failed')
-			);
-		}
+		// The session's token, as it was when the link began: the popup's
+		// sign-in went into the throwaway client.
+		await pb
+			.send('/api/account/link', {
+				method: 'POST',
+				headers: authHeaders(sessionToken),
+				body: { token: client.authStore.token }
+			})
+			.catch((e: unknown) => {
+				throw new LocalizedError(
+					t(httpStatus(e) === 409 ? 'settings_link_oidc_in_use' : 'settings_link_oidc_failed')
+				);
+			});
 	} finally {
 		if (pendingClient === client) pendingClient = null;
 		client.authStore.clear();

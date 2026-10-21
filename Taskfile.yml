@@ -129,6 +129,12 @@ tasks:
       - node scripts/env-check.mjs
       - scripts/ci-image-tag.sh --check
 
+  licenses:
+    desc: Regenerate docs/THIRD_PARTY_LICENSES.md and docs/sbom.cdx.json from what ships; `-- --check` compares instead (CI)
+    deps: [deps]
+    cmds:
+      - node scripts/third-party-licenses.mjs {{.CLI_ARGS}}
+
   lint:
     desc: The type-aware lint on the changed frontend files; all of it when its config changed
     deps: [deps]
@@ -366,9 +372,24 @@ tasks:
 
   # --- browser harnesses ----------------------------------------------------------
   # Each takes Playwright's own arguments after `--`: spec files, -g, --last-failed.
+  build-spa:
+    desc: The SPA into backend/pb_public, which the binary embeds ([D-64]); DEMO=1 the demo's into backend/pb_public_demo ([D-234])
+    vars:
+      OUT: '{{if .DEMO}}frontend/build-demo{{else}}frontend/build{{end}}'
+      DEST: '{{if .DEMO}}backend/pb_public_demo{{else}}backend/pb_public{{end}}'
+    cmds:
+      - cd frontend && {{if .DEMO}}SHOPPINGLIST_DEMO_BUILD=1 {{end}}pnpm build
+      # Which one was built, by the demo's start route: a normal SPA that
+      # mentions it has demo code in it.
+      - >-
+        {{if .DEMO}}grep -rqF /api/demo/start {{.OUT}} ||
+        { echo "build-spa: the demo SPA has no demo code — #demo must resolve to src/lib/demo/on.ts" >&2; exit 1; }{{else}}! grep -rqF /api/demo/start {{.OUT}} ||
+        { echo "build-spa: the normal SPA contains demo code — #demo must resolve to src/lib/demo/off.ts" >&2; exit 1; }{{end}}
+      - rm -rf {{.DEST}} && mkdir -p {{.DEST}} && cp -r {{.OUT}}/. {{.DEST}}/
+
   build-app:
     desc: The binary with the real SPA embedded ([D-64]), for the browser harnesses
-    # One list for both builds: a script only the demo runs rebuilds the app
+    # One list for both builds: a change only the demo uses rebuilds the app
     # too, which costs a build and drifts nothing.
     sources: &app
       - frontend/src/**/*
@@ -385,13 +406,12 @@ tasks:
       - backend/go.sum
       - exclude: backend/pb_data/**/*
       - exclude: backend/pb_public*/**/*
-      - scripts/build-embedded-spa.sh
-      - scripts/build-demo.sh
+      - Taskfile.yml
     generates:
       - backend/shoppinglist
     cmds:
       - defer: *failed
-      - scripts/build-embedded-spa.sh
+      - task: build-spa
       - cd backend && go build {{if .GOCOVERDIR}}-cover {{end}}-o shoppinglist .
 
   e2e:functional:
@@ -426,13 +446,20 @@ tasks:
       - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:tiles npx playwright test -c tiles/tiles.config.ts {{.CLI_ARGS}}'
 
   build-demo:
-    desc: The demo binary, with its own SPA embedded ([D-234])
+    desc: The demo binary, with its own SPA embedded ([D-234]); GOARCH=arm64 for an arm64 server
+    # The target in the label, so an arm64 build is not "up to date" after an
+    # amd64 one.
+    label: build-demo{{if .GOARCH}}-{{.GOARCH}}{{end}}
     sources: *app
     generates:
       - backend/shoppinglist-demo
     cmds:
       - defer: *failed
-      - scripts/build-demo.sh
+      - task: build-spa
+        vars: { DEMO: '1' }
+      # CGO off, as the releases are built (.goreleaser.yaml): one static file
+      # to copy to the demo's server.
+      - cd backend && CGO_ENABLED=0 go build {{if .GOCOVERDIR}}-cover {{end}}-tags demo -o shoppinglist-demo .
 
   e2e:demo:
     desc: The demo build's harness on its own binary (e2e/demo, 8088, [D-234])

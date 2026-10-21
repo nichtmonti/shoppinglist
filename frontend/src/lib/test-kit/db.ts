@@ -20,6 +20,8 @@ import { recompute } from '#lib/sync/apply.js';
 import { shadowFromLocal } from '#lib/sync/shadow.js';
 import { shelve, stampsFromRow } from '#lib/sync/materialize.js';
 import { invalidateLiveCaches, type LiveStore } from '#lib/state/live.js';
+import { get } from 'svelte/store';
+import { vi } from 'vitest';
 
 /** A fresh device: empty tables, and no store value read before ([D-205]). */
 export async function resetDb(): Promise<void> {
@@ -40,32 +42,13 @@ export async function resetDb(): Promise<void> {
  * (nothing external can): the component's private copy.
  */
 export async function untilLoaded(...stores: LiveStore<unknown>[]): Promise<void> {
-	await Promise.all(
-		stores.map(
-			(store) =>
-				new Promise<void>((resolve, reject) => {
-					// Svelte stores deliver the current value synchronously
-					// INSIDE subscribe(): a store whose `loaded` is already
-					// true runs the callback before the `unsub =` assignment
-					// below completes, so the callback must not read `unsub`
-					// directly (temporal dead zone). It defers the unsubscribe
-					// to a microtask instead — queued BEFORE resolve() so the
-					// awaiter's continuation always runs after the real
-					// unsubscribe, never after a not-yet-assigned binding.
-					let unsub: () => void = () => {};
-					const deadline = setTimeout(() => {
-						unsub();
-						reject(new Error('live store never emitted its first value'));
-					}, 5000);
-					unsub = store.loaded.subscribe((isLoaded) => {
-						if (!isLoaded) return;
-						clearTimeout(deadline);
-						queueMicrotask(() => unsub());
-						resolve();
-					});
-				})
-		)
-	);
+	// Subscribed for the wait: a subscription is what runs each query.
+	const unsubs = stores.map((store) => store.loaded.subscribe(() => {}));
+	try {
+		await vi.waitUntil(() => stores.every((store) => get(store.loaded)), { timeout: 5000 });
+	} finally {
+		for (const unsub of unsubs) unsub();
+	}
 }
 
 let seq = 0;

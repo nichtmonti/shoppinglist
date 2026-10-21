@@ -1,7 +1,7 @@
 // The demo's way in ([D-234]): what a refused start tells the visitor, what a
 // successful one stores, and when the banner says the account goes.
 import { existsSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const authStore = vi.hoisted(() => ({
 	isValid: false,
@@ -12,37 +12,32 @@ const authStore = vi.hoisted(() => ({
 	clear: vi.fn()
 }));
 
+const send = vi.hoisted(() => vi.fn());
+
 vi.mock('#lib/pb.js', async () =>
-	(await import('#lib/test-kit/pb-mock.js')).pbModuleMock({ authStore, send: vi.fn() })
+	(await import('#lib/test-kit/pb-mock.js')).pbModuleMock({ authStore, send })
 );
 
 import { EXAMPLE_LISTS, demoEndsAt, startDemo } from './start';
 import { demo } from './off';
 import { setLocale } from '#lib/i18n/index.js';
 import { LocalizedError } from '#lib/localized-error.js';
-
-const fetchMock = vi.fn();
+import { ClientResponseError } from 'pocketbase';
 
 beforeEach(() => {
 	setLocale('de');
 	authStore.record = null;
 	authStore.save.mockReset();
-	fetchMock.mockReset();
-	vi.stubGlobal('fetch', fetchMock);
+	send.mockReset();
 });
-afterEach(() => vi.unstubAllGlobals());
 
 describe('startDemo', () => {
 	it('stores the session the server answers with, and says which language to name it in', async () => {
 		const record = { id: 'a1', nickname: 'Gast 1234' };
-		fetchMock.mockResolvedValue(
-			new Response(JSON.stringify({ token: 'tok', record }), { status: 200 })
-		);
+		send.mockResolvedValue({ token: 'tok', record });
 		await startDemo();
 		expect(authStore.save).toHaveBeenCalledWith('tok', record);
-		const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-		expect(url).toBe('/api/demo/start');
-		expect(JSON.parse(init.body as string)).toEqual({ lang: 'de' });
+		expect(send).toHaveBeenCalledWith('/api/demo/start', { method: 'POST', body: { lang: 'de' } });
 	});
 
 	it.each([
@@ -50,7 +45,7 @@ describe('startDemo', () => {
 		[503, 'Die Demo ist gerade voll'],
 		[500, 'konnte nicht starten']
 	])('a %i is told in the visitor’s words', async (status, words) => {
-		fetchMock.mockResolvedValue(new Response('{}', { status }));
+		send.mockRejectedValue(new ClientResponseError({ status }));
 		const err = await startDemo().catch((e: unknown) => e);
 		expect(err).toBeInstanceOf(LocalizedError);
 		expect((err as Error).message).toContain(words);
@@ -58,7 +53,8 @@ describe('startDemo', () => {
 	});
 
 	it('an unreachable server reads as a failed start, not a crash', async () => {
-		fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+		// The SDK's answer when no response came: status 0.
+		send.mockRejectedValue(new ClientResponseError({ status: 0 }));
 		await expect(startDemo()).rejects.toThrow('konnte nicht starten');
 	});
 });

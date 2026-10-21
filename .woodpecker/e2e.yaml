@@ -81,7 +81,7 @@ steps:
       - *go_build_cache
     commands:
       - *install_task
-      - scripts/third-party-licenses.sh --check
+      - task licenses -- --check
 
   # Every harness, one after the other, each on its own port and server.
   # The arch walk ([D-124]) is single-worker on its own server; the OIDC

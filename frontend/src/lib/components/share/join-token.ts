@@ -8,7 +8,7 @@ const stored = tabValue('join-token');
 
 /** The token in the fragment, else the one this tab read earlier. */
 export function joinToken(): string {
-	const fromUrl = typeof location !== 'undefined' ? location.hash.slice(1) : '';
+	const fromUrl = location.hash.slice(1);
 	if (fromUrl) stored.set(fromUrl);
 	return fromUrl || (stored.get() ?? '');
 }

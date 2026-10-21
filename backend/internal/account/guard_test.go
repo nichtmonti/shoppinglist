@@ -92,16 +92,9 @@ func TestSelfUpdateRejectsHandle(t *testing.T) {
 	}
 }
 
-// TestSelfUpdateRejectsEmail (§11): same as above but for the email field.
-// Note: for this field specifically, PocketBase's own built-in auth-record
-// form validation (forms.RecordUpsert.validateFormFields, which compares the
-// submitted email against record.Original().Email() unless the request has
-// "manage" access) already rejects the change with 400 BEFORE our
-// OnRecordUpdate hook even runs — so this request never needs our hook to
-// reject it on the default REST path. It still exercises the same
-// requirement ("email cannot be changed directly") end-to-end; our hook
-// remains the backstop for any future caller that saves an accounts record
-// without going through that form (e.g. a raw e.App.Save()).
+// TestSelfUpdateRejectsEmail (§11): same as above but for the email field,
+// which PocketBase's own auth-record form refuses to anyone without manage
+// access ([D-32]), so no email can be squatted past verification.
 func TestSelfUpdateRejectsEmail(t *testing.T) {
 	app, mux := setupAccountApp(t)
 	acct, tok := createAccount(t, app, "Alice", "")
@@ -121,26 +114,27 @@ func TestSelfUpdateRejectsEmail(t *testing.T) {
 	}
 }
 
-// TestSelfUpdateHookRejectsEmailDirectly (§11): exercises accountsUpdateGuard
-// itself (bypassing the REST form layer) to prove the hook independently
-// enforces the email allowlist entry, per the spec's explicit four-field list.
-func TestSelfUpdateHookRejectsEmailDirectly(t *testing.T) {
-	app := testutil.NewApp(t)
-	Register(app, Options{Passkeys: true})
-	acct, _ := createAccount(t, app, "Alice", "")
+// TestSelfUpdateLeavesVerifiedAndTokenKey (§11, [D-32]): the rest of the
+// identity a user must not write on their own row, refused or ignored by
+// PocketBase's own form: verified (no manage access) and the hidden tokenKey.
+func TestSelfUpdateLeavesVerifiedAndTokenKey(t *testing.T) {
+	app, mux := setupAccountApp(t)
+	acct, tok := createAccount(t, app, "Alice", "")
+	oldKey := acct.GetString("tokenKey")
 
-	acct.Set("email", "alice@example.com")
-	err := app.Save(acct)
-	if err == nil {
-		t.Fatal("expected direct email change via app.Save to be rejected by the hook")
+	for _, patch := range []string{`{"verified":true}`, `{"tokenKey":"attackerchosentokenkeyvalue00000"}`} {
+		testutil.DoReq(mux, http.MethodPatch, "/api/collections/accounts/records/"+acct.Id, patch, testutil.AuthHeader(tok))
 	}
 
-	updated, ferr := app.FindRecordById("accounts", acct.Id)
-	if ferr != nil {
-		t.Fatalf("find account: %v", ferr)
+	updated, err := app.FindRecordById("accounts", acct.Id)
+	if err != nil {
+		t.Fatalf("find account: %v", err)
 	}
-	if got := updated.GetString("email"); got != "" {
-		t.Errorf("email = %q, want unchanged empty", got)
+	if updated.Verified() {
+		t.Error("verified = true, want unchanged false")
+	}
+	if got := updated.GetString("tokenKey"); got != oldKey {
+		t.Errorf("tokenKey = %q, want unchanged %q", got, oldKey)
 	}
 }
 

@@ -180,12 +180,12 @@ e2e:<name>`) or by hand as below.
   Open states with `openGallery(page, {...})` and find items by
   `[data-item="<case id>"]`; never drive the toolbar. Vite is started with
   `node`, not `pnpm exec`, whose process group hung every run.
-- **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from
-  `scripts/build-demo.sh`.
+- **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from `task
+  build-demo`.
 
-A failed test in the functional, arch or OIDC suite writes `page-diagnosis.md`
-(and `page-diagnosis-watchdog.md` before a timeout) next to Playwright's
-`error-context.md` ([D-247]); CI prints both. The functional, OIDC and demo
+A failed or timed-out test in the functional, arch or OIDC suite writes
+`page-diagnosis.md` next to Playwright's `error-context.md` ([D-247]); CI
+prints both. The functional, OIDC and demo
 suites also keep the failed test's `trace.zip` (`npx playwright show-trace`).
 
 **The integration project has two layers, and only one may know the
@@ -229,6 +229,16 @@ in `commands` goes without braces. A `"${BASE%%:*}"` once became `""` in
 [D-252]'s table saying which standard tool it stands in for, or why there is
 none; a new one adds its row, and a deleted one takes its row with it.
 
+**The library's own tool, never a hand-built one.** Before writing a helper,
+an event listener, an observer, a retry or wait loop, a fetch wrapper or an
+effect that keeps state in sync, look for the feature in the installed
+library's source and types (`node_modules`, the Go module cache), not in
+memory of an older version: PocketBase and its SDK, Svelte and SvelteKit,
+bits-ui, Dexie, SimpleWebAuthn, Playwright and testing-library cover most of
+them. A hand-built copy is one more mechanism to get subtly wrong, and in
+review it is a finding, not a style note. Keep one only where the library is
+not equivalent, with that reason in one line beside it.
+
 **Tool versions live in `tools/`, one Go module per tool** ([D-75],
 `tools/README.md`): `go -C tools/<name> install tool` with no `@version`, the
 module is the pin (Dex runs as `go -C tools/dex tool dex`). diff-cover, the one
@@ -246,16 +256,16 @@ pinned under `tools/`; a test helper imported by production code is how it
 happens.
 
 **A dependency change regenerates `docs/THIRD_PARTY_LICENSES.md` and
-`docs/sbom.cdx.json`**: `scripts/third-party-licenses.sh`
-(`--check` compares). CI fails a stale file or a licence off the allowlist;
+`docs/sbom.cdx.json`**: `task licenses` (`task licenses -- --check`
+compares). CI fails a stale file or a licence off the allowlist;
 the gate does not check it.
 
 **Ports.** Each harness has one port (above); the shots harness takes 8091
 (`app`), 8092 (`gallery`) and 8087, 8086 and Dex on 5558 (`docs`); 8099 is the
 integration server. `scripts/dev.sh` holds 8090 (origin `:5173`, Dex on 5556
-with `--oidc`), and `basePort()` in `e2e/server.ts` refuses both:
-Playwright's `reuseExistingServer` would adopt the dev server and every passkey
-ceremony would fail on an origin mismatch.
+with `--oidc`). No harness reuses a running server, so Playwright refuses a
+port that answers: adopting the dev server, every passkey ceremony would fail
+on an origin mismatch.
 
 **The gate runs beside `scripts/dev.sh`** ([D-157]) because the dev server
 generates into `frontend/.svelte-kit-dev` and the Paraglide CLI and plugin

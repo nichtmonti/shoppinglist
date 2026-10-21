@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { createList, openListView, registerAccount } from './helpers';
 
-// [D-289] A planning row swiped toward its start removes its item, with the
+// [D-289] A planning row swiped left removes its item, with the
 // undo toast; a short drag snaps back and opens nothing.
 
 // A phone's touch: the row's `touch-action: pan-y` is what tells a swipe from
@@ -37,9 +37,7 @@ async function touchDrag(page: Page, name: string, dx: number, dy = 0): Promise<
 	await cdp.detach();
 }
 
-test('a row swiped toward its start is removed, and Rückgängig brings it back', async ({
-	page
-}) => {
+test('a row swiped left is removed, and Rückgängig brings it back', async ({ page }) => {
 	await registerAccount(page, 'Anna');
 	await createList(page, 'Wochenshop');
 	await openListView(page);

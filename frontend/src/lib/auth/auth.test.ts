@@ -18,6 +18,7 @@ const authStore = vi.hoisted(() => ({
 }));
 
 const send = vi.hoisted(() => vi.fn());
+const cancelCeremony = vi.hoisted(() => vi.fn());
 
 const oidcCollection = vi.hoisted(() => ({
 	authWithOAuth2: vi.fn()
@@ -37,19 +38,28 @@ vi.mock('#lib/pb.js', async () => {
 // builds is recorded here, with a real in-memory store and the same collection
 // stub as `pb`.
 const linkClients = vi.hoisted(
-	() => [] as { authStore: import('pocketbase').BaseAuthStore; cancelRequest: () => void }[]
+	() =>
+		[] as {
+			authStore: import('pocketbase').BaseAuthStore;
+			cancelRequest: () => void;
+			send: ReturnType<typeof vi.fn>;
+		}[]
 );
 vi.mock('pocketbase', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('pocketbase')>();
-	class LinkClient {
-		authStore: import('pocketbase').BaseAuthStore;
-		cancelRequest = vi.fn();
-		constructor(_baseURL: string, store: import('pocketbase').BaseAuthStore) {
-			this.authStore = store;
-			linkClients.push(this);
-		}
-		collection() {
-			return oidcCollection;
+	// The real client, with the OIDC collection and cancelRequest faked: its
+	// send goes through the stubbed fetch, as the passkey ceremonies' does.
+	class LinkClient extends actual.default {
+		override cancelRequest = vi.fn();
+		override send = vi.fn((path: string, options?: object) =>
+			actual.default.prototype.send.call(this, path, options ?? {})
+		) as unknown as InstanceType<typeof actual.default>['send'];
+		override collection = (() => oidcCollection) as unknown as InstanceType<
+			typeof actual.default
+		>['collection'];
+		constructor(baseURL: string, store: import('pocketbase').BaseAuthStore) {
+			super(baseURL, store);
+			linkClients.push(this as unknown as (typeof linkClients)[number]);
 		}
 	}
 	return { ...actual, default: LinkClient };
@@ -69,14 +79,17 @@ vi.mock('#lib/auth/account-data.js', () => ({
 vi.mock('@simplewebauthn/browser', () => ({
 	browserSupportsWebAuthn: vi.fn(() => true),
 	startRegistration: vi.fn(async () => ({ id: 'cred-1' })),
-	startAuthentication: vi.fn()
+	startAuthentication: vi.fn(),
+	sendSignal: vi.fn(async () => undefined),
+	WebAuthnAbortService: { cancelCeremony }
 }));
 
-import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+import { sendSignal, startAuthentication, startRegistration } from '@simplewebauthn/browser';
 import { wipeLocalAccountData } from '#lib/auth/account-data.js';
 import {
 	addPasskey,
 	authState,
+	cancelConditionalLogin,
 	cachedAuthMethods,
 	fetchAuthMethods,
 	isAutofillUnsupported,
@@ -113,12 +126,8 @@ beforeEach(() => {
 		getItem: (key: string) => store.get(key) ?? null,
 		setItem: (key: string, value: string) => void store.set(key, value)
 	});
-	// oidcLogin() (used by linkOidc()) opens a real popup and drives the
-	// PocketBase SDK's OAuth2 flow — neither exists in this node test project,
-	// so both are stubbed. authWithOAuth2's mock implementation is set per-test.
-	vi.stubGlobal('window', {
-		open: vi.fn(() => ({ closed: false, close: vi.fn(), location: { href: '' } }))
-	});
+	// The SDK's OAuth2 flow, popup included, is stubbed: authWithOAuth2's
+	// mock implementation is set per-test.
 	oidcCollection.authWithOAuth2.mockReset();
 	send.mockReset();
 	authStore.save.mockClear();
@@ -442,6 +451,7 @@ describe('linkOidc() — attach the OIDC login to the current account', () => {
 
 	beforeEach(() => {
 		linkClients.length = 0;
+		send.mockResolvedValue({});
 		authStore.isValid = true;
 		authStore.token = 'passkey-token';
 		authStore.record = { id: 'acct-passkey' };
@@ -452,14 +462,11 @@ describe('linkOidc() — attach the OIDC login to the current account', () => {
 
 		await linkOidc('google');
 
-		const linkCall = vi
-			.mocked(fetch)
-			.mock.calls.find(([url]) => (url as string).includes('/account/link'));
-		expect(linkCall).toBeDefined();
-		const headers = new Headers(linkCall?.[1]?.headers);
-		expect(headers.get('Authorization')).toBe('Bearer passkey-token');
-		const body = JSON.parse(linkCall?.[1]?.body as string);
-		expect(body.token).toBe('oidc-token');
+		expect(send).toHaveBeenCalledWith('/api/account/link', {
+			method: 'POST',
+			headers: { Authorization: 'Bearer passkey-token' },
+			body: { token: 'oidc-token' }
+		});
 	});
 
 	// [D-76]: the login is attached to this account, so the device keeps the
@@ -468,11 +475,11 @@ describe('linkOidc() — attach the OIDC login to the current account', () => {
 	it('keeps the current session, before and after the link', async () => {
 		exchangeSignsInLinkClient();
 		let sharedTokenDuringLink: string | undefined;
-		vi.mocked(fetch).mockImplementationOnce(async () => {
+		send.mockImplementationOnce(async () => {
 			// Anything reading the shared store now — a sync cycle the popup's
 			// closing refocus started — must still see this account.
 			sharedTokenDuringLink = authStore.token;
-			return jsonResponse({});
+			return {};
 		});
 
 		await expect(linkOidc('google')).resolves.toBe(true);
@@ -492,16 +499,13 @@ describe('linkOidc() — attach the OIDC login to the current account', () => {
 
 		await expect(linkOidc('google')).resolves.toBe(false);
 
-		const linkCall = vi
-			.mocked(fetch)
-			.mock.calls.find(([url]) => (url as string).includes('/account/link'));
-		expect(linkCall).toBeUndefined();
+		expect(send).not.toHaveBeenCalledWith('/api/account/link', expect.anything());
 		expect(authStore.save).not.toHaveBeenCalled();
 	});
 
 	it('leaves the session in place if the link request fails', async () => {
 		exchangeSignsInLinkClient();
-		vi.mocked(fetch).mockImplementationOnce(async () => jsonResponse({}, 500));
+		send.mockRejectedValueOnce(new ClientResponseError({ status: 500 }));
 
 		await expect(linkOidc('google')).rejects.toThrow('settings_link_oidc_failed');
 
@@ -513,7 +517,7 @@ describe('linkOidc() — attach the OIDC login to the current account', () => {
 	// attached; the user is told why and what to do instead.
 	it('says so when the OIDC login already belongs to an account in use (409)', async () => {
 		exchangeSignsInLinkClient();
-		vi.mocked(fetch).mockImplementationOnce(async () => jsonResponse({}, 409));
+		send.mockRejectedValueOnce(new ClientResponseError({ status: 409 }));
 
 		await expect(linkOidc('google')).rejects.toThrow('settings_link_oidc_in_use');
 
@@ -558,12 +562,12 @@ describe('oidcLogin({ expectAccount }) — re-auth keeps the account', () => {
 		expect(err).toBeInstanceOf(WrongAccountError);
 		expect((err as InstanceType<typeof WrongAccountError>).orphan).toBe(true);
 		expect(authStore.save).not.toHaveBeenCalled();
-		const del = vi
-			.mocked(fetch)
-			.mock.calls.find(([url]) => (url as string).includes('/api/account/delete'));
-		expect(del).toBeDefined();
-		// Deleted as ITSELF — never with this device's session.
-		expect(new Headers(del?.[1]?.headers).get('Authorization')).toBe('Bearer token-acct-new');
+		// Deleted as ITSELF, by the client that holds its token — never with
+		// this device's session.
+		const client = linkClients.at(-1)!;
+		expect(client.authStore.token).toBe('token-acct-new');
+		expect(client.send).toHaveBeenCalledWith('/api/account/delete', { method: 'POST' });
+		expect(send).not.toHaveBeenCalledWith('/api/account/delete', expect.anything());
 		expect(lastLoginMethod()).toBe('passkey');
 	});
 
@@ -576,10 +580,7 @@ describe('oidcLogin({ expectAccount }) — re-auth keeps the account', () => {
 		expect(err).toBeInstanceOf(WrongAccountError);
 		expect((err as InstanceType<typeof WrongAccountError>).orphan).toBe(false);
 		expect(authStore.save).not.toHaveBeenCalled();
-		const del = vi
-			.mocked(fetch)
-			.mock.calls.find(([url]) => (url as string).includes('/api/account/delete'));
-		expect(del).toBeUndefined();
+		expect(linkClients.at(-1)!.send).not.toHaveBeenCalled();
 		expect(lastLoginMethod()).toBe('oidc');
 	});
 
@@ -590,6 +591,14 @@ describe('oidcLogin({ expectAccount }) — re-auth keeps the account', () => {
 
 		await expect(oidcLogin('oidc', { expectAccount: 'acct-1' })).resolves.toBe(false);
 		expect(authStore.save).not.toHaveBeenCalled();
+	});
+});
+
+describe('login() — a refused begin', () => {
+	it('says sign-in could not be started, not that the passkey failed', async () => {
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ message: 'too many' }, 429));
+
+		await expect(login()).rejects.toThrow('auth_login_begin_failed');
 	});
 });
 
@@ -688,8 +697,6 @@ describe('isCeremonyDismissal()', () => {
 	// [D-293] A passkey removed from the account that the device still offers:
 	// named, and the browser is asked to stop offering it.
 	it('names a passkey the server no longer has, and asks the browser to forget it', async () => {
-		const signalUnknownCredential = vi.fn(async () => {});
-		vi.stubGlobal('PublicKeyCredential', { signalUnknownCredential });
 		vi.mocked(startAuthentication).mockResolvedValueOnce({ id: 'cred-gone' } as never);
 		vi.stubGlobal(
 			'fetch',
@@ -704,10 +711,13 @@ describe('isCeremonyDismissal()', () => {
 
 		expect((err as Error).message).toBe(t('auth_passkey_unknown'));
 		expect(isCeremonyDismissal(err)).toBe(false);
-		expect(signalUnknownCredential).toHaveBeenCalledWith({
-			rpId: 'example.test',
-			credentialId: 'cred-gone'
-		});
+		await vi.waitFor(() =>
+			expect(sendSignal).toHaveBeenCalledWith({
+				signalName: 'unknownCredential',
+				rpID: 'example.test',
+				credentialID: 'cred-gone'
+			})
+		);
 	});
 
 	// Not a dismissal: a button press that hits it must still say so.
@@ -740,7 +750,9 @@ describe('isCeremonyDismissal()', () => {
 								reject(named('AbortError'));
 							});
 						})
-					: Promise.resolve(jsonResponse({ publicKey: {} }))
+					: Promise.resolve(
+							jsonResponse({ publicKey: {}, token: 'new-token', record: { id: 'acct-1' } })
+						)
 			)
 		);
 		vi.mocked(startAuthentication).mockResolvedValue({ id: 'cred-1' } as Awaited<
@@ -753,6 +765,33 @@ describe('isCeremonyDismissal()', () => {
 		const err = await rejectionOf(background);
 		expect(isCeremonyDismissal(err)).toBe(true);
 		await expect(foreground).resolves.toBeUndefined();
+	});
+
+	// A screen that leaves ends its background login, browser offer included,
+	// but never a ceremony a button started since.
+	it('cancelConditionalLogin ends the background login and only that', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn((_url: string, init?: RequestInit) =>
+				init?.signal
+					? new Promise((_resolve, reject) =>
+							init.signal?.addEventListener('abort', () => reject(named('AbortError')))
+						)
+					: Promise.resolve(jsonResponse({}))
+			)
+		);
+		const background = login({ conditional: true });
+		cancelConditionalLogin();
+		expect(isCeremonyDismissal(await rejectionOf(background))).toBe(true);
+
+		cancelCeremony.mockClear();
+		const button = login();
+		cancelConditionalLogin();
+		expect(cancelCeremony).not.toHaveBeenCalled();
+		const pending = vi.fn();
+		void button.then(pending, pending);
+		await new Promise((r) => setTimeout(r, 20));
+		expect(pending).not.toHaveBeenCalled();
 	});
 });
 

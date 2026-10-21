@@ -439,7 +439,9 @@ test('the list density renders check-off rows with the note back [D-83, D-313]',
 		expect(state.noteDisplayed).toBe(true);
 		expect(state.nameSingleLine).toBe(true);
 		expect(state.columns).toBe(1);
-	}).toPass();
+		// toPass ignores the expect timeout and defaults to none: without one, a
+		// failure surfaced only as the test's own timeout.
+	}).toPass({ timeout: 30_000 });
 });
 
 // A density switch must re-measure the tile: it changes the name's size and

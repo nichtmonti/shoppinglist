@@ -18,6 +18,7 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	"shoppinglist/internal/randid"
@@ -60,7 +61,7 @@ func mintInvite(e *core.RequestEvent) error {
 			return err
 		}
 		rec.Set("list", listID)
-		rec.Set("token_hash", randid.HashToken(token))
+		rec.Set("token_hash", pbsecurity.SHA256(token))
 		rec.Set("token", token)
 		rec.Set("revoked", false)
 		rec.Set("created_by", e.Auth.Id) // from the token, never from the body

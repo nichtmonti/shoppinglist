@@ -406,9 +406,7 @@ describe('SyncBanner — what the count means off a list ([D-130])', () => {
 		authState.set({ nickname: 'Anna', isValid: true });
 		render(SyncBanner);
 
-		await waitFor(() =>
-			expect(screen.getByText('3 Änderungen noch nicht synchronisiert')).toBeDefined()
-		);
+		expect(await screen.findByText('3 Änderungen noch nicht synchronisiert')).toBeDefined();
 	});
 
 	it('still scopes to the list when there is one', async () => {
@@ -419,9 +417,7 @@ describe('SyncBanner — what the count means off a list ([D-130])', () => {
 		authState.set({ nickname: 'Anna', isValid: true });
 		render(SyncBanner, { listId: LIST_A });
 
-		await waitFor(() =>
-			expect(screen.getByText('1 Änderung noch nicht synchronisiert')).toBeDefined()
-		);
+		expect(await screen.findByText('1 Änderung noch nicht synchronisiert')).toBeDefined();
 	});
 });
 

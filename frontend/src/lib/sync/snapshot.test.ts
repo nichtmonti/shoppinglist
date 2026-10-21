@@ -65,9 +65,6 @@ describe('snapshot.ts', () => {
 	// a body that is not a snapshot must throw BEFORE the sweep — never read as
 	// "the list is empty".
 	describe('default fetcher (GET /api/sync/snapshot)', () => {
-		afterEach(() => {
-			vi.unstubAllGlobals();
-		});
 		const respond = (status: number, body: unknown) =>
 			vi.fn().mockResolvedValue(
 				new Response(JSON.stringify(body), {

@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { loginAtDex } from '../oidc/dex';
 import {
@@ -6,7 +5,7 @@ import {
 	disableConditionalMediation,
 	showInviteLink
 } from '../tests/helpers';
-import { INVITE_LOG, INVITE_ORIGIN } from './docs.config';
+import { INVITE_ORIGIN } from './docs.config';
 import { createAccount, createList, device, msg as message, settle, shoot } from './shots';
 
 // The deployment reference's screenshots (docs.config.ts), in English like
@@ -42,14 +41,9 @@ test('who can sign up: SHOPPINGLIST_SIGNUP=invite', async ({ browser }) => {
 	await settle(stranger);
 	await shoot(stranger, stranger, at('signup-invite-only'));
 
-	// The first account, through the setup link in the boot log.
-	let setup = '';
-	await expect
-		.poll(() => {
-			setup = readFileSync(INVITE_LOG, 'utf8').match(/https?:\/\/\S+\/#setup=[\w-]+/)?.[0] ?? '';
-			return setup;
-		})
-		.not.toBe('');
+	// The first account, through the setup link in the boot log (inviteOnlyServer).
+	const setup = process.env.SETUP_LINK ?? '';
+	expect(setup).not.toBe('');
 	const anna = await phone(browser);
 	await addVirtualAuthenticator(anna);
 	await anna.goto(setup);

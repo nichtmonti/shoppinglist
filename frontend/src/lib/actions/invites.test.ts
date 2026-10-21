@@ -20,20 +20,7 @@ vi.mock('#lib/pb.js', async () => {
 	});
 });
 
-import {
-	activeInvite,
-	cacheInviteToken,
-	cachedInviteToken,
-	createInvite,
-	currentInvite,
-	resetInvite,
-	revokeInvite,
-	rotateInvite,
-	tokenFromInput
-} from './invites';
-import { db } from '#lib/db.js';
-import { endSession, resetSessionForTest } from '#lib/auth/session.js';
-import { INVITE_TOKEN_META_PREFIX } from '#lib/auth/account-data.js';
+import { activeInvite, createInvite, resetInvite, revokeInvite, tokenFromInput } from './invites';
 
 const future = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
 const past = new Date(Date.now() - 1000).toISOString();
@@ -118,41 +105,10 @@ describe('tokenFromInput', () => {
 	});
 });
 
-describe('the invite-token cache ([D-148])', () => {
-	beforeEach(async () => {
-		await db.meta.clear();
-	});
-
-	it('offers the token back only for the invite it was minted with', async () => {
-		await cacheInviteToken('list1', { id: 'inv1', token: 'tok1', expires_at: future } as never);
-		expect(await cachedInviteToken('list1', 'inv1')).toBe('tok1');
-		// A reset or a revoke elsewhere mints a new invite: the old token is stale.
-		expect(await cachedInviteToken('list1', 'inv2')).toBeNull();
-		expect(await cachedInviteToken('list2', 'inv1')).toBeNull();
-	});
-
-	it('caches nothing for an invite read back without its token', async () => {
-		await cacheInviteToken('list1', { id: 'inv1', token: null, expires_at: future } as never);
-		expect(await cachedInviteToken('list1', 'inv1')).toBeNull();
-	});
-});
-
-describe("the share sheet's invite (currentInvite / rotateInvite)", () => {
-	beforeEach(async () => {
-		await db.meta.clear();
-	});
-
+describe("the share sheet's invite (activeInvite / resetInvite)", () => {
 	// [D-330] Opening the share sheet never mints: a revoked link stays revoked.
 	it('is null when the list has no active invite, and mints nothing', async () => {
-		expect(await currentInvite('list1')).toBeNull();
-		expect(pbSend).not.toHaveBeenCalled();
-	});
-
-	it('shows the active invite with the token this device minted for it', async () => {
-		invitesGetFullList.mockResolvedValue([{ id: 'inv1', expires_at: future }]);
-		await cacheInviteToken('list1', { id: 'inv1', token: 'tok1', expires_at: future } as never);
-
-		expect(await currentInvite('list1')).toMatchObject({ id: 'inv1', token: 'tok1' });
+		expect(await activeInvite('list1')).toBeNull();
 		expect(pbSend).not.toHaveBeenCalled();
 	});
 
@@ -160,42 +116,24 @@ describe("the share sheet's invite (currentInvite / rotateInvite)", () => {
 	it("shows the active invite's token from the server, whoever minted it", async () => {
 		invitesGetFullList.mockResolvedValue([{ id: 'inv9', expires_at: future, token: 'tok9' }]);
 
-		expect(await currentInvite('list1')).toMatchObject({ id: 'inv9', token: 'tok9' });
+		expect(await activeInvite('list1')).toMatchObject({ id: 'inv9', token: 'tok9' });
 		expect(pbSend).not.toHaveBeenCalled();
 	});
 
 	it('shows a link minted before the server kept tokens without one, and mints nothing', async () => {
 		invitesGetFullList.mockResolvedValue([{ id: 'inv9', expires_at: future }]);
 
-		const invite = await currentInvite('list1');
+		const invite = await activeInvite('list1');
 
 		expect(invite?.id).toBe('inv9');
 		expect(invite?.token).toBeUndefined();
 		expect(pbSend).not.toHaveBeenCalled();
 	});
 
-	it('rotates through one mint and remembers the new token', async () => {
-		const invite = await rotateInvite('list1');
+	it('resets through one mint, which answers with the new token', async () => {
+		const invite = await resetInvite('list1');
 
 		expect(pbSend).toHaveBeenCalledTimes(1);
 		expect(invite.token).toBe('server-minted-token');
-		expect(await cachedInviteToken('list1', 'inv-new')).toBe('server-minted-token');
-	});
-
-	// [D-148] the token cache is cleared on sign-out; a mint answering after the
-	// sign-out must not write it back for the next account on this device
-	// (§5.6 [D-109]).
-	it('a mint that answers after sign-out caches nothing', async () => {
-		resetSessionForTest();
-		let answer!: (v: unknown) => void;
-		pbSend.mockReturnValue(new Promise((r) => (answer = r)));
-
-		const rotating = rotateInvite('list1');
-		await vi.waitFor(() => expect(pbSend).toHaveBeenCalled());
-		endSession();
-		answer({ id: 'inv-new', expires_at: future, token: 'server-minted-token' });
-		await rotating;
-
-		expect(await db.meta.get(INVITE_TOKEN_META_PREFIX + 'list1')).toBeUndefined();
 	});
 });

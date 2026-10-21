@@ -8,13 +8,13 @@
 package signup
 
 import (
-	"crypto/subtle"
 	"errors"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/pocketbase/pocketbase/core"
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 
 	"shoppinglist/internal/invites"
 	"shoppinglist/internal/randid"
@@ -97,7 +97,7 @@ func (g *Gate) StartSetup(app core.App) (token string, ok bool, err error) {
 	}
 	token = randid.Token()
 	g.mu.Lock()
-	g.setupHash = randid.HashToken(token)
+	g.setupHash = pbsecurity.SHA256(token)
 	g.mu.Unlock()
 	return token, true, nil
 }
@@ -171,7 +171,7 @@ func (g *Gate) setupValid(app core.App, h string) (bool, error) {
 	g.mu.Lock()
 	want := g.setupHash
 	g.mu.Unlock()
-	if want == "" || subtle.ConstantTimeCompare([]byte(h), []byte(want)) != 1 {
+	if want == "" || !pbsecurity.Equal(h, want) {
 		return false, nil
 	}
 	n, err := app.CountRecords("accounts")

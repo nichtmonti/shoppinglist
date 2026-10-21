@@ -24,12 +24,15 @@
 	} = $props();
 
 	const id = $props.id();
-	const state = $state({ invalid: false, describedBy: undefined as string | undefined });
-	$effect.pre(() => {
-		state.invalid = !!error;
-		state.describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+	// Getters over the props: the control reads them as live as the props are.
+	setFieldState({
+		get invalid() {
+			return !!error;
+		},
+		get describedBy() {
+			return error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+		}
 	});
-	setFieldState(state);
 </script>
 
 <div

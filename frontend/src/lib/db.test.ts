@@ -1,7 +1,7 @@
 // Schema smoke test for the Dexie database.
 import Dexie from 'dexie';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { AppDB, db, type Item, type PendingOp, getMeta, setMeta } from './db';
+import { AppDB, db, type Item, type PendingOp, getMeta, ownMembership, setMeta } from './db';
 import { wipeLocalAccountData } from '#lib/auth/account-data.js';
 
 // Helper for creating valid test items.
@@ -247,6 +247,42 @@ describe('db schema', () => {
 // The sign-out wipe ([D-21]'s argument, applied to Dexie). What it must drop is
 // the account's data; what it must KEEP is the two things that are not the
 // account's: the app's own shipped vocabulary, and the device's preferences.
+describe('ownMembership()', () => {
+	beforeEach(async () => {
+		await db.memberships.clear();
+	});
+
+	// A list left and re-joined on another device leaves this one a stale row
+	// until the next sync: leaving must delete the live one, not the stale one.
+	it('is the newest row for the list, whatever the ids', async () => {
+		await db.memberships.bulkPut([
+			{
+				id: 'a-old',
+				account: 'acc',
+				list: 'L',
+				created: 't0',
+				updated: '2026-10-01 10:00:00.000Z'
+			},
+			{
+				id: 'z-new',
+				account: 'acc',
+				list: 'L',
+				created: 't1',
+				updated: '2026-10-02 10:00:00.000Z'
+			},
+			{
+				id: 'b-other',
+				account: 'acc',
+				list: 'M',
+				created: 't1',
+				updated: '2026-10-03 10:00:00.000Z'
+			}
+		]);
+		expect((await ownMembership('L'))?.id).toBe('z-new');
+		expect(await ownMembership('none')).toBeUndefined();
+	});
+});
+
 describe('wipeLocalAccountData()', () => {
 	beforeEach(async () => {
 		await db.open();
@@ -336,20 +372,6 @@ describe('wipeLocalAccountData()', () => {
 		expect(await db.category_templates.count()).toBe(1);
 		expect(await db.item_dictionary.count()).toBe(1);
 		expect(await getMeta('seed_version')).toBe('v3');
-	});
-
-	it("drops the cached invite tokens — the only plaintext copy of the lists' join credential", async () => {
-		// [D-148]: keyed per list, so not in ACCOUNT_META_KEYS — and left behind
-		// on the device after a sign-out until the wipe cleared them by prefix.
-		await setMeta('invite_token_list1', { id: 'inv1', token: 'secret-join-token' });
-		await setMeta('invite_token_list2', { id: 'inv2', token: 'another-token' });
-		await setMeta('locale', 'de');
-
-		await wipeLocalAccountData();
-
-		expect(await getMeta('invite_token_list1')).toBeUndefined();
-		expect(await getMeta('invite_token_list2')).toBeUndefined();
-		expect(await getMeta('locale')).toBe('de');
 	});
 
 	it('keeps device preferences but drops the account-bound meta keys', async () => {
@@ -559,5 +581,43 @@ describe('the v7 migration', () => {
 		expect((await v7.meta.get('ui_density'))?.value).toBe('list');
 		expect((await v7.meta.get('list_view'))?.value).toBe('shop');
 		v7.close();
+	});
+});
+
+describe('the v8 migration', () => {
+	const NAME = 'invite-token-migration-test';
+	afterEach(async () => {
+		await Dexie.delete(NAME);
+	});
+
+	it('deletes the invite tokens this device cached, the only plaintext join credentials ([D-294])', async () => {
+		const v7 = new Dexie(NAME);
+		v7.version(7).stores({
+			items: 'id, list, [list+shelf+shelf_at]',
+			list_categories: 'id, list',
+			lists: 'id',
+			memberships: 'id, list',
+			roster: 'id, list',
+			category_templates: 'slug',
+			item_dictionary: 'id',
+			pending_ops: 'op_id, record_id, collection, list_id',
+			meta: 'key',
+			scanned_products: 'barcode',
+			server_items: 'id, list',
+			server_list_categories: 'id, list'
+		});
+		await v7.open();
+		await v7.table('meta').bulkPut([
+			{ key: 'invite_token_list1', value: { id: 'inv1', token: 'secret-join-token' } },
+			{ key: 'invite_token_list2', value: { id: 'inv2', token: 'another-token' } },
+			{ key: 'locale', value: 'de' }
+		]);
+		v7.close();
+
+		const v8 = new AppDB(NAME);
+		await v8.open();
+		expect(await v8.meta.where('key').startsWith('invite_token_').count()).toBe(0);
+		expect((await v8.meta.get('locale'))?.value).toBe('de');
+		v8.close();
 	});
 });

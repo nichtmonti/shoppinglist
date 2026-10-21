@@ -6,7 +6,7 @@
 <script lang="ts">
 	import OfflineHint from '#lib/components/common/OfflineHint.svelte';
 	import Hint from '#lib/components/common/Hint.svelte';
-	import { onMount, untrack } from 'svelte';
+	import { onMount } from 'svelte';
 	import { t, relativeTime } from '#lib/i18n/index.js';
 	import { online } from '#lib/state/online.js';
 	import { authMethods } from '#lib/state/auth-methods.js';
@@ -32,7 +32,8 @@
 	// when it did not arrive in time, and the group asks itself.
 	let { preloaded = null }: { preloaded?: PasskeyRow[] | null } = $props();
 
-	let passkeys = $state<PasskeyRow[]>(untrack(() => preloaded) ?? []);
+	// Derived from the route's read, and overwritten by every load here.
+	let passkeys = $derived<PasskeyRow[]>(preloaded ?? []);
 	// The server refuses to remove an account's last login (§5.4), so the row
 	// says so before the user asks ([D-293]).
 	let onlyLogin = $derived(passkeys.length === 1 && $authMethods?.oidc.linked !== true);
@@ -40,7 +41,7 @@
 	const loadAction = new AsyncAction();
 
 	// "No passkeys" is an answer, so it waits for the first list to arrive.
-	let passkeysLoaded = $state(untrack(() => preloaded) !== null);
+	let passkeysLoaded = $derived(preloaded !== null);
 
 	async function loadPasskeys(): Promise<void> {
 		const attempt = await loadAction.run(() => listPasskeys());

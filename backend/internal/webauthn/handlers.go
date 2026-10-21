@@ -151,8 +151,12 @@ func registerBegin(wa *wlib.WebAuthn, gate *signup.Gate) func(*core.RequestEvent
 			return err
 		}
 
+		// The account's own passkeys are excluded: an authenticator that holds
+		// one refuses (InvalidStateError) instead of replacing it in place,
+		// which would leave a credentials row no key can use, and the
+		// last-passkey guard counting it.
 		creation, sd, err := wa.BeginRegistration(user,
-			wlib.WithResidentKeyRequirement(protocol.ResidentKeyRequirementRequired))
+			wlib.WithExclusions(wlib.Credentials(user.WebAuthnCredentials()).CredentialDescriptors()))
 		if err != nil {
 			return e.InternalServerError("failed to begin registration", err)
 		}
@@ -265,9 +269,9 @@ func loginBegin(wa *wlib.WebAuthn) func(*core.RequestEvent) error {
 		if err := checkBrowserID(e, body.BrowserID, "browser_id"); err != nil {
 			return err
 		}
-		assertion, sd, err := wa.BeginDiscoverableLogin(
-			wlib.WithUserVerification(protocol.VerificationRequired),
-		)
+		// User verification is required by the config (New), which both
+		// ceremonies take it from.
+		assertion, sd, err := wa.BeginDiscoverableLogin()
 		if err != nil {
 			return e.InternalServerError("failed to begin login", err)
 		}
@@ -415,6 +419,9 @@ func updateCredential(app core.App, cred *wlib.Credential) error {
 		applog.Warn(app, "passkey signature counter did not advance — the authenticator may be cloned", nil,
 			"credential", rec.Id, "account", rec.GetString("account"), "sign_count", cred.Authenticator.SignCount)
 	}
+	// go-webauthn only ever sets the flag and stores it with the credential,
+	// so kept it would report every later login of this key as cloned too.
+	cred.Authenticator.CloneWarning = false
 	raw, err := json.Marshal(cred)
 	if err != nil {
 		return err

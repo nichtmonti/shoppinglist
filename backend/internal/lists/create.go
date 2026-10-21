@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	"github.com/pocketbase/pocketbase/core"
-
-	"shoppinglist/internal/randid"
 )
 
 // createListBody carries only the list's name ([D-08]). The id is
@@ -26,7 +24,7 @@ func (h handlers) createList(e *core.RequestEvent) error {
 	if err != nil {
 		return e.InternalServerError("failed to load category templates", err)
 	}
-	listRec, err := populateList(e.App, h.caps.Lists, randid.ID(), e.Auth.Id, body.Name, cats, nil)
+	listRec, err := populateList(e.App, h.caps.Lists, e.Auth.Id, body.Name, cats, nil)
 	if err != nil {
 		return populateFailed(e, err, h.caps.Lists, "failed to create list")
 	}
@@ -47,7 +45,7 @@ func activeTemplates(app core.App) ([]seedCategory, error) {
 		slug := tpl.GetString("slug")
 		cats = append(cats, seedCategory{
 			Key:       slug,
-			Slug:      &slug,
+			Slug:      slug,
 			Icon:      tpl.GetString("icon"),
 			Color:     tpl.GetString("color"),
 			SortOrder: tpl.GetInt("sort_order"),

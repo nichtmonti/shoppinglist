@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { preloadCode } = vi.hoisted(() => ({ preloadCode: vi.fn() }));
 vi.mock('$app/navigation', () => ({ preloadCode }));
@@ -18,7 +18,6 @@ describe('preloadScreens', () => {
 		preloadCode.mockReset().mockResolvedValue(undefined);
 		vi.stubGlobal('navigator', { serviceWorker: { controller: {} } });
 	});
-	afterEach(() => vi.unstubAllGlobals());
 
 	it("imports every screen's code", async () => {
 		await preloadScreens();

@@ -2,12 +2,12 @@
 // lists so the first screen is not empty.
 import type { RecordModel } from 'pocketbase';
 import { pb } from '#lib/pb.js';
-import { syncAuthState } from '#lib/auth/index.js';
 import { importList, templateCategories } from '#lib/actions/lists.js';
 import { backupDocument, type BackupItem } from '#lib/backup.js';
 import { lookupBarcode, type LookupProduct } from '#lib/scan/lookup.js';
 import { getLocale, t, type Locale } from '#lib/i18n/index.js';
 import { LocalizedError } from '#lib/localized-error.js';
+import { httpStatus } from '#lib/http-status.js';
 import { DEMO_LIFETIME_MS } from '#lib/field-contract.js';
 import { stampMs } from '#lib/time.js';
 
@@ -16,23 +16,24 @@ import { stampMs } from '#lib/time.js';
  * message is the visitor's copy.
  */
 export async function startDemo(): Promise<void> {
-	const res = await fetch('/api/demo/start', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ lang: getLocale() })
-	}).catch(() => null);
-	if (!res?.ok) {
-		const key =
-			res?.status === 429
-				? 'demo_start_too_many'
-				: res?.status === 503
-					? 'demo_start_full'
-					: 'demo_start_failed';
-		throw new LocalizedError(t(key));
-	}
-	const data = (await res.json()) as { token: string; record: RecordModel };
+	const data = await pb
+		.send<{ token: string; record: RecordModel }>('/api/demo/start', {
+			method: 'POST',
+			body: { lang: getLocale() }
+		})
+		.catch((e: unknown) => {
+			const status = httpStatus(e);
+			throw new LocalizedError(
+				t(
+					status === 429
+						? 'demo_start_too_many'
+						: status === 503
+							? 'demo_start_full'
+							: 'demo_start_failed'
+				)
+			);
+		});
 	pb.authStore.save(data.token, data.record);
-	syncAuthState();
 }
 
 /** When the signed-in demo account is deleted, or null when unknown. */

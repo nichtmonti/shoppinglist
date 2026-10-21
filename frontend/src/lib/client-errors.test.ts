@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('#lib/pb.js', async () => (await import('#lib/test-kit/pb-mock.js')).pbModuleMock());
 
@@ -21,7 +21,6 @@ describe('client error reporting', () => {
 		assign = vi.fn();
 		vi.stubGlobal('location', { assign });
 	});
-	afterEach(() => vi.unstubAllGlobals());
 
 	it('describes an Error by name and message, anything else as a string', () => {
 		expect(describeError(new TypeError('x is undefined')).message).toBe(

@@ -2,7 +2,7 @@
 // "a match with no name is not usable" edge case, and transport-error
 // resilience. No DOM, no Dexie — the transport is injected (LookupTransport),
 // same shape as #lib/sync/push.ts's PushTransport.
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { authStore } = vi.hoisted(() => ({ authStore: { token: '' } }));
 vi.mock('#lib/pb.js', async () =>
@@ -115,10 +115,6 @@ describe('lookupBarcode default transport', () => {
 				json: () => Promise.resolve({ name: 'Nutella' })
 			})
 		);
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
 	});
 
 	it('sends the PocketBase auth token as a bearer header', async () => {

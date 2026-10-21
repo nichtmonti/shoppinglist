@@ -255,9 +255,7 @@ test.describe('as an iPhone', () => {
 		for (const name of ['Tomate', 'Kartoffel', 'Zwiebel', 'Butter', 'Joghurt', 'Käse', 'Quark']) {
 			await addItemByTyping(page, name);
 		}
-		await expect
-			.poll(async () => page.locator('[data-testid="row"]').count(), { timeout: 15_000 })
-			.toBe(7);
+		await expect(page.locator('[data-testid="row"]')).toHaveCount(7, { timeout: 15_000 });
 		const rowsBeforeTap = await page.locator('[data-testid="row"]').count();
 
 		// A name not on the list, so the pick adds a row rather than jumping to one.

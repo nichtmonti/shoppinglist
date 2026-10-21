@@ -44,7 +44,6 @@ beforeEach(async () => {
 });
 afterEach(() => {
 	vi.restoreAllMocks();
-	vi.unstubAllGlobals();
 });
 
 // --- W5 ------------------------------------------------------------------
@@ -70,10 +69,11 @@ it('[W5] a tab waiting for the leadership lock sends nothing', async () => {
 		}))
 	}));
 	const digestTransport = vi.fn(async () => []);
+	vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 	const stop = startSyncLoop({ ...emptyDeps(), digestTransport, drain: { transport } });
 	try {
-		// Comfortably past the 500ms drain debounce.
-		await new Promise((resolve) => setTimeout(resolve, 1200));
+		// Past the 500ms drain debounce, on the fake clock.
+		await vi.advanceTimersByTimeAsync(1200);
 		// Only the leadership request counts: every tab also holds the shared
 		// visibility lock while on screen ([D-164]), which grants no work.
 		expect(locks.request.mock.calls.filter(([name]) => name === 'sync-leader')).toHaveLength(1);
@@ -83,6 +83,7 @@ it('[W5] a tab waiting for the leadership lock sends nothing', async () => {
 		// And the work is not lost: it waits for whoever holds the lock.
 		expect(await db.pending_ops.count()).toBe(1);
 	} finally {
+		vi.useRealTimers();
 		stop();
 	}
 });

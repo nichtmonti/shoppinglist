@@ -32,13 +32,13 @@ and the "Dashboard" line (the dashboard is off and answers 404).
 In the devcontainer (it has Go and node):
 
 ```sh
-scripts/build-demo.sh                 # backend/shoppinglist-demo, linux/amd64
-GOARCH=arm64 scripts/build-demo.sh    # for an arm64 server
+task build-demo                 # backend/shoppinglist-demo, linux/amd64
+GOARCH=arm64 task build-demo    # for an arm64 server
 ```
 
 One static file with the demo's SPA inside. The release's normal image and
 binaries contain none of it (`backend/deps_arch_test.go` and
-`scripts/build-embedded-spa.sh` check that).
+`task build-spa` check that).
 
 ## Configure
 

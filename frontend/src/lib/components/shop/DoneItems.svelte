@@ -31,7 +31,6 @@
 	const acceptTap = createTapGuard();
 	// Open by default, so a restore is one tap.
 	let doneOpen = $state(true);
-	const doneListId = $props.id();
 
 	// A restored row leaves this section with its focus: the next row gets it,
 	// else the one before, else the section's head (WCAG 2.4.3), as a ticked
@@ -57,45 +56,42 @@
 			label={t('shop_done_section')}
 			count={items.length}
 			bind:open={doneOpen}
-			controls={doneListId}
-		/>
-		<RuledRows
-			id={doneListId}
-			inset="var(--row-rule-inset)"
-			class="done-list pb-2.5"
-			hidden={!doneOpen}
 		>
-			{#each items as item (item.id)}
-				{@const cat = categoryOf(item, categories)}
-				<button
-					type="button"
-					animate:flipNear={{ duration: dur(ROW_FLIP_MS), easing: cubicOut }}
-					class="done-row flex min-h-13 w-full items-center gap-3 px-(--row-gutter) py-2 text-muted-foreground press-row"
-					data-testid="done-row"
-					onclick={(event) => restore(item, event)}
-					aria-label={t('shop_restore_tile', {
-						name: spokenName([displayName(item), item.quantity])
-					})}
-				>
-					<CategoryPlate
-						icon={cat?.icon}
-						size="item"
-						class="grayscale-35 opacity-85"
-						style={cat ? categoryStyle(cat.color) : undefined}
-					/>
-					<!-- Two lines: a done row has no door to read a cut name in full. -->
-					<span
-						class="min-w-0 flex-1 text-sm font-book line-clamp-2 wrap-anywhere hyphens-auto text-start"
-						dir="auto">{displayName(item)}</span
-					>
-					<QuantityBadge quantity={item.quantity} variant="plain" />
-					<Check
-						class="dc size-5 shrink-0 text-primary-text"
-						strokeWidth={2.4}
-						aria-hidden="true"
-					/>
-				</button>
-			{/each}
-		</RuledRows>
+			{#snippet content(props)}
+				<RuledRows {...props} inset="var(--row-rule-inset)" class="done-list pb-2.5">
+					{#each items as item (item.id)}
+						{@const cat = categoryOf(item, categories)}
+						<button
+							type="button"
+							animate:flipNear={{ duration: dur(ROW_FLIP_MS), easing: cubicOut }}
+							class="done-row flex min-h-13 w-full items-center gap-3 px-(--row-gutter) py-2 text-muted-foreground press-row"
+							data-testid="done-row"
+							onclick={(event) => restore(item, event)}
+							aria-label={t('shop_restore_tile', {
+								name: spokenName([displayName(item), item.quantity])
+							})}
+						>
+							<CategoryPlate
+								icon={cat?.icon}
+								size="item"
+								class="grayscale-35 opacity-85"
+								style={cat ? categoryStyle(cat.color) : undefined}
+							/>
+							<!-- Two lines: a done row has no door to read a cut name in full. -->
+							<span
+								class="min-w-0 flex-1 text-sm font-book line-clamp-2 wrap-anywhere hyphens-auto text-start"
+								dir="auto">{displayName(item)}</span
+							>
+							<QuantityBadge quantity={item.quantity} variant="plain" />
+							<Check
+								class="dc size-5 shrink-0 text-primary-text"
+								strokeWidth={2.4}
+								aria-hidden="true"
+							/>
+						</button>
+					{/each}
+				</RuledRows>
+			{/snippet}
+		</SectionToggle>
 	</section>
 {/if}

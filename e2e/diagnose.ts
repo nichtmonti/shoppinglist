@@ -253,23 +253,14 @@ async function report(page: Page, testInfo: TestInfo, reason: string, file: stri
 }
 
 /**
- * Watches `page` for one test: a watchdog writes a diagnosis 20 s before the
- * test's timeout (a test that times out loses its page), and the returned
- * function writes one if the test failed. Call it at the end of the test.
+ * Watches `page` for one test; the returned function writes a diagnosis if the
+ * test failed. Call it after the test, from a fixture's teardown or an
+ * afterEach: Playwright runs those after a timeout too, page still open.
  */
 export function guardTest(page: Page, testInfo: TestInfo): () => Promise<void> {
 	watchPage(page);
-	const t0 = Date.now();
-	let fired = false;
-	const timer = setInterval(() => {
-		const budget = testInfo.timeout;
-		if (fired || budget <= 0 || Date.now() - t0 < budget - 20_000) return;
-		fired = true;
-		void report(page, testInfo, 'the test is about to time out', 'page-diagnosis-watchdog.md');
-	}, 1_000);
 	return async () => {
-		clearInterval(timer);
-		if (testInfo.status !== testInfo.expectedStatus && !fired) {
+		if (testInfo.status !== testInfo.expectedStatus) {
 			await report(page, testInfo, `the test ended ${testInfo.status}`, 'page-diagnosis.md');
 		}
 	};

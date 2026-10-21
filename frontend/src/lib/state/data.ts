@@ -3,6 +3,7 @@
 import {
 	db,
 	getMeta,
+	ownMembership,
 	type Item,
 	type ItemDictionary,
 	type ListCategory,
@@ -149,10 +150,7 @@ export function listRoster(listId: string) {
 export function listMembership(listId: string): LiveStore<MyList | undefined> {
 	return live<MyList | undefined>(
 		async () => {
-			const [m, list] = await Promise.all([
-				db.memberships.where('list').equals(listId).first(),
-				db.lists.get(listId)
-			]);
+			const [m, list] = await Promise.all([ownMembership(listId), db.lists.get(listId)]);
 			return m && myList(m, list);
 		},
 		undefined,

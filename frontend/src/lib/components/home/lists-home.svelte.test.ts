@@ -490,11 +490,11 @@ describe('ListsHome ordering modes', () => {
 		await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId('list-sort')));
 	});
 
-	// [D-237] On a touchscreen svelte-dnd-action swallows the tap's click, so
-	// the grip reads the tap off its pointer events; a mouse clicks right
-	// after them, and that click must not count the same tap twice. A screen
-	// reader's double-tap is a lone click, which must still toggle.
-	it('shows the arrows for a touch tap on the grip, which brings no click', async () => {
+	// [D-237] A touch on the grip is svelte-dnd-action's: its touchstart
+	// cancels the browser's click, and it sends one itself when the touch ends
+	// without a drag. That click, and a mouse's or a screen reader's, toggles
+	// the arrows once.
+	it('shows the arrows for a touch tap on the grip', async () => {
 		await putMyList('list-a', 'Zucker');
 		await putMyList('list-b', 'Äpfel');
 		render(ListsHome);
@@ -503,24 +503,16 @@ describe('ListsHome ordering modes', () => {
 		await fireEvent.click(await screen.findByRole('menuitem', { name: 'Reihenfolge ändern' }));
 		const grip = await screen.findByRole('button', { name: 'Äpfel verschieben' });
 		const arrows = () => screen.queryAllByRole('button', { name: /^Äpfel nach (oben|unten)$/ });
-		const nextTask = () => new Promise((resolve) => setTimeout(resolve));
 
-		// A finger: down and up in place, and no click.
-		await fireEvent.pointerDown(grip, { clientX: 20, clientY: 20, pointerType: 'touch' });
-		await fireEvent.pointerUp(grip, { clientX: 21, clientY: 20, pointerType: 'touch' });
+		// A finger: down and up in place, and no click of the browser's.
+		await fireEvent.touchStart(grip, { touches: [{ clientX: 20, clientY: 20 }] });
+		await fireEvent.touchEnd(grip, { touches: [] });
 		expect(arrows()).toHaveLength(2);
 		expect(grip.getAttribute('aria-pressed')).toBe('true');
 
-		// A screen reader's double-tap, later: a click alone puts them away.
-		await nextTask();
+		// A screen reader's double-tap, or a mouse: a click puts them away.
 		await fireEvent.click(grip);
 		expect(arrows()).toHaveLength(0);
-
-		// A mouse: the click that follows its pointer events is the same tap.
-		await fireEvent.pointerDown(grip, { clientX: 20, clientY: 20, pointerType: 'mouse' });
-		await fireEvent.pointerUp(grip, { clientX: 20, clientY: 20, pointerType: 'mouse' });
-		await fireEvent.click(grip);
-		expect(arrows()).toHaveLength(2);
 	});
 
 	// The mode is a history entry: the system back closes it (on the home, the
@@ -589,7 +581,11 @@ describe('ListsHome ordering modes', () => {
 			new CustomEvent('finalize', {
 				bubbles: true,
 				detail: {
-					items: [{ id: 'list-c' }, { id: 'list-b' }, { id: 'list-a' }],
+					items: [
+						{ id: 'list-c', row: { list: 'list-c', name: 'Banane' } },
+						{ id: 'list-b', row: { list: 'list-b', name: 'Äpfel' } },
+						{ id: 'list-a', row: { list: 'list-a', name: 'Zucker' } }
+					],
 					info: { trigger: 'droppedIntoZone', id: 'list-c', source: 'pointer' }
 				}
 			})
@@ -611,19 +607,23 @@ describe('ListsHome ordering modes', () => {
 		await waitFor(() => expect(document.querySelectorAll('.arrange-row')).toHaveLength(3));
 
 		// What svelte-dnd-action dispatches the moment 'Äpfel' leaves the list:
-		// the grabbed item is replaced by a SHADOW item — a placeholder id plus
-		// the marker — and that shadow is the hole the row drops into. Mirroring
-		// the event down to bare ids would drop it, and the list would close up
-		// with nowhere to land until the drag crossed into another index.
+		// the grabbed item is replaced by a SHADOW item — a copy of it under a
+		// placeholder id, plus the marker — and that shadow is the hole the row
+		// drops into. Losing it, the list would close up with nowhere to land
+		// until the drag crossed into another index.
 		await fireEvent(
 			document.querySelector('.arrange-list') as Element,
 			new CustomEvent('consider', {
 				bubbles: true,
 				detail: {
 					items: [
-						{ id: 'list-a' },
-						{ id: SHADOW_PLACEHOLDER_ITEM_ID, [SHADOW_ITEM_MARKER_PROPERTY_NAME]: true },
-						{ id: 'list-c' }
+						{ id: 'list-a', row: { list: 'list-a', name: 'Zucker' } },
+						{
+							id: SHADOW_PLACEHOLDER_ITEM_ID,
+							row: { list: 'list-b', name: 'Äpfel' },
+							[SHADOW_ITEM_MARKER_PROPERTY_NAME]: true
+						},
+						{ id: 'list-c', row: { list: 'list-c', name: 'Banane' } }
 					],
 					info: { trigger: 'dragStarted', id: 'list-b', source: 'pointer' }
 				}
@@ -720,7 +720,7 @@ describe('ListsHome leave (§7.2)', () => {
 
 		// The old native-dialog path could only fire a toast at an already-closed
 		// prompt; the sheet has to survive its own failure so the user can retry.
-		await waitFor(() => expect(within(dialog).getByRole('alert')).toBeDefined());
+		expect(await within(dialog).findByRole('alert')).toBeDefined();
 		expect(screen.getByRole('alertdialog', { name: 'Liste verlassen' })).toBeDefined();
 	});
 
@@ -837,8 +837,8 @@ describe('ListsHome clone/export menu', () => {
 describe('ListsHome create/join/rename dialogs', () => {
 	it('creates a list from the in-app prompt rather than a native dialog', async () => {
 		// happy-dom has no native dialogs at all; give it one to spy on.
-		if (typeof window.prompt !== 'function') Object.assign(window, { prompt: () => null });
-		const promptSpy = vi.spyOn(window, 'prompt');
+		const promptSpy = vi.fn(() => null);
+		vi.stubGlobal('prompt', promptSpy);
 		vi.mocked(createList).mockResolvedValueOnce('list-new');
 		await putMyList('list-a', 'Alltag');
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
@@ -854,7 +854,6 @@ describe('ListsHome create/join/rename dialogs', () => {
 		// Trimmed on the way out, exactly as the prompt path did.
 		await waitFor(() => expect(vi.mocked(createList)).toHaveBeenCalledWith('Wocheneinkauf'));
 		expect(promptSpy).not.toHaveBeenCalled();
-		promptSpy.mockRestore();
 	});
 
 	// [D-325] The button stays enabled and says what is missing.
@@ -912,8 +911,8 @@ describe('ListsHome create/join/rename dialogs', () => {
 
 	it('asks for the invite in-app instead of via window.prompt', async () => {
 		// happy-dom has no native dialogs at all; give it one to spy on.
-		if (typeof window.prompt !== 'function') Object.assign(window, { prompt: () => null });
-		const promptSpy = vi.spyOn(window, 'prompt');
+		const promptSpy = vi.fn(() => null);
+		vi.stubGlobal('prompt', promptSpy);
 		await putMyList('list-a', 'Alltag');
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
 
@@ -927,7 +926,6 @@ describe('ListsHome create/join/rename dialogs', () => {
 		const dialog = await screen.findByRole('dialog', { name: 'Mit Einladung beitreten' });
 		expect(within(dialog).getByLabelText('Einladungslink oder Code')).toBeDefined();
 		expect(promptSpy).not.toHaveBeenCalled();
-		promptSpy.mockRestore();
 	});
 });
 
@@ -961,14 +959,14 @@ describe('ListsHome — the sync chip rides in the home app bar ([D-130])', () =
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
 		render(ListsHome);
 
-		await waitFor(() => expect(screen.getByText('Wocheneinkauf')).toBeDefined());
+		expect(await screen.findByText('Wocheneinkauf')).toBeDefined();
 		expect(chip()).not.toBeNull();
 	});
 
 	it('carries it in the zero-list state too, where there is no list to open', async () => {
 		render(ListsHome);
 
-		await waitFor(() => expect(screen.getByText('Willkommen!')).toBeDefined());
+		expect(await screen.findByText('Willkommen!')).toBeDefined();
 		expect(chip()).not.toBeNull();
 	});
 });
@@ -984,7 +982,7 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 	it('says it is loading and offers no create/join until the pull answers', async () => {
 		render(ListsHome);
 
-		await waitFor(() => expect(screen.getByText('Deine Listen werden geladen …')).toBeDefined());
+		expect(await screen.findByText('Deine Listen werden geladen …')).toBeDefined();
 		expect(screen.queryByText('Willkommen!')).toBeNull();
 		expect(screen.queryByRole('button', { name: 'Neue Liste' })).toBeNull();
 		expect(screen.queryByRole('button', { name: 'Mit Einladung beitreten' })).toBeNull();
@@ -995,22 +993,22 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 
 	it('shows the lists as soon as they arrive, before the cycle is stamped', async () => {
 		render(ListsHome);
-		await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+		expect(await screen.findByTestId('home-loading')).toBeDefined();
 
 		await putMyList('list-a', 'Wocheneinkauf');
 		await putList('list-a', '2026-01-01T00:00:00.000Z');
 
-		await waitFor(() => expect(screen.getByText('Wocheneinkauf')).toBeDefined());
+		expect(await screen.findByText('Wocheneinkauf')).toBeDefined();
 		expect(screen.queryByTestId('home-loading')).toBeNull();
 	});
 
 	it('turns into the welcome screen once an empty pull is recorded', async () => {
 		render(ListsHome);
-		await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+		expect(await screen.findByTestId('home-loading')).toBeDefined();
 
 		await markPulled();
 
-		await waitFor(() => expect(screen.getByText('Willkommen!')).toBeDefined());
+		expect(await screen.findByText('Willkommen!')).toBeDefined();
 		expect(screen.queryByTestId('home-loading')).toBeNull();
 	});
 
@@ -1035,7 +1033,7 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 		it('asks for the re-auth instead of loading forever', async () => {
 			render(ListsHome);
 
-			await waitFor(() => expect(screen.getByTestId('home-expired')).toBeDefined());
+			expect(await screen.findByTestId('home-expired')).toBeDefined();
 			expect(screen.queryByTestId('home-loading')).toBeNull();
 			// One way to sign in, not two: the chip's action is the prompt's button.
 			expect(screen.getAllByRole('button', { name: /anmelden/ })).toHaveLength(1);
@@ -1047,7 +1045,7 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 			online.set(false);
 			render(ListsHome);
 
-			await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+			expect(await screen.findByTestId('home-loading')).toBeDefined();
 			expect(screen.queryByTestId('home-expired')).toBeNull();
 		});
 	});
@@ -1056,12 +1054,12 @@ describe('ListsHome before the first membership pull ([D-182])', () => {
 		vi.useFakeTimers({ shouldAdvanceTime: true });
 		try {
 			render(ListsHome);
-			await waitFor(() => expect(screen.getByTestId('home-loading')).toBeDefined());
+			expect(await screen.findByTestId('home-loading')).toBeDefined();
 			expect(screen.queryByText(/länger als üblich/)).toBeNull();
 
 			await vi.advanceTimersByTimeAsync(8000);
 
-			await waitFor(() => expect(screen.getByText(/länger als üblich/)).toBeDefined());
+			expect(await screen.findByText(/länger als üblich/)).toBeDefined();
 		} finally {
 			vi.useRealTimers();
 		}

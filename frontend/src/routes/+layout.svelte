@@ -71,16 +71,6 @@
 	);
 
 	onMount(() => {
-		// Mobile Safari applies `:active` to non-anchors only when the document
-		// has a touch listener; without it the tile press-scale does nothing on
-		// an iPhone. Empty on purpose.
-		document.addEventListener('touchstart', () => {}, { passive: true });
-
-		// §6.11 [D-137]: a suggestion hidden or restored offline is delivered when
-		// the connection comes back, not only at the next app start.
-		const onOnline = () => void suppression().then(({ flushSuppressed }) => flushSuppressed());
-		window.addEventListener('online', onOnline);
-
 		// Read the list-view pref from boot, so opening a list from the home
 		// finds it already answered rather than waiting a frame on it ([D-196]).
 		const unsubscribeView = listView.subscribe(() => {});
@@ -114,7 +104,6 @@
 			);
 		})();
 		return () => {
-			window.removeEventListener('online', onOnline);
 			unsubscribeView();
 			stopInstall();
 		};
@@ -142,10 +131,14 @@
 	// The browser bar follows the app's light/dark choice, not only the phone's.
 	$effect(() => followThemeChoice(userPrefersMode.current));
 
-	// The engine follows the session, not the route. `mountSync` is idempotent, so
-	// re-running this effect (e.g. on a token refresh) cannot start a second loop.
+	// Whether a session is valid, as its own signal: `$authState` is a new
+	// object on every set, and Svelte counts a store's object as changed each
+	// time, so effects reading it directly re-ran on every token save.
+	const sessionValid = $derived($authState.isValid);
+
+	// The engine follows the session, not the route.
 	$effect(() => {
-		if ($authState.isValid) mountSync(noticeToasts);
+		if (sessionValid) mountSync(noticeToasts);
 		else unmountSync();
 	});
 
@@ -173,7 +166,7 @@
 	// would not unhide it (§6.11). The refresh then delivers what a 401 held
 	// ([D-137]).
 	$effect(() => {
-		if ($authState.isValid)
+		if (sessionValid)
 			void suppression()
 				.then(({ refreshSuppressedMirror }) => refreshSuppressedMirror())
 				.catch(() => {});
@@ -182,8 +175,21 @@
 	onDestroy(() => unmountSync());
 </script>
 
+<!-- §6.11 [D-137]: a suggestion hidden or restored offline is delivered when
+     the connection comes back, not only at the next app start. -->
+<svelte:window
+	ononline={() => void suppression().then(({ flushSuppressed }) => flushSuppressed())}
+/>
+<!-- Mobile Safari applies `:active` to non-anchors only when the document has a
+     touch listener; without it the tile press-scale does nothing on an iPhone.
+     Empty on purpose (and passive, as Svelte makes touchstart). -->
+<svelte:document ontouchstart={() => {}} />
+
 <div class="app-shell" data-testid="app-shell">
-	<ModeWatcher />
+	<!-- static/theme.js sets the theme before the first paint; the inline head
+	     script mode-watcher would add never runs here (no SSR, and the CSP
+	     allows no inline code). -->
+	<ModeWatcher disableHeadScriptInjection />
 	{#if DemoBanner && localeLoaded && $authState.nickname !== null}<DemoBanner />{/if}
 	{#if localeLoaded && ($authState.nickname !== null || (publicRoute && booted))}
 		<svelte:boundary onerror={reportRenderError}>

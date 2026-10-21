@@ -234,12 +234,8 @@ func EmitJSON(w io.Writer, groups []Group, live map[string]bool) error {
 		if !ok {
 			continue // no live category — appendseed would reject the item
 		}
-		en := g.RawName
-		if en == "" {
-			en = g.Name // defensive: a Group not built by Suggestions still yields a valid name
-		}
 		doc.Items = append(doc.Items, candidates.Item{
-			NamesI18n:       candidates.LocaleNames{En: []string{en}},
+			NamesI18n:       candidates.LocaleNames{En: []string{g.RawName}},
 			DefaultCategory: slug,
 		})
 	}
@@ -255,6 +251,7 @@ func NewCommand(app core.App) *cobra.Command {
 	asJSON := false
 	cmd := &cobra.Command{
 		Use:   "dictionary-suggestions",
+		Args:  cobra.NoArgs,
 		Short: "Print usage-derived item_dictionary candidates (read-only, §6.13)",
 		Long: "Scans non-deleted items across all lists for names with no match in " +
 			"item_dictionary, groups them by normalized name, and prints those seen on " +

@@ -180,8 +180,6 @@ func TestAppendJSONEntryHandlesEmptyArray(t *testing.T) {
 // bumpSeedVersion increments the constant and leaves the rest of the file untouched.
 func TestBumpSeedVersionIncrements(t *testing.T) {
 	dir := t.TempDir()
-	origWD, _ := os.Getwd()
-	defer func() { _ = os.Chdir(origWD) }()
 
 	seedDir := filepath.Join(dir, "seed")
 	if err := os.MkdirAll(seedDir, 0o755); err != nil {
@@ -191,9 +189,7 @@ func TestBumpSeedVersionIncrements(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(seedDir, "seed.go"), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
+	t.Chdir(dir)
 
 	next, err := bumpSeedVersion()
 	if err != nil {

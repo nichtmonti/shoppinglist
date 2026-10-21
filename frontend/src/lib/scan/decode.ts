@@ -6,53 +6,43 @@
 // WASM loading:
 // 1. Left unconfigured, the ponyfill fetches its .wasm from the jsDelivr CDN.
 //    ensureLocalWasm points it at a same-origin, SW-cacheable copy instead.
-// 2. `setZXingModuleOverrides` MUST come from `barcode-detector/ponyfill`: it
-//    inlines its own copy of zxing-wasm's reader, with its own override state,
-//    so overriding via `zxing-wasm/reader` has no effect.
+// 2. `prepareZXingModule` MUST come from `barcode-detector/ponyfill`: it
+//    inlines its own copy of zxing-wasm's reader, with its own module state,
+//    so preparing via `zxing-wasm/reader` has no effect.
 // 3. The .wasm bytes come from the `zxing-wasm` package via `?url`, which MUST
 //    be the exact version the ponyfill inlines its glue from: any other build
 //    makes every detect() throw "memory access out of bounds" ([D-21],
 //    wasm-version.test.ts).
 // 4. The .wasm is not precached ([D-95]): a first scan while offline fails
-//    silently on every detect(), which startCameraScan bounds with
-//    CameraDecodeError.
+//    to instantiate it, which ends that scan with CameraDecodeError. The
+//    ponyfill keeps a failed module as it keeps a good one, so it is purged:
+//    otherwise every later scan, online too, would fail until a reload.
 //
 // The ponyfill and the 1MB .wasm load DYNAMICALLY at the first scan, so they do
-// not ride on every route with a scan button.
+// not ride on every route with a scan button; the `?url` import is only the
+// file's address.
+import wasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url';
 
-let ponyfillModule: Promise<typeof import('barcode-detector/ponyfill')> | null = null;
-function loadPonyfill(): Promise<typeof import('barcode-detector/ponyfill')> {
-	// A rejected load must not stick: a transient chunk-fetch failure would
-	// otherwise break every later scan until reload.
-	return (ponyfillModule ??= import('barcode-detector/ponyfill').catch((err: unknown) => {
-		ponyfillModule = null;
-		throw err;
-	}));
-}
+// One object for the session: the ponyfill reuses its module while the
+// overrides it is given are the same, and instantiates again when they differ.
+const overrides = {
+	locateFile: (path: string, prefix: string) => (path.endsWith('.wasm') ? wasmUrl : prefix + path)
+};
 
-let wasmUrlPromise: Promise<string> | null = null;
-function loadWasmUrl(): Promise<string> {
-	return (wasmUrlPromise ??= import('zxing-wasm/reader/zxing_reader.wasm?url')
-		.then((m) => m.default)
-		.catch((err: unknown) => {
-			wasmUrlPromise = null;
-			throw err;
-		}));
-}
-
-let overrideInstalled = false;
-
-/** Idempotent: point the ponyfill's WASM loader at the bundled asset. */
-function ensureLocalWasm(
-	setZXingModuleOverrides: (typeof import('barcode-detector/ponyfill'))['setZXingModuleOverrides'],
-	wasmUrl: string
-): void {
-	if (overrideInstalled) return;
-	setZXingModuleOverrides({
-		locateFile: (path: string, prefix: string): string =>
-			path.endsWith('.wasm') ? wasmUrl : prefix + path
-	});
-	overrideInstalled = true;
+/** A detector on the bundled .wasm, instantiated once; a failed
+ *  instantiation is dropped, so the next scan tries again. */
+async function createDetector(): Promise<
+	InstanceType<typeof import('barcode-detector/ponyfill').BarcodeDetector>
+> {
+	const { BarcodeDetector, prepareZXingModule, purgeZXingModule } =
+		await import('barcode-detector/ponyfill');
+	try {
+		await prepareZXingModule({ overrides, fireImmediately: true });
+	} catch {
+		purgeZXingModule();
+		throw new CameraDecodeError();
+	}
+	return new BarcodeDetector({ formats: [...RETAIL_FORMATS] });
 }
 
 export class CameraUnsupportedError extends Error {
@@ -80,14 +70,6 @@ export function isCameraScanSupported(): boolean {
 	return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 }
 
-// E2E-ONLY hook: e2e/tests/scan.spec.ts injects a decoded value and skips
-// straight to §9.2 step 2. Only page.addInitScript sets it, never the app.
-declare global {
-	interface Window {
-		__e2eFakeBarcode?: string;
-	}
-}
-
 export interface CameraScan {
 	/** Resolves with the first decoded barcode value. Rejects with
 	 * CameraPermissionDeniedError, CameraUnsupportedError, CameraDecodeError
@@ -107,10 +89,6 @@ function stopTracks(stream: MediaStream): void {
 
 /** Starts the camera into `video` and polls frames for a barcode (§9.2 step 1). */
 export function startCameraScan(video: HTMLVideoElement): CameraScan {
-	const fake = typeof window !== 'undefined' ? window.__e2eFakeBarcode : undefined;
-	if (fake) {
-		return { result: Promise.resolve(fake), stop: () => {} };
-	}
 	if (!isCameraScanSupported()) {
 		return { result: Promise.reject(new CameraUnsupportedError()), stop: () => {} };
 	}
@@ -118,20 +96,15 @@ export function startCameraScan(video: HTMLVideoElement): CameraScan {
 	let stopped = false;
 	let stream: MediaStream | null = null;
 	let rafId: number | null = null;
-	// One failed frame is transient, but a BROKEN decoder (the .wasm never
-	// loaded) must not spin forever behind a live camera with no outcome.
+	// One failed frame is transient, but a decoder that fails frame after
+	// frame must not spin forever behind a live camera with no outcome.
 	let consecutiveDecodeErrors = 0;
 	const MAX_CONSECUTIVE_DECODE_ERRORS = 5;
 
 	const result = new Promise<string>((resolve, reject) => {
 		// In parallel, so the permission prompt does not wait for the module.
 		const media = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-		const module = Promise.all([loadPonyfill(), loadWasmUrl()]).then(
-			([{ BarcodeDetector, setZXingModuleOverrides }, wasmUrl]) => {
-				ensureLocalWasm(setZXingModuleOverrides, wasmUrl);
-				return new BarcodeDetector({ formats: [...RETAIL_FORMATS] });
-			}
-		);
+		const module = createDetector();
 		// Held as soon as it resolves, so stop() and the failure path can release
 		// it whatever happens to the decoder.
 		media.then(

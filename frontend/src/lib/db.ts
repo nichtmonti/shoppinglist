@@ -171,8 +171,6 @@ export interface MetaValues {
 	list_order: string[];
 	locale: Locale;
 	install_prompt_dismissed: boolean;
-	// One per list: #lib/actions/invites's token cache ([D-148]).
-	[key: `invite_token_${string}`]: { id: string; token: string };
 }
 export type MetaKey = keyof MetaValues;
 
@@ -307,6 +305,11 @@ export class AppDB extends Dexie {
 					if (row.value === 'rows') row.value = 'list';
 				})
 		);
+		// v8: the invite tokens this device once cached for the links it minted
+		// go; the server keeps a live link's token ([D-294]).
+		this.version(8).upgrade((tx) =>
+			tx.table('meta').where('key').startsWith('invite_token_').delete()
+		);
 	}
 }
 
@@ -355,6 +358,13 @@ export function listDataTables() {
 export async function getMeta<K extends MetaKey>(key: K): Promise<MetaValues[K] | undefined> {
 	const row = await db.meta.get(key);
 	return row?.value as MetaValues[K] | undefined;
+}
+
+/** This device's membership row for a list, the newest: one left and
+ *  re-joined on another device has a second, stale row here until the next
+ *  sync drops it. */
+export async function ownMembership(listId: string): Promise<Membership | undefined> {
+	return (await db.memberships.where('list').equals(listId).sortBy('updated')).at(-1);
 }
 
 export async function setMeta<K extends MetaKey>(key: K, value: MetaValues[K]): Promise<void> {

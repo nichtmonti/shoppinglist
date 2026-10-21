@@ -11,6 +11,7 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
+	pbsecurity "github.com/pocketbase/pocketbase/tools/security"
 	"github.com/pocketbase/pocketbase/tools/types"
 
 	"shoppinglist/internal/randid"
@@ -84,7 +85,7 @@ func TestMintReturnsUsableToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("find minted invite: %v", err)
 	}
-	if stored.GetString("token_hash") != randid.HashToken(out.Token) {
+	if stored.GetString("token_hash") != pbsecurity.SHA256(out.Token) {
 		t.Error("stored token_hash does not match the issued token")
 	}
 	if stored.GetString("token") != out.Token {
@@ -126,7 +127,7 @@ func TestMintStampsServerOwnedFields(t *testing.T) {
 	if rec.GetBool("revoked") {
 		t.Error("revoked was taken from the request body")
 	}
-	if rec.GetString("token_hash") != randid.HashToken(out.Token) {
+	if rec.GetString("token_hash") != pbsecurity.SHA256(out.Token) {
 		t.Error("token_hash was taken from the request body")
 	}
 

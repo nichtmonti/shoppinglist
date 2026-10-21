@@ -15,7 +15,8 @@ const STOCK: Record<keyof typeof THEME_SCALES, RegExp> = {
 	text: /^(xs|sm|base|lg|[2-9]?xl)$/,
 	radius: /^(xs|sm|md|lg|[2-4]?xl|none|full)$/,
 	'font-weight': /^(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)$/,
-	leading: /^(none|tight|snug|normal|relaxed|loose|\d+)$/
+	leading: /^(none|tight|snug|normal|relaxed|loose|\d+)$/,
+	shadow: /^(2xs|xs|sm|md|lg|xl|2xl|none|inner)$/
 };
 
 function declaredNames(scale: keyof typeof THEME_SCALES): string[] {
@@ -31,6 +32,11 @@ describe('cn: tailwind-merge knows the project theme', () => {
 			expect([...THEME_SCALES[scale]].sort()).toEqual(declaredNames(scale));
 		});
 	}
+
+	it('reads a theme shadow as a shadow, not a shadow colour', () => {
+		expect(cn('shadow-pop shadow-none')).toBe('shadow-none');
+		expect(cn('shadow-pop shadow-black/10')).toBe('shadow-pop shadow-black/10');
+	});
 
 	it('keeps a custom text size next to a text colour', () => {
 		expect(cn('text-micro text-muted-foreground')).toBe('text-micro text-muted-foreground');

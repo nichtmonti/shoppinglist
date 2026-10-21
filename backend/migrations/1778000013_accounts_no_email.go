@@ -12,8 +12,9 @@
 // it was ever issued).
 //
 // The `email` column itself stays: it is a system field of PocketBase auth
-// collections and cannot be removed. It remains empty and, through the §11
-// accounts guard, unwritable from the client.
+// collections and cannot be removed. It remains empty and, through
+// PocketBase's own rule for an auth record's email, unwritable from the
+// client.
 
 package migrations
 

@@ -116,7 +116,9 @@ describe('AuthScreen', () => {
 	});
 	it('renders the thrown ceremony message when registration fails', async () => {
 		vi.mocked(register).mockRejectedValue(
-			new LocalizedError('Dieser Passkey ist bereits registriert.')
+			new LocalizedError(
+				'Für diesen Spitznamen ist auf diesem Gerät schon ein Passkey gespeichert.'
+			)
 		);
 		await renderAuth();
 
@@ -124,7 +126,9 @@ describe('AuthScreen', () => {
 		await fireEvent.click(screen.getByRole('button', { name: 'Konto erstellen' }));
 
 		await waitFor(() =>
-			expect(screen.getByRole('alert').textContent).toBe('Dieser Passkey ist bereits registriert.')
+			expect(screen.getByRole('alert').textContent).toBe(
+				'Für diesen Spitznamen ist auf diesem Gerät schon ein Passkey gespeichert.'
+			)
 		);
 	});
 
@@ -164,6 +168,21 @@ describe('AuthScreen — discovering an existing passkey', () => {
 		await renderAuth();
 
 		await waitFor(() => expect(vi.mocked(login)).toHaveBeenCalledWith({ conditional: true }));
+	});
+
+	// A screen that left before its methods arrived (a sign-in another way, a
+	// navigation) starts no offer that nothing would cancel.
+	it('starts no ceremony when the screen left before its methods arrived', async () => {
+		let answer!: (methods: ReturnType<typeof defaultAuthMethods>) => void;
+		vi.mocked(fetchAuthMethods).mockReturnValue(new Promise((r) => (answer = r)));
+		const { unmount } = render(AuthScreen);
+
+		unmount();
+		answer(defaultAuthMethods());
+		await waitFor(() => expect(vi.mocked(canUsePasskeyAutofill)).toHaveBeenCalled());
+		await tick();
+
+		expect(vi.mocked(login)).not.toHaveBeenCalled();
 	});
 
 	// The autofill dropdown binds to an input whose `autocomplete` ENDS in

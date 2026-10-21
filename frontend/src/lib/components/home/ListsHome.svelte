@@ -55,6 +55,7 @@
 	// has nothing to arrange, so it ends below two (a leave elsewhere).
 	let arrangeOpen = $derived(modeOpen('arrange-lists') && rows.length > 1);
 	let heading = $state<HTMLElement>();
+	let sortTrigger = $state<HTMLElement | null>(null);
 
 	async function startArranging(): Promise<void> {
 		if (mode !== 'custom') {
@@ -72,11 +73,7 @@
 		const open = arrangeOpen;
 		if (open === wasOpen) return;
 		wasOpen = open;
-		void tick().then(() =>
-			requestAnimationFrame(() =>
-				(open ? heading : document.querySelector<HTMLElement>('[data-testid="list-sort"]'))?.focus()
-			)
-		);
+		void tick().then(() => requestAnimationFrame(() => (open ? heading : sortTrigger)?.focus()));
 	});
 
 	// Keep the custom order aware of every membership: a new list slots to the
@@ -159,7 +156,10 @@
 			     one way out, "Fertig", so neither shows. -->
 			{#if !arrangeOpen}
 				{#if rows.length > 0}
-					<ListSort onarrange={rows.length > 1 ? () => void startArranging() : undefined} />
+					<ListSort
+						bind:trigger={sortTrigger}
+						onarrange={rows.length > 1 ? () => void startArranging() : undefined}
+					/>
 				{/if}
 				{@render settingsLink()}
 			{/if}

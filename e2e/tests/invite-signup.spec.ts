@@ -1,7 +1,6 @@
-import { readFileSync } from 'node:fs';
 import { expect, test, type Browser, type Page } from './fixtures';
 import { addVirtualAuthenticator, createList, inviteLinkFor } from './helpers';
-import { inviteOnlyServer } from '../server';
+import { INVITE_PORT } from '../server';
 
 // [D-241] SHOPPINGLIST_SIGNUP=invite, end to end on a real server
 // (playwright.config.ts boots it beside the suite's own, with an empty
@@ -13,20 +12,12 @@ import { inviteOnlyServer } from '../server';
 // account, so a second attempt against the same server could only fail.
 test.describe.configure({ mode: 'serial', retries: 0 });
 
-const SERVER = inviteOnlyServer();
+const ORIGIN = `http://localhost:${INVITE_PORT}`;
 
-/** The setup link from the server's boot log. */
-async function setupLink(): Promise<string> {
-	let link = '';
-	await expect
-		.poll(
-			() => {
-				link = readFileSync(SERVER.log, 'utf8').match(/https?:\/\/\S+\/#setup=[\w-]+/)?.[0] ?? '';
-				return link;
-			},
-			{ message: `no setup link in ${SERVER.log}`, timeout: 30_000 }
-		)
-		.not.toBe('');
+/** The setup link from the server's boot log (inviteOnlyServer). */
+function setupLink(): string {
+	const link = process.env.SETUP_LINK;
+	if (!link) throw new Error('no setup link: the invite-only server printed none');
 	return link;
 }
 
@@ -45,22 +36,22 @@ test('the first account by the setup link, the next by a list invite, none witho
 	browser
 }) => {
 	const stranger = await newDevice(browser);
-	await stranger.goto(SERVER.origin + '/');
+	await stranger.goto(ORIGIN + '/');
 	await expect(stranger.getByText(/nur mit einem Einladungslink/)).toBeVisible();
 	await expect(stranger.getByRole('button', { name: 'Konto erstellen' })).toHaveCount(0);
 
-	const link = await setupLink();
-	expect(link.startsWith(SERVER.origin + '/#setup=')).toBe(true);
+	const link = setupLink();
+	expect(link.startsWith(ORIGIN + '/#setup=')).toBe(true);
 
 	const owner = await newDevice(browser);
 	await owner.goto(link);
 	// The token leaves the address bar as soon as it is read.
-	await expect(owner).toHaveURL(SERVER.origin + '/');
+	await expect(owner).toHaveURL(ORIGIN + '/');
 	await createAccount(owner, 'Alice');
 	await expect(owner.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
 	await createList(owner, 'Familie');
 	const invite = await inviteLinkFor(owner);
-	expect(invite.startsWith(SERVER.origin + '/join#')).toBe(true);
+	expect(invite.startsWith(ORIGIN + '/join#')).toBe(true);
 
 	// The family member: the invite's preview, an account, and the list.
 	const joiner = await newDevice(browser);

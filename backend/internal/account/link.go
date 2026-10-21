@@ -90,12 +90,11 @@ func linkAccount(e *core.RequestEvent) error {
 		}
 		if !caller.Verified() {
 			// PocketBase's OAuth2 sign-in treats an unverified account as
-			// possibly pre-hijacked and marks it verified, a write the accounts
-			// guard refuses, so every later provider sign-in would fail
-			// (internal/oidc/hooks.go). Before the logins move: PocketBase's
-			// own upgrade would delete them and rotate A's token key.
+			// possibly pre-hijacked (internal/oidc/hooks.go). Verified before
+			// the logins move: PocketBase's own upgrade would delete them and
+			// rotate A's token key.
 			caller.SetVerified(true)
-			if err := tx.SaveWithContext(bypassAccountsUpdateGuard(e.Request.Context()), caller); err != nil {
+			if err := tx.Save(caller); err != nil {
 				return err
 			}
 		}

@@ -75,34 +75,10 @@
 	// The row showing its arrows; a tap on its own grip clears it.
 	let selected = $state<string | null>(null);
 
-	// svelte-dnd-action swallows a touch tap's click, so a tap is read off the
-	// pointer (up within the library's 3px). A mouse still clicks afterwards
-	// and a screen reader only clicks; `tapped` stops a double count.
-	const TAP_SLOP_PX = 3;
-	let down: { x: number; y: number } | null = null;
-	let tapped = false;
-
+	// A tap is a click: svelte-dnd-action sends one itself when a touch on the
+	// grip ends without a drag, since its touchstart cancels the browser's.
 	function toggle(key: string): void {
 		selected = selected === key ? null : key;
-	}
-
-	function handleUp(event: PointerEvent, key: string): void {
-		const start = down;
-		down = null;
-		if (!start) return;
-		if (Math.abs(event.clientX - start.x) > TAP_SLOP_PX) return;
-		if (Math.abs(event.clientY - start.y) > TAP_SLOP_PX) return;
-		toggle(key);
-		tapped = true;
-		setTimeout(() => (tapped = false));
-	}
-
-	function handleClick(key: string): void {
-		if (tapped) {
-			tapped = false;
-			return;
-		}
-		toggle(key);
 	}
 
 	async function move(event: MouseEvent, r: T, delta: -1 | 1): Promise<void> {
@@ -162,14 +138,18 @@
 						<ArrowDown class="shrink-0" />
 					</Button>
 				{/if}
+				<!-- Its keys are dragHandle's: Space or Enter starts the keyboard drag.
+				     A <button> would lose both drags, which skip clickable targets.
+				     The role and tabindex are the ones dragHandle sets at rest. -->
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
 				<span
 					use:dragHandle
+					role="button"
+					tabindex="0"
 					class="arrange-handle grid size-11 shrink-0 touch-none place-items-center rounded-control text-muted-foreground hover:text-foreground"
 					aria-label={t('arrange_drag', { name })}
 					aria-pressed={selected === key}
-					onpointerdown={(e) => (down = { x: e.clientX, y: e.clientY })}
-					onpointerup={(e) => handleUp(e, key)}
-					onclick={() => handleClick(key)}
+					onclick={() => toggle(key)}
 				>
 					<GripVertical class="size-5 shrink-0" />
 				</span>

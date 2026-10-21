@@ -59,12 +59,12 @@ func addMissingCategories(e *core.RequestEvent) error {
 			return err
 		}
 		for _, tpl := range templates {
-			if have[*tpl.Slug] {
+			if have[tpl.Slug] {
 				continue
 			}
 			rec := core.NewRecord(col)
 			rec.Set("list", listID)
-			rec.Set("slug", *tpl.Slug)
+			rec.Set("slug", tpl.Slug)
 			rec.Set("icon", tpl.Icon)
 			rec.Set("color", tpl.Color)
 			rec.Set("sort_order", next)
@@ -72,7 +72,7 @@ func addMissingCategories(e *core.RequestEvent) error {
 			if err := txApp.SaveNoValidate(rec); err != nil {
 				return err
 			}
-			added = append(added, *tpl.Slug)
+			added = append(added, tpl.Slug)
 		}
 		return nil
 	})

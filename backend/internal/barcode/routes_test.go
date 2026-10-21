@@ -43,11 +43,9 @@ func barcodeMux(t *testing.T) (core.App, http.Handler, string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// The app's headers too, so a photo's own policy is seen through them.
+	security.Register(r, nil, true)
 	RegisterRoutes(security.AppRoutes(r))
-	// Every test here builds its own router rather than testutil.NewMux, so it
-	// re-arms the per-IP budgets itself — otherwise the whole package shares
-	// one 30-per-minute lookup bucket, and whichever test runs 31st gets a 429.
-	security.ResetLimiters()
 	mux, err := r.BuildMux()
 	if err != nil {
 		t.Fatal(err)

@@ -5,9 +5,6 @@ import (
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/tools/types"
-
-	"shoppinglist/internal/randid"
 )
 
 // cloneListBody carries only the copy's name, which is required. The new
@@ -45,59 +42,41 @@ func (h handlers) cloneList(e *core.RequestEvent) error {
 
 	cats := make([]seedCategory, 0, len(sourceCats))
 	for _, rec := range sourceCats {
-		cat := seedCategory{
+		cats = append(cats, seedCategory{
 			Key:       rec.Id,
+			Slug:      rec.GetString("slug"),
+			Name:      rec.GetString("name"),
 			Icon:      rec.GetString("icon"),
 			Color:     rec.GetString("color"),
 			SortOrder: rec.GetInt("sort_order"),
-		}
-		cat.Slug = optionalText(rec, "slug")
-		cat.Name = optionalText(rec, "name")
-		cats = append(cats, cat)
+		})
 	}
 
 	items := make([]seedItem, 0, len(sourceItems))
 	for _, rec := range sourceItems {
 		item := seedItem{
-			Name:        rec.GetString("name"),
-			NameDE:      optionalText(rec, "name_de"),
-			NameEN:      optionalText(rec, "name_en"),
-			Quantity:    rec.GetString("quantity"),
-			Note:        optionalText(rec, "note"),
-			CategoryKey: optionalText(rec, "category_key"),
-			Barcode:     optionalText(rec, "barcode"),
-			Checked:     rec.GetBool("checked"),
+			Name:         rec.GetString("name"),
+			NameDE:       rec.GetString("name_de"),
+			NameEN:       rec.GetString("name_en"),
+			Quantity:     rec.GetString("quantity"),
+			Note:         rec.GetString("note"),
+			CategoryKey:  rec.GetString("category_key"),
+			Barcode:      rec.GetString("barcode"),
+			Checked:      rec.GetBool("checked"),
+			LastBoughtAt: rec.GetDateTime("last_bought_at"),
+			PrevBoughtAt: rec.GetDateTime("prev_bought_at"),
 		}
 		// checked_at only pairs with checked=true; the purchase dates are independent.
 		if item.Checked {
-			item.CheckedAt = optionalTime(rec, "checked_at")
+			item.CheckedAt = rec.GetDateTime("checked_at")
 		}
-		item.LastBoughtAt = optionalTime(rec, "last_bought_at")
-		item.PrevBoughtAt = optionalTime(rec, "prev_bought_at")
 		items = append(items, item)
 	}
 
-	listRec, err := populateList(e.App, h.caps.Lists, randid.ID(), e.Auth.Id, body.Name, cats, items)
+	listRec, err := populateList(e.App, h.caps.Lists, e.Auth.Id, body.Name, cats, items)
 	if err != nil {
 		return populateFailed(e, err, h.caps.Lists, "failed to clone list")
 	}
 
 	return e.JSON(http.StatusOK, listRec)
-}
-
-// optionalText is a text column as a seed field: nil when empty, which is how
-// PocketBase stores an unset nullable one.
-func optionalText(rec *core.Record, field string) *string {
-	if v := rec.GetString(field); v != "" {
-		return &v
-	}
-	return nil
-}
-
-// optionalTime is a date column as a seed field: nil when unset.
-func optionalTime(rec *core.Record, field string) *types.DateTime {
-	if dt := rec.GetDateTime(field); !dt.IsZero() {
-		return &dt
-	}
-	return nil
 }

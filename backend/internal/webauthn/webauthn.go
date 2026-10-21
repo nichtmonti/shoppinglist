@@ -6,7 +6,6 @@ package webauthn
 import (
 	"errors"
 	"fmt"
-	"net"
 	"net/url"
 	"strings"
 
@@ -46,9 +45,9 @@ const (
 )
 
 // FromSettings validates the Relying-Party settings. Its errors are fatal at
-// boot: with passkeys on an RP-ID that is unset or a raw IP (passkeys break on
-// either, §5.7), with passkeys off no origin, and an RP_ORIGIN that is not an
-// origin.
+// boot: with passkeys on an RP-ID that is unset or not a bare domain (New
+// refuses a raw IP, §5.7), with passkeys off no origin, and an RP_ORIGIN that
+// is not an origin.
 func FromSettings(s settings.Serve, b settings.Boot) (*Config, error) {
 	// Default on: passkeys are the app's own login, and an instance must not
 	// lose them by omission.
@@ -79,9 +78,6 @@ func FromSettings(s settings.Serve, b settings.Boot) (*Config, error) {
 	if rpid == "" {
 		return nil, fmt.Errorf("%s is not set — passkeys require the domain users open, such as list.example.com (%s)", envRPID, rpDocs)
 	}
-	if ip := net.ParseIP(rpid); ip != nil {
-		return nil, fmt.Errorf("%s (%q) is a raw IP — passkeys require a domain name (%s)", envRPID, rpid, rpDocs)
-	}
 	// go-webauthn's own refusal names neither the setting nor the fix.
 	if strings.ContainsAny(rpid, ":/ ") {
 		return nil, fmt.Errorf("%s (%q) must be a bare domain such as list.example.com, without https://, a port or a path (%s)",
@@ -97,8 +93,9 @@ func FromSettings(s settings.Serve, b settings.Boot) (*Config, error) {
 }
 
 // checkOrigin refuses an SHOPPINGLIST_RP_ORIGIN that cannot be the address
-// bar's origin: go-webauthn compares it as a string, so a malformed one fails
-// every ceremony with nothing in the log naming the setting (§5.7). With rpid
+// bar's origin: a malformed one would fail every ceremony with nothing in the
+// log naming the setting (§5.7). Its serialized form is also what CORS and the
+// logged setup link use. With rpid
 // set it also checks what the browser will (RP-ID a parent of the host, https
 // outside localhost). It returns the origin as the browser serializes it.
 func checkOrigin(origin, rpid string) (string, error) {
@@ -128,21 +125,27 @@ func checkOrigin(origin, rpid string) (string, error) {
 }
 
 // New builds the go-webauthn instance, requiring discoverable keys and user
-// verification (§5.3).
+// verification (§5.3). go-webauthn refuses an RP-ID that is not a domain,
+// a raw IP included; the error names the setting.
 func New(cfg *Config) (*webauthn.WebAuthn, error) {
 	if cfg == nil {
 		return nil, errors.New("nil webauthn config")
 	}
-	return webauthn.New(&webauthn.Config{
+	wa, err := webauthn.New(&webauthn.Config{
 		RPID:          cfg.RPID,
 		RPDisplayName: cfg.RPDisplayName,
 		RPOrigins:     []string{cfg.RPOrigin},
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
-			ResidentKey:      protocol.ResidentKeyRequirementRequired,
-			UserVerification: protocol.VerificationRequired,
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			RequireResidentKey: protocol.ResidentKeyRequired(), // the Level 1 form
+			UserVerification:   protocol.VerificationRequired,
 		},
 		// Some authenticators return extension outputs unprompted, which
 		// go-webauthn would fail by default ([D-201]).
 		ExtensionsUnsolicitedOutputPolicy: protocol.UnsolicitedOutputPolicyIgnore,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("%s (%q): %w (%s)", envRPID, cfg.RPID, err, rpDocs)
+	}
+	return wa, nil
 }

@@ -30,7 +30,7 @@ on the machine:
 | `e2e:arch` | the dead-controls gate, `e2e/arch/` ([D-124]) | 8096 |
 | `e2e:oidc` | the OIDC journeys against Dex, `e2e/oidc/` ([D-154]) | 8095 (+8094 OIDC-only, Dex 5557) |
 | `e2e:tiles` | the tile audit on the Vite dev server, `e2e/tiles/` ([D-166]) | 8093 |
-| `e2e:demo` | the demo binary (`scripts/build-demo.sh`) and its harness, `e2e/demo/` ([D-234]) | 8088 |
+| `e2e:demo` | the demo binary (`task build-demo`) and its harness, `e2e/demo/` ([D-234]) | 8088 |
 
 
 Passkey ceremonies have a Go-side layer too: `testutil.Authenticator` is a

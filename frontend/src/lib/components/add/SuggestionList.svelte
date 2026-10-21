@@ -15,6 +15,8 @@
 	import type { Suggestion } from './add-model';
 
 	interface Props {
+		/** The listbox's own id, which the input's aria-controls names. */
+		id: string;
 		/** The suggestions, then the as-typed add (`withTypedCandidate`). */
 		candidates: Suggestion[];
 		/** The amount typed with the name ([D-285]); '' for none. */
@@ -25,7 +27,7 @@
 		onsuppress: (name: string) => void;
 	}
 
-	let { candidates, quantity, onitempointerup, onitemclick, onsuppress }: Props = $props();
+	let { id, candidates, quantity, onitempointerup, onitemclick, onsuppress }: Props = $props();
 
 	// A row of the page's rhythm, ruled as every list is ([D-326]).
 	const ROW =
@@ -33,6 +35,7 @@
 </script>
 
 <Combobox.ContentStatic
+	{id}
 	aria-label={t('add_label')}
 	class={[
 		floatSurface,

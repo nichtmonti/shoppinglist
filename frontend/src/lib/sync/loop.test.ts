@@ -152,9 +152,6 @@ describe('startSyncLoop: learning a list is gone', () => {
 		vi.stubGlobal('addEventListener', events.addEventListener.bind(events));
 		vi.stubGlobal('removeEventListener', events.removeEventListener.bind(events));
 	});
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
 
 	function startLoop(transport = vi.fn().mockResolvedValue({ results: [] })) {
 		const digestTransport = vi.fn().mockResolvedValue([]);
@@ -235,7 +232,6 @@ describe('startSyncLoop: nobody looking', () => {
 	});
 	afterEach(() => {
 		vi.restoreAllMocks();
-		vi.unstubAllGlobals();
 	});
 
 	function startLoop(here: { visible: boolean }, elsewhere: boolean, cycleMs = TICK) {
@@ -392,7 +388,6 @@ describe('startSyncLoop: a failed push', () => {
 		resetReferenceMirrorCheck();
 		await db.pending_ops.clear();
 		await db.memberships.clear();
-		const retryTimers = trackTimers((delay) => delay === 35);
 		const transport = vi.fn().mockRejectedValue(new Error('push timed out'));
 		const digestTransport = vi.fn().mockResolvedValue([]);
 		const stop = startSyncLoop({
@@ -427,7 +422,6 @@ describe('startSyncLoop: a failed push', () => {
 			});
 		} finally {
 			stop();
-			retryTimers.dispose();
 		}
 	});
 });

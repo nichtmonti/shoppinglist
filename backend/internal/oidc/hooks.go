@@ -44,6 +44,8 @@
 package oidc
 
 import (
+	"database/sql"
+	"errors"
 	"strings"
 
 	"github.com/pocketbase/dbx"
@@ -53,7 +55,6 @@ import (
 	"shoppinglist/internal/applog"
 	"shoppinglist/internal/fieldcontract"
 	"shoppinglist/internal/oidclogin"
-	"shoppinglist/internal/records"
 )
 
 // Register binds the auto-create hook on the accounts collection. It must
@@ -104,7 +105,11 @@ func autoCreateRecord(e *core.RecordAuthWithOAuth2RequestEvent) error {
 			return err
 		}
 
+		// The rest of the chain runs in the transaction, as PocketBase's own
+		// hooks do it, and the event gets its app back after.
+		original := e.App
 		e.App = txApp
+		defer func() { e.App = original }()
 		e.Record = rec
 		e.IsNewRecord = true
 		if err := e.Next(); err != nil {
@@ -139,15 +144,20 @@ func ownsIdentity(app core.App, collectionID, provider, subject string, rec *cor
 	if rec == nil || subject == "" {
 		return false, nil
 	}
-	rel, err := records.FindFirstOptional(app, core.CollectionNameExternalAuths, dbx.HashExp{
+	// The lookup PocketBase's own OAuth2 route makes, so this judges the row
+	// it resolved.
+	rel, err := app.FindFirstExternalAuthByExpr(dbx.HashExp{
 		"collectionRef": collectionID,
 		"provider":      provider,
 		"providerId":    subject,
 	})
-	if err != nil || rel == nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
 		return false, err
 	}
-	return rel.GetString("recordRef") == rec.Id, nil
+	return rel.RecordRef() == rec.Id, nil
 }
 
 // displayName picks the new account's nickname: the first non-blank of the

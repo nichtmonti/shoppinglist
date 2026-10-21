@@ -37,6 +37,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/vite": "^4.3.3",
 		"@testing-library/svelte": "5.4.2",
+		"@testing-library/user-event": "14.6.7",
 		"@types/node": "^26.6.5",
 		"@vitest/coverage-v8": "5.0.5",
 		"eslint": "^10.13.0",
@@ -60,6 +61,7 @@
 	"dependencies": {
 		"@lucide/svelte": "^1.58.0",
 		"@simplewebauthn/browser": "14.0.0",
+		"@use-gesture/vanilla": "10.3.1",
 		"barcode-detector": "3.2.2",
 		"bits-ui": "^2.19.5",
 		"clsx": "^2.1.1",

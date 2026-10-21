@@ -139,25 +139,33 @@ describe('checkAndMirrorReference default transports', () => {
 		await db.item_dictionary.clear();
 		await db.meta.clear();
 		vi.restoreAllMocks();
-		vi.unstubAllGlobals();
 	});
 
-	it('the seed-version and reference reads carry a timeout signal', async () => {
-		const fetchMock = vi.fn(
-			async () => new Response(JSON.stringify({ version: '7' }), { status: 200 })
-		);
-		vi.stubGlobal('fetch', fetchMock);
-		const getFullList = vi.fn(async (options?: { signal?: AbortSignal }) => {
-			expect(options?.signal).toBeInstanceOf(AbortSignal);
-			return [{ id: 'd1', slug: 's', names_i18n: {}, popularity: 0 }];
+	it('the seed-version and reference reads keep their own timeout signal', async () => {
+		// The real SDK: with auto-cancellation on, a request without
+		// requestKey: null gets the SDK's own controller signal in place of the
+		// caller's, which pb.cancelAllRequests() would abort.
+		const signals: AbortSignal[] = [];
+		const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+			if (init?.signal) signals.push(init.signal);
+			const body = url.includes('/seed-version')
+				? { version: '7' }
+				: {
+						page: 1,
+						perPage: 1000,
+						totalItems: 1,
+						totalPages: 1,
+						items: [{ id: 'd1', slug: 's', names_i18n: {}, popularity: 0 }]
+					};
+			return new Response(JSON.stringify(body), { status: 200 });
 		});
-		vi.spyOn(pb, 'collection').mockReturnValue({ getFullList } as never);
+		vi.stubGlobal('fetch', fetchMock);
 
 		await checkAndMirrorReference();
 
-		const init = (fetchMock.mock.calls[0] as unknown[])[1] as RequestInit;
-		expect(init.signal).toBeInstanceOf(AbortSignal);
-		expect(getFullList).toHaveBeenCalledTimes(2);
-		vi.unstubAllGlobals();
+		expect(fetchMock).toHaveBeenCalledTimes(3);
+		expect(signals).toHaveLength(3);
+		pb.cancelAllRequests();
+		for (const signal of signals) expect(signal.aborted).toBe(false);
 	});
 });

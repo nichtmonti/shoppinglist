@@ -43,8 +43,6 @@ func SweepPhotos(app core.App) error {
 // photoShown reports whether an item, tombstones included, holds exactly the
 // URL issued for token: the same equality test as SweepPhotos.
 func photoShown(app core.App, token string) (bool, error) {
-	var n int
-	err := app.DB().NewQuery(`SELECT COUNT(*) FROM items WHERE image_url = {:url}`).
-		Bind(dbx.Params{"url": photoPathPrefix + token}).Row(&n)
+	n, err := app.CountRecords("items", dbx.HashExp{"image_url": photoPathPrefix + token})
 	return n > 0, err
 }

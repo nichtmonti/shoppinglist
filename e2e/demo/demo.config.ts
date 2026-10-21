@@ -1,27 +1,21 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import { appServer, basePort, LOCALE } from '../server';
 
 // The demo build's harness ([D-234]): a visitor's way in, the example list,
 // a second visitor joining through an invite, sign-out and an expired demo,
-// in a real browser against the demo binary (scripts/build-demo.sh).
+// in a real browser against the demo binary (`task build-demo`).
 //
 // Its own run because it is its own binary: a demo instance has passkeys and
 // OIDC off and a different auth screen, which no other harness expects. A
 // fresh database each run, one worker.
 //
 // Run it as `scripts/gate.sh e2e:demo`, which builds the demo binary first;
-// by hand, from e2e/ after scripts/build-demo.sh:
+// by hand, from e2e/ after `task build-demo`:
 //   E2E_PORT=8088 npx playwright test -c demo/demo.config.ts
 const PORT = basePort('8088');
-const REPO = resolve(import.meta.dirname, '../..');
 
-// CI and the gate build it and say where; by hand it is build-demo.sh's output.
+// CI and the gate build it and say where; by hand it is `task build-demo`'s output.
 const BIN = process.env.SHOPPINGLIST_DEMO_BIN ?? 'backend/shoppinglist-demo';
-if (!existsSync(resolve(REPO, BIN))) {
-	throw new Error(`demo.config.ts: no demo binary at ${BIN} — run scripts/build-demo.sh first`);
-}
 
 export default defineConfig({
 	testDir: './',

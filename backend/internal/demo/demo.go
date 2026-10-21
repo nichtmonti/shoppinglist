@@ -40,8 +40,8 @@ const (
 	sweepJobID    = "__shoppinglist_demo_sweep__"
 	sweepSchedule = "*/10 * * * *" // every 10 minutes: an account outlives Lifetime by at most that
 
-	// startBudget is the per-IP budget on POST /api/demo/start, added at
-	// registration so the normal build's §10 table does not name the route.
+	// startBudget is the per-IP budget on POST /api/demo/start, outside the
+	// §10 table so the normal build's does not name the route.
 	startBudget   = "demo_start"
 	startWindow   = 10 * time.Minute
 	startsRefusal = "the demo is full right now, try again later"
@@ -88,8 +88,9 @@ func Describe(cfg Config) string {
 
 // RegisterRoutes mounts POST /api/demo/start.
 func RegisterRoutes(r *router.RouterGroup[*core.RequestEvent], cfg Config) {
-	security.SetBudget(startBudget, startWindow, cfg.StartsPerIP)
-	r.POST("/api/demo/start", start(cfg)).BindFunc(security.RateLimit(startBudget))
+	r.POST("/api/demo/start", start(cfg)).
+		BindFunc(security.Limit(startBudget, startWindow, cfg.StartsPerIP)).
+		Bind(apis.RequireGuestOnly())
 }
 
 // Register turns request logging off, stores the example products and
@@ -134,9 +135,6 @@ type startBody struct {
 // PocketBase's own auth response as after a passkey sign-up.
 func start(cfg Config) func(*core.RequestEvent) error {
 	return func(e *core.RequestEvent) error {
-		if e.Auth != nil {
-			return e.BadRequestError("already signed in", nil)
-		}
 		var body startBody
 		if err := e.BindBody(&body); err != nil {
 			return e.BadRequestError("invalid request body", err)

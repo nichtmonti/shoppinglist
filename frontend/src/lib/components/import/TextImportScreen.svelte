@@ -216,9 +216,13 @@
 	// An empty name does not disable "create": pressed, it says so under the
 	// field ([D-325]).
 	let canConfirm = $derived(chosen.length > 0 && !busy && !needsOnline);
-	let nameMissing = $state(false);
-	$effect(() => {
-		if (newName.trim() || target !== NEW) nameMissing = false;
+	// Set by a press with no name; any change to the name or the target
+	// takes it back (a writable $derived).
+	let nameFilled = $derived(newName.trim() !== '');
+	let nameMissing = $derived.by(() => {
+		void nameFilled;
+		void target;
+		return false;
 	});
 
 	function review(): void {

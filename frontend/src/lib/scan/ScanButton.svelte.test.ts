@@ -265,9 +265,7 @@ describe('ScanButton', () => {
 		render(ScanButton, { props: { listId: LIST } });
 		await openScanner();
 
-		await waitFor(() =>
-			expect(screen.getByText('Dieses Gerät kann keine Barcodes scannen.')).toBeDefined()
-		);
+		expect(await screen.findByText('Dieses Gerät kann keine Barcodes scannen.')).toBeDefined();
 	});
 
 	// [D-293] Android: another app holds the camera (NotReadableError).
@@ -278,9 +276,7 @@ describe('ScanButton', () => {
 		render(ScanButton, { props: { listId: LIST } });
 		await openScanner();
 
-		await waitFor(() =>
-			expect(screen.getByText(/Die Kamera lässt sich gerade nicht öffnen/)).toBeDefined()
-		);
+		expect(await screen.findByText(/Die Kamera lässt sich gerade nicht öffnen/)).toBeDefined();
 	});
 
 	it('shows the decode-failed message and falls back to typing when the decoder is broken', async () => {
@@ -311,7 +307,7 @@ describe('ScanButton', () => {
 
 		render(ScanButton, { props: { listId: LIST, onadded } });
 		await openScanner();
-		await waitFor(() => expect(screen.getByText('Produkt wird gesucht …')).toBeDefined());
+		expect(await screen.findByText('Produkt wird gesucht …')).toBeDefined();
 		await fireEvent.click(screen.getByRole('button', { name: 'Scanner schließen' }));
 		answer(jsonResponse({ name: 'Nutella', category_slug: 'pantry' }));
 		await new Promise((r) => setTimeout(r, 50));
@@ -337,7 +333,7 @@ describe('ScanButton', () => {
 
 		render(ScanButton, { props: { listId: LIST, onadded } });
 		await openScanner();
-		await waitFor(() => expect(screen.getByText('Barcode ins Bild halten')).toBeDefined());
+		expect(await screen.findByText('Barcode ins Bild halten')).toBeDefined();
 		await fireEvent.click(screen.getByRole('button', { name: 'Scanner schließen' }));
 		detect(EAN);
 		await new Promise((r) => setTimeout(r, 50));
@@ -359,7 +355,7 @@ describe('ScanButton', () => {
 
 		render(ScanButton, { props: { listId: LIST } });
 		await openScanner();
-		await waitFor(() => expect(screen.getByText('Barcode ins Bild halten')).toBeDefined());
+		expect(await screen.findByText('Barcode ins Bild halten')).toBeDefined();
 		await fireEvent.click(screen.getByRole('button', { name: 'Scanner schließen' }));
 		refuse(new CameraPermissionDeniedError());
 		await new Promise((r) => setTimeout(r, 50));
@@ -375,11 +371,14 @@ describe('ScanButton', () => {
 
 		render(ScanButton, { props: { listId: LIST } });
 		await openScanner();
-		await waitFor(() => expect(screen.getByTestId('scan-message')).toBeDefined());
+		expect(await screen.findByTestId('scan-message')).toBeDefined();
 		await fireEvent.click(screen.getByRole('button', { name: 'Scanner schließen' }));
 
 		vi.mocked(startCameraScan).mockReturnValue({ result: new Promise(() => {}), stop: vi.fn() });
 		await openScanner();
+		// Real time: the timer waited out was scheduled while findBy* polled,
+		// which a fake clock would stall. scan-session.svelte.test.ts proves the
+		// same on a fake clock, one level down.
 		await new Promise((r) => setTimeout(r, 1400));
 
 		expect(screen.getByText('Barcode ins Bild halten')).toBeDefined();

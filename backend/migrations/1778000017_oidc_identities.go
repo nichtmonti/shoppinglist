@@ -6,8 +6,7 @@
 // written by the OIDC login hook (internal/oidc) and read by GET
 // /api/auth/methods. Its own collection rather than an `accounts` column: the
 // accounts record travels in every auth response and is persisted in the
-// client's auth store, and the §11 accounts update guard would refuse the
-// hook's write. No rules: server only, never served to co-members.
+// client's auth store. No rules: server only, never served to co-members.
 
 package migrations
 

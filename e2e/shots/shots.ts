@@ -37,14 +37,13 @@ export function msg(locale: Locale, key: string): string {
 	return text;
 }
 
-/** Waits for web fonts and every image — lazy ones made eager, since a
- *  preview taller than the viewport would otherwise show them unloaded —
- *  then saves `target` as OUT/<name>.png. */
+/** Waits for every image — lazy ones made eager, since a preview taller than
+ *  the viewport would otherwise show them unloaded — then saves `target` as
+ *  OUT/<name>.png. The screenshot itself waits for the web fonts. */
 export async function shoot(page: Page, target: Page | Locator, name: string): Promise<void> {
 	const path = resolve(OUT, `${name}.png`);
 	mkdirSync(dirname(path), { recursive: true });
 	await page.evaluate(async () => {
-		await document.fonts.ready;
 		const images = [...document.images];
 		for (const img of images) img.loading = 'eager';
 		const settled = (img: HTMLImageElement) =>

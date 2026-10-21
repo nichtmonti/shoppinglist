@@ -18,7 +18,7 @@ pnpm lint              # type-aware eslint (prettier lives at the repo root: pnp
 pnpm check             # svelte-check + the service-worker tsconfig
 pnpm test              # unit + component (the `server` and `client` vitest projects)
 pnpm test:integration  # two clients against the REAL built backend binary
-pnpm build             # -> build/ (../scripts/build-embedded-spa.sh copies it into ../backend/pb_public)
+pnpm build             # -> build/ (`task build-spa` copies it into ../backend/pb_public)
 ```
 
 `../scripts/dev.sh` runs PocketBase and Vite together on one origin (Vite proxies

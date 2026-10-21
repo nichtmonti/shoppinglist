@@ -31,14 +31,13 @@ export interface SyncLoopOptions extends CycleDeps {
 }
 
 // „Jetzt senden" in any tab reaches the leader, the one that sends ([D-296]).
-const syncNowChannel =
-	typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('sync-now');
+const syncNowChannel = new BroadcastChannel('sync-now');
 let runNow: (() => void) | null = null;
 
 /** A cycle now, in the leader: here when this tab leads, else in the one that does. */
 export function syncNow(): void {
 	if (runNow) runNow();
-	else syncNowChannel?.postMessage('now');
+	else syncNowChannel.postMessage('now');
 }
 
 /** Starts the loop under leadership; returns its stop(). */
@@ -185,7 +184,7 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 		if (stopped) return; // stopped before leadership was granted
 		opts.onLeadership?.(true);
 		runNow = cycle;
-		if (syncNowChannel) syncNowChannel.onmessage = () => runNow?.();
+		syncNowChannel.onmessage = () => runNow?.();
 		cycle(); // initial cycle on becoming leader
 		globalThis.addEventListener?.('focus', onFocus);
 		globalThis.addEventListener?.('online', onOnline);
@@ -222,7 +221,7 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	const releaseLeaderWork = async () => {
 		opts.onLeadership?.(false);
 		detachTriggers();
-		if (syncNowChannel) syncNowChannel.onmessage = null;
+		syncNowChannel.onmessage = null;
 		await cyclesSettled();
 	};
 

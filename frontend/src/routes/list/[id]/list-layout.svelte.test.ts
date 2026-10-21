@@ -33,8 +33,8 @@ vi.mock('#lib/state/online.js', async () => {
 });
 
 vi.mock('#lib/actions/invites.js', () => ({
-	currentInvite: vi.fn(() => new Promise(() => {})),
-	rotateInvite: vi.fn(),
+	activeInvite: vi.fn(() => new Promise(() => {})),
+	resetInvite: vi.fn(),
 	inviteUrl: (token: string) => `https://example.test/join#${token}`
 }));
 
@@ -125,7 +125,7 @@ describe('in-list rename', () => {
 		await fireEvent.click(within(dialog).getByRole('button', { name: 'Speichern' }));
 
 		// The rejection is reported in the sheet, not lost as an unhandled promise.
-		await waitFor(() => expect(within(dialog).getByRole('alert')).toBeDefined());
+		expect(await within(dialog).findByRole('alert')).toBeDefined();
 		expect(screen.getByRole('dialog', { name: 'Umbenennen' })).toBeDefined();
 	});
 });
@@ -153,7 +153,7 @@ describe('in-list leave', () => {
 		const dialog = await screen.findByRole('alertdialog', { name: 'Liste verlassen' });
 		await fireEvent.click(within(dialog).getByRole('button', { name: 'Liste verlassen' }));
 
-		await waitFor(() => expect(within(dialog).getByRole('alert')).toBeDefined());
+		expect(await within(dialog).findByRole('alert')).toBeDefined();
 	});
 });
 

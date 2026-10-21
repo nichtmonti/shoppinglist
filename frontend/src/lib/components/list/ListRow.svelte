@@ -1,9 +1,9 @@
 <!--
   §9.1 one list-view (planning) row: aisle chip, name + note, and the quantity
   control. Removal lives in the detail sheet, reached through the name or the
-  chip ([D-119]), and, given `onremove`, in a swipe toward the row's start
-  ([D-289]). Pure presentation like ShopTile: every side effect is a
-  callback, so ListView and /dev/gallery share it.
+  chip ([D-119]), and, given `onremove`, in a swipe to the left ([D-289]).
+  Pure presentation like ShopTile: every side effect is a callback, so
+  ListView and /dev/gallery share it.
 
   `cat` is also the mode switch: A→Z rows pass their aisle and get the chip,
   grouped rows pass null because the aisle header already names it.
@@ -33,7 +33,7 @@
 		onopen?: () => void;
 		/** Overrides where a committed quantity goes; defaults to the item mutation. */
 		onquantity?: (value: string) => void | Promise<void>;
-		/** Remove the item; given, a swipe toward the row's start does it ([D-289]). */
+		/** Remove the item; given, a swipe to the left does it ([D-289]). */
 		onremove?: () => void;
 		/** Rendered before everything else: the text import's checkbox ([D-254]). */
 		lead?: Snippet;

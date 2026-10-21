@@ -9,17 +9,12 @@ export class DndList<T> {
 	#idOf: (row: T) => string;
 	#onreorder: (ids: string[]) => void;
 
-	/** The row being carried; the shadow item renders as it. */
-	draggingId = $state<string | null>(null);
-
-	/** The zone's `items`: re-seeded from the source order whenever it changes,
+	/** The zone's `items`: re-seeded from the source whenever it changes,
 	 *  overwritten by the handlers in between. Whole dnd items, see #lib/dnd. */
-	items: DndItem[] = $derived(dndItemsOf(this.#ids()));
+	items: DndItem<T>[] = $derived(dndItemsOf(this.#rows(), (row) => this.#id(row)));
 
-	/** The rows to render, keyed by dnd id; a row removed mid-drag is dropped. */
-	rows: { key: string; row: T }[] = $derived(
-		dndRows(this.items, (id) => this.#find(id), this.#find(this.draggingId))
-	);
+	/** The rows to render, keyed by dnd id. */
+	rows: { key: string; row: T }[] = $derived(dndRows(this.items));
 
 	/**
 	 * @param source the rows in their current order — the source of truth.
@@ -34,16 +29,17 @@ export class DndList<T> {
 		});
 	}
 
-	#ids(): string[] {
-		return this.#source().map(this.#idOf);
+	// Methods, so `items` above may read them: a field initializer may not
+	// read the private fields the constructor sets.
+	#rows(): T[] {
+		return this.#source();
 	}
 
-	#find(id: string | null): T | undefined {
-		return id === null ? undefined : this.#source().find((row) => this.#idOf(row) === id);
+	#id(row: T): string {
+		return this.#idOf(row);
 	}
 
-	consider = (e: CustomEvent<DndEvent<DndItem>>): void => {
-		this.draggingId = e.detail.info?.id ?? this.draggingId;
+	consider = (e: CustomEvent<DndEvent<DndItem<T>>>): void => {
 		this.items = dndMirror(e.detail.items);
 	};
 
@@ -54,21 +50,26 @@ export class DndList<T> {
 	 * position, or null at that end.
 	 */
 	move(id: string, delta: -1 | 1): number | null {
-		const ids = this.items.map((item) => item.id);
-		const from = ids.indexOf(id);
+		const items = [...this.items];
+		const from = items.findIndex((item) => item.id === id);
 		const to = from + delta;
-		if (from < 0 || to < 0 || to >= ids.length) return null;
-		[ids[from], ids[to]] = [ids[to], ids[from]];
-		this.items = dndItemsOf(ids);
-		this.#onreorder(ids);
+		if (from < 0 || to < 0 || to >= items.length) return null;
+		[items[from], items[to]] = [items[to], items[from]];
+		this.items = items;
+		this.#onreorder(items.map((item) => item.id));
 		return to + 1;
 	}
 
-	finalize = (e: CustomEvent<DndEvent<DndItem>>): void => {
-		const newOrder = e.detail.items.map((item) => item.id);
-		this.items = dndItemsOf(newOrder);
-		this.draggingId = null;
-		if (newOrder.join() !== this.#ids().join()) this.#onreorder(newOrder);
+	finalize = (e: CustomEvent<DndEvent<DndItem<T>>>): void => {
+		this.items = dndMirror(e.detail.items);
+		const newOrder = this.items.map((item) => item.id);
+		if (
+			newOrder.join() !==
+			this.#rows()
+				.map((row) => this.#id(row))
+				.join()
+		)
+			this.#onreorder(newOrder);
 	};
 
 	/** The zone options, plus the caller's own. One flip duration for zone and

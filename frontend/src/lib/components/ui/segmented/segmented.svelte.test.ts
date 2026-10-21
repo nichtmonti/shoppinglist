@@ -1,9 +1,7 @@
-// Segmented wraps bits-ui's ToggleGroup type="single", which lets a tap on the
-// ACTIVE item deselect it. The wrapper must hold the selection on the value
-// its caller passed, not only swallow the empty string it reports: before
-// bits-ui's own state went to '' on that tap while the caller's value
-// stayed put, so NO segment rendered as selected — the view toggle read
-// neither „Einkaufen" nor „Bearbeiten" while the shop view was on screen.
+// Segmented is a radio group: one choice, never none. A tap on the active
+// segment must leave it selected (the ToggleGroup it was built on once let it
+// go, and the view toggle then read neither „Einkaufen" nor „Bearbeiten"),
+// and the arrow keys choose, as in any radio group.
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -36,5 +34,12 @@ describe('Segmented', () => {
 		expect(onchange).not.toHaveBeenCalled();
 		expect(shop.getAttribute('aria-checked')).toBe('true');
 		expect(list.getAttribute('aria-checked')).toBe('false');
+	});
+
+	it('chooses the next segment with an arrow key', async () => {
+		const { onchange, shop } = renderSegmented();
+		shop.focus();
+		await fireEvent.keyDown(shop, { key: 'ArrowRight' });
+		expect(onchange).toHaveBeenCalledWith('list');
 	});
 });
