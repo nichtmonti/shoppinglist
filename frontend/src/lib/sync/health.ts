@@ -29,13 +29,18 @@ export const NO_HEALTH: SyncHealth = {
 /** A send the server answered without a result for: its fault, not the network's. */
 export const NO_RESULT = Object.assign(new Error('no result'), { status: 500 });
 
-/** A 429 is the rate limit, any other answer the server, no answer (status
- *  0) the connection; an error with no status at all is the app's own. */
+/** A 429 is the rate limit, no answer (status 0) the connection. A request
+ *  the server refuses as malformed (a 4xx but 401, 408 and 429), like an error
+ *  with no status at all, is the app's own: it fails the same on every try,
+ *  and a reload is what can help (a tab from before an update, say). Any
+ *  other answer is the server. */
 export function failureOf(error: unknown): SyncFailure {
 	const status = httpStatus(error);
 	if (status === undefined) return 'app';
 	if (status === 429) return 'rate';
-	return status > 0 ? 'server' : 'connection';
+	if (status === 0) return 'connection';
+	if (status >= 400 && status < 500 && status !== 401 && status !== 408) return 'app';
+	return 'server';
 }
 
 async function update(change: (prev: SyncHealth) => SyncHealth): Promise<void> {

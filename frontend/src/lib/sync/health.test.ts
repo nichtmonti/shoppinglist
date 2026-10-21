@@ -10,6 +10,16 @@ describe('failureOf', () => {
 		expect(failureOf(Object.assign(new Error('x'), { status: 0 }))).toBe('connection');
 	});
 
+	// A refusal repeats on every try, so "server not answering" would mislead.
+	it('reads a request the server refuses as the app’s own', () => {
+		for (const status of [400, 403, 404, 413]) {
+			expect(failureOf(Object.assign(new Error('x'), { status }))).toBe('app');
+		}
+		for (const status of [401, 408]) {
+			expect(failureOf(Object.assign(new Error('x'), { status }))).toBe('server');
+		}
+	});
+
 	// apiJson gives a request without an answer status 0 (http.test.ts).
 	it('reads an error without a status as the app’s own', () => {
 		expect(failureOf(new TypeError("Cannot read properties of undefined (reading 'digest')"))).toBe(
