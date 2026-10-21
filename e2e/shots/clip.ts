@@ -1,6 +1,7 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { Browser, Locator, Page } from '@playwright/test';
+import sharp from 'sharp';
 import { OUT } from './shots';
 
 // A short clip of two phones side by side, as an animated WebP — what a
@@ -9,17 +10,15 @@ import { OUT } from './shots';
 //   1. record(): each phone's frames over the DevTools screencast, with
 //      their timestamps, while the scene plays;
 //   2. compose(): a canvas page lays the two phones out with their names and
-//      the scene's subtitle at a fixed frame rate and encodes each frame as
-//      a still WebP (Chromium's canvas.toBlob). The phone whose turn it is
-//      has its name in green, and a change that reaches the other phone is
-//      outlined there as it lands: sync takes a fraction of a second, and
-//      without a pointer the eye is looking at the wrong spot when it does;
-//      Only the rectangle that changed since the previous frame is encoded:
-//      a sync touches one tile, and full frames made the clip 3 MB;
-//   3. animate(): the stills become one animated WebP (RIFF VP8X/ANIM/ANMF,
-//      the container format from Google's WebP spec), each drawn at its
-//      offset over the frames before it. A run of identical frames becomes
-//      one frame with a longer duration.
+//      the scene's subtitle at a fixed frame rate, each frame a PNG. The phone
+//      whose turn it is has its name in green, and a change that reaches the
+//      other phone is outlined there as it lands: sync takes a fraction of a
+//      second, and without a pointer the eye is looking at the wrong spot when
+//      it does. A run of identical frames becomes one frame with a longer
+//      duration;
+//   3. sharp joins the frames into one animated WebP. libwebp's animation
+//      encoder stores only what changed since the frame before (a sync touches
+//      one tile; full frames made the clip 3 MB).
 
 interface Frame {
 	t: number;
@@ -113,17 +112,8 @@ export async function record(
 /** One composed frame: the changed rectangle as a still WebP, at x, y. An
  *  empty `webp` repeats the frame before. */
 interface Still {
-	webp: string;
+	png: string;
 	key: string;
-	x: number;
-	y: number;
-}
-
-interface AnimFrame {
-	webp: Buffer;
-	ms: number;
-	x: number;
-	y: number;
 }
 
 /** How long a mark stays on screen, its last 600ms fading. */
@@ -161,7 +151,6 @@ export async function compose(
 			canvas.height = H;
 			const ctx = canvas.getContext('2d', { alpha: false })!;
 			const out: Still[] = [];
-			let previous: Uint32Array | null = null;
 			for (let t = rec.start; t <= rec.end; t += 1000 / fps) {
 				const pick = phones.map((list) => {
 					let i = 0;
@@ -181,7 +170,7 @@ export async function compose(
 					marks.map((m) => Math.floor((t - m.t) / 100)).join(',')
 				].join('|');
 				if (out.length && out.at(-1)!.key === key) {
-					out.push({ webp: '', key, x: 0, y: 0 });
+					out.push({ png: '', key });
 					continue;
 				}
 				ctx.fillStyle = '#f4f3ee';
@@ -240,38 +229,7 @@ export async function compose(
 				ctx.fillStyle = '#1d1d1b';
 				ctx.font = '500 22px system-ui, sans-serif';
 				ctx.fillText(caption, W / 2, HEAD + PHONE_H + 44);
-				// The changed rectangle, its corner on even pixels: ANMF stores
-				// offsets halved.
-				const pixels = new Uint32Array(ctx.getImageData(0, 0, W, H).data.buffer);
-				let [x0, y0, x1, y1] = [W, H, -1, -1];
-				for (let y = 0; y < H; y++)
-					for (let x = 0; x < W; x++) {
-						const i = y * W + x;
-						if (previous && pixels[i] === previous[i]) continue;
-						if (x < x0) x0 = x;
-						if (x > x1) x1 = x;
-						if (y < y0) y0 = y;
-						if (y > y1) y1 = y;
-					}
-				previous = pixels;
-				if (x1 < 0) {
-					out.push({ webp: '', key, x: 0, y: 0 });
-					continue;
-				}
-				x0 -= x0 % 2;
-				y0 -= y0 % 2;
-				const part = document.createElement('canvas');
-				part.width = x1 - x0 + 1;
-				part.height = y1 - y0 + 1;
-				part.getContext('2d', { alpha: false })!.drawImage(canvas, -x0, -y0);
-				const blob = await new Promise<Blob>((done) =>
-					part.toBlob((b) => done(b!), 'image/webp', 0.82)
-				);
-				const bytes = new Uint8Array(await blob.arrayBuffer());
-				let bin = '';
-				for (let i = 0; i < bytes.length; i += 0x8000)
-					bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-				out.push({ webp: btoa(bin), key, x: x0, y: y0 });
+				out.push({ png: canvas.toDataURL('image/png').split(',')[1], key });
 			}
 			return out;
 		},
@@ -281,78 +239,18 @@ export async function compose(
 
 	// Runs of one still become one frame with the run's duration.
 	const step = 1000 / fps;
-	const runs: AnimFrame[] = [];
+	const frames: Buffer[] = [];
+	const delay: number[] = [];
 	for (const s of stills) {
-		if (s.webp) runs.push({ webp: Buffer.from(s.webp, 'base64'), ms: step, x: s.x, y: s.y });
-		else runs[runs.length - 1].ms += step;
+		if (s.png) {
+			frames.push(Buffer.from(s.png, 'base64'));
+			delay.push(step);
+		} else delay[delay.length - 1] += step;
 	}
-	runs[runs.length - 1].ms += 1500; // hold the last frame before the loop
+	delay[delay.length - 1] += 1500; // hold the last frame before the loop
 	const path = resolve(OUT, `${name}.webp`);
 	mkdirSync(dirname(path), { recursive: true });
-	writeFileSync(path, animate(runs));
-}
-
-const u24 = (n: number) => Buffer.from([n & 255, (n >> 8) & 255, (n >> 16) & 255]);
-const chunk = (fourcc: string, body: Buffer) => {
-	const head = Buffer.alloc(8);
-	head.write(fourcc, 0, 'ascii');
-	head.writeUInt32LE(body.length, 4);
-	return Buffer.concat([head, body, body.length % 2 ? Buffer.alloc(1) : Buffer.alloc(0)]);
-};
-
-/** Still WebPs → one animated WebP. Each still's image chunks (VP8/VP8L, and
- *  ALPH if any) go into an ANMF frame as they are, at the still's offset; the
- *  first is the whole canvas. */
-function animate(frames: AnimFrame[]): Buffer {
-	const parts = frames.map(({ webp, ms, x, y }) => {
-		if (webp.toString('ascii', 0, 4) !== 'RIFF' || webp.toString('ascii', 8, 12) !== 'WEBP')
-			throw new Error('not a WebP still');
-		let width = 0;
-		let height = 0;
-		const image: Buffer[] = [];
-		for (let at = 12; at < webp.length;) {
-			const fourcc = webp.toString('ascii', at, at + 4);
-			const size = webp.readUInt32LE(at + 4);
-			const body = webp.subarray(at + 8, at + 8 + size);
-			if (fourcc === 'VP8X') {
-				width = body.readUIntLE(4, 3) + 1;
-				height = body.readUIntLE(7, 3) + 1;
-			} else if (fourcc === 'VP8 ') {
-				width ||= body.readUInt16LE(6) & 0x3fff;
-				height ||= body.readUInt16LE(8) & 0x3fff;
-				image.push(chunk(fourcc, body));
-			} else if (fourcc === 'VP8L') {
-				const bits = body.readUInt32LE(1);
-				width ||= (bits & 0x3fff) + 1;
-				height ||= ((bits >> 14) & 0x3fff) + 1;
-				image.push(chunk(fourcc, body));
-			} else if (fourcc === 'ALPH') image.push(chunk(fourcc, body));
-			at += 8 + size + (size % 2);
-		}
-		const head = Buffer.concat([
-			u24(x / 2),
-			u24(y / 2),
-			u24(width - 1),
-			u24(height - 1),
-			u24(Math.round(ms)),
-			Buffer.from([0b10])
-		]);
-		return { width, height, anmf: chunk('ANMF', Buffer.concat([head, ...image])) };
-	});
-	const { width, height } = parts[0];
-	const vp8x = chunk(
-		'VP8X',
-		Buffer.concat([Buffer.from([0b10, 0, 0, 0]), u24(width - 1), u24(height - 1)])
-	);
-	const anim = chunk('ANIM', Buffer.from([0, 0, 0, 0, 0, 0]));
-	const body = Buffer.concat([
-		Buffer.from('WEBP', 'ascii'),
-		vp8x,
-		anim,
-		...parts.map((p) => p.anmf)
-	]);
-	const riff = Buffer.alloc(8);
-	riff.write('RIFF', 0, 'ascii');
-	riff.writeUInt32LE(body.length, 4);
-	return Buffer.concat([riff, body]);
+	await sharp(frames, { join: { animated: true } })
+		.webp({ quality: 82, delay: delay.map(Math.round), loop: 0, minSize: true })
+		.toFile(path);
 }

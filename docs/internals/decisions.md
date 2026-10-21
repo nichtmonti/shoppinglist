@@ -594,8 +594,8 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 | `scripts/ci-image-tag.sh` | Woodpecker cannot compute an image name; a content tag must be written into the workflows ([D-203]) |
 | `scripts/dev.sh` | the dev servers' flags, ports and OIDC settings around `concurrently`, and the URL once this tree answers ([D-71]) |
 | `scripts/shots.sh` | the screenshot harness's launcher: the machine lock, the build it shoots, its flags, and copying the README's pairs into `docs/`; as go-task tasks the flags would become variables and the copying would still need a script |
-| `e2e/shots/pair.ts` | two PNGs side by side in the container's Chromium, which has no ImageMagick ([D-286]) |
-| `e2e/shots/clip.ts` (`animate()`) | the README clip as an animated WebP, muxed by hand because the container has no ffmpeg or `img2webp`, encoding only the changed rectangle per frame; `img2webp` or sharp's animated join would replace the muxer if the clip stays as small |
+| `e2e/shots/pair.ts` | two PNGs side by side through sharp's `composite`, as a file because `shots.sh` calls it per README pair ([D-286]) |
+| `e2e/shots/clip.ts` | the README clip: a canvas page draws the two phones' frames with names, taps, marks and subtitles, which no recorder lays out, and sharp's animated join encodes the WebP, libwebp storing only what changed per frame |
 | `scripts/third-party-licenses.mjs` (`task licenses`) | only what ships: `rollup-plugin-license` in the real client build missed packages (the OFL font, Tailwind, Paraglide's generated runtime) and misreported licences and versions |
 | `scripts/bundle-budget.mjs` | `size-limit` measures files; this sums the modulepreload set a first paint waits on ([D-203]) |
 | `scripts/doc-links.mjs` | lychee knows neither Codeberg's anchors nor `docs/…#anchor` cited in code |
