@@ -43,6 +43,7 @@ import {
 	writeFileSync
 } from 'node:fs';
 import path from 'node:path';
+import satisfies from 'spdx-satisfies';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const FRONTEND = path.join(ROOT, 'frontend');
@@ -67,6 +68,15 @@ const ALLOWED = new Set([
 	'OFL-1.1', // fonts: the licence ships with them (this file)
 	'CC-BY-SA-4.0' // OpenMoji artwork: attribution in the app's settings footer
 ]);
+
+/** Whether the SPDX expression can be met with ALLOWED licences alone. */
+function allowedLicence(expression) {
+	try {
+		return satisfies(expression, [...ALLOWED]);
+	} catch {
+		return false;
+	}
+}
 
 const LICENSE_FILE = /^(licen[cs]e|copying|notice|patents|unlicense)([-._].*)?$/i;
 
@@ -621,13 +631,9 @@ const bom = sbom(go, npm);
 const problems = [];
 for (const c of [...go, ...npm]) {
 	if (!c.license) problems.push(`${c.name}@${c.version}: no recognisable licence`);
-	// An SPDX expression passes when one OR-alternative is all allowed licences.
-	else if (
-		!c.license
-			.replace(/[()]/g, '')
-			.split(/\s+OR\s+/)
-			.some((alt) => alt.split(/\s+AND\s+/).every((l) => ALLOWED.has(l.trim())))
-	)
+	// An SPDX expression passes when it can be met with allowed licences
+	// alone; one spdx-satisfies cannot parse (a bare "GPL") cannot.
+	else if (!allowedLicence(c.license))
 		problems.push(`${c.name}@${c.version}: licence ${c.license} is not on the allowlist`);
 	if (c.eco === 'npm' && c.detected && !c.license.includes(c.detected))
 		problems.push(

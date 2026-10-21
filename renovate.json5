@@ -48,6 +48,10 @@
 
 	timezone: 'Europe/Berlin',
 
+	// §14: exact versions, in package.json as in the lockfiles; a range added
+	// by hand is pinned by Renovate's first update of it.
+	rangeStrategy: 'pin',
+
 	// Commit style matches the repo: `chore(deps): ...`, mirroring the
 	// type(scope) convention of every hand-written commit here.
 	semanticCommits: 'enabled',
