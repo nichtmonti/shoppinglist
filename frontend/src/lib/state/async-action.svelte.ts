@@ -4,6 +4,7 @@
 import { t } from '#lib/i18n/index.js';
 import { LocalizedError } from '#lib/localized-error.js';
 import { httpStatus } from '#lib/http-status.js';
+import { reportUncaught } from '#lib/client-errors.js';
 
 /**
  * The outcome of one attempt; a union rather than `T | undefined` so a void
@@ -66,6 +67,10 @@ export class AsyncAction {
 			this.busy = false;
 			return { ok: true, value };
 		} catch (e) {
+			// The app's own error, no answer of a server's (a TypeError, a
+			// database that refused), says only "Something went wrong" on
+			// screen: its cause goes to the server log.
+			if (httpStatus(e) === undefined && !(e instanceof LocalizedError)) reportUncaught(e, 'action');
 			if (run !== this.#run) return { ok: false };
 			this.error = failureMessage(e);
 			this.busy = false;

@@ -52,11 +52,12 @@ export function reportClientError(report: Omit<ClientErrorReport, 'version' | 'a
 
 /**
  * Reports an error nothing caught: a rejected promise no one awaited, or a
- * throw in an event handler. SvelteKit's handleError sees only a route's load
- * and render, and on a phone the console is out of sight ([D-197]). A request
- * the app cancelled, or one with no connection, is not an error.
+ * throw in an event handler; or, with its own context, one the screen shows
+ * only as "Something went wrong". SvelteKit's handleError sees only a route's
+ * load and render, and on a phone the console is out of sight ([D-197]). A
+ * request the app cancelled, or one with no connection, is not an error.
  */
-export function reportUncaught(error: unknown): void {
+export function reportUncaught(error: unknown, context = 'uncaught'): void {
 	const e = error as { name?: unknown; isAbort?: unknown; status?: unknown } | null;
 	if (e?.name === 'AbortError' || e?.isAbort === true || e?.status === 0) return;
 	const { message, stack } = describeError(error);
@@ -66,7 +67,7 @@ export function reportUncaught(error: unknown): void {
 		route: '',
 		path: location.pathname,
 		status: 0,
-		context: 'uncaught'
+		context
 	});
 }
 

@@ -3,6 +3,9 @@
 // `client` vitest project: the module under test declares `$state` class fields,
 // which need Svelte's browser build.
 import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('#lib/client-errors.js', () => ({ reportUncaught: vi.fn() }));
+import { reportUncaught } from '#lib/client-errors.js';
 import { t } from '#lib/i18n/index.js';
 import { AsyncAction, AsyncDialog, failureMessage } from './async-action.svelte';
 import { LocalizedError } from '#lib/localized-error.js';
@@ -49,6 +52,18 @@ describe('AsyncAction', () => {
 		const generic = new AsyncAction();
 		await generic.run(() => Promise.reject(new Error('this passkey is already registered')));
 		expect(generic.error).toBe(GENERIC());
+	});
+
+	// [D-197] What the screen says only as "Something went wrong" reaches the
+	// server log; a server's answer and the app's own copy do not.
+	it("reports the app's own error, not a server's answer or user copy", async () => {
+		vi.mocked(reportUncaught).mockClear();
+		const action = new AsyncAction();
+		const bug = new TypeError("Cannot read properties of undefined (reading 'id')");
+		await action.run(() => Promise.reject(bug));
+		await action.run(() => Promise.reject(Object.assign(new Error('x'), { status: 500 })));
+		await action.run(() => Promise.reject(new LocalizedError('Du bist schon auf 25 Listen')));
+		expect(vi.mocked(reportUncaught).mock.calls).toEqual([[bug, 'action']]);
 	});
 
 	it('always surfaces a LocalizedError — it is user copy, not noise ([D-219])', async () => {
