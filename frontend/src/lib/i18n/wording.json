@@ -1,0 +1,23 @@
+{
+	"de": [
+		{ "pattern": "[A-Za-zÄÖÜäöüß]…", "why": "a space before „…“, as German sets it" },
+		{
+			"pattern": "\\banle(?:gen|gt)\\b|angelegt|anzulegen",
+			"why": "„erstellen“, the buttons’ word, not „anlegen“"
+		}
+	],
+	"en": [
+		{ "pattern": " …", "why": "no space before \"…\", as English sets it" },
+		{ "pattern": "\\.\\.\\.", "why": "\"…\", not three full stops" },
+		{ "pattern": "’", "why": "a straight apostrophe, as the rest" },
+		{ "pattern": "\\b(?i:logins?)\\b", "why": "\"sign-in\", not \"login\"" },
+		{
+			"pattern": "\\b(?i:cancelled|colour(?:ed|s)?|grey|any more)\\b",
+			"why": "US spelling, as \"Color\" and \"Gray\""
+		},
+		{
+			"pattern": "\\b(?i:(?:un)?tick(?:s|ed|ing)?)\\b",
+			"why": "\"check off\" and \"uncheck\", not \"tick\""
+		}
+	]
+}
