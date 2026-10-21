@@ -71,6 +71,12 @@ export async function record(
 		pages.map((page, i) =>
 			page.screencast.start({
 				quality: 90,
+				// The screencast fits 800x800 unless told: the phones' own pixels,
+				// for a clip drawn at SCALE.
+				size: {
+					width: page.viewportSize()!.width * SCALE,
+					height: page.viewportSize()!.height * SCALE
+				},
 				onFrame: ({ data, timestamp }) => {
 					frames[i].push({ t: timestamp, data: data.toString('base64') });
 				}
@@ -116,6 +122,10 @@ interface Still {
 	key: string;
 }
 
+/** The clip's pixels per layout pixel: the README shows it 560 wide, which a
+ *  phone or a HiDPI screen draws with twice that or more. */
+const SCALE = 2;
+
 /** How long a mark stays on screen, its last 600ms fading. */
 const MARK_MS = 2500;
 /** The app's primary green, for the acting phone's name and the marks. */
@@ -130,7 +140,7 @@ export async function compose(
 	const page = await (await browser.newContext()).newPage();
 	await page.setContent('<!doctype html><body style="margin:0;background:#fff"></body>');
 	const stills: Still[] = await page.evaluate(
-		async ({ rec, labels, fps, MARK_MS, GREEN }) => {
+		async ({ rec, labels, fps, MARK_MS, GREEN, SCALE }) => {
 			const load = async (data: string) =>
 				createImageBitmap(await (await fetch(`data:image/jpeg;base64,${data}`)).blob());
 			const phones = await Promise.all(
@@ -147,9 +157,11 @@ export async function compose(
 			const W = PAD * 3 + PHONE_W * 2;
 			const H = HEAD + PHONE_H + FOOT;
 			const canvas = document.createElement('canvas');
-			canvas.width = W;
-			canvas.height = H;
+			canvas.width = W * SCALE;
+			canvas.height = H * SCALE;
 			const ctx = canvas.getContext('2d', { alpha: false })!;
+			// Laid out in layout pixels, drawn at SCALE.
+			ctx.scale(SCALE, SCALE);
 			const out: Still[] = [];
 			for (let t = rec.start; t <= rec.end; t += 1000 / fps) {
 				const pick = phones.map((list) => {
@@ -233,7 +245,7 @@ export async function compose(
 			}
 			return out;
 		},
-		{ rec, labels, fps, MARK_MS, GREEN }
+		{ rec, labels, fps, MARK_MS, GREEN, SCALE }
 	);
 	await page.context().close();
 
