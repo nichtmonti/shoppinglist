@@ -60,6 +60,22 @@ describe('LeaveListDialog', () => {
 		expect(await screen.findByText('„Wocheneinkauf“ wirklich verlassen?')).toBeDefined();
 	});
 
+	// The wording the confirm stands for is the one after the read: until it
+	// answers, only Cancel works.
+	it('holds the confirm until the members are read again', async () => {
+		let answer!: () => void;
+		vi.mocked(refreshRoster).mockReturnValue(
+			new Promise((resolve) => (answer = () => resolve([])))
+		);
+		renderSheet(true);
+
+		const leave = await screen.findByRole('button', { name: 'Liste verlassen' });
+		expect(leave).toHaveProperty('disabled', true);
+		expect(screen.getByRole('button', { name: 'Abbrechen' })).toHaveProperty('disabled', false);
+		answer();
+		await vi.waitFor(() => expect(leave).toHaveProperty('disabled', false));
+	});
+
 	it('reads nothing while closed', () => {
 		renderSheet(false);
 		expect(refreshRoster).not.toHaveBeenCalled();
