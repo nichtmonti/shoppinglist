@@ -20,9 +20,9 @@ func init() {
 //     sends no Authorization header, and the auth token lives in IndexedDB
 //     (§5.6), not a cookie. Keying the URL on the barcode would make
 //     "has this household scanned <product>?" enumerable by anyone; keying it
-//     on the PocketBase record id would lean on core.GenerateDefaultRandomId,
-//     which is math/rand/v2 and documented upstream as "not intended for
-//     security purposes". So the route gets its own 128-bit crypto/rand token.
+//     on the PocketBase record id would make that id a secret, and it has
+//     only ~77 random bits. So the route gets its own 128-bit crypto/rand
+//     token.
 //   - photo_hash: sha256 of the stored bytes, so a refetch that returns the same
 //     photo KEEPS the existing token. items.image_url holds that token URL and
 //     syncs to every member, so rotating it on every refetch would blank the
@@ -48,7 +48,7 @@ func barcodeCachePhotoUp(app core.App) error {
 			// field is protected — so leaving this false would publish every photo
 			// on a second, unauthenticated route that bypasses the 128-bit token
 			// and the barcode_photo rate-limit budget, sets its own Cache-Control
-			// and offers server-side ?thumb= resizing, guarded only by the math/rand/v2 record
+			// and offers server-side ?thumb= resizing, guarded only by the record
 			// id this design specifically refuses to rely on. The app serves photos
 			// off the filesystem directly (photoHandler), so nothing legitimate
 			// needs that route.

@@ -6,10 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"strings"
 
 	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/protocol/webauthncose"
 	wlib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/apis"
@@ -97,6 +99,25 @@ func verificationFailed(e *core.RequestEvent, ceremony string, err error) error 
 	// quotes it.
 	applog.Warn(e.App, "passkey "+ceremony+" refused", nil, append([]any{"reason", reason}, attrs...)...)
 	return e.BadRequestError(ceremony+" verification failed", nil)
+}
+
+// minRSABits is NIST's floor for RSA through 2030 (SP 800-57). go-webauthn
+// checks a passkey's algorithm but not its RSA key size, and has no option for it.
+const minRSABits = 2048
+
+// checkKeyLength refuses a passkey whose public key is RSA under minRSABits,
+// at registration and at every sign-in, so one stored earlier is refused too.
+func checkKeyLength(publicKey []byte) error {
+	key, err := webauthncose.ParsePublicKey(publicKey)
+	if err != nil {
+		return err
+	}
+	if k, ok := key.(webauthncose.RSAPublicKeyData); ok {
+		if bits := new(big.Int).SetBytes(k.Modulus).BitLen(); bits < minRSABits {
+			return fmt.Errorf("RSA key of %d bits, under the %d required", bits, minRSABits)
+		}
+	}
+	return nil
 }
 
 // rpHint names the setting behind the two refusals the operator's settings
@@ -251,6 +272,9 @@ func registerFinish(wa *wlib.WebAuthn, gate *signup.Gate) func(*core.RequestEven
 			return verificationFailed(e, "registration", err)
 		}
 		cred, err := wa.CreateCredential(user, *s.Session, parsed)
+		if err == nil {
+			err = checkKeyLength(cred.PublicKey)
+		}
 		if err != nil {
 			return verificationFailed(e, "registration", err)
 		}
@@ -364,6 +388,9 @@ func loginFinish(wa *wlib.WebAuthn) func(*core.RequestEvent) error {
 			// still offers: a 404, so the client can say so and ask the
 			// browser to forget it, instead of a retry that never works.
 			return e.NotFoundError("unknown passkey", nil)
+		}
+		if err == nil {
+			err = checkKeyLength(cred.PublicKey)
 		}
 		if err != nil {
 			return verificationFailed(e, "login", err)

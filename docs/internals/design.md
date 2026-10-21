@@ -109,7 +109,7 @@ No email login, recovery or notification; no account row holds an address, and t
 ### 5.1 Division of responsibility: we write zero crypto
 
 - **`go-webauthn` owns** challenges, signature verification, COSE key parsing, sign-count / replay checks (a counter that did not advance is logged, not refused), attestation, origin and RP-ID validation.
-- **We own** parking `SessionData` between a ceremony's two requests ([§5.5]) and persisting the resulting `Credential`.
+- **We own** parking `SessionData` between a ceremony's two requests ([§5.5]), persisting the resulting `Credential`, and refusing an RSA key under 2048 bits, which go-webauthn does not check ([§10.1]).
 
 ### 5.2 The `webauthn.User` interface
 
@@ -728,12 +728,12 @@ Every cryptographic primitive the app relies on, who owns it and what it protect
 
 | What | Primitive | Owner | Protects |
 |---|---|---|---|
-| Passkey ceremonies ([§5.4]) | WebAuthn assertions: the algorithms go-webauthn accepts by default (ES256, RS256, EdDSA among them), no attestation requested, user verification required | go-webauthn | sign-in; the server stores only public keys |
+| Passkey ceremonies ([§5.4]) | WebAuthn assertions: the algorithms go-webauthn accepts by default (ES256/384/512, RS256/384/512, PS256/384/512, EdDSA; no SHA-1), no attestation requested, user verification required; an RSA key under 2048 bits, NIST's floor through 2030, is refused at registration and at every sign-in (`checkKeyLength`) | go-webauthn; the floor is ours | sign-in; the server stores only public keys |
 | Ceremony challenge ([§5.5]) | 32 random bytes from go-webauthn, single-use, ~5 min | go-webauthn | replay of a ceremony |
 | Auth tokens ([§5.6]) | JWT, HS256, keyed by the account's `tokenKey` + the collection's secret | PocketBase | every API call; rotating `tokenKey` revokes all of an account's tokens |
 | Invite tokens ([§7.1]) | 32 bytes `crypto/rand`, base64url (`randid.Token`); looked up by its SHA-256 hex | `internal/invites` | joining a list; a revoked or expired link opens nothing |
 | Setup link ([D-241]) | 32 bytes `crypto/rand`, base64url, as invite tokens; SHA-256 in memory only, compared with `crypto/subtle` | `internal/signup` | the first account of an invite-only instance |
-| Server-minted ids, photo tokens, handles | `crypto/rand` (`internal/randid`: 128 bits for ids and photo tokens, 64 for handles) | `internal/randid` | unguessable list ids and photo URLs ([§10]); PocketBase's own id generator is `math/rand` and never used where guessing matters |
+| Server-minted ids, photo tokens, handles | `crypto/rand` (`internal/randid`: 128 bits for ids and photo tokens, 64 for handles) | `internal/randid` | unguessable list ids and photo URLs ([§10]); a record PocketBase mints itself gets 15 characters `[a-z0-9]` from `crypto/rand` (its id field's pattern), and its `math/rand` generator names only log rows |
 | Client-minted ids (items, categories, op ids, `browser_id`) | `crypto.randomUUID()` (122 random bits) | browser | collisions and guessable ids |
 | OIDC sign-in ([§5.9]) | authorization code with PKCE (S256) and `state`; user data from the userinfo endpoint over TLS, so the id_token's signature is never relied on | PocketBase | the provider round-trip |
 | Superuser password | bcrypt | PocketBase | the dashboard |

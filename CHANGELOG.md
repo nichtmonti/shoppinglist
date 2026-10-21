@@ -8,6 +8,8 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **A passkey with an RSA key shorter than 2048 bits is refused**, when it is created and at every sign-in, as NIST's minimum through 2030 asks. Passkeys from phones, password managers and security keys use stronger keys and are not affected.
+- **A passkey with an RSA key shorter than 2048 bits is refused**, when it is created and when it signs in, as NIST requires through 2030. The passkeys of phones, computers and security keys in use are elliptic-curve or 2048-bit RSA, so none is affected.
 - **The cards under "My lists" are one line.** Each shows the list's name and, beside it, how many items are still open, a grey ✓ when everything is checked off, and nothing for an empty list. The number of members is gone from the cards; the list's header and "Share & members" still show it. In the list switcher, the list you are in has its green tick where its number would be ([D-123]).
 - **A scanned product's number says what it is.** Under the photo in "Product details" and "Edit item", the long number now has "Barcode" in front of it, and the “Copy barcode” button beside it is gone.
 - **[`CONTRIBUTING.md`](CONTRIBUTING.md) says how to send a change and what it must test.** A change comes as a pull request against `main` on Codeberg; a new feature brings its tests, and a bug fix a test that fails without the fix.
