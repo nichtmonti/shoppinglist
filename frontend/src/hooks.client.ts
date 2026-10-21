@@ -1,4 +1,6 @@
 import type { HandleClientError } from '@sveltejs/kit/hooks';
+import Dexie from 'dexie';
+import { t } from '#lib/i18n/index.js';
 import { describeError, reportClientError, watchUncaughtErrors } from '#lib/client-errors.js';
 import {
 	claimReload,
@@ -12,7 +14,13 @@ import {
 
 watchResourceFailures();
 watchServiceWorker();
-watchUncaughtErrors();
+// A change the device's database refused (full, or its connection lost) is
+// gone unless the user hears of it ([D-293]); the toasts load lazily, off the
+// boot path.
+watchUncaughtErrors((error) => {
+	if (!(error instanceof Dexie.DexieError)) return;
+	void import('#lib/toasts.js').then(({ showFailure }) => showFailure(t('local_save_failed')));
+});
 
 // Every error SvelteKit catches on the client — a route that throws while it
 // loads or renders — is reported to the server log and carried to the error

@@ -166,15 +166,15 @@
 		const name = addableName(rawName);
 		if (!name) return;
 
-		// Clear the field after the await only if it still holds what was
-		// committed: a fill typed meanwhile must survive.
+		// Clear the field once the add is saved, and only if it still holds
+		// what was committed: a fill typed meanwhile must survive, and a
+		// failed save must not take the typed name with it.
 		const committedQuery = query;
 
 		await unsuppressName(name);
 
 		// Planned after the await, against the list as it is now.
 		const plan = planAdd(name, dictSlug, items, categories, corpus);
-		if (query === committedQuery) query = '';
 
 		if (plan.kind === 'existing') {
 			await applyDedupHit(plan.item, props.onjump, quantity);
@@ -185,6 +185,7 @@
 				t('add_added', { name: plan.name })
 			);
 		}
+		if (query === committedQuery) query = '';
 		focusInput();
 	}
 

@@ -247,6 +247,7 @@
 	"common_error_session": "Deine Sitzung ist abgelaufen. Melde dich erneut an und versuch es dann noch einmal.",
 	"common_error_rate_limited": "Zu viele Versuche. Warte einen Moment und versuch es dann noch einmal.",
 	"error_page_body": "Diese Ansicht konnte nicht angezeigt werden. Der Fehler wurde gemeldet.",
+	"local_save_failed": "Deine Änderung ließ sich auf diesem Gerät nicht speichern. Lade die App neu und versuche es noch einmal.",
 	"error_page_not_found": "Diese Seite gibt es nicht.",
 	"error_page_reload": "Neu laden",
 	"error_page_retrying": "Einen Moment …",

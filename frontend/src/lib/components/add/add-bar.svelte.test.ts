@@ -449,6 +449,23 @@ describe('AddBar — head-noun classification of a typed name (§9)', () => {
 		expect((await db.items.toArray()).some((r) => r.name === 'Milch')).toBe(false);
 	});
 
+	// [D-293] The field clears once the add is saved: a save the device
+	// refuses must not take the typed name with it.
+	it('keeps the typed name until the add is saved', async () => {
+		await seedSweetsAndDairy();
+		const { input } = await renderBar();
+		const add = vi.spyOn(db.pending_ops, 'add').mockReturnValueOnce(new Promise(() => {}) as never);
+
+		await openAndType(input, 'Mil');
+		await chipFor('Milch');
+		await fireEvent.keyDown(input, { key: 'Escape' });
+		await fireEvent.keyDown(input, { key: 'Enter' });
+
+		await waitFor(() => expect(add).toHaveBeenCalled());
+		expect((input as HTMLInputElement).value).toBe('Mil');
+		add.mockRestore();
+	});
+
 	it('lets an explicitly selected suggestion keep its own aisle', async () => {
 		// The dictionary deliberately files Kokosmilch away from dairy; picking it
 		// must not be second-guessed by the "milch" head.

@@ -245,6 +245,7 @@
 	"common_error_session": "Your session has expired. Sign in again, then try again.",
 	"common_error_rate_limited": "Too many attempts. Wait a moment, then try again.",
 	"error_page_body": "This view could not be shown. The error has been reported.",
+	"local_save_failed": "Your change could not be saved on this device. Reload the app and try again.",
 	"error_page_not_found": "This page does not exist.",
 	"error_page_reload": "Reload",
 	"error_page_retrying": "One moment…",

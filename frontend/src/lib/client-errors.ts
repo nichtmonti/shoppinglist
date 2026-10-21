@@ -72,14 +72,19 @@ export function reportUncaught(error: unknown): void {
 
 let watching = false;
 
-/** Sends every uncaught error and rejection on this page to reportUncaught. */
-export function watchUncaughtErrors(): void {
+/** Sends every uncaught error and rejection on this page to reportUncaught,
+ *  and to `also`, which can tell the user. */
+export function watchUncaughtErrors(also: (error: unknown) => void = () => {}): void {
 	if (watching || typeof window === 'undefined') return;
 	watching = true;
-	window.addEventListener('unhandledrejection', (event) => reportUncaught(event.reason));
+	const uncaught = (error: unknown) => {
+		reportUncaught(error);
+		also(error);
+	};
+	window.addEventListener('unhandledrejection', (event) => uncaught(event.reason));
 	// A resource that failed to load fires `error` too, without an error.
 	window.addEventListener('error', (event) => {
-		if (event.error !== undefined) reportUncaught(event.error);
+		if (event.error !== undefined) uncaught(event.error);
 	});
 }
 
