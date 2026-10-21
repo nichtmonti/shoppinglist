@@ -4,7 +4,8 @@
 // session's start and end on this device: the start-up refresh (§5.6) and
 // sign-out with its local teardown.
 import { initialToken, pb } from '../pb';
-import { wipeLocalAccountData } from './account-data';
+import { deleteLocalDatabase, wipeLocalAccountData } from './account-data';
+import { describeError, reportClientError } from '../client-errors';
 import { isAuthRejected, markAuthExpired, refreshSessionToken, syncAuthState } from './state';
 import { PHOTO_CACHE } from '../photo-cache';
 import { endSession, onRemoteSessionEnd, onRemoteSessionStart, sessionScope } from './session';
@@ -70,7 +71,21 @@ export async function logout(): Promise<void> {
 	// re-fetchable. `caches` is absent in SSR/tests.
 	if (typeof caches !== 'undefined') void caches.delete(PHOTO_CACHE);
 	// Awaited: this is what sign-out is for (./account-data says what stays).
-	await wipeLocalAccountData();
+	try {
+		await wipeLocalAccountData();
+	} catch (error) {
+		// Never a sign-out that leaves the account's data behind: the whole
+		// database goes, and the reload starts on an empty one.
+		reportClientError({
+			...describeError(error),
+			route: '',
+			path: location.pathname,
+			status: 0,
+			context: 'sign-out wipe failed; deleting the local database'
+		});
+		await deleteLocalDatabase();
+		location.reload();
+	}
 }
 
 // On app load: wait for the async store to apply its persisted token (its

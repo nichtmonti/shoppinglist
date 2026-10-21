@@ -73,7 +73,8 @@ vi.mock('#lib/i18n/index.js', () => ({
 // it is mocked so logout() can be asserted as "hands off to the wipe" without
 // standing up an IndexedDB in the node project.
 vi.mock('#lib/auth/account-data.js', () => ({
-	wipeLocalAccountData: vi.fn(async () => {})
+	wipeLocalAccountData: vi.fn(async () => {}),
+	deleteLocalDatabase: vi.fn(async () => {})
 }));
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -85,7 +86,7 @@ vi.mock('@simplewebauthn/browser', () => ({
 }));
 
 import { sendSignal, startAuthentication, startRegistration } from '@simplewebauthn/browser';
-import { wipeLocalAccountData } from '#lib/auth/account-data.js';
+import { deleteLocalDatabase, wipeLocalAccountData } from '#lib/auth/account-data.js';
 import {
 	addPasskey,
 	authState,
@@ -434,6 +435,21 @@ describe('logout()', () => {
 		await logout();
 
 		expect(order).toEqual(['clear', 'wipe']);
+	});
+
+	// A failed wipe must not leave the account's lists to the next account:
+	// the whole database goes, and the page starts again on an empty one.
+	it('deletes the whole local database when the wipe fails', async () => {
+		vi.mocked(wipeLocalAccountData).mockRejectedValueOnce(new Error('QuotaExceededError'));
+		const reload = vi.fn();
+		vi.stubGlobal('location', { pathname: '/settings', reload });
+		vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 204 })));
+
+		await logout();
+
+		expect(vi.mocked(deleteLocalDatabase)).toHaveBeenCalled();
+		expect(reload).toHaveBeenCalled();
+		vi.unstubAllGlobals();
 	});
 });
 

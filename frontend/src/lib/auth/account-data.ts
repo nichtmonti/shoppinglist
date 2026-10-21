@@ -63,3 +63,13 @@ export async function wipeLocalAccountData(): Promise<void> {
 	// read replays the rows just deleted ([D-145]).
 	invalidateLiveCaches();
 }
+
+/**
+ * The sign-out's fallback when the wipe itself fails (an IndexedDB that is
+ * full or lost its connection): the whole database goes, device preferences
+ * and the vocabulary with it, which the next start sets up again. Left in
+ * place, the account's lists would wait for whoever signs in next.
+ */
+export async function deleteLocalDatabase(): Promise<void> {
+	await db.delete();
+}
