@@ -251,6 +251,7 @@
 	"error_page_reload": "Reload",
 	"error_page_retrying": "One moment…",
 	"common_quantity": "Quantity",
+	"common_barcode": "Barcode",
 	"common_name": "Name",
 	"common_note": "Note",
 	"common_category": "Category",
@@ -619,7 +620,6 @@
 	"shop_product_info": "Product details for {name}",
 	"shop_product_details": "Product details",
 	"shop_photo_enlarge": "Enlarge photo of {name}",
-	"shop_copy_barcode": "Copy barcode",
 
 	"sync_conflict_cleared": "{who} had already cleared {field}.",
 	"sync_conflict_cleared_named": "“{name}”: {who} had already cleared {field}.",

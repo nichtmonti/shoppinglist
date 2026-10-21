@@ -6,6 +6,10 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
+## Unreleased
+
+- **A scanned product's number says what it is.** Under the photo in "Product details" and "Edit item", the long number now has "Barcode" in front of it, and the “Copy barcode” button beside it is gone.
+
 ## v0.17.0: errors that say what went wrong, and a server that stops on a setting it does not know (2026-10)
 
 **For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` (and `SQLITE_PRAGMAS`, if you set it) is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it. With passkeys off (`SHOPPINGLIST_PASSKEYS=off`), check that `SHOPPINGLIST_APP_URL` is the `https://` address: a plain `http://` one anywhere but `localhost` stops the server too, as it already did with passkeys on. If you filter or alert on the server's warnings in the container log, match their new form (below).

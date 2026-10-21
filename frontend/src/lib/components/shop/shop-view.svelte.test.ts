@@ -662,10 +662,9 @@ describe('ShopView — product details sheet', () => {
 			})
 		).toBeDefined();
 
-		// Name, barcode with copy affordance, quantity, note — all read-only.
+		// Name, labelled barcode, quantity, note — all read-only.
 		expect(within(dialog).getByText('Sonnencreme')).toBeDefined();
-		expect(within(dialog).getByText('4005808307870')).toBeDefined();
-		expect(within(dialog).getByRole('button', { name: t('shop_copy_barcode') })).toBeDefined();
+		expect(within(dialog).getByText(`${t('common_barcode')}: 4005808307870`)).toBeDefined();
 		expect(within(dialog).getByText(new RegExp(`${t('common_quantity')}.*200 ml`))).toBeDefined();
 		expect(within(dialog).getByText('wasserfest')).toBeDefined();
 		// The aisle it is shelved in (§9.1, [D-213]).
@@ -833,40 +832,6 @@ describe('ShopView — product details sheet', () => {
 				name: t('shop_product_info', { name: 'Haselnusscreme mit Vollmilchgeschmack' })
 			})
 		).not.toBeNull();
-	});
-
-	it('copies the barcode to the clipboard from the product sheet', async () => {
-		const writeText = vi.fn().mockResolvedValue(undefined);
-		Object.defineProperty(navigator, 'clipboard', {
-			value: { writeText },
-			configurable: true
-		});
-
-		const cat = makeCategory({
-			list: LIST_ID,
-			slug: 'personal_care',
-			name: 'Pflege',
-			sort_order: 1
-		});
-		const item = makeItem({
-			list: LIST_ID,
-			name: 'Sonnencreme',
-			category_key: cat.id,
-			barcode: '4005808307870'
-		});
-		await seedList({ listId: LIST_ID, items: [item], categories: [cat] });
-
-		render(ShopView, { props: { listId: LIST_ID } });
-
-		const info = await screen.findByRole('button', {
-			name: t('shop_product_info', { name: 'Sonnencreme' })
-		});
-		await fireEvent.click(info);
-
-		const dialog = await screen.findByRole('dialog');
-		await fireEvent.click(within(dialog).getByRole('button', { name: t('shop_copy_barcode') }));
-
-		expect(writeText).toHaveBeenCalledWith('4005808307870');
 	});
 
 	// The sheet shows the row as it is now: an edit elsewhere reaches it, and a

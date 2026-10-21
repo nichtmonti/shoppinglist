@@ -253,6 +253,7 @@
 	"error_page_reload": "Neu laden",
 	"error_page_retrying": "Einen Moment …",
 	"common_quantity": "Menge",
+	"common_barcode": "Barcode",
 	"common_name": "Name",
 	"common_note": "Notiz",
 	"common_category": "Kategorie",
@@ -594,7 +595,6 @@
 	"shop_product_info": "Produktdetails für {name}",
 	"shop_product_details": "Produktdetails",
 	"shop_photo_enlarge": "Foto von {name} vergrößern",
-	"shop_copy_barcode": "Barcode kopieren",
 
 	"sync_conflict_cleared": "{who} hatte {field} schon entfernt.",
 	"sync_conflict_cleared_named": "„{name}“: {who} hatte {field} schon entfernt.",
