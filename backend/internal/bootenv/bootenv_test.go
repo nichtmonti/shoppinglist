@@ -332,8 +332,8 @@ func TestApplySettingsPartialEnvLeavesOtherSettingsAlone(t *testing.T) {
 
 // TestApplySettingsWarnsOfAStoredHeaderWithoutTheVariable: unset seeds
 // nothing, so a header stored by an earlier start stays trusted after the
-// variable is commented out (.env.example's LAN tryout says to). The boot
-// says so, since without a proxy any client can then pick its own bucket.
+// variable is commented out. The boot says so, since without a proxy any
+// client can then pick its own bucket.
 func TestApplySettingsWarnsOfAStoredHeaderWithoutTheVariable(t *testing.T) {
 	app := testutil.NewApp(t)
 	out := testutil.CaptureLog(t)

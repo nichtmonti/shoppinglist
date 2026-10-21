@@ -9,7 +9,7 @@ Ten programs the gate, the tests, CI and the dev loop depend on, each declared i
 | `gosec/` | [gosec](https://github.com/securego/gosec) | `go-lint` in the gate, `.woodpecker/go.yaml` |
 | `gitleaks/` | [gitleaks](https://github.com/gitleaks/gitleaks), secrets in the history | the gate, the pre-push hook, `.woodpecker/go.yaml` ([D-203], [D-274]) |
 | `govulncheck/` | [govulncheck](https://go.dev/blog/vuln) | `.woodpecker/security.yaml` |
-| `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `.woodpecker/security.yaml` |
+| `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `osv` in the gate, `.woodpecker/security.yaml` |
 | `air/` | [air](https://github.com/air-verse/air) | `scripts/dev.sh` ([D-71]) |
 | `task/` | [go-task](https://taskfile.dev), the runner behind `Taskfile.yml` | `scripts/gate.sh` and CI ([D-177]) |
 | `dex/` | [Dex](https://dexidp.io), an OpenID Connect provider | `scripts/dev.sh --oidc`, the OIDC tests (`backend/internal/dextest`, `e2e/oidc`) and `shots.sh docs` ([D-154]) |

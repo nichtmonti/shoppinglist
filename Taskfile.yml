@@ -467,7 +467,7 @@ tasks:
       - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:oidc npx playwright test -c oidc/oidc.config.ts {{.CLI_ARGS}}'
 
   e2e:tiles:
-    desc: The tile audit on the design gallery, no backend (e2e/tiles, 8093, [D-166])
+    desc: The tile and state audits on the design gallery, no backend (e2e/tiles, 8093, [D-166])
     deps: [deps]
     cmds:
       - defer: *failed
