@@ -237,7 +237,9 @@ SHOPPINGLIST_TRUSTED_PROXY_HEADER=X-Forwarded-For
 ```
 
 It is applied at every boot and wins over the dashboard (`/_/` → Settings →
-Application, where it can also be set by hand).
+Application, where it can also be set by hand). While neither sets one, the log
+warns once per start when a request carries `X-Forwarded-For` or a similar
+header.
 
 #### Only if you run a proxy chain
 

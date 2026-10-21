@@ -108,7 +108,7 @@ in a private window.
 ## Run your own instance
 
 You need Docker with Compose, HTTPS from a reverse proxy, and a domain for
-passkeys, which [does not have to be public](docs/deploying.md#no-public-domain).
+passkeys, which [does not have to be public](docs/deploying.md#if-you-have-no-public-domain).
 Save this as `docker-compose.yml` in a directory of its own:
 
 ```yaml
