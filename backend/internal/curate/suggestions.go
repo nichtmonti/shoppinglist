@@ -196,8 +196,8 @@ func categoryLabel(categoryKey string, labels map[string]string) string {
 
 // Print writes the §6.13 report format, e.g.:
 //
-//	"kiwi"     (5 lists)  produce: 4, snacks_sweets: 1
-//	"hummus"   (4 lists)  pantry: 2, dairy_eggs: 1, other: 1
+//	"kiwi"       (5 lists)  produce: 4, snacks_sweets: 1
+//	"hummus"     (4 lists)  pantry: 2, dairy_eggs: 1, other: 1
 func Print(w io.Writer, groups []Group) {
 	for _, g := range groups {
 		fmt.Fprintf(w, "%-12s (%d lists)  %s\n", fmt.Sprintf("%q", g.Name), g.ListCount, formatCategories(g.CategoryCount))

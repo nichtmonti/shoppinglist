@@ -70,7 +70,7 @@ type Serve struct {
 	// Most lists one account can be on, its own and joined ones. Joining is
 	// never refused. Lowering it removes no one.
 	MaxListsPerAccount Positive `env:"SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT" envDefault:"25" unit:"lists per account"`
-	// Where the settings screen's "Source code" link points. Running a
+	// Where the settings screen's "Source code (AGPL-3.0)" link points. Running a
 	// **modified** version, the AGPL-3.0 requires pointing it at your source.
 	// The barcode lookup names it to Open Food Facts too, in its User-Agent.
 	//
@@ -94,7 +94,7 @@ type OIDCConnection struct {
 // configuration ([D-65]). SQLITE_PRAGMAS is unprefixed: it names the SQLite
 // driver's own connection options.
 type Boot struct {
-	// PocketBase's "app URL". With passkeys off, the app's origin when
+	// PocketBase's *Application URL*. With passkeys off, the app's origin when
 	// `SHOPPINGLIST_RP_ORIGIN` is unset.
 	//
 	// Default: `http://localhost:8090`

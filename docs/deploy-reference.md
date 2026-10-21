@@ -32,8 +32,8 @@ There is no database URL (SQLite lives in the data volume), no secret key
 | `SHOPPINGLIST_SCANNER` | `on` | `off` removes the barcode scanner and its camera permission; the server then never contacts Open Food Facts. Photos already stored keep showing. |
 | `SHOPPINGLIST_MAX_ITEMS_PER_LIST` | `5000` | Most items one list holds, bought and removed ones included. Below `2000` it also caps one import. Lowering it deletes nothing. |
 | `SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT` | `25` | Most lists one account can be on, its own and joined ones. Joining is never refused. Lowering it removes no one. |
-| `SHOPPINGLIST_SOURCE_URL` | this repository | Where the settings screen's "Source code" link points. Running a **modified** version, the AGPL-3.0 requires pointing it at your source. The barcode lookup names it to Open Food Facts too, in its User-Agent. |
-| `SHOPPINGLIST_APP_URL` | `http://localhost:8090` | PocketBase's "app URL". With passkeys off, the app's origin when `SHOPPINGLIST_RP_ORIGIN` is unset. |
+| `SHOPPINGLIST_SOURCE_URL` | this repository | Where the settings screen's "Source code (AGPL-3.0)" link points. Running a **modified** version, the AGPL-3.0 requires pointing it at your source. The barcode lookup names it to Open Food Facts too, in its User-Agent. |
+| `SHOPPINGLIST_APP_URL` | `http://localhost:8090` | PocketBase's *Application URL*. With passkeys off, the app's origin when `SHOPPINGLIST_RP_ORIGIN` is unset. |
 | `SHOPPINGLIST_TRUSTED_PROXY_HEADER` | *unset* (`.env.example`: `X-Forwarded-For`) | The header your reverse proxy puts the client IP in, usually `X-Forwarded-For`. Without it every user shares one rate limit. Unset keeps a header an earlier start stored (the log warns); clear it in the dashboard. [Details](#1-send-the-app-the-real-client-ip). |
 | `SHOPPINGLIST_TRUSTED_PROXY_LEFTMOST` | `off` | `on` reads the header's leftmost value. Only for a [proxy chain](#only-if-you-run-a-proxy-chain) whose every hop overwrites the header. |
 | `SQLITE_PRAGMAS` | *stock* | Only for a data directory on NFS or virtiofs. [Details](#sqlite-on-network-storage). |
@@ -155,9 +155,10 @@ account by a matching email, and linking is refused when the identity already
 has an account with lists or passkeys of its own.
 
 **If sign-in fails after the provider accepted it,** the server log has a line
-with `OIDC sign-in failed after the provider accepted it` and the cause.
-"Failed to fetch OAuth2 token" means a wrong client secret, token endpoint or
-redirect URI; "Failed to fetch OAuth2 user" a wrong userinfo endpoint.
+`level=WARN msg="shoppinglist: OIDC sign-in failed after the provider accepted it" error=…`
+with the cause. `error="Failed to fetch OAuth2 token."` means a wrong client
+secret, token endpoint or redirect URI; `error="Failed to fetch OAuth2 user."` a
+wrong userinfo endpoint.
 Hand-set endpoints are the usual culprit, which the issuer setting avoids.
 Behind an [egress allowlist](#an-egress-allowlist), check that it allows the
 provider's hosts.
