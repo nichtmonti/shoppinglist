@@ -152,7 +152,7 @@ A ceremony's `SessionData` must survive between its two requests and be single-u
 
 - **Auth token: 90 days, sliding**, refreshed at every app start while online ([D-04]); kept in the SDK's async auth store on IndexedDB. A **401** from the refresh or a sync request marks the session expired (auth record and local mirror kept, for §5.8's re-auth), and the sync engine never mounts under the dead token ([D-28]). Any other refresh failure is transient; the local session stays readable offline.
 - **A session has a generation** [D-109]: asynchronous work checks it before each write, inside the write's transaction, so nothing arriving after sign-out writes. Sign-out in one tab ends the session in every tab (`#lib/auth/session`).
-- **Revocation** is per-account **token-key rotation**: „Überall abmelden" (`POST /api/account/rotate-token-key`).
+- **Revocation** is per-account **token-key rotation**: „Überall abmelden“ (`POST /api/account/rotate-token-key`).
 - **Sign-out on this device wipes the account's local data** [D-55]: the auth record, the SW photo cache, and through `wipeLocalAccountData` every list-data table (shadows and outbox included), the roster, `scanned_products`, and the account-bound `meta` keys. Device preferences and the seeded vocabulary survive; the auth screen's nickname draft is reset. With edits queued it warns first.
 
 ### 5.7 RP-ID / self-hosting config
@@ -164,7 +164,7 @@ A ceremony's `SessionData` must survive between its two requests and be single-u
 ### 5.8 Offline ↔ session policy
 
 - **Local Dexie data is readable and writable with no valid server token.** The token gates **syncing only**.
-- **The gate is "authenticated at least once, ever."** After that the device works offline indefinitely.
+- **The gate is having authenticated at least once, ever.** After that the device works offline indefinitely.
 - An expired token on reconnect shows a **one-tap re-auth prompt**: never silent (WebAuthn needs user activation), **never blocking local use**; **queued edits are kept** and drain right after.
 - **Re-auth keeps the account** ([D-76]): one that lands in another account is refused before its session is stored, an account that sign-in just created is deleted with its own token, and the device then remembers the passkey as its login.
 
@@ -175,10 +175,10 @@ Passkeys stay the default and the only self-serve signup; an operator may add an
 - **Configuration** (the variables: [deploy-reference.md](../deploy-reference.md#oidc-login)). `SHOPPINGLIST_OIDC=on|off` is the switch; the endpoints come from the issuer's discovery document ([D-208]), or explicit URLs for a provider without one. `oidc.Apply` writes `accounts.OAuth2` at serve time: `on` ⇒ the `oidc` provider (other provider rows kept); `off`/unset ⇒ OAuth2 off, dashboard-added providers included, and `auth-with-oauth2` refuses. The boot fails on connection variables without the switch, neither login on, or an invalid value ([D-61]), and logs how many accounts a switched-off login strands. `SHOPPINGLIST_PASSKEYS=off` removes the §5.4 routes and the RP-ID requirement. Redirect URI: `<app-origin>/api/oauth2-redirect`.
 - **Client flow.** The SDK's realtime form (`@oauth2` SSE topic), the provider **popup opened synchronously at click time**. The result populates `pb.authStore` like a passkey finish; §5.6 and §5.8 apply unchanged.
 - **Provisioning.** The first OIDC login creates the account at system level in PB's exchange transaction (`OnRecordAuthWithOAuth2Request` hook; `accounts.CreateRule` stays superuser-only): **no email** ([D-25]), `verified`, a null `handle` (§6.1), and the nickname from the name claim, else the username, else the email's local part, else empty (the client shows a placeholder). **No email auto-merge:** the hook accepts PB's resolved record only when this `sub`'s `ExternalAuth` row points at it. OIDC plus `SHOPPINGLIST_SIGNUP=closed` makes the provider the sole onboarding path.
-- **Link** („Mit ‹name› verknüpfen"). Signed in as A, the user signs in with the provider as B; `POST /api/account/link` carries A's token as Authorization and B's as body `{token}`. If B has **no memberships and no passkeys**, one transaction marks A `verified` first, moves B's `_externalAuths` row and identity label to A, and deletes B; A keeps its id, lists, passkeys and sessions. Otherwise **409**, nothing changes; A already linked, or B without an OIDC login: **400**. Never a merge.
-- **`GET /api/auth/methods`** returns `{passkeys: {enabled, signup, signup_by_link}, oidc: {enabled, provider, name, linked, identity}}`. The UI shows each login only while it is on (`SHOPPINGLIST_SIGNUP` gates passkey signup only) and, once linked, „Verbunden mit ‹name› als ‹identity›". The link route and the last-passkey guard count an OIDC login only while OIDC is on; §5.8's re-auth uses the device's last login while it is on.
+- **Link** („Mit ‹name› verbinden“). Signed in as A, the user signs in with the provider as B; `POST /api/account/link` carries A's token as Authorization and B's as body `{token}`. If B has **no memberships and no passkeys**, one transaction marks A `verified` first, moves B's `_externalAuths` row and identity label to A, and deletes B; A keeps its id, lists, passkeys and sessions. Otherwise **409**, nothing changes; A already linked, or B without an OIDC login: **400**. Never a merge.
+- **`GET /api/auth/methods`** returns `{passkeys: {enabled, signup, signup_by_link}, oidc: {enabled, provider, name, linked, identity}}`. The UI shows each login only while it is on (`SHOPPINGLIST_SIGNUP` gates passkey signup only) and, once linked, „Verbunden mit ‹name› als ‹identity›“. The link route and the last-passkey guard count an OIDC login only while OIDC is on; §5.8's re-auth uses the device's last login while it is on.
 - **Identity label** (§4.4): the provider's `preferred_username`, else the address it asserted, written at every sign-in to the server-only `oidc_identities` (one row per account), served only to the account itself through `/api/auth/methods`, never in the §7.4 roster, and deleted with the OIDC login or the account. The client's offline cache of the methods answer drops it with `linked`.
-- **Unlink** („Anmeldung entfernen", whose confirmation says the next provider sign-in creates a separate, empty account). `POST /api/account/unlink` deletes the `_externalAuths` row and label in one transaction; **409** unless passkeys are on and the account has one (race-free with the last-passkey guard), **404** while OIDC is off or the account has no OIDC login. Sessions stay valid; the device's remembered login becomes the passkey.
+- **Unlink** („Anmeldung entfernen“, whose confirmation says the next provider sign-in creates a separate, empty account). `POST /api/account/unlink` deletes the `_externalAuths` row and label in one transaction; **409** unless passkeys are on and the account has one (race-free with the last-passkey guard), **404** while OIDC is off or the account has no OIDC login. Sessions stay valid; the device's remembered login becomes the passkey.
 - **Testing.** Against Dex ([D-154]); the popup inside the installed PWA is manual device testing only (§5.7).
 
 ---
@@ -240,11 +240,11 @@ No name of its own, no update rule [D-08]; readable only by its owner (the roste
 | category_key | **string, nullable** | `id` of one of *this list's* `list_categories` rows (§6.7), a plain key, not a relation. null **or an unknown/hidden/tombstoned key** ⇒ the list's **Others** category (§6.12) |
 | checked | bool | |
 | checked_at | **datetime, nullable** | **server-stamped by the sync-push route** when an applied op flips `checked` true, nulled when it flips false [D-26]. **Never carried in ops**; the UI shows an optimistic local stamp until the server's arrives. Drives the trip split and newest-first order (§6.10, §9). Besides the push route, clone and import copy it (§7.5) and the clear-history route [D-79] bulk-nulls it |
-| last_bought_at | **datetime, nullable** | **server-stamped by the sync-push route** to `now()` whenever an applied op flips `checked` true [D-26]; **persists across unchecking**, except for an untick that takes the tick back (`prev_bought_at`, [D-303]). **Never carried in ops.** Dates the previous-items screen and this list's typeahead suggestions (§6.10); `null` = never bought, rendered as no date. The §7.5 clear-history route [D-79] is the only other writer (bulk null); on a **tombstoned** row that purges it from "Frühere Artikel" and re-arms the §13 sweep ([D-100]) |
+| last_bought_at | **datetime, nullable** | **server-stamped by the sync-push route** to `now()` whenever an applied op flips `checked` true [D-26]; **persists across unchecking**, except for an untick that takes the tick back (`prev_bought_at`, [D-303]). **Never carried in ops.** Dates the previous-items screen and this list's typeahead suggestions (§6.10); `null` = never bought, rendered as no date. The §7.5 clear-history route [D-79] is the only other writer (bulk null); on a **tombstoned** row that purges it from „Frühere Artikel“ and re-arms the §13 sweep ([D-100]) |
 | prev_bought_at | **datetime, nullable** | **ignored by the client**: the `last_bought_at` a tick replaced, so an untick that takes the tick back restores it [D-303]; nulled with it by clear-history. Not in the client row shape |
 | barcode | **string, nullable** | EAN/UPC from the scanner (§9.2); scan-dedup and re-lookup |
 | image_url | **string, nullable** | product-image **URL** (§9.2), always a **path on our own origin** (`/api/barcode/photo/{token}`); `img-src` is `'self'` ([D-21]). **Server-stamped from `barcode`** by the sync-push route, import and clone: the photo the lookup stored for that barcode, empty when there is none. **Never carried in ops**; a value an op still carries is dropped ([D-266]). Synced as a URL (§8.3), never as bytes; SW-cached. **No per-item icon field** (§9.1) |
-| modified_by | relation → accounts, **non-cascading** | **server-stamped** by the sync-push route on every applied write; conflict attribution ("Anna set it to 3"). `cascadeDelete: false`: deleting the account clears it, rendered as "someone" (§7.4) [D-32] |
+| modified_by | relation → accounts, **non-cascading** | **server-stamped** by the sync-push route on every applied write; conflict attribution ("‹who› had already set ‹field› to “‹theirs›”."). `cascadeDelete: false`: deleting the account clears it, rendered as "someone" (§7.4) [D-32] |
 | updated | | PB auto-stamped on every write (feeds the §8.5 digest `hash` and the merge's `updated` comparisons) |
 | deleted_at | **datetime, nullable** | **server-stamped by the sync-push route** [D-45] when an applied op sets `deleted` true, nulled on restore. **Never carried in ops**: clients send a `deleted: true/false` signal (§8.2). The §13 tombstone GC (180d) reads it |
 
@@ -312,26 +312,26 @@ There is **no `purchases` collection** [D-18]: a checked-off item stays in `item
 
 | `checked_at` vs. the list's **current trip** | Bucket | Where it shows |
 |---|---|---|
-| **on it** | recently checked | the **shop view's** *"Erledigt"* section only, newest first; tap to restore |
-| **before it** | previous items | the per-list **"Frühere Artikel"** screen; tap to re-add |
+| **on it** | recently checked | the **shop view's** „Erledigt“ section only, newest first; tap to restore |
+| **before it** | previous items | the per-list **„Frühere Artikel“** screen; tap to re-add |
 
 **The current trip** is the list's run of check-offs with **no pause of three hours or more** between two of them (`TRIP_GAP_MS`), while the newest is less than three hours old, judged over the whole list from the server stamp [D-18].
 
-**A checked row whose `checked_at` is missing counts as long-since-checked**: previous items, sorted last in the default last-purchased order, never the done section [D-79]. Only „Kaufdaten zurücksetzen" (§7.5, at the foot of „Frühere Artikel" while any row carries a date, [D-271]) produces this state.
+**A checked row whose `checked_at` is missing counts as long-since-checked**: previous items, sorted last in the default last-purchased order, never the done section [D-79]. Only „Kaufdaten zurücksetzen“ (§7.5, at the foot of „Frühere Artikel“ while any row carries a date, [D-271]) produces this state.
 
 Both buckets are **client-side view filters over `items`**; nothing moves in storage. An open view re-sorts when the trip ends (`#lib/state/clock` ticks then and when the tab becomes visible).
 
-- **Re-adding** clears `checked`/`checked_at` (not `last_bought_at`) and puts the same row back on the active list as a **new entry**: no old quantity; the note comes back only when re-added from "Frühere Artikel", not from the add bar or scanner ([D-200]).
+- **Re-adding** clears `checked`/`checked_at` (not `last_bought_at`) and puts the same row back on the active list as a **new entry**: no old quantity; the note comes back only when re-added from „Frühere Artikel“, not from the add bar or scanner ([D-200]).
 - **Restoring** from recently-checked undoes this trip's check-off and keeps every field.
 - **Removing** (tombstone, §8.2) is distinct from checking off. A removed row **with** a `last_bought_at` stays in previous items; one **never bought** never appears there ([D-18]). The predicate lives in `frontend/src/lib/sorting.ts` (view, client dedup), mirrored by `remembersPurchase` in the §8.3 merge.
 - **Per list, kept indefinitely.** §13's 180-day tombstone sweep skips tombstoned `items` carrying a `last_bought_at`; clearing the stamps (§7.5) returns them to it ([D-100]).
 - **No conflict logic.** Check/uncheck rides the field-level merge (§8.3); `checked_at` is stamped outside it, so it cannot conflict or toast [D-26].
 - Previous items feed this list's derived typeahead picks (§9).
-- **`last_bought_at` is shown** only on the **previous-items row** and this list's own **typeahead suggestions**, whenever there is a stamp, as a relative date in **calendar days** („heute" / „gestern" / „vor 3 Tagen"; `daysAgo` floors both ends to local midnight) [D-18]. Never on a **dictionary** suggestion, the planning row or the shop tile. [D-29] preserves it when it re-activates a row.
+- **`last_bought_at` is shown** only on the **previous-items row** and this list's own **typeahead suggestions**, whenever there is a stamp, as a relative date in **calendar days** (*heute* / *gestern* / *vor 3 Tagen*, as `Intl.RelativeTimeFormat` words them; `daysAgo` floors both ends to local midnight) [D-18]. Never on a **dictionary** suggestion, the planning row or the shop tile. [D-29] preserves it when it re-activates a row.
 
 ### 6.11 Suggestion suppression (account-bound preference) [D-17]
 
-Behind **"Nicht mehr vorschlagen"** (§9): a suppressed name leaves the typeahead's *union* (dictionary hits and derived picks alike) **without** erasing history.
+Behind **„Nicht mehr vorschlagen“** (§9): a suppressed name leaves the typeahead's *union* (dictionary hits and derived picks alike) **without** erasing history.
 
 **Not a collection, not synced through the outbox.** A **global, per-account** list of normalized names in `accounts.suppressed_names`, written through PocketBase's ordinary **own-row** path (§11), never `sync/push`, and **mirrored in Dexie** so it applies offline. Each change is kept as a **pending intent** (name → add/remove) until the server confirms it; the mirror is the last confirmed server copy with those intents applied ([D-137]). Delivery applies the intents to the account's current server list, so another device's names survive; it is retried on the next change, at app start, on reconnect and after re-auth. A refused write drops its intents, falls back to the server copy and says so. Simultaneous writes from two devices are last-write-wins.
 
@@ -374,7 +374,7 @@ Both are populated only by an **idempotent boot seeder**, never by hand or clien
 
   Retired: 🪴 `lime` Garten & Pflanzen / Garden & Plants (`garden`), folded into `hardware` [D-300].
 
-  Slugs are permanent. **Others** (`other`) is an **explicit** seeded category that sorts last and is the fallback for any null/unknown `category_key` (§6.6); there is no implicit "Uncategorised" bucket. `items.json` covers de/en and every category but `other`, which seeds no dictionary entries.
+  Slugs are permanent. **Others** (`other`) is an **explicit** seeded category that sorts last and is the fallback for any null/unknown `category_key` (§6.6); there is no implicit uncategorized bucket. `items.json` covers de/en and every category but `other`, which seeds no dictionary entries.
 
 **Content is hand-curated, never bulk-imported** from a grocery database [D-24]; this holds for the §6.13 tooling too.
 
@@ -385,8 +385,8 @@ Growing the global taxonomy is an **operator** action ([D-15]) with two tools th
 - **Additive seed-append command** (`cmd/appendseed`, outside the compiled binary; edits only the checked-in seed files): derives each `item_dictionary.id` exactly as the boot seeder does (`item_<normalized-en-name>`, §9 [D-44]), categories by `slug`; appends only entries whose id/slug is not already in `seed/items.json` / `seed/categories.json` (an id-string check, not a semantic one); bumps `seed_version`. The seed is embedded, so a **rebuilt and redeployed binary** applies it at its start (§6.12).
 - **`./shoppinglist dictionary-suggestions`**, a read-only CLI subcommand on the binary, run over SSH. It normalizes the names of non-deleted `items` across all lists with the **app's own normalization function**, the one the duplicate merge uses (§9, [D-29], [D-44]); keeps those matching no `item_dictionary.names_i18n` entry; groups them by normalized name, counting **distinct lists** and dropping groups below a threshold (e.g. 3 lists); and prints the groups by list count, descending, each with its **per-category occurrence counts** (`items.category_key → list_categories.id → slug`; a `slug`-less custom category is labelled as such), not one collapsed guess:
   ```
-  "kiwi"     (5 lists)  produce: 4, snacks_sweets: 1
-  "hummus"   (4 lists)  pantry: 2, dairy_eggs: 1, other: 1
+  "kiwi"       (5 lists)  produce: 4, snacks_sweets: 1
+  "hummus"     (4 lists)  pantry: 2, dairy_eggs: 1, other: 1
   ```
   The operator curates its output ([D-24]) into the append command.
 
@@ -403,7 +403,7 @@ Growing the global taxonomy is an **operator** action ([D-15]) with two tools th
 - **One reusable link per list**, live until expiry (**30 days**) or revocation. Any member may share, reset (rotate), revoke or create it; revoking blocks new joins without evicting anyone. **Any member's departure revokes it** (§7.3) [D-31].
 - The token is **minted server-side** (32 `crypto/rand` bytes, base64url) and looked up by its sha256 hash; a live link's token is kept beside the hash for every member to share, and a revocation blanks it [D-294]. It travels in the **URL fragment** (`#…`), never in access logs or Referer headers; the SPA POSTs it to the §7.6 routes.
 - **The server holds one active link per list**: a partial unique index (`ON invites (list) WHERE revoked = 0`) plus atomic rotation in the mint route [D-31].
-- The **"Share & members" sheet** shows the roster (§7.4, no avatars [D-57]) above the live link, with "Link zurücksetzen" and "Link zurückziehen" [D-310]; without a live link it offers "Link erstellen", and opening it never mints [D-330].
+- The **"Share & members" sheet** shows the roster (§7.4, no avatars [D-57]) above the live link, with „Link zurücksetzen“ and „Link zurückziehen“ [D-310]; without a live link it offers „Link erstellen“, and opening it never mints [D-330].
 
 ### 7.2 Leave = hard delete
 
@@ -443,7 +443,7 @@ Two variants build a populated list the same way, in one transaction [D-72]:
 
 Clone and import copy the list as it stands, `checked`, `checked_at` and `last_bought_at` included (the never-in-ops rule, §8.2, binds client ops, not routes), but never tombstoned rows, record ids, created/updated stamps or members; `modified_by` is the caller. The backup envelope (format tag, **one accepted version**, row caps) is in the §8.3 field contract; any other version is refused, not migrated [D-72].
 
-`POST /api/lists/{listId}/clear-history` [D-79] nulls `checked_at` and `last_bought_at` in one transaction on every item carrying either, **tombstones included** (such a row leaves "Frühere Artikel", §6.10, and its §13 GC re-arms [D-100]); `checked` is untouched. `RequireAuth` + [D-74] gate, byte-identical 403 for non-member and nonexistent list. Response `{"cleared": n}`, exactly the items whose stamps (and `updated`) changed (§8.5). The caller nulls both columns in its Dexie mirror as a local settle, never an op.
+`POST /api/lists/{listId}/clear-history` [D-79] nulls `checked_at` and `last_bought_at` in one transaction on every item carrying either, **tombstones included** (such a row leaves „Frühere Artikel“, §6.10, and its §13 GC re-arms [D-100]); `checked` is untouched. `RequireAuth` + [D-74] gate, byte-identical 403 for non-member and nonexistent list. Response `{"cleared": n}`, exactly the items whose stamps (and `updated`) changed (§8.5). The caller nulls both columns in its Dexie mirror as a local settle, never an op.
 
 ### 7.6 Join / preview flows
 
@@ -516,7 +516,7 @@ A custom, heavily unit-tested engine [D-10]. The app enters it only through `#li
 3. **`update`:** load the record. Missing: if the **list** is gone (§7.3) → `gone`; if the list lives (GC swept the row) → `denied`/`row_missing` [D-103] (§8.6).
    - **A delivery already decided** (the same `op_id`, `changed` and `base`, among the row's last 8 non-denied, non-merged verdicts, kept in its hidden `deliveries`) → nothing applies again: `noop` with the current record, or `partial` listing each field whose value differs now [D-42].
    - Sets `deleted` true on the `list_categories` row with slug `other` → `denied`: Others is permanent (§6.7, [D-30]).
-   - Tombstoned and the op **sets `deleted` true** → **convergent delete**: `noop`, no conflict (other coalesced fields are moot). **Except a check-off** [D-175]: an `items` op that also sets `checked` true stamps `last_bought_at` = `now()` on the tombstone (which stays removed, `checked` untouched) and answers `applied`, so the purchase reaches "Frühere Artikel" (§6.10).
+   - Tombstoned and the op **sets `deleted` true** → **convergent delete**: `noop`, no conflict (other coalesced fields are moot). **Except a check-off** [D-175]: an `items` op that also sets `checked` true stamps `last_bought_at` = `now()` on the tombstone (which stays removed, `checked` untouched) and answers `applied`, so the purchase reaches „Frühere Artikel“ (§6.10).
    - Tombstoned, the op **clears `deleted`** (a restore), and a **living** `items` row with the same normalized name exists → **restore-merge** [D-176]: the tombstone stays; the living row survives by the create-merge rules above but keeps its own quantity and note, and takes the tombstone's `last_bought_at` if newer, which the tombstone loses. `merged` with the survivor's `record_id`, logged in `merge_log` under the tombstone's id and the op's `op_id` [D-108]: a retry of the same op replays, a later restore by another op is decided anew. Without a living twin the restore lifts the tombstone as below.
    - Tombstoned and the op does not clear `deleted` → not applied; `deleted_conflict` with `{theirs_by}` (§8.4).
    - Otherwise, **per field `f` in `changed`** (excluding the `deleted` signal):
@@ -530,7 +530,7 @@ A custom, heavily unit-tested engine [D-10]. The app enters it only through `#li
 
 **The field contract** (`backend/internal/fieldcontract/field-contract.json`) is the one shared artefact for the writable-field allowlist, per-field byte caps, push limit, reason codes and backup envelope: the Go route embeds it and the frontend imports it [D-40], like `seed/digest-vectors.json` and `seed/normalization-vectors.json` (§9).
 
-The client engine has no per-collection machinery: "previous items" are ordinary `items` rows (§6.10) and suggestion suppression lives outside sync (§6.11). Besides the list cap [D-217], the route has **five special cases**, each a small unit-tested branch (§14): the `merged` create [D-29], the restore-merge [D-176], the Others protection [D-30], `checked` stamping [D-26] [D-175], and `deleted` stamping [D-45]; the rest is the general merge.
+The client engine has no per-collection machinery: previous items are ordinary `items` rows (§6.10) and suggestion suppression lives outside sync (§6.11). Besides the list cap [D-217], the route has **five special cases**, each a small unit-tested branch (§14): the `merged` create [D-29], the restore-merge [D-176], the Others protection [D-30], `checked` stamping [D-26] [D-175], and `deleted` stamping [D-45]; the rest is the general merge.
 
 ### 8.4 Conflict UX (client) [D-11]
 
@@ -590,7 +590,7 @@ Categories exist for **ordering** the store walk, not for labelling. A list's ca
 
 **Category assignment** is a picker of the list's categories (§6.7). **Aisle order is per-list**, set by any member in the category editor's arrange mode ([D-90]); it writes `sort_order` (§8). There is **no per-item drag-ordering** ([D-19]).
 
-**No "clear" step.** A checked item stays in the shop view's „Erledigt“ section for the current **trip** (the list's run of check-offs while the newest is under three hours old, [D-18]), then moves to the per-list **„Frühere Artikel“** screen (§6.10). Nothing is swept and no cron runs: it is a client-side, time-based view change, and each age shows in one place only.
+**No clearing step.** A checked item stays in the shop view's „Erledigt“ section for the current **trip** (the list's run of check-offs while the newest is under three hours old, [D-18]), then moves to the per-list **„Frühere Artikel“** screen (§6.10). Nothing is swept and no cron runs: it is a client-side, time-based view change, and each age shows in one place only.
 
 **Previous items screen (per list).** A sub-screen whose ‹ goes back to the list ([D-304]). Its rows are the list's checked items from earlier trips (§6.10), each **dated** with the relative day bought ([D-18]) and each a one-tap **re-add**: it clears `checked`/`checked_at` and resets the quantity ([D-200]); `last_bought_at` persists (§6.6). Its sort menu offers last purchased (default), A→Z and by category, kept in `meta.history_sort` ([D-121]).
 
@@ -599,7 +599,7 @@ Categories exist for **ordering** the store walk, not for labelling. A list's ca
 **Live preview ([D-117], [D-228]).** `/dev/gallery` renders every state of a list's contents with the production `ShopItems`/`ListItems` over fixtures.
 
 **Two views, separate jobs.** The **shop view is only for checking off**; the **list view is only for building and editing**. Both are client-side presentations over the same Dexie `items`.
-- **View choice:** `meta.list_view`, device-local and last-used; its only writer is the „Einkaufen / Bearbeiten“ switch in the app bar ([D-101], [D-276]). A list's sub-screens (previous items, category editor, text import) show no switch ([D-323]).
+- **View choice:** `meta.list_view`, device-local and last-used; its only writer is the „Einkaufen“/„Bearbeiten“ switch in the app bar ([D-101], [D-276]). A list's sub-screens (previous items, category editor, text import) show no switch ([D-323]).
 - **Item order ([D-115]):** both views share one order, **by category** (`sort_order` → name, Others last; the default) or **A→Z**, chosen from the app bar's sort menu and kept device-local in `meta.list_row_sort`, never synced. Checked items are newest-checked first.
 
 **Item visuals.** A category's emoji and colour show on its header, on a list row's chip in A→Z, and on each list-density row ([D-37], [D-313]); emoji are OpenMoji artwork drawn through `CategoryIcon` ([D-180], [D-181]). The shop view shows an item's **product photo** (`image_url`, §9.2) or its name; the list view shows no photos. **An item reads in three tiers**, name over quantity over note, with no quantity under 13px and no note under 12px ([D-275]).
@@ -650,7 +650,7 @@ The app root is the **„Meine Listen“ home**: the user's `memberships` as car
 
 **Per-list card**, computed client-side via `liveQuery`, no new field:
 - the list's `name`;
-- a **remaining count**: „12 offen“ (`!checked && !deleted_at`), „alles erledigt ✓“ when nothing is open, „leer“ with no items; no purchased totals;
+- a **remaining count**: „‹open› offen“ (`!checked && !deleted_at`), „alles erledigt ✓“ when nothing is open, „leer“ with no items; no purchased totals;
 - a **member count** when the roster cache (§7.4) shows more than one member;
 - an **unsynced dot** with the list's pending count from `pending_ops` (§8.2).
 
@@ -682,9 +682,9 @@ The app root is the **„Meine Listen“ home**: the user's `memberships` as car
 - **Token revocation** by per-account token-key rotation; 90-day sliding token life (§5.6).
 - **Account self-update is hook-allowlisted** to `nickname` and the suggestion-suppression preference (§11, [D-32]); deletion is its own route (§4.5).
 - **`img-src 'self' data:`**: no third-party image host is reachable; product photos are stored and served by the backend ([D-21]). With `items.image_url` server-stamped from the barcode ([D-266]), this is the second wall against a member pointing other members' browsers at a host of their choosing.
-- **`GET /api/barcode/photo/{token}` is the one unauthenticated route that serves stored user data** (an `<img src>` carries no bearer token, and the auth token is not a cookie, §5.6). The token is **128 `crypto/rand` bits**, so the route is not enumerable and cannot answer "has this household scanned *X*?"; it is rate-limited. This holds only while the `photo` field is **`Protected`** (else PocketBase's `/api/files/…` serves every photo, outside token and limiter) and the stored file is **named after the token, not the barcode** (PocketBase echoes the filename in `Content-Disposition`).
+- **`GET /api/barcode/photo/{token}` is the one unauthenticated route that serves stored user data** (an `<img src>` carries no bearer token, and the auth token is not a cookie, §5.6). The token is **128 `crypto/rand` bits**, so the route is not enumerable and cannot answer “has this household scanned *X*?”; it is rate-limited. This holds only while the `photo` field is **`Protected`** (else PocketBase's `/api/files/…` serves every photo, outside token and limiter) and the stored file is **named after the token, not the barcode** (PocketBase echoes the filename in `Content-Disposition`).
 - **RP-ID** validated at startup (§5.7).
-- **API rules and route checks enforce the whole access model** (§11), tested with explicit "unauthorised access is denied" cases (§14).
+- **API rules and route checks enforce the whole access model** (§11), tested with explicit “unauthorised access is denied” cases (§14).
 
 ### 10.1 Cryptography in use
 
@@ -730,7 +730,7 @@ Rules live in checked-in migrations (§14).
 | `barcode_cache` | no rules (server only; read only by the `/api/barcode` routes, §9.2, §10) | none | none | none |
 | `merge_log` | no rules (server only; the push route's record of merged create ids, [D-108]) | none | none | none |
 
-Membership filters (e.g. on `items`) are a cross-collection reference: "the requester's account appears among `memberships` rows for this list". **Both conditions must bind to the same membership row**; PB's single-join semantics for a repeated `@collection.memberships.*` reference give this, and the §14 integration tests pin it against the pinned version. Leave is a hard delete, so no rule needs tombstone awareness.
+Membership filters (e.g. on `items`) are a cross-collection reference: “the requester's account appears among `memberships` rows for this list”. **Both conditions must bind to the same membership row**; PB's single-join semantics for a repeated `@collection.memberships.*` reference give this, and the §14 integration tests pin it against the pinned version. Leave is a hard delete, so no rule needs tombstone awareness.
 
 Realtime SSE subscriptions obey the same list/view rules: a member who leaves stops receiving events at once.
 
@@ -744,7 +744,7 @@ Realtime SSE subscriptions obey the same list/view rules: a member who leaves st
 - **`@simplewebauthn/browser`** for the ceremonies.
 - **Service worker:** SvelteKit's, app-shell precache; installable PWA. Installing is offered only after sign-up ([D-231]): a banner for a signed-in user where Chromium offers installation, and the settings screen's first card in a browser tab.
 - **Settings** is one column of groups in the list's look ([D-269]): app (install, browser tab only), account (nickname, the OIDC link or login), passkeys (not with passkeys off, [D-76]), general (language, theme, hidden suggestions), sign out (this device, everywhere), and deleting the account, above the about footer. Leaving a list is on the list's ⋮ menus ([D-270]).
-- **Client errors reach the server log** ([D-197]): each distinct error is posted once per page session to `POST /api/client-errors` (unauthenticated, 16 KB cap, rate-limited, stores nothing, one log line); the error page offers „Neu laden".
+- **Client errors reach the server log** ([D-197]): each distinct error is posted once per page session to `POST /api/client-errors` (unauthenticated, 16 KB cap, rate-limited, stores nothing, one log line); the error page offers „Neu laden“.
 - **Lists home (§9.3)** is the app root; **two views (§9.1)**, shop and list, both fully functional offline, the choice persisted in `meta.list_view`.
 
 **Colour [D-114].** Green lives in the primary alone, split into a fill (`--primary`) and a text colour (`--primary-text`); in the app bar it marks a state ([D-276]). Category colours share one lightness and chroma per theme and differ by hue ([D-37]). Values live in `frontend/src/app.css`; `design-tokens.test.ts` checks their contrast.
@@ -756,7 +756,7 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 - **N = count of `pending_ops`** (one per record after coalescing), scoped to the list on screen (§8.2); on the home and settings, the whole device's outbox ([D-130]).
 - **Form** ([D-102]): one glyph in a fixed box, so nothing around it moves: a cloud when synced, **the count itself** whenever N>0, a grey `cloud-off` when offline with nothing pending, a grey **clock** when stale, a filled **key** when expired. No two states share a glyph, and the one actionable state is the app bar's only **filled** chip.
 - **Last sync time** comes from `meta.last_synced_at`, stamped by the **leader tab** (§8.7) after each successful drain → digest → repair cycle (§8.2, §8.5), and is shown **only offline**.
-- **States** (Dexie `liveQuery`, the `online` store, `authState`): synced → "All changes synced", **only while true**; stale (three exchanges in a row have failed with nothing pending) → "No answer from the server · last <time>" ([D-296]); broken (three in a row failed in the app itself) → the same clock, or the count while changes wait, "Sync isn't working"; pending → "{count} changes not synced yet"; offline → "Offline · {count} not synced", "last synced {when}" for a screen reader; expired (online, session invalid) → the chip is the one-tap §5.8 re-auth button, whose **failures show as a toast**, a dismissed ceremony staying silent ([D-130]). **Offline wins over an expired token**, since re-auth needs connectivity. The chip complements the §8.4 notices, never blocks use and never auto-hides.
+- **States** (Dexie `liveQuery`, the `online` store, `authState`): synced → "All changes synced", **only while true**; stale (three exchanges in a row have failed with nothing pending) → "No answer from the server · last ‹when›" ([D-296]); broken (three in a row failed in the app itself) → the same clock, or the count while changes wait, "Sync isn't working"; pending → "‹count› changes not synced yet"; offline → "Offline · ‹count› not synced", "last synced ‹when›" for a screen reader; expired (online, session invalid) → the chip is the one-tap §5.8 re-auth button, whose **failures show as a toast**, a dismissed ceremony staying silent ([D-130]). **Offline wins over an expired token**, since re-auth needs connectivity. The chip complements the §8.4 notices, never blocks use and never auto-hides.
 - **The line under the list's name** says what the chip cannot ([D-296]): the members while the sync is fine or a change is on its way, otherwise one short status in their place (failing, broken, another tab or this one stuck, stale, offline), amber when something of the user's is not getting out, grey otherwise. A tap on the members opens „Teilen & Mitglieder“ (§7.1), the name keeping the quick switcher; a tap on a status opens a sheet that explains it and offers the one action that helps (send now, sync now, reload; none for another tab). Every tab reads it from `meta.sync_health`, which the leader writes at the start and the end of every exchange (§8.7).
 - **Accessibility.** Each state's full sentence is `.sr-only` inside the chip: it is the accessible name and the announcement of a **permanent** `role="status"` wrapper, so the move into *expired* is announced. **Every `[data-slot="button"]` control has a 44px effective target**; a smaller painted box gets it from an invisible `::after` hit inset, as the chip does, pinned by the target-size sweep [D-56].
 - **Contrast:** the pending glyph, the expired chip and the aisle-count tint clear WCAG AA (≥4.5) in both themes, pinned by `design-tokens.test.ts`, which recomputes every recipe from `app.css` ([D-102]).
@@ -776,7 +776,7 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 
 ## 13. Background jobs (PB cron)
 
-Scheduled in `internal/jobs`, each sweep written in the package that owns its table (the demo sweep in `internal/demo`); "daily" is 03:00 UTC.
+Scheduled in `internal/jobs`, each sweep written in the package that owns its table (the demo sweep in `internal/demo`); a daily job runs at 03:00 UTC.
 
 | Job | Schedule | Action |
 |---|---|---|
@@ -806,7 +806,7 @@ Scheduled in `internal/jobs`, each sweep written in the package that owns its ta
 
 **What the layers guarantee:**
 1. **Unit (Vitest, Go):** the client sync engine (coalescing, base capture, result application, conflict state, `gone`), and **every branch of the server merge** (§8.3): apply / no-op / conflict / `merged` / deleted_conflict / convergent-delete `noop` / gone / denied / Others protection, plus `checked_at` stamping (a concurrent double check-off converges with **zero** conflicts).
-2. **Integration (real PocketBase, fresh DB, every migration: Go tests in-process; the vitest `integration` project against the real binary):** the access model, with **explicit "unauthorised access is denied" cases**: A cannot read or write B's lists; direct writes to `items`/`list_categories`/`lists` are denied even for members; a member reads only their own membership rows and renames only lists they are on; the roster requires membership; revoked/expired invites fail; preview cannot mutate; passkey-finish and invite routes are rate-limited; the membership filters bind one row (§11); last-one-out (incl. two concurrent leaves) leaves zero orphans; account deletion cascades solo lists and leaves shared lists and their items intact (§4.5); the last credential of an account without OIDC cannot be deleted, but the account-deletion route removes all; the self-update allowlist (§11); reference data readable but not writable by a non-member; list creation is atomic with the membership and the seed categories (§7.5). Two Dexie clients against the binary pin the §8 outcomes (§8.5 hydration and repair, conflicts, `merged`, `gone`).
+2. **Integration (real PocketBase, fresh DB, every migration: Go tests in-process; the vitest `integration` project against the real binary):** the access model, with **explicit “unauthorised access is denied” cases**: A cannot read or write B's lists; direct writes to `items`/`list_categories`/`lists` are denied even for members; a member reads only their own membership rows and renames only lists they are on; the roster requires membership; revoked/expired invites fail; preview cannot mutate; passkey-finish and invite routes are rate-limited; the membership filters bind one row (§11); last-one-out (incl. two concurrent leaves) leaves zero orphans; account deletion cascades solo lists and leaves shared lists and their items intact (§4.5); the last credential of an account without OIDC cannot be deleted, but the account-deletion route removes all; the self-update allowlist (§11); reference data readable but not writable by a non-member; list creation is atomic with the membership and the seed categories (§7.5). Two Dexie clients against the binary pin the §8 outcomes (§8.5 hydration and repair, conflicts, `merged`, `gone`).
 3. **Component (Vitest + `@testing-library/svelte`, happy-dom):** among them the lists-home card counts and its three ordering modes (§9.3).
 4. **E2E (Playwright, Chromium):** passkeys via the CDP virtual authenticator; offline mutate → reconnect → the server **and a second client** converge; a same-field conflict shows first-committed-wins and the passive notice; service worker and install. Separate harnesses: arch dead controls ([D-124]), OIDC against Dex ([D-154]), the tile audit ([D-166]), in Firefox too ([D-301]), the demo ([D-234]).
 5. **Manual:** the passkey ceremony inside the installed PWA on a physical iPhone and an Android device (§5.7).
@@ -816,7 +816,7 @@ Scheduled in `internal/jobs`, each sweep written in the package that owns its ta
 **Standing rules:**
 - **Schema and rules are checked-in Go migrations**, the source of truth, never set in the admin UI.
 - **Every dependency is pinned to an exact version** when introduced, in each `package.json` as in the lockfiles (Renovate's `rangeStrategy: 'pin'`). The PocketBase version is pinned in `go.mod`, identical in CI and prod.
-- **Every custom route gets a "denied" test** beside its happy-path test.
+- **Every custom route gets a “denied” test** beside its happy-path test.
 
 ---
 
