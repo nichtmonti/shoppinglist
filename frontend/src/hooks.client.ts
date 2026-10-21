@@ -1,6 +1,5 @@
 import type { HandleClientError } from '@sveltejs/kit/hooks';
 import Dexie from 'dexie';
-import { t } from '#lib/i18n/index.js';
 import { describeError, reportClientError, watchUncaughtErrors } from '#lib/client-errors.js';
 import {
 	claimReload,
@@ -19,7 +18,7 @@ watchServiceWorker();
 // boot path.
 watchUncaughtErrors((error) => {
 	if (!(error instanceof Dexie.DexieError)) return;
-	void import('#lib/toasts.js').then(({ showFailure }) => showFailure(t('local_save_failed')));
+	void import('#lib/toasts.js').then(({ showSaveFailure }) => showSaveFailure());
 });
 
 // Every error SvelteKit catches on the client — a route that throws while it

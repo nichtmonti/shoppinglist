@@ -13,6 +13,7 @@
 // The liveQuery owns every value after that.
 import { liveQuery } from 'dexie';
 import { derived, readable, type Readable } from 'svelte/store';
+import { describeError, reportClientError } from '#lib/client-errors.js';
 
 /**
  * A live store, plus whether its first emission has landed. An empty state must
@@ -88,8 +89,19 @@ export function live<T>(query: () => Promise<T>, initial: T, key?: string): Live
 					if (key !== undefined) seeds.set(key, value);
 					set({ value, loaded: true });
 				},
-				// A failing view query must not take the app down (e.g. mid-upgrade).
-				error: (error) => console.error('liveQuery failed', error)
+				// A failing view query must not take the app down (e.g. mid-upgrade),
+				// but it leaves its view without data for good: the server log hears
+				// of it ([D-197]).
+				error: (error) => {
+					console.error('liveQuery failed', error);
+					reportClientError({
+						...describeError(error),
+						route: '',
+						path: globalThis.location?.pathname ?? '',
+						status: 0,
+						context: `liveQuery ${key ?? ''}`.trim()
+					});
+				}
 			});
 			return () => subscription.unsubscribe();
 		}

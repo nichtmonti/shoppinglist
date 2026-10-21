@@ -443,7 +443,10 @@ describe('logout()', () => {
 		vi.mocked(wipeLocalAccountData).mockRejectedValueOnce(new Error('QuotaExceededError'));
 		const reload = vi.fn();
 		vi.stubGlobal('location', { pathname: '/settings', reload });
-		vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 204 })));
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => new Response(null, { status: 204 }))
+		);
 
 		await logout();
 

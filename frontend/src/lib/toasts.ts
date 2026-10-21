@@ -33,6 +33,11 @@ export function showFailure(message: string): void {
 	current = toast.error(message, { duration: TOAST_TIMEOUT_MS });
 }
 
+/** A change the device's database refused: it is lost unless the user hears of it. */
+export function showSaveFailure(): void {
+	showFailure(t('local_save_failed'));
+}
+
 const notices: string[] = [];
 let noticeShown = false;
 
