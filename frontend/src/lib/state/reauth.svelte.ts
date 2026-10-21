@@ -19,7 +19,7 @@ import { pb } from '#lib/pb.js';
 import { demo } from '#demo';
 import { authMethods } from '#lib/state/auth-methods.js';
 import { showFailure } from '#lib/toasts.js';
-import { failureMessage } from './async-action.svelte.js';
+import { failureMessage } from '#lib/failure-message.js';
 import { t } from '#lib/i18n/index.js';
 
 /**

@@ -7,7 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('#lib/client-errors.js', () => ({ reportUncaught: vi.fn() }));
 import { reportUncaught } from '#lib/client-errors.js';
 import { t } from '#lib/i18n/index.js';
-import { AsyncAction, AsyncDialog, failureMessage } from './async-action.svelte';
+import { AsyncAction, AsyncDialog } from './async-action.svelte';
+import { failureMessage } from '#lib/failure-message.js';
 import { LocalizedError } from '#lib/localized-error.js';
 
 /** Compared against the real message rather than a hardcoded string, so a

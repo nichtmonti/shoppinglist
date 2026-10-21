@@ -401,11 +401,13 @@ describe('importListFromFile', () => {
 	});
 
 	it('reports a refused import as failed', async () => {
-		pbSend.mockRejectedValueOnce(new Error('400'));
+		const refused = new Error('400');
+		pbSend.mockRejectedValueOnce(refused);
 
 		expect(await importListFromFile(fileOf(minimalBackup), 'x')).toEqual({
 			ok: false,
-			reason: 'failed'
+			reason: 'failed',
+			error: refused
 		});
 	});
 });
@@ -413,7 +415,11 @@ describe('importListFromFile', () => {
 describe('importFailureMessage', () => {
 	it('says what each refusal means, with its numbers', () => {
 		expect(importFailureMessage({ ok: false, reason: 'invalid' })).toBe(t('home_import_invalid'));
-		expect(importFailureMessage({ ok: false, reason: 'failed' })).toBe(t('home_import_failed'));
+		const failed = (error: unknown) => importFailureMessage({ ok: false, reason: 'failed', error });
+		expect(failed(Object.assign(new Error('x'), { status: 500 }))).toBe(t('home_import_failed'));
+		// [D-293] What the user can act on is said: no connection, the session.
+		expect(failed(Object.assign(new Error('x'), { status: 0 }))).toBe(t('common_error_connection'));
+		expect(failed(Object.assign(new Error('x'), { status: 401 }))).toBe(t('common_error_session'));
 		expect(importFailureMessage({ ok: false, reason: 'list_limit', max: 25 })).toBe(
 			t('home_list_limit', { max: 25 })
 		);

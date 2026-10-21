@@ -38,7 +38,8 @@
 		type SignupLink
 	} from '#lib/auth/index.js';
 	import { oidcProvider as providerOf, passkeySignup } from '#lib/auth/login-methods.js';
-	import { AsyncAction, failureMessage } from '#lib/state/async-action.svelte.js';
+	import { AsyncAction } from '#lib/state/async-action.svelte.js';
+	import { failureMessage } from '#lib/failure-message.js';
 	import { t } from '#lib/i18n/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Field, FieldLabel } from '#lib/components/ui/field/index.js';

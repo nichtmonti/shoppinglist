@@ -2,6 +2,7 @@
 // nobody sees the browser console. hooks.client.ts hands every such error here.
 import { appVersion } from '#lib/config.js';
 import { authHeaders } from '#lib/pb.js';
+import { isNetworkFailure } from '#lib/failure-message.js';
 
 interface ClientErrorReport {
 	message: string;
@@ -59,7 +60,8 @@ export function reportClientError(report: Omit<ClientErrorReport, 'version' | 'a
  */
 export function reportUncaught(error: unknown, context = 'uncaught'): void {
 	const e = error as { name?: unknown; isAbort?: unknown; status?: unknown } | null;
-	if (e?.name === 'AbortError' || e?.isAbort === true || e?.status === 0) return;
+	if (e?.name === 'AbortError' || e?.isAbort === true || e?.status === 0 || isNetworkFailure(error))
+		return;
 	const { message, stack } = describeError(error);
 	reportClientError({
 		message,

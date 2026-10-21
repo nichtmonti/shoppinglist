@@ -1,40 +1,14 @@
 // "Run a mutation, keep the surface open while it fails", for every online-only
 // action (§7.5/§7.6/§9.3). A surface closes only on success, so a failure has
 // the still-open surface to render in.
-import { t } from '#lib/i18n/index.js';
-import { LocalizedError } from '#lib/localized-error.js';
-import { httpStatus } from '#lib/http-status.js';
 import { reportUncaught } from '#lib/client-errors.js';
+import { failureMessage, isAppError } from '#lib/failure-message.js';
 
 /**
  * The outcome of one attempt; a union rather than `T | undefined` so a void
  * mutation can still be branched on.
  */
 export type Attempt<T> = { ok: true; value: T } | { ok: false };
-
-/** A browser's own words for a fetch that never got an answer. */
-const NETWORK_FAILURE = /failed to fetch|load failed|networkerror/i;
-
-/**
- * What a failed action says ([D-293]): a cause the user can act on in their
- * language, never the server's or the SDK's English. A response's status says
- * which; a message is shown as thrown only when it is the app's own, a
- * `LocalizedError` (the passkey and OIDC ceremonies throw them).
- */
-export function failureMessage(e: unknown): string {
-	if (e instanceof LocalizedError) return e.message;
-	const status = httpStatus(e);
-	if (status !== undefined) {
-		if (status === 0) return t('common_error_connection');
-		if (status === 401) return t('common_error_session');
-		if (status === 429) return t('common_error_rate_limited');
-		return t('common_error');
-	}
-	if (e instanceof TypeError && NETWORK_FAILURE.test(e.message)) {
-		return t('common_error_connection');
-	}
-	return t('common_error');
-}
 
 /** One in-flight mutation's `busy` + `error`, with the try/catch that drives them. */
 export class AsyncAction {
@@ -70,7 +44,7 @@ export class AsyncAction {
 			// The app's own error, no answer of a server's (a TypeError, a
 			// database that refused), says only "Something went wrong" on
 			// screen: its cause goes to the server log.
-			if (httpStatus(e) === undefined && !(e instanceof LocalizedError)) reportUncaught(e, 'action');
+			if (isAppError(e)) reportUncaught(e, 'action');
 			if (run !== this.#run) return { ok: false };
 			this.error = failureMessage(e);
 			this.busy = false;

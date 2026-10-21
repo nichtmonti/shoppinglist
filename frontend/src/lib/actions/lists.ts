@@ -12,6 +12,7 @@ import { ClientResponseError } from 'pocketbase';
 import { t } from '#lib/i18n/index.js';
 import { LocalizedError } from '#lib/localized-error.js';
 import { httpStatus } from '#lib/http-status.js';
+import { failureMessage, isNetworkFailure } from '#lib/failure-message.js';
 import { LIST_LIMIT } from '#lib/field-contract.js';
 
 /**
@@ -171,7 +172,9 @@ export async function templateCategories(): Promise<BackupCategory[]> {
 
 export type ImportOutcome =
 	| { ok: true; id: string }
-	| { ok: false; reason: 'invalid' | 'failed' }
+	| { ok: false; reason: 'invalid' }
+	// The server did not import it; `error` says why, when the user can act.
+	| { ok: false; reason: 'failed'; error: unknown }
 	// [D-217] more items than one list may hold here.
 	| { ok: false; reason: 'too_many_items'; max: number; count: number }
 	// [D-219] the account is at its lists cap.
@@ -186,8 +189,14 @@ export function importFailureMessage(outcome: Extract<ImportOutcome, { ok: false
 			return t('home_list_limit', { max: outcome.max });
 		case 'invalid':
 			return t('home_import_invalid');
-		case 'failed':
-			return t('home_import_failed');
+		case 'failed': {
+			// No connection, an expired session or the rate limit say so; any
+			// other failure is the import's own.
+			const status = httpStatus(outcome.error);
+			return status === 0 || status === 401 || status === 429 || isNetworkFailure(outcome.error)
+				? failureMessage(outcome.error)
+				: t('home_import_failed');
+		}
 	}
 }
 
@@ -230,7 +239,7 @@ export async function importBackup(
 		return { ok: true, id };
 	} catch (e) {
 		if (e instanceof ListLimitError) return { ok: false, reason: 'list_limit', max: e.max };
-		return { ok: false, reason: 'failed' };
+		return { ok: false, reason: 'failed', error: e };
 	}
 }
 

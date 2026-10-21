@@ -216,7 +216,10 @@ describe('TextImportScreen', () => {
 			message:
 				'Du bist schon auf 25 Listen, mehr gehen hier nicht. Verlasse eine, um eine neue zu erstellen.'
 		},
-		{ outcome: { ok: false, reason: 'failed' } as const, message: 'Import fehlgeschlagen' }
+		{
+			outcome: { ok: false, reason: 'failed', error: new Error('500') } as const,
+			message: 'Import fehlgeschlagen'
+		}
 	])(
 		'says why the server refused the new list ($outcome.reason), and stays',
 		async ({ outcome, message }) => {
@@ -437,7 +440,10 @@ describe('TextImportScreen', () => {
 				'Du bist schon auf 25 Listen, mehr gehen hier nicht. Verlasse eine, um eine neue zu erstellen.'
 		},
 		{ outcome: { ok: false, reason: 'invalid' } as const, message: 'Ungültige Backup-Datei' },
-		{ outcome: { ok: false, reason: 'failed' } as const, message: 'Import fehlgeschlagen' }
+		{
+			outcome: { ok: false, reason: 'failed', error: new Error('500') } as const,
+			message: 'Import fehlgeschlagen'
+		}
 	])(
 		'says why a backup was refused ($outcome.reason), and keeps the text',
 		async ({ outcome, message }) => {
