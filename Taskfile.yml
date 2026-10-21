@@ -259,8 +259,10 @@ tasks:
       - backend/**/*.json
       - backend/go.mod
       - backend/go.sum
-      # What internal/settings' tests hold the settings to ([D-337]).
+      # The files outside backend/ the TestDocs tests read ([D-337]).
       - docs/deploy-reference.md
+      - docs/operating.md
+      - docs/internals/design.md
       - .env.example
       - Dockerfile.demo
       - docker-compose.yml
@@ -270,6 +272,9 @@ tasks:
     cmds:
       - defer: *failed
       - cd backend && go test -tags no_ui {{.CLI_ARGS}} ./...
+      # Go's test cache sees no file outside the module, so a docs-only edit
+      # would leave their passing results cached.
+      - cd backend && go test -tags no_ui -count=1 -run '^TestDocs' ./...
       - cd backend && go test -tags demo,no_ui .
 
   vitest:

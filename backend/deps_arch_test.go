@@ -41,6 +41,7 @@ func TestBinaryLinksNoTestDependencies(t *testing.T) {
 	testSupport := []string{
 		"shoppinglist/internal/testutil",
 		"shoppinglist/internal/testutil/testapp",
+		"shoppinglist/internal/testutil/docblock",
 		"shoppinglist/internal/dextest",
 		"shoppinglist/internal/sectest",
 	}
