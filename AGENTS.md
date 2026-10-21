@@ -71,7 +71,7 @@ included.
 ([D-177]).** It runs `task` (`Taskfile.yml`, go-task from `tools/task`,
 [D-177]) and takes the same arguments. A layer whose inputs have not changed
 since it last passed is skipped, so a docs edit runs only the repo's rule
-checks (decision index, doc links, settings, CI image tag) beside the three
+checks (decision index, doc links, CI image tag) beside the three
 that run every time (gitleaks, gofmt, prettier with its cache), and a rerun
 repeats only what failed; the rest scope themselves: the type-aware lint on
 the changed files, `vitest --changed`, Go's test cache, prettier's cache.

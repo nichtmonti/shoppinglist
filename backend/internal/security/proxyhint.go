@@ -10,8 +10,9 @@ import (
 )
 
 // forwardingHeaders are the headers a reverse proxy commonly sets for the
-// client's address.
-var forwardingHeaders = []string{"X-Forwarded-For", "X-Real-Ip", "Forwarded", "Cf-Connecting-Ip"}
+// client's address and PocketBase can read: not RFC 7239's Forwarded, whose
+// for= it does not parse, so naming that one would not help.
+var forwardingHeaders = []string{"X-Forwarded-For", "X-Real-Ip", "Cf-Connecting-Ip"}
 
 // ProxyHeaderHint warns once per start when a request carries a forwarding
 // header while the app trusts none: behind a reverse proxy every visitor then

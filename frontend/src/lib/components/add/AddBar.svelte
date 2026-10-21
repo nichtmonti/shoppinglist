@@ -158,14 +158,30 @@
 	 * That call is not gated on the `suppressed` snapshot, which hydrates a tick
 	 * after mount: a fast submit would read "not loaded" as "not suppressed".
 	 */
+	// An add whose save is under way: the field still holds its name, so a
+	// second Enter or tap meanwhile would add it twice.
+	let adding = false;
+
 	async function commitAdd(
 		rawName: string,
 		dictSlug: string | null,
 		quantity: string
 	): Promise<void> {
 		const name = addableName(rawName);
-		if (!name) return;
+		if (!name || adding) return;
+		adding = true;
+		try {
+			await commitName(name, dictSlug, quantity);
+		} finally {
+			adding = false;
+		}
+	}
 
+	async function commitName(
+		name: string,
+		dictSlug: string | null,
+		quantity: string
+	): Promise<void> {
 		// Clear the field once the add is saved, and only if it still holds
 		// what was committed: a fill typed meanwhile must survive, and a
 		// failed save must not take the typed name with it.

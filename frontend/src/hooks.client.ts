@@ -16,8 +16,11 @@ watchServiceWorker();
 // A change the device's database refused (full, or its connection lost) is
 // gone unless the user hears of it ([D-293]); the toasts load lazily, off the
 // boot path.
+// A closed database (another tab's upgrade, a sign-out's reload) and a failed
+// read lose nothing, so only a refused write says so.
+const REFUSED_WRITE = ['QuotaExceededError', 'AbortError', 'ConstraintError', 'UnknownError'];
 watchUncaughtErrors((error) => {
-	if (!(error instanceof Dexie.DexieError)) return;
+	if (!(error instanceof Dexie.DexieError) || !REFUSED_WRITE.includes(error.name)) return;
 	void import('#lib/toasts.js').then(({ showSaveFailure }) => showSaveFailure());
 });
 

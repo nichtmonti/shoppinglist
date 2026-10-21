@@ -26,6 +26,10 @@ func LogOAuth2Failure(e *core.RequestEvent) error {
 	if err == nil || e.Request.URL.Path != oauth2Path {
 		return err
 	}
+	// A server error is applog.ServerErrors' to log.
+	if apiErr, ok := errors.AsType[*router.ApiError](err); ok && apiErr.Status >= 500 {
+		return err
+	}
 	message, attrs := err.Error(), []any{}
 	if apiErr, ok := errors.AsType[*router.ApiError](err); ok {
 		message = apiErr.Message

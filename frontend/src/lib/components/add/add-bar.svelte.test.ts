@@ -3,6 +3,7 @@
 // both suppression paths (§6.11).
 import userEvent from '@testing-library/user-event';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // The add box renders the real ScanButton, so reaching its scan-dedup handoff
@@ -451,7 +452,7 @@ describe('AddBar — head-noun classification of a typed name (§9)', () => {
 
 	// [D-293] The field clears once the add is saved: a save the device
 	// refuses must not take the typed name with it.
-	it('keeps the typed name until the add is saved', async () => {
+	it('keeps the typed name until the add is saved, and adds it once', async () => {
 		await seedSweetsAndDairy();
 		const { input } = await renderBar();
 		const add = vi.spyOn(db.pending_ops, 'add').mockReturnValueOnce(new Promise(() => {}) as never);
@@ -463,6 +464,10 @@ describe('AddBar — head-noun classification of a typed name (§9)', () => {
 
 		await waitFor(() => expect(add).toHaveBeenCalled());
 		expect((input as HTMLInputElement).value).toBe('Mil');
+		// A second Enter while the save is under way does not add it again.
+		await fireEvent.keyDown(input, { key: 'Enter' });
+		await tick();
+		expect(add).toHaveBeenCalledOnce();
 		add.mockRestore();
 	});
 

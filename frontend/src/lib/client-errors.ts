@@ -85,9 +85,10 @@ export function watchUncaughtErrors(also: (error: unknown) => void = () => {}): 
 		also(error);
 	};
 	window.addEventListener('unhandledrejection', (event) => uncaught(event.reason));
-	// A resource that failed to load fires `error` too, without an error.
+	// One without an error object (a cross-origin "Script error.", Chrome's
+	// ResizeObserver loop notice) says nothing worth a report.
 	window.addEventListener('error', (event) => {
-		if (event.error !== undefined) uncaught(event.error);
+		if (event.error != null) uncaught(event.error);
 	});
 }
 
