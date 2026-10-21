@@ -18,7 +18,7 @@ func TestRegisterAddsAllJobs(t *testing.T) {
 	if err := Register(app); err != nil {
 		t.Fatalf("Register: %v", err)
 	}
-	if got, want := app.Cron().Total()-before, 6; got != want {
+	if got, want := app.Cron().Total()-before, len(jobs); got != want {
 		t.Errorf("registered %d cron jobs, want %d", got, want)
 	}
 }

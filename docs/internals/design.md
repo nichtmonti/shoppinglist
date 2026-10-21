@@ -250,7 +250,7 @@ No name of its own, no update rule [D-08]; readable only by its owner (the roste
 
 ### 6.7 Categories: per-list, copied from a global seed at creation [D-14]
 
-The global **seed** of 21 categories (§6.12) is **copied** into a new list's own `list_categories` rows (§7.5). From then on they are **ordinary syncable rows the members own**: rename, re-emoji, recolor, reorder, hide, add, all through normal sync (§8), with no runtime resolver and no deterministic ids. Later seed edits do not reach existing lists, except a template's new icon ([D-287]) and the one fold of [D-302] (§6.12).
+The global **seed** of categories (§6.12) is **copied** into a new list's own `list_categories` rows (§7.5). From then on they are **ordinary syncable rows the members own**: rename, re-emoji, recolor, reorder, hide, add, all through normal sync (§8), with no runtime resolver and no deterministic ids. Later seed edits do not reach existing lists, except a template's new icon ([D-287]) and the one fold of [D-302] (§6.12).
 
 **`category_templates` (global, app-seeded, read-only to clients), the seed source only:**
 | Field | Type | Notes |
@@ -346,35 +346,37 @@ Both are populated only by an **idempotent boot seeder**, never by hand or clien
 - **What a bump does to existing lists.** A template whose icon changes moves every list's category still on its old icon, and leaves one changed by hand ([D-287]). The boot that crosses seed version 8 folds every list once into [D-300]'s aisles (`seed/fold.go`, [D-302]).
 - **Client re-mirror on version bump.** `GET /api/seed-version` exposes the active version to authenticated clients. The client stores its mirror's version in `meta.seed_version` and compares after the **first completed pull of each session**, retrying each cycle until it succeeds; if they differ (or the local dictionary is empty), it re-pulls both collections in full and replaces the mirror, refusing an empty fetch.
 - **Shape.** Template `icon` is stored and synced as the emoji character, drawn with bundled OpenMoji artwork ([D-181], §9.1). A `retired` template is no longer copied into a list, offered to one or used by a text import; it still names the rows lists have and lets a backup carrying its slug import [D-300]. Dictionary fields: §6.9.
-- **Default category seed** (21, walk order through a German supermarket then errands, colours by meaning with neighbours apart: [D-251], [D-300]; copied into each new list at creation, §7.5; editable per list, §6.7):
+- **Default category seed**: walk order through a German supermarket then errands, colours by meaning with neighbours apart ([D-251], [D-300]); copied into each new list at creation (§7.5) and editable per list (§6.7).
 
-  | # | Emoji | Color | Deutsch | English | slug |
-  |---|---|---|---|---|---|
-  | 1 | 🥦 | `green` | Obst & Gemüse | Produce | `produce` |
-  | 2 | 🥖 | `amber` | Brot & Backwaren | Bakery | `bakery` |
-  | 3 | 🥛 | `sky` | Milch & Kühlregal | Dairy & Chilled | `dairy_eggs` |
-  | 4 | 🥩 | `red` | Fleisch & Fisch | Meat & Fish | `meat_fish` |
-  | 5 | 🥫 | `olive` | Konserven & Vorräte | Pantry & Canned | `pantry` |
-  | 6 | 🍝 | `yellow` | Nudeln, Reis & Getreide | Pasta, Rice & Grains | `pasta_rice` |
-  | 7 | 🧁 | `brown` | Backen & Gewürze | Baking & Spices | `baking_spices` |
-  | 8 | 🥣 | `pink` | Frühstück & Müsli | Breakfast & Cereal | `breakfast` |
-  | 9 | 🍵 | `lime` | Tee, Kaffee & Kakao | Tea, Coffee & Cocoa | `coffee_tea` |
-  | 10 | 🍫 | `violet` | Snacks & Süßigkeiten | Snacks & Sweets | `snacks_sweets` |
-  | 11 | 🥤 | `teal` | Getränke | Beverages | `beverages` |
-  | 12 | 🍷 | `wine` | Bier, Wein & Spirituosen | Beer, Wine & Spirits | `alcohol` |
-  | 13 | ❄️ | `cyan` | Tiefkühl | Frozen | `frozen` |
-  | 14 | 🧴 | `lavender` | Drogerie & Körperpflege | Personal Care | `personal_care` |
-  | 15 | 🧻 | `slate` | Haushalt & Reinigung | Household & Cleaning | `household` |
-  | 16 | 🍼 | `blue` | Baby | Baby | `baby` |
-  | 17 | 🐾 | `indigo` | Tierbedarf | Pet | `pet` |
-  | 18 | 💊 | `magenta` | Apotheke | Pharmacy | `pharmacy` |
-  | 19 | 🔨 | `orange` | Baumarkt & Garten | Hardware & Garden | `hardware` |
-  | 20 | 🛞 | `steel` | Auto & Fahrrad | Car & Bike | `car_bike` |
-  | 21 | 📦 | `gray` | Sonstiges | Other | `other` |
+<!-- category seed (rendered from backend/seed/categories.json by its test) -->
+| # | Emoji | Color | Deutsch | English | slug |
+|---|---|---|---|---|---|
+| 1 | 🥦 | `green` | Obst & Gemüse | Produce | `produce` |
+| 2 | 🥖 | `amber` | Brot & Backwaren | Bakery | `bakery` |
+| 3 | 🥛 | `sky` | Milch & Kühlregal | Dairy & Chilled | `dairy_eggs` |
+| 4 | 🥩 | `red` | Fleisch & Fisch | Meat & Fish | `meat_fish` |
+| 5 | 🥫 | `olive` | Konserven & Vorräte | Pantry & Canned | `pantry` |
+| 6 | 🍝 | `yellow` | Nudeln, Reis & Getreide | Pasta, Rice & Grains | `pasta_rice` |
+| 7 | 🧁 | `brown` | Backen & Gewürze | Baking & Spices | `baking_spices` |
+| 8 | 🥣 | `pink` | Frühstück & Müsli | Breakfast & Cereal | `breakfast` |
+| 9 | 🍵 | `lime` | Tee, Kaffee & Kakao | Tea, Coffee & Cocoa | `coffee_tea` |
+| 10 | 🍫 | `violet` | Snacks & Süßigkeiten | Snacks & Sweets | `snacks_sweets` |
+| 11 | 🥤 | `teal` | Getränke | Beverages | `beverages` |
+| 12 | 🍷 | `wine` | Bier, Wein & Spirituosen | Beer, Wine & Spirits | `alcohol` |
+| 13 | ❄️ | `cyan` | Tiefkühl | Frozen | `frozen` |
+| 14 | 🧴 | `lavender` | Drogerie & Körperpflege | Personal Care | `personal_care` |
+| 15 | 🧻 | `slate` | Haushalt & Reinigung | Household & Cleaning | `household` |
+| 16 | 🍼 | `blue` | Baby | Baby | `baby` |
+| 17 | 🐾 | `indigo` | Tierbedarf | Pet | `pet` |
+| 18 | 💊 | `magenta` | Apotheke | Pharmacy | `pharmacy` |
+| 19 | 🔨 | `orange` | Baumarkt & Garten | Hardware & Garden | `hardware` |
+| 20 | 🛞 | `steel` | Auto & Fahrrad | Car & Bike | `car_bike` |
+| 21 | 📦 | `gray` | Sonstiges | Other | `other` |
 
-  Retired: 🪴 `lime` Garten & Pflanzen / Garden & Plants (`garden`), folded into `hardware` [D-300].
+Retired: 🪴 `lime` Garten & Pflanzen / Garden & Plants (`garden`).
+<!-- category seed end -->
 
-  Slugs are permanent. **Others** (`other`) is an **explicit** seeded category that sorts last and is the fallback for any null/unknown `category_key` (§6.6); there is no implicit "Uncategorised" bucket. `items.json` covers de/en and every category but `other`, which seeds no dictionary entries.
+`garden` is retired into `hardware` [D-300]. Slugs are permanent. **Others** (`other`) is an **explicit** seeded category that sorts last and is the fallback for any null/unknown `category_key` (§6.6); there is no implicit "Uncategorised" bucket. `items.json` covers de/en and every category but `other`, which seeds no dictionary entries.
 
 **Content is hand-curated, never bulk-imported** from a grocery database [D-24]; this holds for the §6.13 tooling too.
 
@@ -672,7 +674,40 @@ The app root is the **„Meine Listen“ home**: the user's `memberships` as car
 ---
 ## 10. Security summary
 
-- **Rate limits** are per IP: an IPv4 address (IPv4-mapped included), an IPv6 address by its /64, since one line is handed a whole /64; PocketBase's own catch-all counts every address apart. **`backend/internal/security/ratelimit.go` is the single table** of budgets and windows ([D-307]): every custom route has a row there or is named there as deliberately left to PocketBase's catch-all (the digest and its snapshot, the roster, `seed-version`, `auth/methods`). Both passkey `begin` routes share one budget, both `finish` routes another. The demo build adds its own `demo/start` budget ([D-234]).
+**Rate limits** are per IP: an IPv4 address (IPv4-mapped included), an IPv6 address by its /64, since one line is handed a whole /64; PocketBase's own catch-all counts every address apart. **`backend/internal/security/ratelimit.go` is the single table** of budgets ([D-307]), the one below: every custom route has a budget there or is named there as left to PocketBase's catch-all, and a test fails a route with neither. The demo build adds its own `demo/start` budget ([D-234]).
+
+<!-- rate limits (rendered from backend/internal/security/ratelimit.go by its test) -->
+| Budget | Calls per IP | Routes |
+|---|---|---|
+| `sync_push` | 300 per 5 minutes | `POST /api/sync/push`, the only sync write path |
+| `passkey_begin` | 30 per minute | `POST /api/passkey/register/begin` and `POST /api/passkey/login/begin`, one budget for both |
+| `passkey_finish` | 30 per minute | `POST /api/passkey/register/finish` and `POST /api/passkey/login/finish` |
+| `invite_preview` | 30 per minute | `POST /api/invites/preview`, unauthenticated |
+| `invite_join` | 30 per minute | `POST /api/invites/join` |
+| `invite_mint` | 30 per minute | `POST /api/lists/{listId}/invite`, link rotation at a human pace |
+| `barcode_lookup` | 30 per minute | `GET /api/barcode/{ean}`, the Open Food Facts proxy |
+| `barcode_photo` | 300 per minute | `GET /api/barcode/photo/{token}`, unauthenticated (an `<img>` carries no token); one request per shop tile |
+| `list_create` | 30 per 5 minutes | `POST /api/lists`: one row plus a category copy per call |
+| `list_import` | 10 per 5 minutes | `POST /api/lists/import`: up to 2000 items per call, the amplifier |
+| `list_clone` | 10 per 5 minutes | `POST /api/lists/{listId}/clone`: a whole list, the other amplifier |
+| `clear_history` | 30 per 5 minutes | `POST /api/lists/{listId}/clear-history`: a bulk update across a list |
+| `missing_categories` | 30 per 5 minutes | `POST /api/lists/{listId}/categories/missing`: at most one row per template per call |
+| `invite_revoke` | 30 per minute | `POST /api/lists/{listId}/invite/revoke`, mint's twin |
+| `account_write` | 10 per minute | `POST /api/account/delete`, `POST /api/account/link`, `POST /api/account/unlink` and `POST /api/account/rotate-token-key`, one budget |
+| `cred_rename` | 30 per minute | `POST /api/credentials/{id}/rename`, a passkey's label (§5.4) |
+| `client_error` | 10 per minute | `POST /api/client-errors` |
+<!-- rate limits end -->
+
+Left to PocketBase's catch-all:
+
+<!-- unlimited routes (rendered from backend/internal/security/ratelimit.go by its test) -->
+- `GET /api/sync/digest`: polled every ~60s by every device (§8.5): a per-IP budget would cut off a household whose phones share a NAT.
+- `GET /api/sync/snapshot/{listId}`: the digest's repair read (§8.5): it runs only for a diverged list, but for every list at once after an eviction (§8.8), a repair a budget would stall.
+- `GET /api/lists/{listId}/members`: a cheap read (§7.4).
+- `GET /api/seed-version`: a constant.
+- `GET /api/auth/methods`: one cached lookup (§5.9).
+<!-- unlimited routes end -->
+
 - **Size caps** bound how much, where rate limits bound how fast: a list holds at most 5,000 items rows, tombstones included (`SHOPPINGLIST_MAX_ITEMS_PER_LIST`), and 200 categories, past which a push create is denied `list_full` (§8.3, [D-217]); an import brings at most the lower of the cap and the backup cap. An account is on at most 25 lists (`SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT`); past that, create, import and clone answer 409 `list_limit`, and joining is never refused ([D-219]).
 - **Request bodies:** every app route is registered on one group (`security.AppRoutes`) with a 64 KiB body limit, so a longer body is a 413 before a handler reads it. Push and import alone opt back into PocketBase's 32 MiB (`security.LargeBody`), which their op, row and field caps need; PocketBase's own routes keep their limits.
 - **Open signup** is spammable; the limits and the orphan sweep (§13) are the mitigation. `SHOPPINGLIST_SIGNUP=closed` closes it, `invite` admits only holders of a list's invite link ([D-61], [D-241]).
@@ -776,17 +811,26 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 
 ## 13. Background jobs (PB cron)
 
-Scheduled in `internal/jobs`, each sweep written in the package that owns its table (the demo sweep in `internal/demo`); "daily" is 03:00 UTC.
+Scheduled in `internal/jobs`, each sweep written in the package that owns its table; what each job does, as operators read it, is [operating.md's table](../operating.md#cron-jobs), rendered from the same registry. The window is the age a sweep deletes past, or for the retry how long after a lookup it keeps trying.
 
-| Job | Schedule | Action |
-|---|---|---|
-| Tombstone GC | daily | hard-delete `items` / `list_categories` rows with `deleted_at` older than **180 days**, **except `items` carrying a `last_bought_at`** (previous items, §6.10 [D-18], kept indefinitely) **and `list_categories` carrying a `slug`** (a removed template aisle, which the missing-categories route must not add again, [D-251]). No cursor depends on the window (§8.5), so it only has to cover a realistic offline gap |
-| Invite sweep | daily | delete invites expired > 30 days ago, and ones revoked > 30 days ago (the revocation stamps `updated`) |
-| Orphan sweep | daily | delete accounts with **zero memberships** AND created > 60 days ago AND no credential `last_used_at` within 60 days, each through the §4.5 teardown (`account.DeleteAccount`) |
-| Barcode photo retry | every 15 min | download again the photos that failed for a reason that can pass, for **two days** after their lookup, ten per run, one at a time; a photo that arrives goes to the items with that barcode and none ([D-21]) |
-| Barcode photo sweep | daily | delete `barcode_cache` rows whose `fetched_at` is older than **180 days** *and whose photo no item still references*, tombstones included (equality against the exact issued URL, [D-21], [D-266]). Bounds `pb_data`. Deletes go through the record API one row at a time, so the image file goes with the row |
-| Merge-log sweep | daily | delete `merge_log` rows ([D-108]) whose `merged_at` is older than **180 days**; a list's rows also go with the list (§7.3) |
-| Demo sweep | every 10 min | **demo build only** ([D-234]): delete accounts created more than 24 hours ago, through the §4.5 teardown |
+<!-- cron jobs (rendered from backend/internal/jobs/jobs.go by its test) -->
+| Job | Schedule | Window | Sweep |
+|---|---|---|---|
+| `tombstone_gc` | daily, 03:00 UTC | 180 days | `sync.SweepTombstones` |
+| `invite_sweep` | daily, 03:00 UTC | 30 days | `invites.Sweep` |
+| `orphan_sweep` | daily, 03:00 UTC | 60 days | `account.SweepOrphans` |
+| `barcode_photo_sweep` | daily, 03:00 UTC | 180 days | `barcode.SweepPhotos` |
+| `barcode_photo_retry` | every 15 minutes | 2 days | `barcode.RetryPhotos` |
+| `merge_log_sweep` | daily, 03:00 UTC | 180 days | `sync.SweepMergeLog` |
+<!-- cron jobs end -->
+
+- **`tombstone_gc`** hard-deletes tombstoned `items` and `list_categories` rows, **except `items` carrying a `last_bought_at`** (previous items, §6.10 [D-18], kept indefinitely) **and `list_categories` carrying a `slug`** (a removed template aisle, which the missing-categories route must not add again, [D-251]). No cursor depends on the window (§8.5), so it only has to cover a realistic offline gap.
+- **`invite_sweep`** deletes invites past expiry, and revoked ones by their `updated`, which the revocation stamps.
+- **`orphan_sweep`** deletes accounts with **zero memberships**, older than the window and with no credential `last_used_at` within it, each through the §4.5 teardown (`account.DeleteAccount`).
+- **`barcode_photo_sweep`** deletes `barcode_cache` rows by `fetched_at` *whose photo no item still references*, tombstones included (equality against the exact issued URL, [D-21], [D-266]). Bounds `pb_data`. Deletes go through the record API one row at a time, so the image file goes with the row.
+- **`barcode_photo_retry`** downloads again the photos that failed for a reason that can pass, ten per run, one at a time; a photo that arrives goes to the items with that barcode and none ([D-21]).
+- **`merge_log_sweep`** deletes `merge_log` rows ([D-108]) by `merged_at`; a list's rows also go with the list (§7.3).
+- **The demo sweep**, every 10 minutes, **demo build only** ([D-234], in `internal/demo`): deletes accounts past the demo lifetime, through the §4.5 teardown.
 
 ---
 

@@ -12,31 +12,33 @@ import (
 // budgetName is typed so a call site cannot pass an arbitrary string.
 type budgetName string
 
-// The §10 rate-limit budgets.
+// The §10 rate-limit budgets. Each comment names the routes the budget
+// guards, which design.md's table shows beside it (rendered by this package's
+// test).
 const (
-	RateSyncPush      budgetName = "sync_push"      // §10: the only sync write path
-	RatePasskeyBegin  budgetName = "passkey_begin"  // §10: register+login begin share ONE budget
-	RatePasskeyFinish budgetName = "passkey_finish" // §10: both finish routes
-	RateInvitePreview budgetName = "invite_preview" // §10: unauthenticated
-	RateInviteJoin    budgetName = "invite_join"    // §10
-	RateInviteMint    budgetName = "invite_mint"    // link rotation, human pace
-	RateBarcodeLookup budgetName = "barcode_lookup" // §10: authenticated Open Food Facts proxy
-	RateBarcodePhoto  budgetName = "barcode_photo"  // unauthenticated (an <img> carries no token); one request per shop tile
+	RateSyncPush      budgetName = "sync_push"      // `POST /api/sync/push`, the only sync write path
+	RatePasskeyBegin  budgetName = "passkey_begin"  // `POST /api/passkey/register/begin` and `POST /api/passkey/login/begin`, one budget for both
+	RatePasskeyFinish budgetName = "passkey_finish" // `POST /api/passkey/register/finish` and `POST /api/passkey/login/finish`
+	RateInvitePreview budgetName = "invite_preview" // `POST /api/invites/preview`, unauthenticated
+	RateInviteJoin    budgetName = "invite_join"    // `POST /api/invites/join`
+	RateInviteMint    budgetName = "invite_mint"    // `POST /api/lists/{listId}/invite`, link rotation at a human pace
+	RateBarcodeLookup budgetName = "barcode_lookup" // `GET /api/barcode/{ean}`, the Open Food Facts proxy
+	RateBarcodePhoto  budgetName = "barcode_photo"  // `GET /api/barcode/photo/{token}`, unauthenticated (an `<img>` carries no token); one request per shop tile
 
 	// Authenticated writes: AuthRoutes bounds who, not how often, and these
 	// are where one member can multiply server-side state.
-	RateListCreate        budgetName = "list_create"        // one row plus a category copy per call
-	RateListImport        budgetName = "list_import"        // up to 2000 items per call — the amplifier
-	RateListClone         budgetName = "list_clone"         // duplicates a whole list — the other amplifier
-	RateClearHistory      budgetName = "clear_history"      // bulk UPDATE across a list
-	RateMissingCategories budgetName = "missing_categories" // at most one row per template per call
-	RateInviteRevoke      budgetName = "invite_revoke"      // mint's twin
-	RateAccountWrite      budgetName = "account_write"      // delete / link / unlink / rotate-token-key, one bucket
-	RateCredRename        budgetName = "cred_rename"        // §5.4 passkey label
+	RateListCreate        budgetName = "list_create"        // `POST /api/lists`: one row plus a category copy per call
+	RateListImport        budgetName = "list_import"        // `POST /api/lists/import`: up to 2000 items per call, the amplifier
+	RateListClone         budgetName = "list_clone"         // `POST /api/lists/{listId}/clone`: a whole list, the other amplifier
+	RateClearHistory      budgetName = "clear_history"      // `POST /api/lists/{listId}/clear-history`: a bulk update across a list
+	RateMissingCategories budgetName = "missing_categories" // `POST /api/lists/{listId}/categories/missing`: at most one row per template per call
+	RateInviteRevoke      budgetName = "invite_revoke"      // `POST /api/lists/{listId}/invite/revoke`, mint's twin
+	RateAccountWrite      budgetName = "account_write"      // `POST /api/account/delete`, `POST /api/account/link`, `POST /api/account/unlink` and `POST /api/account/rotate-token-key`, one budget
+	RateCredRename        budgetName = "cred_rename"        // `POST /api/credentials/{id}/rename`, a passkey's label (§5.4)
 
 	// Unauthenticated by design; bounds how fast anyone can fill the
 	// operator's log ([D-197]).
-	RateClientError budgetName = "client_error"
+	RateClientError budgetName = "client_error" // `POST /api/client-errors`
 )
 
 // budget is one row of the §10 rate-limit table.
@@ -70,17 +72,16 @@ var policy = map[budgetName]budget{
 	RateClientError:       {time.Minute, 10},
 }
 
-// Deliberately ABSENT from the table, left to PocketBase's /api/ catch-all:
-//
-//   - GET /api/sync/digest, polled every ~60s by every device (§8.5): a
-//     per-IP budget would cut off a household whose phones share a NAT.
-//   - GET /api/sync/snapshot/{listId}, the digest's repair read (§8.5): it runs
-//     only for a diverged list, but for every list at once after an eviction
-//     (§8.8), a repair a budget would stall.
-//   - GET /api/lists/{listId}/members, a cheap read (§7.4).
-//   - GET /api/seed-version, a constant.
-//   - GET /api/auth/methods, one cached lookup (§5.9).
-//
+// unlimited are the custom routes deliberately left to PocketBase's /api/
+// catch-all, and why; design.md lists them under the table.
+var unlimited = []struct{ route, why string }{
+	{"GET /api/sync/digest", "polled every ~60s by every device (§8.5): a per-IP budget would cut off a household whose phones share a NAT"},
+	{"GET /api/sync/snapshot/{listId}", "the digest's repair read (§8.5): it runs only for a diverged list, but for every list at once after an eviction (§8.8), a repair a budget would stall"},
+	{"GET /api/lists/{listId}/members", "a cheap read (§7.4)"},
+	{"GET /api/seed-version", "a constant"},
+	{"GET /api/auth/methods", "one cached lookup (§5.9)"},
+}
+
 // RateLimit returns middleware enforcing the named §10 budget per IP. It
 // panics at bind time on an unknown name: inside a request the router's
 // recover would turn it into a bare 500.

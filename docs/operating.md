@@ -77,19 +77,21 @@ page shows) it holds the download's details.
 
 ## Cron jobs
 
-Six jobs run on their own; there is nothing to configure, but several delete
-data for good. "Daily" is 03:00 UTC.
+These jobs run on their own; there is nothing to configure, but several
+delete data for good.
 
+<!-- cron jobs (rendered from backend/internal/jobs/jobs.go by its test) -->
 | Job | Schedule | What it does |
 |---|---|---|
-| Tombstone cleanup | daily | **Deletes** items and categories removed more than 180 days ago, except items remembered under *Previous items* and the built-in aisles a list removed |
-| Invite sweep | daily | Deletes invite links that expired, or were revoked or replaced, more than 30 days ago |
-| Orphan sweep | daily | **Deletes** accounts that are on no list, are older than 60 days and have used no passkey in 60 days |
-| Barcode photo sweep | daily | Deletes product lookups and photos older than 180 days that no item still shows |
-| Barcode photo retry | every 15 minutes | Downloads again, from the Open Food Facts photo hosts, product photos whose download failed in the last 48 hours |
-| Merge-log sweep | daily | Deletes records of duplicate items merged during sync, after 180 days |
+| `tombstone_gc` | daily, 03:00 UTC | **Deletes** items and categories removed more than 180 days ago, except items remembered under *Previous items* and the built-in aisles a list removed |
+| `invite_sweep` | daily, 03:00 UTC | Deletes invite links that expired, or were revoked or replaced, more than 30 days ago |
+| `orphan_sweep` | daily, 03:00 UTC | **Deletes** accounts that are on no list, are older than 60 days and have used no passkey in 60 days |
+| `barcode_photo_sweep` | daily, 03:00 UTC | Deletes product lookups and photos older than 180 days that no item still shows |
+| `barcode_photo_retry` | every 15 minutes | Downloads again, from the Open Food Facts photo hosts, product photos whose download failed in the last 2 days |
+| `merge_log_sweep` | daily, 03:00 UTC | Deletes records of duplicate items merged during sync, after 180 days |
+<!-- cron jobs end -->
 
-A job that fails says so in the log
+A job that fails says so in the log, by its name
 (`docker compose logs shoppinglist | grep 'failed'`).
 
 ## Growing the item vocabulary
