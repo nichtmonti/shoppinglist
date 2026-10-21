@@ -468,6 +468,7 @@
 	"scan_looking_up": "Looking up product…",
 	"scan_not_found": "Product not found. Type the name instead.",
 	"scan_offline_miss": "Unknown code, and you're offline. Type the name instead.",
+	"scan_lookup_failed": "The product can't be looked up right now. Type the name instead.",
 	"scan_attribution": "Photo: Open Food Facts contributors",
 	"scan_hint": "Hold the barcode in the frame",
 

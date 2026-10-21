@@ -23,9 +23,13 @@ export interface ResolveDeps {
 	isOnline?: () => boolean;
 }
 
+/** A lookup that got no answer: unlike a miss, worth saying as a failure. */
+export const LOOKUP_FAILED = 'failed';
+
 /**
- * Resolves a scanned EAN/UPC to a product, or null on a miss or a failed
- * lookup (the caller falls back to typing, §9.2). Cache first, then the server
+ * Resolves a scanned EAN/UPC to a product, null on a miss (offline included),
+ * or LOOKUP_FAILED when the server gave no answer; the caller falls back to
+ * typing either way (§9.2). Cache first, then the server
  * when online. `scanned_products` is device-local and never synced, so it is
  * written directly, bypassing the outbox. A miss is cached only when the
  * server answered one; a failed lookup is asked again next scan.
@@ -33,7 +37,7 @@ export interface ResolveDeps {
 export async function resolveScannedProduct(
 	barcode: string,
 	deps: ResolveDeps = {}
-): Promise<ResolvedProduct | null> {
+): Promise<ResolvedProduct | null | typeof LOOKUP_FAILED> {
 	const cached = await db.scanned_products.get(barcode);
 	const age = cached ? Date.now() - Date.parse(cached.looked_up_at) : Infinity;
 	const maxAge = cached?.found === false ? MISS_CACHE_MS : SUCCESS_CACHE_MS;
@@ -55,7 +59,7 @@ export async function resolveScannedProduct(
 
 	const session = sessionScope();
 	const result = await lookupBarcode(barcode, deps.transport);
-	if (result.kind === 'error') return null;
+	if (result.kind === 'error') return LOOKUP_FAILED;
 	// A sign-out while the lookup was in flight has wiped scanned_products
 	// ([D-109]); the answer must not be written back behind it.
 	const owned = session.owned();

@@ -443,6 +443,7 @@
 	"scan_looking_up": "Produkt wird gesucht …",
 	"scan_not_found": "Produkt nicht gefunden. Tippe den Namen ein.",
 	"scan_offline_miss": "Unbekannter Code, und du bist offline. Tippe den Namen ein.",
+	"scan_lookup_failed": "Das Produkt lässt sich gerade nicht nachschlagen. Tippe den Namen ein.",
 	"scan_attribution": "Foto: Mitwirkende von Open Food Facts",
 	"scan_hint": "Barcode ins Bild halten",
 

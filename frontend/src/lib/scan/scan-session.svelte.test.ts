@@ -4,7 +4,7 @@
 // the real component and Dexie.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CameraPermissionDeniedError } from './decode';
-import type { ResolvedProduct } from './resolve';
+import { LOOKUP_FAILED, type ResolvedProduct } from './resolve';
 import { ScanSession, type ScanDeps } from './scan-session.svelte';
 
 const EAN = '3017620422003';
@@ -136,6 +136,17 @@ describe('ScanSession', () => {
 		scan.startCamera(video);
 		await vi.advanceTimersByTimeAsync(1400);
 		expect(scan.status).toBe('scanning');
+	});
+
+	it('says a lookup that got no answer as a failure, not as a miss', async () => {
+		const { scan } = session({ resolve: async () => LOOKUP_FAILED });
+		scan.open();
+		scan.startCamera(video);
+		await settle();
+
+		expect(scan.status).toBe('lookup_failed');
+		expect(scan.message).toBe('scan_lookup_failed');
+		expect(scan.takeFallback()).toBe(true);
 	});
 
 	it('says an offline miss as one, and hands the focus to typing once', async () => {

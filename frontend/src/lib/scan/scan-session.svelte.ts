@@ -14,7 +14,7 @@ import {
 	CameraUnsupportedError,
 	type CameraScan
 } from './decode';
-import type { ResolvedProduct } from './resolve';
+import { LOOKUP_FAILED, type ResolvedProduct } from './resolve';
 
 export type ScanStatus =
 	| 'idle'
@@ -26,7 +26,8 @@ export type ScanStatus =
 	| 'camera_busy'
 	| 'decode_failed'
 	| 'not_found'
-	| 'offline_miss';
+	| 'offline_miss'
+	| 'lookup_failed';
 
 const MESSAGES: Partial<Record<ScanStatus, MessageKey>> = {
 	unsupported: 'scan_unsupported',
@@ -35,6 +36,7 @@ const MESSAGES: Partial<Record<ScanStatus, MessageKey>> = {
 	decode_failed: 'scan_decode_failed',
 	not_found: 'scan_not_found',
 	offline_miss: 'scan_offline_miss',
+	lookup_failed: 'scan_lookup_failed',
 	looking_up: 'scan_looking_up'
 };
 
@@ -48,7 +50,7 @@ export interface ScanDeps {
 	/** Brings that row back instead of adding a second one. */
 	reuse: (item: Item) => Promise<void>;
 	/** The product `barcode` names, or null for a miss (§9.2 step 2). */
-	resolve: (barcode: string) => Promise<ResolvedProduct | null>;
+	resolve: (barcode: string) => Promise<ResolvedProduct | null | typeof LOOKUP_FAILED>;
 	/** Adds `product` to the list; resolves the new row's id (§9.2 step 3). */
 	create: (barcode: string, product: ResolvedProduct) => Promise<string>;
 	/** A row was added from the scan. */
@@ -185,8 +187,8 @@ export class ScanSession {
 		const online = this.#deps.isOnline();
 		const product = await this.#deps.resolve(barcode);
 		if (gen !== this.#gen) return;
-		if (!product) {
-			this.status = online ? 'not_found' : 'offline_miss';
+		if (!product || product === LOOKUP_FAILED) {
+			this.status = product ? 'lookup_failed' : online ? 'not_found' : 'offline_miss';
 			// The message gets a beat; the fallback follows the overlay's close.
 			this.#fallbackDue = true;
 			this.#closeAfter(MISS_MS);

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { db } from '#lib/db.js';
 import { endSession } from '#lib/auth/session.js';
 import { resetDb } from '#lib/test-kit/db.js';
-import { resolveScannedProduct } from './resolve';
+import { LOOKUP_FAILED, resolveScannedProduct } from './resolve';
 import { BARCODE_ENDPOINT } from './lookup';
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -82,7 +82,7 @@ describe('resolveScannedProduct', () => {
 		['a transport failure', () => Promise.reject(new Error('timeout'))],
 		['a 500', () => Promise.resolve(jsonResponse({ message: 'unavailable' }, 500))],
 		['a 429', () => Promise.resolve(jsonResponse({}, 429))]
-	])('%s resolves to null and caches nothing', async (_label, respond) => {
+	])('%s resolves to a failure and caches nothing', async (_label, respond) => {
 		const transport = vi.fn(respond);
 
 		const result = await resolveScannedProduct('5000000000000', {
@@ -90,7 +90,7 @@ describe('resolveScannedProduct', () => {
 			isOnline: () => true
 		});
 
-		expect(result).toBeNull();
+		expect(result).toBe(LOOKUP_FAILED);
 		expect(await db.scanned_products.get('5000000000000')).toBeUndefined();
 	});
 
