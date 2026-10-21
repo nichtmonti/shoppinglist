@@ -43,8 +43,8 @@ its path on the host.
 
 `pb_data/backups/` also holds the `pb_backup_pre_upgrade_*.zip` files the
 server writes before an upgrade changes the database
-([upgrades](deploy-reference.md#upgrades)). It keeps the newest three of
-those; "max backups to keep" applies only to the scheduled ones.
+([upgrades](deploy-reference.md#upgrades)); "max backups to keep" applies only
+to the scheduled ones.
 
 **Restoring.** With the dashboard: `/_/` → Settings → Backups → *Restore*,
 on the running server. Without it: stop the container, empty the data

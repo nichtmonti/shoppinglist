@@ -137,9 +137,7 @@ invite links, an optional egress allowlist) is in the
 
 Database changes apply at start, after the server has zipped the data
 directory into `pb_data/backups/`; restoring that zip with the previous image
-undoes the upgrade. A setting the new release renamed or removed stops it with
-that name in the log; the changelog says what replaced it
-([details](deploy-reference.md#upgrades)).
+undoes the upgrade ([details](deploy-reference.md#upgrades)).
 
 ## Everything else
 

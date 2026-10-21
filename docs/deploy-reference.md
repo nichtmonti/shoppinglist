@@ -83,13 +83,8 @@ invite links still let people with an account join a list.
 | <img src="images/signup-invite-only.png" width="200" alt="The auth screen under invite: passkey sign-in, and a note that new accounts need an invite link"> | <img src="images/signup-invite-join.png" width="200" alt="An invite link opened without an account: the list's preview above the sign-up form"> | <img src="images/share-sheet.png" width="200" alt="The share sheet: Anna and Ben, the invite link, and the reset and revoke buttons"> |
 | <sub>No "Create account", only<br>a note to ask for a link.</sub> | <sub>The list's preview, and an<br>account straight onto it.</sub> | <sub>Where the link comes from;<br>"Reset link" retires it.</sub> |
 
-**The setup link.** With `invite` and no account yet, every boot logs:
-
-```
-shoppinglist: no accounts yet and SHOPPINGLIST_SIGNUP=invite — create the first account at https://list.example.com/#setup=… (valid until the first account exists; …)
-```
-
-Open it, create your account, then make a list and share it. It admits
+**The setup link.** With `invite` and no account yet, every boot logs a link
+for the first account ([the log line](deploying.md#3-first-boot)). It admits
 exactly one account and lives only in memory: a restart prints a new one, and
 none is printed once an account exists. Treat it as a secret while it is
 valid.
@@ -188,9 +183,8 @@ Administration then happens on the host, with the binary's `superuser` and
 
 Before you set it:
 
-- PocketBase's own enrolment link (first boot) points at `/_/` and stops
-  working. Create the superuser with
-  [`superuser upsert`](#running-it) instead.
+- PocketBase's own enrolment link (first boot) is not printed. Create the
+  superuser with [`superuser upsert`](deploying.md#3-first-boot) instead.
 - Dashboard settings such as the backup schedule and rate limits become unreachable.
   Configure them first, or switch the dashboard back on briefly when you need
   it. The trusted-proxy header has its own variable and needs no dashboard.
@@ -212,13 +206,13 @@ register a passkey.
   under; changing it strands all of them, and everyone registers again.
 - **Plain `http://` only on this machine.** The server refuses to start while
   its address (`RP_ORIGIN`, or `SHOPPINGLIST_APP_URL` with passkeys off) is
-  plain `http://` at anything but `localhost` or `127.0.0.1`: browsers withhold
+  plain `http://` at anything but `localhost`, a `*.localhost` name or a
+  loopback address: browsers withhold
   what the app needs there. A visitor who reaches it over plain HTTP anyway
   sees a page saying so instead of the app.
 
-Before inviting anyone, register an account at your real domain, then **reload
-and sign in with the passkey**. If either fails, `RP_ID` or `RP_ORIGIN` does
-not match the address bar.
+The guide's [first boot](deploying.md#3-first-boot) checks both with a real
+passkey before anyone is invited.
 
 ## The reverse proxy is part of the security model
 
@@ -258,7 +252,9 @@ leftmost, the real client.
 
 Publish the port to the proxy only: `127.0.0.1:8090` (the compose default), or
 an internal Docker network. A public `-p 8090:8090` serves the app, and its
-admin dashboard, over plain HTTP.
+admin dashboard, over plain HTTP, and anyone who reaches it can send their own
+`X-Forwarded-For`. For a proxy on another machine, `SHOPPINGLIST_BIND=8090`
+publishes the port on every interface; let only that machine reach it.
 
 ### A known-good Caddy config
 
@@ -309,7 +305,8 @@ from.
 ### Without Docker
 
 The [releases page](https://codeberg.org/sclermont/shoppinglist/releases) has
-a zip for `linux/amd64` and `arm64` holding a single self-contained binary:
+a zip for `linux/amd64` and `arm64` holding the self-contained binary, with
+the licences and the operator docs:
 
 ```sh
 unzip shoppinglist_*_linux_amd64.zip
@@ -419,9 +416,8 @@ and restore that zip ([restoring](operating.md#backups)). Downgrading without
 restoring is not supported.
 
 **Renamed and removed settings** are listed in the changelog, with what to do.
-One still set stops the server, which logs the name to rename or delete: a
-removed setting like a misspelt one, an old `EINKAUFSLISTE_*` name (now
-`SHOPPINGLIST_*`) too.
+One still set stops the server like a
+[misspelt name](#environment-variables).
 
 **Never change collections or their rules in the `/_/` dashboard**
 ([why](operating.md#three-things-not-to-change)).
@@ -476,8 +472,8 @@ that the scanner `cannot reach` them, naming each site and the cause. With
 `SHOPPINGLIST_SCANNER=off` and OIDC off, it needs no route out at all. To
 allow it only those hosts, see [an egress allowlist](#an-egress-allowlist).
 
-**Invite links are bearer tokens.** Anyone holding one can join that list for
-30 days. It travels in the URL fragment, so no page load and no access log
+**Invite links are bearer tokens.** Anyone holding one can join that list
+while it lasts. It travels in the URL fragment, so no page load and no access log
 carries it (the app sends it only in a request's body), but whoever it is
 forwarded to can use it. If one leaks, "Reset link"
 replaces it and "Revoke link" ends it.

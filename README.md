@@ -149,7 +149,7 @@ Write a `.env` beside it and start:
 
 ```sh
 cat > .env <<'EOF'
-# CHANGE: your bare domain (no https://, no port)
+# CHANGE: your bare domain (no https://, no port, no IP)
 SHOPPINGLIST_RP_ID=list.example.com
 SHOPPINGLIST_SIGNUP=invite
 SHOPPINGLIST_TRUSTED_PROXY_HEADER=X-Forwarded-For
@@ -165,8 +165,9 @@ link (⋮ → "Share & members").
 This runs the newest release, so a restart can upgrade you; add
 `SHOPPINGLIST_VERSION=X.Y.Z` from the
 [releases page](https://codeberg.org/sclermont/shoppinglist/releases) to stay on
-one. Every other setting is in [`.env.example`](.env.example), and backups,
-upgrades and the admin account in [`docs/deploying.md`](docs/deploying.md).
+one. Every other setting is in [`.env.example`](.env.example), upgrades and the
+admin account in [`docs/deploying.md`](docs/deploying.md), and backups in
+[`docs/operating.md`](docs/operating.md#backups).
 
 A plain binary for `linux/amd64` and `arm64`, zipped, is on the
 [releases page](https://codeberg.org/sclermont/shoppinglist/releases).
