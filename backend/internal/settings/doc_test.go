@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"flag"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -10,14 +9,9 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"shoppinglist/internal/testutil/docblock"
 )
-
-var update = flag.Bool("update", false, "rewrite the settings tables in docs/deploy-reference.md")
-
-const docFile = "../../../docs/deploy-reference.md"
-
-// A table's markers name the structs whose fields it lists, in order.
-var tableBlock = regexp.MustCompile(`(?s)(<!-- settings table: ([A-Za-z ]+?) \(rendered from backend/internal/settings/settings\.go by its test\) -->\n)(.*?)(<!-- settings table end -->)`)
 
 var types = map[string]reflect.Type{
 	"Serve": reflect.TypeFor[Serve](),
@@ -26,35 +20,13 @@ var types = map[string]reflect.Type{
 }
 
 // [D-337] Each table in docs/deploy-reference.md is the one this file's
-// declarations render; -update rewrites them.
-func TestSettingsTables(t *testing.T) {
+// declarations render; its markers name the structs whose fields it lists, in
+// order.
+func TestDocsSettingsTables(t *testing.T) {
 	docs := fieldDocs(t)
-	raw, err := os.ReadFile(docFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	blocks := tableBlock.FindAllStringSubmatchIndex(string(raw), -1)
-	if len(blocks) == 0 {
-		t.Fatalf("%s has no settings table markers", docFile)
-	}
-	out, last := []byte{}, 0
-	for _, b := range blocks {
-		structs := strings.Fields(string(raw[b[4]:b[5]]))
-		out = append(out, raw[last:b[6]]...)
-		out = append(out, renderTable(t, structs, docs)...)
-		last = b[7]
-	}
-	out = append(out, raw[last:]...)
-	if string(out) == string(raw) {
-		return
-	}
-	if *update {
-		if err := os.WriteFile(docFile, out, 0o600); err != nil {
-			t.Fatal(err)
-		}
-		return
-	}
-	t.Errorf("the settings tables in docs/deploy-reference.md are stale: go test ./internal/settings -update")
+	docblock.Render(t, "docs/deploy-reference.md", "settings table", func(structs []string) string {
+		return renderTable(t, structs, docs)
+	})
 }
 
 // The values the defaults column quotes from elsewhere: what .env.example

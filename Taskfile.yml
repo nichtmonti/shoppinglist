@@ -261,19 +261,17 @@ tasks:
       - backend/**/*.json
       - backend/go.mod
       - backend/go.sum
-      # What internal/settings' tests hold the settings to ([D-337]).
+      # The files outside backend/ the TestDocs tests read ([D-337]).
+      - README.md
+      - CHANGELOG.md
+      - docs/using.md
+      - docs/deploying.md
       - docs/deploy-reference.md
+      - docs/operating.md
+      - docs/internals/design.md
       - .env.example
       - Dockerfile.demo
       - docker-compose.yml
-      - README.md
-      # What internal/docquotes holds to the messages, the wording rules and
-      # the server's code.
-      - docs/using.md
-      - docs/deploying.md
-      - docs/operating.md
-      - docs/internals/design.md
-      - CHANGELOG.md
       - frontend/messages/*.json
       - frontend/src/lib/i18n/wording.json
       - exclude: backend/pb_data/**/*
@@ -281,6 +279,9 @@ tasks:
     cmds:
       - defer: *failed
       - cd backend && go test -tags no_ui {{.CLI_ARGS}} ./...
+      # Go's test cache sees no file outside the module, so a docs-only edit
+      # would leave their passing results cached.
+      - cd backend && go test -tags no_ui -count=1 -run '^TestDocs' ./...
       - cd backend && go test -tags demo,no_ui .
 
   vitest:

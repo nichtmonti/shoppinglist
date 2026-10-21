@@ -126,7 +126,7 @@ func TestTheRetryJobStoresAPhotoThatFailedForAWhile(t *testing.T) {
 	}
 }
 
-// The retry job asks only for photos looked up within photoRetryWindow.
+// The retry job asks only for photos looked up within PhotoRetryWindow.
 func TestTheRetryJobStopsAfterItsWindow(t *testing.T) {
 	up := newUpstream(t)
 	app, mux, token := barcodeMux(t)
@@ -134,7 +134,7 @@ func TestTheRetryJobStopsAfterItsWindow(t *testing.T) {
 	lookup(t, mux, token, downloadEAN)
 
 	rec := cacheRow(t, app, downloadEAN)
-	rec.Set("fetched_at", time.Now().Add(-photoRetryWindow-time.Hour))
+	rec.Set("fetched_at", time.Now().Add(-PhotoRetryWindow-time.Hour))
 	if err := app.SaveNoValidate(rec); err != nil {
 		t.Fatal(err)
 	}

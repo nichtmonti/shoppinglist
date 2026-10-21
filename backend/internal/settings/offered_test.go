@@ -21,7 +21,7 @@ const repoRoot = "../../../"
 // setting the code reads but neither names is one nobody finds, and a name
 // .env.example offers that nothing reads does nothing. The demo build's own
 // settings are not offered in .env.example, which runs the real image.
-func TestOperatorFilesOfferTheSettings(t *testing.T) {
+func TestDocsOperatorFilesOfferTheSettings(t *testing.T) {
 	server := slices.Concat(keys(t, &Serve{}), keys(t, &Boot{}))
 	demo := keys(t, &Demo{})
 	compose := readRepo(t, "docker-compose.yml")

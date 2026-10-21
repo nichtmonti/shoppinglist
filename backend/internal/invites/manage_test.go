@@ -132,9 +132,9 @@ func TestMintStampsServerOwnedFields(t *testing.T) {
 	}
 
 	exp := rec.GetDateTime("expires_at").Time()
-	want := before.Time().Add(inviteLifetime)
+	want := before.Time().Add(Lifetime)
 	if exp.Before(want.Add(-time.Minute)) || exp.After(want.Add(time.Minute)) {
-		t.Errorf("expires_at = %v, want ~%v (server-set, %v)", exp, want, inviteLifetime)
+		t.Errorf("expires_at = %v, want ~%v (server-set, %v)", exp, want, Lifetime)
 	}
 }
 

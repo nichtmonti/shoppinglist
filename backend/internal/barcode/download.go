@@ -26,11 +26,11 @@ var (
 // job's.
 const maxPhotoDownloads = 4
 
-// photoRetryWindow is how long after its lookup the retry job keeps trying a
+// PhotoRetryWindow is how long after its lookup the retry job keeps trying a
 // photo that failed for a reason that can pass; photoRetryBatch bounds one
 // run.
 const (
-	photoRetryWindow = 48 * time.Hour
+	PhotoRetryWindow = 48 * time.Hour
 	photoRetryBatch  = 10
 )
 
@@ -118,13 +118,13 @@ func fillItems(app core.App, ean, path string) error {
 }
 
 // RetryPhotos tries again the photos whose download failed for a reason that
-// can pass, for photoRetryWindow after their lookup, a few per run and one at
+// can pass, for PhotoRetryWindow after their lookup, a few per run and one at
 // a time, so a slow photo host is not met with all of them at once.
 func RetryPhotos(app core.App) error {
 	rows, err := app.FindRecordsByFilter("barcode_cache",
 		"found = true && image_url != '' && photo = '' && fetched_at > {:since}",
 		"-fetched_at", photoRetryBatch, 0,
-		dbx.Params{"since": time.Now().Add(-photoRetryWindow).UTC().Format(types.DefaultDateLayout)})
+		dbx.Params{"since": time.Now().Add(-PhotoRetryWindow).UTC().Format(types.DefaultDateLayout)})
 	if err != nil {
 		return err
 	}

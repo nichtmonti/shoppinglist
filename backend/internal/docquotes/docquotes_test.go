@@ -89,7 +89,7 @@ func quotesAny(quote string, messages []string) bool {
 // "shoppinglist: " in it, or what a `docker compose logs … | grep '…'`
 // filters for. Its message ("…" for any text, a number for any number) must be
 // in the server's code, and every key=value's key too.
-func TestOperatorDocsQuoteTheServer(t *testing.T) {
+func TestDocsQuoteTheServer(t *testing.T) {
 	source := serverSource(t)
 	// A line's message, and the key=value pairs after it.
 	logLine := regexp.MustCompile(`(?:level=\w+ msg="shoppinglist: ([^"]*)"?|shoppinglist: (\S.*?))((?: \w+=.*)?)$`)
@@ -122,7 +122,7 @@ func TestOperatorDocsQuoteTheServer(t *testing.T) {
 }
 
 // The user docs keep the wording the messages keep (messages.test.ts).
-func TestUserDocsKeepTheMessagesWording(t *testing.T) {
+func TestDocsKeepTheMessagesWording(t *testing.T) {
 	var wording map[string][]struct{ Pattern, Why string }
 	readJSON(t, "frontend/src/lib/i18n/wording.json", &wording)
 	for _, doc := range []string{"README.md", "docs/using.md"} {

@@ -19,7 +19,8 @@ func init() {
 	pbmigrations.Register(scheduledBackupsUp, func(core.App) error { return nil }, "1778000024_scheduled_backups.go")
 }
 
-// The schedule and how many it keeps, also named in docs/operating.md.
+// The schedule and how many it keeps, which docs/operating.md quotes
+// (backend/docs_test.go holds it to them).
 const (
 	backupCron     = "0 3 * * *"
 	backupKeepLast = 7

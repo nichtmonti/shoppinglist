@@ -3,13 +3,19 @@ package barcode
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
-// SweepPhotos drops barcode_cache entries untouched for 180 days, which bounds
-// pb_data growth from stored product photos ([D-21]).
+// PhotoSweepAfter is how long a lookup and its photo are kept past their fetch
+// while no item shows the photo.
+const PhotoSweepAfter = 180 * 24 * time.Hour
+
+// SweepPhotos drops barcode_cache entries untouched for PhotoSweepAfter, which
+// bounds pb_data growth from stored product photos ([D-21]).
 //
 // It skips a row whose photo an item still points at (§9.2), tombstones
 // included since they can be restored (§8.2). The reference test is equality
@@ -23,11 +29,11 @@ import (
 // returned, joined.
 func SweepPhotos(app core.App) error {
 	rows, err := app.FindAllRecords("barcode_cache", dbx.NewExp(
-		`fetched_at != '' AND fetched_at < datetime('now','-180 days') `+
+		`fetched_at != '' AND fetched_at < {:before} `+
 			`AND (photo_token = '' OR NOT EXISTS (`+
 			`SELECT 1 FROM items `+
 			`WHERE items.image_url = {:prefix} || barcode_cache.photo_token))`,
-		dbx.Params{"prefix": photoPathPrefix}))
+		dbx.Params{"prefix": photoPathPrefix, "before": types.NowDateTime().Add(-PhotoSweepAfter).String()}))
 	if err != nil {
 		return err
 	}

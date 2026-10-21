@@ -111,7 +111,8 @@ func parseServeEnv() (*serveEnv, error) {
 		return nil, err
 	}
 	// [D-335] An instance whose address is plain http works for no visitor.
-	// The demo says so on its start screen instead, so it runs at one too.
+	// The demo runs at one too: the root layout's InsecureView tells a
+	// visitor outside a secure context, there as everywhere.
 	if !demoBuild {
 		if err := webauthn.SecureOrigin(wacfg.RPOrigin); err != nil {
 			return nil, err

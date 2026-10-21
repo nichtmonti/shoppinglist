@@ -25,8 +25,12 @@ import (
 	"shoppinglist/internal/security"
 )
 
-// inviteLifetime is how long a freshly minted link stays valid.
-const inviteLifetime = 30 * 24 * time.Hour
+// Lifetime is how long a freshly minted link stays valid, and SweepAfter how
+// long the sweep keeps one past its expiry or revocation.
+const (
+	Lifetime   = 30 * 24 * time.Hour
+	SweepAfter = 30 * 24 * time.Hour
+)
 
 // mintResponse carries the raw token; members read it back later from the row.
 type mintResponse struct {
@@ -65,7 +69,7 @@ func mintInvite(e *core.RequestEvent) error {
 		rec.Set("token", token)
 		rec.Set("revoked", false)
 		rec.Set("created_by", e.Auth.Id) // from the token, never from the body
-		rec.Set("expires_at", types.NowDateTime().Add(inviteLifetime))
+		rec.Set("expires_at", types.NowDateTime().Add(Lifetime))
 		return txApp.SaveNoValidate(rec)
 	})
 	if err != nil {
@@ -110,12 +114,12 @@ func RevokeLive(app core.App, listID string) (int, error) {
 	return int(n), err
 }
 
-// Sweep deletes invites expired more than 30 days ago, and invites revoked
-// more than 30 days ago (§13).
+// Sweep deletes invites expired or revoked more than SweepAfter ago (§13).
 func Sweep(app core.App) error {
 	_, err := app.DB().NewQuery(`DELETE FROM invites ` +
-		`WHERE (expires_at != '' AND expires_at < datetime('now','-30 days')) ` +
-		`OR (revoked = 1 AND updated < datetime('now','-30 days'))`).Execute()
+		`WHERE (expires_at != '' AND expires_at < {:before}) ` +
+		`OR (revoked = 1 AND updated < {:before})`).
+		Bind(dbx.Params{"before": types.NowDateTime().Add(-SweepAfter).String()}).Execute()
 	return err
 }
 

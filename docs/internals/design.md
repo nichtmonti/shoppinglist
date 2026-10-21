@@ -158,6 +158,7 @@ A ceremony's `SessionData` must survive between its two requests and be single-u
 ### 5.7 RP-ID / self-hosting config
 
 - RP-ID from **`SHOPPINGLIST_RP_ID`** (origin `SHOPPINGLIST_RP_ORIGIN`), required only while passkeys are on (§5.9). **The server refuses to boot** if it is unset or a raw IP.
+- **The app needs a secure context** ([D-335]): the server refuses to boot while its address (`SHOPPINGLIST_RP_ORIGIN`, or `SHOPPINGLIST_APP_URL` with passkeys off) is plain `http://` anywhere but `localhost`, `*.localhost` or a loopback address (`webauthn.SecureOrigin`). The demo build is exempt ([D-234]). A browser that reaches the app outside one anyway gets §12's insecure screen.
 - Passkeys break if the domain changes or the instance is reached by raw LAN IP; domain migration is not supported.
 - The ceremony inside the installed PWA (especially iOS standalone) is covered only by manual device testing (§14).
 
@@ -250,7 +251,7 @@ No name of its own, no update rule [D-08]; readable only by its owner (the roste
 
 ### 6.7 Categories: per-list, copied from a global seed at creation [D-14]
 
-The global **seed** of 21 categories (§6.12) is **copied** into a new list's own `list_categories` rows (§7.5). From then on they are **ordinary syncable rows the members own**: rename, re-emoji, recolor, reorder, hide, add, all through normal sync (§8), with no runtime resolver and no deterministic ids. Later seed edits do not reach existing lists, except a template's new icon ([D-287]) and the one fold of [D-302] (§6.12).
+The global **seed** of categories (§6.12) is **copied** into a new list's own `list_categories` rows (§7.5). From then on they are **ordinary syncable rows the members own**: rename, re-emoji, recolor, reorder, hide, add, all through normal sync (§8), with no runtime resolver and no deterministic ids. Later seed edits do not reach existing lists, except a template's new icon ([D-287]) and the one fold of [D-302] (§6.12).
 
 **`category_templates` (global, app-seeded, read-only to clients), the seed source only:**
 | Field | Type | Notes |
@@ -287,9 +288,9 @@ Seeded on boot (§6.12); superuser-only writes. Clients **read** templates but *
 |---|---|---|
 | id | PB record id | |
 | list | relation → lists | |
-| token_hash | string | **sha256 of the token**; looked up by hash. The token is 32 random bytes, base64url, so a fast hash suffices |
-| token | string | the live link's token, readable by every member under the member-only read rules; **blanked on revocation**; empty on links minted before the column [D-294] |
-| expires_at | datetime | **+30 days** from the server clock (§7.6) |
+| token_hash | string | **sha256 of the token**, the lookup key (§7.1); the token's 32 random bytes (§10.1) make a fast hash enough |
+| token | string | the live link's token (§7.1), read under the member-only rules; empty on links minted before the column [D-294] |
+| expires_at | datetime | the link's lifetime (§7.1) from the server clock at minting (§7.6) |
 | revoked | bool | |
 | created_by | relation → accounts, **non-cascading** [D-32] | |
 
@@ -346,35 +347,37 @@ Both are populated only by an **idempotent boot seeder**, never by hand or clien
 - **What a bump does to existing lists.** A template whose icon changes moves every list's category still on its old icon, and leaves one changed by hand ([D-287]). The boot that crosses seed version 8 folds every list once into [D-300]'s aisles (`seed/fold.go`, [D-302]).
 - **Client re-mirror on version bump.** `GET /api/seed-version` exposes the active version to authenticated clients. The client stores its mirror's version in `meta.seed_version` and compares after the **first completed pull of each session**, retrying each cycle until it succeeds; if they differ (or the local dictionary is empty), it re-pulls both collections in full and replaces the mirror, refusing an empty fetch.
 - **Shape.** Template `icon` is stored and synced as the emoji character, drawn with bundled OpenMoji artwork ([D-181], §9.1). A `retired` template is no longer copied into a list, offered to one or used by a text import; it still names the rows lists have and lets a backup carrying its slug import [D-300]. Dictionary fields: §6.9.
-- **Default category seed** (21, walk order through a German supermarket then errands, colours by meaning with neighbours apart: [D-251], [D-300]; copied into each new list at creation, §7.5; editable per list, §6.7):
+- **Default category seed**: walk order through a German supermarket then errands, colours by meaning with neighbours apart ([D-251], [D-300]); copied into each new list at creation (§7.5) and editable per list (§6.7).
 
-  | # | Emoji | Color | Deutsch | English | slug |
-  |---|---|---|---|---|---|
-  | 1 | 🥦 | `green` | Obst & Gemüse | Produce | `produce` |
-  | 2 | 🥖 | `amber` | Brot & Backwaren | Bakery | `bakery` |
-  | 3 | 🥛 | `sky` | Milch & Kühlregal | Dairy & Chilled | `dairy_eggs` |
-  | 4 | 🥩 | `red` | Fleisch & Fisch | Meat & Fish | `meat_fish` |
-  | 5 | 🥫 | `olive` | Konserven & Vorräte | Pantry & Canned | `pantry` |
-  | 6 | 🍝 | `yellow` | Nudeln, Reis & Getreide | Pasta, Rice & Grains | `pasta_rice` |
-  | 7 | 🧁 | `brown` | Backen & Gewürze | Baking & Spices | `baking_spices` |
-  | 8 | 🥣 | `pink` | Frühstück & Müsli | Breakfast & Cereal | `breakfast` |
-  | 9 | 🍵 | `lime` | Tee, Kaffee & Kakao | Tea, Coffee & Cocoa | `coffee_tea` |
-  | 10 | 🍫 | `violet` | Snacks & Süßigkeiten | Snacks & Sweets | `snacks_sweets` |
-  | 11 | 🥤 | `teal` | Getränke | Beverages | `beverages` |
-  | 12 | 🍷 | `wine` | Bier, Wein & Spirituosen | Beer, Wine & Spirits | `alcohol` |
-  | 13 | ❄️ | `cyan` | Tiefkühl | Frozen | `frozen` |
-  | 14 | 🧴 | `lavender` | Drogerie & Körperpflege | Personal Care | `personal_care` |
-  | 15 | 🧻 | `slate` | Haushalt & Reinigung | Household & Cleaning | `household` |
-  | 16 | 🍼 | `blue` | Baby | Baby | `baby` |
-  | 17 | 🐾 | `indigo` | Tierbedarf | Pet | `pet` |
-  | 18 | 💊 | `magenta` | Apotheke | Pharmacy | `pharmacy` |
-  | 19 | 🔨 | `orange` | Baumarkt & Garten | Hardware & Garden | `hardware` |
-  | 20 | 🛞 | `steel` | Auto & Fahrrad | Car & Bike | `car_bike` |
-  | 21 | 📦 | `gray` | Sonstiges | Other | `other` |
+<!-- category seed (rendered from backend/seed/categories.json by its test) -->
+| # | Emoji | Color | Deutsch | English | slug |
+|---|---|---|---|---|---|
+| 1 | 🥦 | `green` | Obst & Gemüse | Produce | `produce` |
+| 2 | 🥖 | `amber` | Brot & Backwaren | Bakery | `bakery` |
+| 3 | 🥛 | `sky` | Milch & Kühlregal | Dairy & Chilled | `dairy_eggs` |
+| 4 | 🥩 | `red` | Fleisch & Fisch | Meat & Fish | `meat_fish` |
+| 5 | 🥫 | `olive` | Konserven & Vorräte | Pantry & Canned | `pantry` |
+| 6 | 🍝 | `yellow` | Nudeln, Reis & Getreide | Pasta, Rice & Grains | `pasta_rice` |
+| 7 | 🧁 | `brown` | Backen & Gewürze | Baking & Spices | `baking_spices` |
+| 8 | 🥣 | `pink` | Frühstück & Müsli | Breakfast & Cereal | `breakfast` |
+| 9 | 🍵 | `lime` | Tee, Kaffee & Kakao | Tea, Coffee & Cocoa | `coffee_tea` |
+| 10 | 🍫 | `violet` | Snacks & Süßigkeiten | Snacks & Sweets | `snacks_sweets` |
+| 11 | 🥤 | `teal` | Getränke | Beverages | `beverages` |
+| 12 | 🍷 | `wine` | Bier, Wein & Spirituosen | Beer, Wine & Spirits | `alcohol` |
+| 13 | ❄️ | `cyan` | Tiefkühl | Frozen | `frozen` |
+| 14 | 🧴 | `lavender` | Drogerie & Körperpflege | Personal Care | `personal_care` |
+| 15 | 🧻 | `slate` | Haushalt & Reinigung | Household & Cleaning | `household` |
+| 16 | 🍼 | `blue` | Baby | Baby | `baby` |
+| 17 | 🐾 | `indigo` | Tierbedarf | Pet | `pet` |
+| 18 | 💊 | `magenta` | Apotheke | Pharmacy | `pharmacy` |
+| 19 | 🔨 | `orange` | Baumarkt & Garten | Hardware & Garden | `hardware` |
+| 20 | 🛞 | `steel` | Auto & Fahrrad | Car & Bike | `car_bike` |
+| 21 | 📦 | `gray` | Sonstiges | Other | `other` |
 
-  Retired: 🪴 `lime` Garten & Pflanzen / Garden & Plants (`garden`), folded into `hardware` [D-300].
+Retired: 🪴 `lime` Garten & Pflanzen / Garden & Plants (`garden`).
+<!-- category seed end -->
 
-  Slugs are permanent. **Others** (`other`) is an **explicit** seeded category that sorts last and is the fallback for any null/unknown `category_key` (§6.6); there is no implicit uncategorized bucket. `items.json` covers de/en and every category but `other`, which seeds no dictionary entries.
+`garden` is retired into `hardware` [D-300]. Slugs are permanent. **Others** (`other`) is an **explicit** seeded category that sorts last and is the fallback for any null/unknown `category_key` (§6.6); there is no implicit uncategorized bucket. `items.json` covers de/en and every category but `other`, which seeds no dictionary entries.
 
 **Content is hand-curated, never bulk-imported** from a grocery database [D-24]; this holds for the §6.13 tooling too.
 
@@ -401,7 +404,7 @@ Growing the global taxonomy is an **operator** action ([D-15]) with two tools th
 ### 7.1 Invite lifecycle (link-only)
 
 - **One reusable link per list**, live until expiry (**30 days**) or revocation. Any member may share, reset (rotate), revoke or create it; revoking blocks new joins without evicting anyone. **Any member's departure revokes it** (§7.3) [D-31].
-- The token is **minted server-side** (32 `crypto/rand` bytes, base64url) and looked up by its sha256 hash; a live link's token is kept beside the hash for every member to share, and a revocation blanks it [D-294]. It travels in the **URL fragment** (`#…`), never in access logs or Referer headers; the SPA POSTs it to the §7.6 routes.
+- The token is **minted server-side** (§10.1) and looked up by its sha256 hash; a live link's token is kept beside the hash for every member to share, and a revocation blanks it [D-294]. It travels in the **URL fragment** (`#…`), never in access logs or Referer headers; the SPA POSTs it to the §7.6 routes.
 - **The server holds one active link per list**: a partial unique index (`ON invites (list) WHERE revoked = 0`) plus atomic rotation in the mint route [D-31].
 - The **"Share & members" sheet** shows the roster (§7.4, no avatars [D-57]) above the live link, with „Link zurücksetzen“ and „Link zurückziehen“ [D-310]; without a live link it offers „Link erstellen“, and opening it never mints [D-330].
 
@@ -422,13 +425,14 @@ A device's queued ops for a list it no longer belongs to come back `denied`/`not
 
 ### 7.4 Member roster (custom route)
 
-`GET /api/lists/{listId}/members` (auth + membership) returns `[{account, nickname, joined}]`. It is the **only** exposure of member identities; `memberships` reads stay own-rows-only (§11), so SSE cannot carry roster changes. The client caches it in Dexie and refreshes it at **three triggers** [D-236]:
+`GET /api/lists/{listId}/members` (auth + membership) returns `[{account, nickname, joined}]`. It is the **only** exposure of member identities; `memberships` reads stay own-rows-only (§11), so SSE cannot carry roster changes. The client caches it in Dexie and refreshes it at **four triggers** [D-236]:
 
-- **(a)** per list, on its **first drain of each session**, and at once on a join;
-- **(b)** when the Share & members sheet opens, every 5 s while open, and once as it closes;
-- **(c)** **on miss**: a conflict notice (§8.4) or the home's member count (§9.3) needing an uncached member fetches once more, then falls back to "someone" (e.g. a deleted account, §4.5).
+- **(a)** per list, on its **first drain of each session** (a failure retries next cycle), and at once on a join, without holding the join;
+- **(b)** when the Share & members sheet opens, every 5 s while open (skipped offline or hidden), and once as it closes;
+- **(c)** **on miss**: a conflict notice (§8.4) naming an uncached member fetches once more, then falls back to "someone" (e.g. a deleted account, §4.5);
+- **(d)** when the leave dialog opens (§7.2): its confirm stays busy until the read answers, since the roster decides whether it warns that leaving deletes the list for everyone.
 
-Between triggers the cache may lag.
+Every other reader, the home's member count (§9.3) and the list header's member line among them, reads the cache only. Between triggers the cache may lag.
 
 ### 7.5 List creation (custom route)
 
@@ -509,7 +513,7 @@ A custom, heavily unit-tested engine [D-10]. The app enters it only through `#li
    - `record_id` already exists (re-delivery) → `noop` with the current record; the merge is **not** re-run [D-42].
    - `record_id` is not 8-64 of `[A-Za-z0-9_-]`, or names another list's row or another list's `merge_log` entry → `denied`/`bad_record_id`, and that list's row is left alone [D-191].
    - The list no longer exists → `gone`; no orphan is stored (§8.6). A deleted list usually answers `denied`/`not_member` at step 1 instead, the cascade having deleted the memberships, and the cycle's membership set notices it (§8.5, [D-138]).
-   - A create that would add a row to a list already holding `max_items_per_list` items rows, or 200 `list_categories` rows (tombstones included) → `denied`/`list_full` [D-217] (§10).
+   - A create that would add a row past the list's items or categories cap (§10) → `denied`/`list_full` [D-217].
    - `items` create whose **normalized name** (§9) matches a **non-tombstoned** item (checked or not; of several, the oldest by `created`, the lower `id` within a millisecond) → **not inserted**; `merged` with the existing row's `record_id`, the discarded id logged in `merge_log` so a retry replays the answer [D-108]. The existing row keeps its fields, **except a re-activated row** (checked, or a remembered tombstone): it gets `checked` = false, `checked_at` = null unless the create checks it (`last_bought_at` persists, §6.6) and takes the create's `quantity` and `note`, reporting no conflict for them [D-200]. A living row's blank `quantity`, `note` or `barcode` takes the create's value, reporting no conflict, a filled barcode with its photo [D-29], [D-266]. Otherwise each field where the create carried a **non-empty, differing** value is reported in `conflicts` (`{field, mine, theirs, theirs_by}`) for the §8.4 toast; none otherwise [D-29].
    - A **tombstoned** row matches **only if it carries `last_bought_at`** (it is a previous item, §6.10); the merge then nulls its `deleted_at`. A never-bought tombstone does not match and the create inserts fresh [D-18].
    - Else insert, stamp `modified_by` = caller (and `checked_at`/`last_bought_at` if inserted checked, see 3) → `applied`.
@@ -590,7 +594,7 @@ Categories exist for **ordering** the store walk, not for labelling. A list's ca
 
 **Category assignment** is a picker of the list's categories (§6.7). **Aisle order is per-list**, set by any member in the category editor's arrange mode ([D-90]); it writes `sort_order` (§8). There is **no per-item drag-ordering** ([D-19]).
 
-**No clearing step.** A checked item stays in the shop view's „Erledigt“ section for the current **trip** (the list's run of check-offs while the newest is under three hours old, [D-18]), then moves to the per-list **„Frühere Artikel“** screen (§6.10). Nothing is swept and no cron runs: it is a client-side, time-based view change, and each age shows in one place only.
+**No clearing step.** A checked item stays in the shop view's „Erledigt“ section for the current **trip**, then moves to the per-list **„Frühere Artikel“** screen (§6.10). Nothing is swept and no cron runs: it is a client-side, time-based view change, and each age shows in one place only.
 
 **Previous items screen (per list).** A sub-screen whose ‹ goes back to the list ([D-304]). Its rows are the list's checked items from earlier trips (§6.10), each **dated** with the relative day bought ([D-18]) and each a one-tap **re-add**: it clears `checked`/`checked_at` and resets the quantity ([D-200]); `last_bought_at` persists (§6.6). Its sort menu offers last purchased (default), A→Z and by category, kept in `meta.history_sort` ([D-121]).
 
@@ -636,7 +640,7 @@ An optional scanner adds a product with its picture as an ordinary `items` row (
    - **Device cache:** the never-synced Dexie `scanned_products` store; hits 30 days, misses 24 hours; concurrent scans of one barcode share one request.
    - **Server:** the authenticated `GET /api/barcode/{ean}?lang=de|en` (8 to 14 digits, rate-limited per IP, §10) reads the persistent `barcode_cache` (hits 30 days; misses, and a hit whose photo has not arrived, 5 minutes), then **Open Food Facts**, then the sister database OFF names (**Open Beauty Facts**, **Open Pet Food Facts** or **Open Products Facts**). Upstream calls time out after five seconds. It returns the name in the requested language where the database has it, else the main language, a **same-origin photo path**, and a category slug mapped from the most specific category tag. The server downloads the photo beside the lookup: it waits three seconds for it, then answers without it while the download goes on for up to a minute. A photo that fails for a reason that can pass is retried (§13); one that cannot is not asked for again until the product's refresh. A photo that arrives late goes to every item with that barcode and no photo ([D-21], [D-266]).
    - **Miss everywhere:** "Product not found. Type the name instead." and the normal typeahead; a miss never blocks adding. With the scanner on, each boot checks the four databases can be reached and logs a warning when not ([D-260]).
-3. **Create** the item with `name`, `name_de`/`name_en` (where the database has them), `category_key` and `barcode`; the server stamps `image_url` from the barcode ([D-266]). `image_url` is `/api/barcode/photo/{token}` on our own origin (SW-cached; the category emoji on a miss), stored once on the server and swept once 180 days past its lookup if no item references it then (§13). Dedup as in §9.1; a name match typed without a barcode takes the scanned one, and its photo.
+3. **Create** the item with `name`, `name_de`/`name_en` (where the database has them), `category_key` and `barcode`; the server stamps `image_url` from the barcode ([D-266]). `image_url` is `/api/barcode/photo/{token}` on our own origin (SW-cached; the category emoji on a miss), stored once on the server and swept by §13's barcode photo sweep once no item references it. Dedup as in §9.1; a name match typed without a barcode takes the scanned one, and its photo.
 
 - **Operator switch ([D-218]).** `SHOPPINGLIST_SCANNER=off` removes the lookup route, the scan button (the shell carries `shoppinglist-scanner=off`) and camera permission (`camera=()`). The photo route stays.
 - **Attribution.** Product images are CC BY-SA, so a "Photo: Open Food Facts contributors" credit sits near the image.
@@ -672,18 +676,51 @@ The app root is the **„Meine Listen“ home**: the user's `memberships` as car
 ---
 ## 10. Security summary
 
-- **Rate limits** are per IP: an IPv4 address (IPv4-mapped included), an IPv6 address by its /64, since one line is handed a whole /64; PocketBase's own catch-all counts every address apart. **`backend/internal/security/ratelimit.go` is the single table** of budgets and windows ([D-307]): every custom route has a row there or is named there as deliberately left to PocketBase's catch-all (the digest and its snapshot, the roster, `seed-version`, `auth/methods`). Both passkey `begin` routes share one budget, both `finish` routes another. The demo build adds its own `demo/start` budget ([D-234]).
-- **Size caps** bound how much, where rate limits bound how fast: a list holds at most 5,000 items rows, tombstones included (`SHOPPINGLIST_MAX_ITEMS_PER_LIST`), and 200 categories, past which a push create is denied `list_full` (§8.3, [D-217]); an import brings at most the lower of the cap and the backup cap. An account is on at most 25 lists (`SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT`); past that, create, import and clone answer 409 `list_limit`, and joining is never refused ([D-219]).
+**Rate limits** are per IP: an IPv4 address (IPv4-mapped included), an IPv6 address by its /64, since one line is handed a whole /64; PocketBase's own catch-all counts every address apart. **`backend/internal/security/ratelimit.go` is the single table** of budgets ([D-307]), the one below: every custom route has a budget there or is named there as left to PocketBase's catch-all, and a test fails a route with neither. The demo build adds its own `demo/start` budget ([D-234]).
+
+<!-- rate limits (rendered from backend/internal/security/ratelimit.go by its test) -->
+| Budget | Calls per IP | Routes |
+|---|---|---|
+| `sync_push` | 300 per 5 minutes | `POST /api/sync/push`, the only sync write path |
+| `passkey_begin` | 30 per minute | `POST /api/passkey/register/begin` and `POST /api/passkey/login/begin`, one budget for both |
+| `passkey_finish` | 30 per minute | `POST /api/passkey/register/finish` and `POST /api/passkey/login/finish` |
+| `invite_preview` | 30 per minute | `POST /api/invites/preview`, unauthenticated |
+| `invite_join` | 30 per minute | `POST /api/invites/join` |
+| `invite_mint` | 30 per minute | `POST /api/lists/{listId}/invite`, link rotation at a human pace |
+| `barcode_lookup` | 30 per minute | `GET /api/barcode/{ean}`, the Open Food Facts proxy |
+| `barcode_photo` | 300 per minute | `GET /api/barcode/photo/{token}`, unauthenticated (an `<img>` carries no token); one request per shop tile |
+| `list_create` | 30 per 5 minutes | `POST /api/lists`: one row plus a category copy per call |
+| `list_import` | 10 per 5 minutes | `POST /api/lists/import`: up to 2000 items per call, the amplifier |
+| `list_clone` | 10 per 5 minutes | `POST /api/lists/{listId}/clone`: a whole list, the other amplifier |
+| `clear_history` | 30 per 5 minutes | `POST /api/lists/{listId}/clear-history`: a bulk update across a list |
+| `missing_categories` | 30 per 5 minutes | `POST /api/lists/{listId}/categories/missing`: at most one row per template per call |
+| `invite_revoke` | 30 per minute | `POST /api/lists/{listId}/invite/revoke`, mint's twin |
+| `account_write` | 10 per minute | `POST /api/account/delete`, `POST /api/account/link`, `POST /api/account/unlink` and `POST /api/account/rotate-token-key`, one budget |
+| `cred_rename` | 30 per minute | `POST /api/credentials/{id}/rename`, a passkey's label (§5.4) |
+| `client_error` | 10 per minute | `POST /api/client-errors` |
+<!-- rate limits end -->
+
+Left to PocketBase's catch-all:
+
+<!-- unlimited routes (rendered from backend/internal/security/ratelimit.go by its test) -->
+- `GET /api/sync/digest`: polled every ~60s by every device (§8.5): a per-IP budget would cut off a household whose phones share a NAT.
+- `GET /api/sync/snapshot/{listId}`: the digest's repair read (§8.5): it runs only for a diverged list, but for every list at once after an eviction (§8.8), a repair a budget would stall.
+- `GET /api/lists/{listId}/members`: a cheap read (§7.4).
+- `GET /api/seed-version`: a constant.
+- `GET /api/auth/methods`: one cached lookup (§5.9).
+<!-- unlimited routes end -->
+
+- **Size caps** bound how much, where rate limits bound how fast: a list holds at most 5,000 items rows unless `SHOPPINGLIST_MAX_ITEMS_PER_LIST` moves it, and 200 categories (`listcap.MaxCategories`), tombstones included, past which a push create is denied `list_full` (§8.3, [D-217]); an import brings at most the lower of the cap and the backup cap. An account is on at most 25 lists (`SHOPPINGLIST_MAX_LISTS_PER_ACCOUNT`); past that, create, import and clone answer 409 `list_limit`, and joining is never refused ([D-219]).
 - **Request bodies:** every app route is registered on one group (`security.AppRoutes`) with a 64 KiB body limit, so a longer body is a 413 before a handler reads it. Push and import alone opt back into PocketBase's 32 MiB (`security.LargeBody`), which their op, row and field caps need; PocketBase's own routes keep their limits.
 - **Open signup** is spammable; the limits and the orphan sweep (§13) are the mitigation. `SHOPPINGLIST_SIGNUP=closed` closes it, `invite` admits only holders of a list's invite link ([D-61], [D-241]).
-- **Invite tokens:** 32 random bytes, base64url, looked up by their **sha256 hash**, kept for members while the link is live and blanked on revocation [D-294], delivered in the **URL fragment**.
+- **Invite tokens:** their lifecycle and storage are §7.1's, their randomness §10.1's; a token is an invitation, not a credential (§7.6).
 - **`Referrer-Policy: no-referrer`** app-wide; no URL carrying a token reaches an error report.
 - **Global reference data is not client-writable:** clients read `category_templates` and `item_dictionary` (§6.7, §6.9); writes are superuser-only. All item and category writes go through `sync/push`, which enforces membership; a list's name is the one shared field written directly, under the membership rule and the lists update guard ([D-08]).
-- **Token revocation** by per-account token-key rotation; 90-day sliding token life (§5.6).
+- **Sessions and their revocation:** §5.6.
 - **Account self-update is hook-allowlisted** to `nickname` and the suggestion-suppression preference (§11, [D-32]); deletion is its own route (§4.5).
 - **`img-src 'self' data:`**: no third-party image host is reachable; product photos are stored and served by the backend ([D-21]). With `items.image_url` server-stamped from the barcode ([D-266]), this is the second wall against a member pointing other members' browsers at a host of their choosing.
 - **`GET /api/barcode/photo/{token}` is the one unauthenticated route that serves stored user data** (an `<img src>` carries no bearer token, and the auth token is not a cookie, §5.6). The token is **128 `crypto/rand` bits**, so the route is not enumerable and cannot answer “has this household scanned *X*?”; it is rate-limited. This holds only while the `photo` field is **`Protected`** (else PocketBase's `/api/files/…` serves every photo, outside token and limiter) and the stored file is **named after the token, not the barcode** (PocketBase echoes the filename in `Content-Disposition`).
-- **RP-ID** validated at startup (§5.7).
+- **RP-ID and a secure context**, both checked at startup (§5.7); a browser outside a secure context gets one screen in place of the app (§12).
 - **API rules and route checks enforce the whole access model** (§11), tested with explicit “unauthorised access is denied” cases (§14).
 
 ### 10.1 Cryptography in use
@@ -694,8 +731,8 @@ Every cryptographic primitive the app relies on, who owns it and what it protect
 |---|---|---|---|
 | Passkey ceremonies (§5.4) | WebAuthn assertions: the algorithms go-webauthn accepts by default (ES256, RS256, EdDSA among them), no attestation requested, user verification required | go-webauthn | sign-in; the server stores only public keys |
 | Ceremony challenge (§5.5) | 32 random bytes from go-webauthn, single-use, ~5 min | go-webauthn | replay of a ceremony |
-| Auth tokens (§5.6) | JWT, HS256, keyed by the account's `tokenKey` + the collection's secret, 90 days | PocketBase | every API call; rotating `tokenKey` revokes all of an account's tokens |
-| Invite tokens (§7.1, §10) | 32 bytes `crypto/rand`, base64url (`randid.Token`); looked up by its SHA-256 hex, and a live link's token kept beside it for every member ([D-294]) | `internal/invites` | joining a list; a revoked or expired link opens nothing |
+| Auth tokens (§5.6) | JWT, HS256, keyed by the account's `tokenKey` + the collection's secret | PocketBase | every API call; rotating `tokenKey` revokes all of an account's tokens |
+| Invite tokens (§7.1) | 32 bytes `crypto/rand`, base64url (`randid.Token`); looked up by its SHA-256 hex | `internal/invites` | joining a list; a revoked or expired link opens nothing |
 | Setup link ([D-241]) | 32 bytes `crypto/rand`, base64url, as invite tokens; SHA-256 in memory only, compared with `crypto/subtle` | `internal/signup` | the first account of an invite-only instance |
 | Server-minted ids, photo tokens, handles | `crypto/rand` (`internal/randid`: 128 bits for ids and photo tokens, 64 for handles) | `internal/randid` | unguessable list ids and photo URLs (§10); PocketBase's own id generator is `math/rand` and never used where guessing matters |
 | Client-minted ids (items, categories, op ids, `browser_id`) | `crypto.randomUUID()` (122 random bits) | browser | collisions and guessable ids |
@@ -739,6 +776,7 @@ Realtime SSE subscriptions obey the same list/view rules: a member who leaves st
 ## 12. Frontend
 
 - **SvelteKit** with `adapter-static` → static SPA in `pb_public`.
+- **A secure context or nothing** ([D-335]): while `window.isSecureContext` is false, the root layout shows `InsecureView` in place of the app, saying to open the HTTPS address or `http://localhost:<port>` on the machine it runs on, and starts nothing but the language (§5.7).
 - **Dexie** stores: `lists`, `items`, `list_categories` (§6.7), `server_items` + `server_list_categories` (the §8.2 shadow of the last server state, [D-40]), `category_templates` + `item_dictionary` (read-only mirror), `memberships` (own), `roster` (per-list member cache), `scanned_products` (device-local barcode→product cache, never synced, §9.2), `pending_ops`, and `meta`. `meta` holds `last_synced_at`; `sync_health` (what the leader last saw of the server, §12.1, [D-296]); `memberships_synced_at` (this account's memberships have arrived at least once, [D-182]); the mirror's `seed_version` (§6.12); `locale`; `list_view`; `ui_density`; `install_prompt_dismissed`; the device-local, unsynced sort choices `list_row_sort` (§9.1 [D-115]), `history_sort`, `list_sort` / `list_order`; and the mirror of the account's **suggestion suppression** with its `suppressed_pending` intents (§6.11 [D-137]). There is no sync cursor: §8.5 reconciles per list, by digest.
 - **PocketBase JS SDK** with an IndexedDB-backed async auth store; the token is refreshed once on start (`refreshSessionToken`, not the SDK's `authRefresh()`, [D-156]).
 - **`@simplewebauthn/browser`** for the ceremonies.
@@ -754,11 +792,17 @@ Realtime SSE subscriptions obey the same list/view rules: a member who leaves st
 Sync state is a permanently visible chip left of the title in **every app bar** (one `AppBar`, [D-272]). It is the only control that clears the *expired* state, which any screen can reach ([D-130]).
 
 - **N = count of `pending_ops`** (one per record after coalescing), scoped to the list on screen (§8.2); on the home and settings, the whole device's outbox ([D-130]).
-- **Form** ([D-102]): one glyph in a fixed box, so nothing around it moves: a cloud when synced, **the count itself** whenever N>0, a grey `cloud-off` when offline with nothing pending, a grey **clock** when stale, a filled **key** when expired. No two states share a glyph, and the one actionable state is the app bar's only **filled** chip.
+- **Form** ([D-102]): one glyph in a fixed 26×26 box, so nothing around it moves: a cloud when synced, **the count itself** whenever N>0 (amber, capped at 99+, `aria-hidden`), a grey `cloud-off` when offline with nothing pending, a grey **clock** when stale or broken, a `key-round` on solid `--danger` when expired. No two states share a glyph, and the one actionable state is the app bar's only **filled** chip.
 - **Last sync time** comes from `meta.last_synced_at`, stamped by the **leader tab** (§8.7) after each successful drain → digest → repair cycle (§8.2, §8.5), and is shown **only offline**.
 - **States** (Dexie `liveQuery`, the `online` store, `authState`): synced → "All changes synced", **only while true**; stale (three exchanges in a row have failed with nothing pending) → "No answer from the server · last ‹when›" ([D-296]); broken (three in a row failed in the app itself) → the same clock, or the count while changes wait, "Sync isn't working"; pending → "‹count› changes not synced yet"; offline → "Offline · ‹count› not synced", "last synced ‹when›" for a screen reader; expired (online, session invalid) → the chip is the one-tap §5.8 re-auth button, whose **failures show as a toast**, a dismissed ceremony staying silent ([D-130]). **Offline wins over an expired token**, since re-auth needs connectivity. The chip complements the §8.4 notices, never blocks use and never auto-hides.
-- **The line under the list's name** says what the chip cannot ([D-296]): the members while the sync is fine or a change is on its way, otherwise one short status in their place (failing, broken, another tab or this one stuck, stale, offline), amber when something of the user's is not getting out, grey otherwise. A tap on the members opens „Teilen & Mitglieder“ (§7.1), the name keeping the quick switcher; a tap on a status opens a sheet that explains it and offers the one action that helps (send now, sync now, reload; none for another tab). Every tab reads it from `meta.sync_health`, which the leader writes at the start and the end of every exchange (§8.7).
-- **Accessibility.** Each state's full sentence is `.sr-only` inside the chip: it is the accessible name and the announcement of a **permanent** `role="status"` wrapper, so the move into *expired* is announced. **Every `[data-slot="button"]` control has a 44px effective target**; a smaller painted box gets it from an invisible `::after` hit inset, as the chip does, pinned by the target-size sweep [D-56].
+- **The line under the list's name** says what the chip cannot ([D-296]): the members while the sync is fine or a change is on its way, otherwise one short status in their place, amber when something of the user's is not getting out or the app itself fails, grey otherwise:
+  - after three failed exchanges in a row, their reason: no answer, a 5xx, a 429, or the app's own error (no HTTP status, as a request without an answer carries 0, or a 4xx other than 401, 408 and 429, a refusal that repeats on every try), which shows „Sync-Fehler · neu laden“ pending or not;
+  - with nothing pending after three failures in a row, how old the last good exchange is („Stand: ‹when›“), since what others change is not arriving;
+  - „Wartet auf anderen Tab“ or „App hängt · neu laden“ when a change has waited 20 s and no exchange has started or ended for 20 s, none being under way (never in a page's first 20 s; one under way for a minute counts as frozen, since a cycle's push and digest time out within 25 s);
+  - offline, and since when.
+
+  A tap on the members opens „Teilen & Mitglieder“ (§7.1), the name keeping the quick switcher; the two tap boxes meet where the rows meet, so the bar stays 56px. A tap on a status opens a sheet that explains it and offers the one action that helps: send now (a cycle in the leader, over a `BroadcastChannel`), sync now, reload (stuck, broken); none for another tab ([D-288]). Every tab reads it from `meta.sync_health`, which the leader writes at the start and the end of every exchange (§8.7): when one last worked, started and ended, the failures in a row and the last one's reason.
+- **Accessibility.** Each state's full sentence is `.sr-only` inside the chip and its `title`: it is the accessible name and the announcement of a **permanent** `role="status"` wrapper, so the move into *expired* is announced. **Every `[data-slot="button"]` control has a 44px effective target**; a smaller painted box gets it from an invisible `::after` hit inset, as the chip does, pinned by the target-size sweep [D-56].
 - **Contrast:** the pending glyph, the expired chip and the aisle-count tint clear WCAG AA (≥4.5) in both themes, pinned by `design-tokens.test.ts`, which recomputes every recipe from `app.css` ([D-102]).
 
 ### 12.2 Localization (i18n)
@@ -776,17 +820,26 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 
 ## 13. Background jobs (PB cron)
 
-Scheduled in `internal/jobs`, each sweep written in the package that owns its table (the demo sweep in `internal/demo`); a daily job runs at 03:00 UTC.
+Scheduled in `internal/jobs`, each sweep written in the package that owns its table; what each job does, as operators read it, is [operating.md's table](../operating.md#cron-jobs), rendered from the same registry. The window is the age a sweep deletes past, or for the retry how long after a lookup it keeps trying.
 
-| Job | Schedule | Action |
-|---|---|---|
-| Tombstone GC | daily | hard-delete `items` / `list_categories` rows with `deleted_at` older than **180 days**, **except `items` carrying a `last_bought_at`** (previous items, §6.10 [D-18], kept indefinitely) **and `list_categories` carrying a `slug`** (a removed template aisle, which the missing-categories route must not add again, [D-251]). No cursor depends on the window (§8.5), so it only has to cover a realistic offline gap |
-| Invite sweep | daily | delete invites expired > 30 days ago, and ones revoked > 30 days ago (the revocation stamps `updated`) |
-| Orphan sweep | daily | delete accounts with **zero memberships** AND created > 60 days ago AND no credential `last_used_at` within 60 days, each through the §4.5 teardown (`account.DeleteAccount`) |
-| Barcode photo retry | every 15 min | download again the photos that failed for a reason that can pass, for **two days** after their lookup, ten per run, one at a time; a photo that arrives goes to the items with that barcode and none ([D-21]) |
-| Barcode photo sweep | daily | delete `barcode_cache` rows whose `fetched_at` is older than **180 days** *and whose photo no item still references*, tombstones included (equality against the exact issued URL, [D-21], [D-266]). Bounds `pb_data`. Deletes go through the record API one row at a time, so the image file goes with the row |
-| Merge-log sweep | daily | delete `merge_log` rows ([D-108]) whose `merged_at` is older than **180 days**; a list's rows also go with the list (§7.3) |
-| Demo sweep | every 10 min | **demo build only** ([D-234]): delete accounts created more than 24 hours ago, through the §4.5 teardown |
+<!-- cron jobs (rendered from backend/internal/jobs/jobs.go by its test) -->
+| Job | Schedule | Window | Sweep |
+|---|---|---|---|
+| `tombstone_gc` | daily, 03:00 UTC | 180 days | `sync.SweepTombstones` |
+| `invite_sweep` | daily, 03:00 UTC | 30 days | `invites.Sweep` |
+| `orphan_sweep` | daily, 03:00 UTC | 60 days | `account.SweepOrphans` |
+| `barcode_photo_sweep` | daily, 03:00 UTC | 180 days | `barcode.SweepPhotos` |
+| `barcode_photo_retry` | every 15 minutes | 2 days | `barcode.RetryPhotos` |
+| `merge_log_sweep` | daily, 03:00 UTC | 180 days | `sync.SweepMergeLog` |
+<!-- cron jobs end -->
+
+- **`tombstone_gc`** hard-deletes tombstoned `items` and `list_categories` rows, **except `items` carrying a `last_bought_at`** (previous items, §6.10 [D-18], kept indefinitely) **and `list_categories` carrying a `slug`** (a removed template aisle, which the missing-categories route must not add again, [D-251]). No cursor depends on the window (§8.5), so it only has to cover a realistic offline gap.
+- **`invite_sweep`** deletes invites past expiry, and revoked ones by their `updated`, which the revocation stamps.
+- **`orphan_sweep`** deletes accounts with **zero memberships**, older than the window and with no credential `last_used_at` within it, each through the §4.5 teardown (`account.DeleteAccount`).
+- **`barcode_photo_sweep`** deletes `barcode_cache` rows by `fetched_at` *whose photo no item still references*, tombstones included (equality against the exact issued URL, [D-21], [D-266]). Bounds `pb_data`. Deletes go through the record API one row at a time, so the image file goes with the row.
+- **`barcode_photo_retry`** downloads again the photos that failed for a reason that can pass, ten per run, one at a time; a photo that arrives goes to the items with that barcode and none ([D-21]).
+- **`merge_log_sweep`** deletes `merge_log` rows ([D-108]) by `merged_at`; a list's rows also go with the list (§7.3).
+- **The demo sweep**, every 10 minutes, **demo build only** ([D-234], in `internal/demo`): deletes accounts past the demo lifetime, through the §4.5 teardown.
 
 ---
 
@@ -797,7 +850,7 @@ Scheduled in `internal/jobs`, each sweep written in the package that owns its ta
 - **Demo build ([D-234]):** `-tags demo` adds a one-button sign-in to a throwaway account deleted 24 hours after creation (`POST /api/demo/start`), with the client half behind the `#demo` import. **Neither the normal binary nor the normal bundle contains any of it** (`deps_arch_test.go`, `task build-spa`). Each release publishes it as the `:demo` image ([D-235]); [`demo.md`](demo.md) says how to run a public one.
 - **Artifacts:** a **multi-arch Docker image** (incl. arm64) and a **plain binary zip** (UI included, no Docker needed), semver-tagged, with the SBOM attached ([D-203]).
 - **License:** AGPL-3.0. Settings links `SHOPPINGLIST_SOURCE_URL` (default: this repository), which an operator of a modified version points at theirs ([D-211]).
-- **Backups:** PB scheduled backups, on from the first start: nightly at 03:00 UTC, the newest seven kept, a failure on the container log too ([D-334]); the operator changes them (incl. S3-compatible) in the dashboard, or copies the SQLite file. A start about to apply a migration or a new seed first zips `pb_data` to `pb_data/backups/pb_backup_pre_upgrade_*.zip`, before opening the database, keeping the newest three; it cannot be skipped ([D-183], [D-223]).
+- **Backups:** PB scheduled backups, on from the first start, a failure on the container log too ([D-334]); the schedule, how many are kept and how an operator changes them (incl. S3-compatible) or copies the data directory: [operating.md](../operating.md#backups). A start about to apply a migration or a new seed first zips `pb_data` to `pb_data/backups/pb_backup_pre_upgrade_*.zip`, before opening the database, and prunes the older ones ([deploy-reference.md](../deploy-reference.md#upgrades)); it cannot be skipped ([D-183], [D-223]).
 - The **idempotent boot seeder** (§6.12) fills the reference data from the embedded seed files.
 - **Settings are env vars** ([D-65]), each in [`deploy-reference.md`](../deploy-reference.md#environment-variables); `SHOPPINGLIST_APP_URL` and `_TRUSTED_PROXY_HEADER`, when set, win over the admin UI at every boot. Every setting but `SQLITE_PRAGMAS` is `SHOPPINGLIST_`-prefixed; each is declared once in `backend/internal/settings/settings.go`, which renders the reference's tables ([D-337]); any non-empty `EINKAUFSLISTE_` variable refuses the boot, naming each ([D-222]), and so does a non-empty `SHOPPINGLIST_` (or `SQLITE_PRAGMA…`) name that is no setting, a removed one included ([D-336]). The compose file hands `.env` over whole ([D-263]). Values only the client acts on (item cap, scanner switch, source link, version) are stamped into the shell document as `shoppinglist-*` meta tags (`internal/ui`).
 

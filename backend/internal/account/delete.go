@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
+	"github.com/pocketbase/pocketbase/tools/types"
 
 	"shoppinglist/internal/applog"
 	"shoppinglist/internal/security"
@@ -75,8 +77,12 @@ func DeleteAccount(ctx context.Context, app core.App, acct *core.Record) error {
 	})
 }
 
+// OrphanAfter is how old an account on no list is, with no credential used
+// for as long, before the orphan sweep deletes it.
+const OrphanAfter = 60 * 24 * time.Hour
+
 // SweepOrphans deletes accounts that have zero memberships, were created more
-// than 60 days ago, and show no credential use within the last 60 days (§13).
+// than OrphanAfter ago, and show no credential use within it (§13).
 // It goes through DeleteAccount: a plain app.Delete would trip the
 // last-credential guard and roll the whole delete back. An account that fails
 // does not stop the others; every failure is returned, joined. The deletions
@@ -84,9 +90,10 @@ func DeleteAccount(ctx context.Context, app core.App, acct *core.Record) error {
 func SweepOrphans(app core.App) error {
 	var accounts []*core.Record
 	err := app.RecordQuery("accounts").AndWhere(dbx.NewExp(
-		`created != '' AND created < datetime('now','-60 days') ` +
-			`AND id NOT IN (SELECT account FROM memberships) ` +
-			`AND id NOT IN (SELECT account FROM credentials WHERE last_used_at != '' AND last_used_at >= datetime('now','-60 days'))`,
+		`created != '' AND created < {:before} `+
+			`AND id NOT IN (SELECT account FROM memberships) `+
+			`AND id NOT IN (SELECT account FROM credentials WHERE last_used_at != '' AND last_used_at >= {:before})`,
+		dbx.Params{"before": types.NowDateTime().Add(-OrphanAfter).String()},
 	)).All(&accounts)
 	if err != nil {
 		return err
@@ -98,7 +105,7 @@ func SweepOrphans(app core.App) error {
 		}
 	}
 	if deleted := len(accounts) - len(errs); deleted > 0 {
-		applog.Info(app, "deleted accounts on no list and unused for 60 days", "count", deleted)
+		applog.Info(app, fmt.Sprintf("deleted accounts on no list and unused for %d days", int(OrphanAfter.Hours()/24)), "count", deleted)
 	}
 	return errors.Join(errs...)
 }
