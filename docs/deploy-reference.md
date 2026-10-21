@@ -320,6 +320,33 @@ set the variables this page names in the binary's environment (a systemd
 unit's `EnvironmentFile=` takes the same file). Everything else applies
 unchanged.
 
+### Rebuilding a release yourself
+
+A release's binaries and zips are reproducible: built again from its tag,
+they come out byte for byte the same, so you can check that a download is
+what the source says. Clone the tag, then build the web app in the
+devcontainer ([`CONTRIBUTING.md`](../CONTRIBUTING.md#set-up)) with the
+commit's time as its version:
+
+```sh
+export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+(cd frontend && pnpm install --frozen-lockfile)
+task build-spa && task build-spa DEMO=1
+```
+
+Then, on the host, run GoReleaser with the image and the `GOTOOLCHAIN` that
+the tag's `.woodpecker/release.yaml` names:
+
+```sh
+docker run --rm --user "$(id -u)" -e HOME=/tmp -v "$PWD:$PWD" -w "$PWD" \
+  -e GOTOOLCHAIN=go1.x.y -e EXPECT_GO=go1.x.y goreleaser/goreleaser:vX.Y.Z \
+  release --clean --skip=docker,publish,announce
+```
+
+`dist/checksums.txt` then matches the release's `checksums.txt`. The Docker
+images are not covered: they hold the same binary, but their own digest
+also records when they were built.
+
 ### Bind-mounting a host directory instead of a named volume
 
 A named volume takes its ownership from the image and just works. A bind mount

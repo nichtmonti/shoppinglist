@@ -11,6 +11,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **The cards under "My lists" are one line.** Each shows the list's name and, beside it, how many items are still open, a grey ✓ when everything is checked off, and nothing for an empty list. The number of members is gone from the cards; the list's header and "Share & members" still show it. In the list switcher, the list you are in has its green tick where its number would be ([D-123]).
 - **A scanned product's number says what it is.** Under the photo in "Product details" and "Edit item", the long number now has "Barcode" in front of it, and the “Copy barcode” button beside it is gone.
 - **[`CONTRIBUTING.md`](CONTRIBUTING.md) says how to send a change and what it must test.** A change comes as a pull request against `main` on Codeberg; a new feature brings its tests, and a bug fix a test that fails without the fix.
+- **Releases can be rebuilt byte for byte.** Built again from its tag, a release's binaries and zips come out identical, so you can check a download against the source ([how](docs/deploy-reference.md#rebuilding-a-release-yourself), [D-338]).
 
 ## v0.17.0: errors that say what went wrong, and a server that stops on a setting it does not know (2026-10)
 
@@ -979,3 +980,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-335]: docs/internals/decisions.md#D-335
 [D-336]: docs/internals/decisions.md#D-336
 [D-337]: docs/internals/decisions.md#D-337
+[D-338]: docs/internals/decisions.md#D-338

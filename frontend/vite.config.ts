@@ -94,6 +94,14 @@ export default defineConfig(({ command, isPreview }) => {
 				// The dev server's own generated dir — see devServer above.
 				outDir: devServer ? `.svelte-kit-${devInstance}` : '.svelte-kit',
 
+				// The build's version, SvelteKit's clock in ms unless the release sets
+				// SOURCE_DATE_EPOCH (reproducible-builds.org) to the commit's time, so
+				// a rebuild of a tag is byte-identical. It names the shell cache, and
+				// lib/shell-caches.ts orders those as numbers, hence ms either way.
+				...(process.env.SOURCE_DATE_EPOCH
+					? { version: { name: String(Number(process.env.SOURCE_DATE_EPOCH) * 1000) } }
+					: {}),
+
 				// §10 CSP. Sits alongside `adapter` rather than under a `kit` key:
 				// options passed inline to sveltekit() ARE the kit config (see
 				// core/config/index.js split_config — anything it does not recognise is

@@ -847,7 +847,7 @@ Scheduled in `internal/jobs`, each sweep written in the package that owns its ta
 ### Deployment
 - **Build:** PocketBase is imported in `main.go`, which registers routes, hooks and crons; the SvelteKit SPA is built into `pb_public` and **embedded at compile time** into a single binary ([D-64]; `-tags no_ui` builds without it, for tests and the dev loop).
 - **Demo build ([D-234]):** `-tags demo` adds a one-button sign-in to a throwaway account deleted 24 hours after creation (`POST /api/demo/start`), with the client half behind the `#demo` import. **Neither the normal binary nor the normal bundle contains any of it** (`deps_arch_test.go`, `task build-spa`). Each release publishes it as the `:demo` image ([D-235]); [`demo.md`](demo.md) says how to run a public one.
-- **Artifacts:** a **multi-arch Docker image** (incl. arm64) and a **plain binary zip** (UI included, no Docker needed), semver-tagged, with the SBOM attached ([D-203]).
+- **Artifacts:** a **multi-arch Docker image** (incl. arm64) and a **plain binary zip** (UI included, no Docker needed), semver-tagged, with the SBOM attached ([D-203]). The binaries and zips are reproducible: a rebuild of the tag is byte-identical ([D-338]).
 - **License:** AGPL-3.0. Settings links `SHOPPINGLIST_SOURCE_URL` (default: this repository), which an operator of a modified version points at theirs ([D-211]).
 - **Backups:** PB scheduled backups, on from the first start, a failure on the container log too ([D-334]); the schedule, how many are kept and how an operator changes them (incl. S3-compatible) or copies the data directory: [operating.md](../operating.md#backups). A start about to apply a migration or a new seed first zips `pb_data` to `pb_data/backups/pb_backup_pre_upgrade_*.zip`, before opening the database, and prunes the older ones ([deploy-reference.md](../deploy-reference.md#upgrades)); it cannot be skipped ([D-183], [D-223]).
 - The **idempotent boot seeder** ([§6.12]) fills the reference data from the embedded seed files.
@@ -1097,3 +1097,4 @@ The standing rules it set are in [§14].
 [D-335]: decisions.md#D-335
 [D-336]: decisions.md#D-336
 [D-337]: decisions.md#D-337
+[D-338]: decisions.md#D-338

@@ -126,6 +126,9 @@ steps:
       # go-task as frontend.yaml installs it; .gomod and .task are gitignored,
       # so goreleaser still sees a clean tree.
       - export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod" && go -C tools/task install tool
+      # The SPA's version is the commit's time, so a rebuild of the tag is
+      # byte-identical ([D-338]).
+      - export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
       - (cd frontend && pnpm install --frozen-lockfile)
       - task build-spa
       # [D-234] The demo image's SPA, into its own pb_public_demo.
