@@ -1,3 +1,4 @@
+import { reportUncaught } from '#lib/client-errors.js';
 import { allCollectionTables, db, shadowTable, syncTable } from '../db';
 import type { SyncCollection } from './types';
 import { applyServerRows, forgetServerRows } from './apply';
@@ -164,13 +165,16 @@ export async function reconcileDivergedLists(
 }
 
 // After the full snapshot, a still-mismatched digest means the mirror is wrong:
-// log it, do not throw. Local ahead (an SSE event since the probe) is excluded.
+// report it to the server log ([D-197]), do not throw. Local ahead (an SSE
+// event since the probe) is excluded.
 function verifyConverged(listId: string, srv: DigestEntry, after: Digest): void {
 	if (after.hash !== srv.hash && after.max_updated <= srv.max_updated) {
-		console.error(
-			`[sync] reconcile failed to converge list ${listId}: ` +
+		const error = new Error(
+			`reconcile failed to converge list ${listId}: ` +
 				`server rows=${srv.row_count} max=${srv.max_updated} vs ` +
 				`local rows=${after.row_count} max=${after.max_updated}`
 		);
+		console.error(`[sync] ${error.message}`);
+		reportUncaught(error, 'sync');
 	}
 }

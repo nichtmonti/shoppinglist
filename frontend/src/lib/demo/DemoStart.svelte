@@ -12,6 +12,7 @@
 	import FocusTitle from '#lib/components/common/FocusTitle.svelte';
 	import ErrorText from '#lib/components/common/ErrorText.svelte';
 	import { createExampleLists, startDemo } from './start';
+	import { reportUncaught } from '#lib/client-errors.js';
 
 	const action = new AsyncAction();
 	// [D-335] Over http:// at any address but localhost the browser withholds
@@ -25,7 +26,7 @@
 		if (joining) return;
 		// Best-effort: the visitor is in either way. The import is online-only,
 		// and the start just proved online.
-		await createExampleLists().catch(() => null);
+		await createExampleLists().catch((e: unknown) => reportUncaught(e, 'demo example lists'));
 	}
 </script>
 

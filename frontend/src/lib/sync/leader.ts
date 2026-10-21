@@ -1,5 +1,6 @@
 // Web Locks leader election for the shoppinglist sync engine (§8.7).
 // Ensures exactly one sync loop runs across tabs sharing the same IndexedDB.
+import { reportUncaught } from '#lib/client-errors.js';
 
 // A minimal Web Locks API surface (only what we use).
 export interface LocksAPI {
@@ -35,8 +36,9 @@ export function requestLeadership(loop: () => void, opts: LeadershipOptions = {}
 	if (!locks) {
 		try {
 			loop();
-		} catch {
-			/* swallow — leadership errors must not crash the app */
+		} catch (error) {
+			// Leadership errors must not crash the app, but are reported.
+			reportUncaught(error, 'sync leader');
 		}
 		// No Web Locks: this context IS the leader for its own lifetime, so the
 		// cancel still has to run the teardown — otherwise a stopped loop in a
@@ -53,8 +55,8 @@ export function requestLeadership(loop: () => void, opts: LeadershipOptions = {}
 			release = resolve;
 			try {
 				loop();
-			} catch {
-				/* swallow */
+			} catch (error) {
+				reportUncaught(error, 'sync leader');
 			}
 		});
 		// STILL HOLDING THE LOCK here — see onRelease. The next tab waiting on

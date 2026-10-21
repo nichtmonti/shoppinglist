@@ -2,6 +2,7 @@
 // denial, §8.6 list gone), raised as passive toasts. The engine reports raw
 // data; the root layout hands these handlers to mountSync, and the loop runs
 // in the leader tab only, so each notice also goes to the other tabs ([D-293]).
+import { reportUncaught } from '#lib/client-errors.js';
 import { db, rosterKey, type Item } from '#lib/db.js';
 import { displayName } from '#lib/item-name.js';
 import {
@@ -156,7 +157,10 @@ export function formatGone(name: string | undefined): string {
 
 /** The loop's notice callbacks: each notice as a passive toast. */
 export const noticeToasts: SyncNotices = {
-	onConflict: (notice) => void surfaceConflict(notice),
+	// A notice that cannot be worded is still reported: the user's edit was
+	// overridden either way.
+	onConflict: (notice) =>
+		void surfaceConflict(notice).catch((e) => reportUncaught(e, 'conflict notice')),
 	onGone: (_listId, name) => raise(formatGone(name)),
 	// A lost membership raises the §8.6 notice from the next cycle instead
 	// ([D-138]).

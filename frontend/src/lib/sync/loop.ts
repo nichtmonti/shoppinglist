@@ -1,6 +1,7 @@
 // When a cycle runs (§8.5, §8.7): on becoming leader, on an idle tick, on
 // focus, online and visibility, after a failure; plus a debounced drain on
 // every local mutation. What a cycle does is cycle.ts.
+import { reportUncaught } from '#lib/client-errors.js';
 import { db } from '#lib/db.js';
 import { drainOutbox, type DrainOptions } from '#lib/sync/push.js';
 import { requestLeadership } from '#lib/sync/leader.js';
@@ -193,7 +194,8 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 		tickTimer = globalThis.setInterval(tick, cycleMs);
 		sub = liveQuery(() => db.pending_ops.count()).subscribe({
 			next: () => scheduleDrain(),
-			error: () => {}
+			// Dead from here on: no queued change starts a drain but the tick.
+			error: (error) => reportUncaught(error, 'outbox count')
 		});
 	};
 

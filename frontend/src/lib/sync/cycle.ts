@@ -1,4 +1,5 @@
 // One sync cycle (§8.5), serialized per tab. loop.ts decides when one runs.
+import { reportUncaught } from '#lib/client-errors.js';
 import { db, setMeta, type Membership } from '#lib/db.js';
 import { drainOutbox, type DrainOptions } from '#lib/sync/push.js';
 import {
@@ -227,8 +228,10 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 		try {
 			mirrored = await checkAndMirrorReference(deps.mirror ?? {});
 			referenceMirrorChecked = true;
-		} catch {
-			/* retried next cycle */
+		} catch (error) {
+			// Retried next cycle; reported once a session, since a device whose
+			// fetch always fails would otherwise lack the vocabulary unnoticed.
+			reportUncaught(error, 'reference mirror');
 		}
 	}
 

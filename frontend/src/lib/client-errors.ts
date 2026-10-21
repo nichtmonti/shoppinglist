@@ -67,7 +67,7 @@ export function reportUncaught(error: unknown, context = 'uncaught'): void {
 		message,
 		stack,
 		route: '',
-		path: location.pathname,
+		path: globalThis.location?.pathname ?? '',
 		status: 0,
 		context
 	});
