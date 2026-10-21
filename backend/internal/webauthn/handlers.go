@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	wlib "github.com/go-webauthn/webauthn/webauthn"
@@ -83,14 +84,32 @@ func readBody(e *core.RequestEvent) ([]byte, error) {
 // expected origin and RP-ID, the challenge, the UV flag) helps tune a phishing
 // relay. The client tells the failures apart by status alone.
 func verificationFailed(e *core.RequestEvent, ceremony string, err error) error {
-	reason := err.Error()
-	if pe, ok := errors.AsType[*protocol.Error](err); ok && pe.DevInfo != "" {
-		reason = pe.Details + " :: " + pe.DevInfo
+	reason, attrs := err.Error(), []any{}
+	if pe, ok := errors.AsType[*protocol.Error](err); ok {
+		if pe.DevInfo != "" {
+			reason = pe.Details + " :: " + pe.DevInfo
+		}
+		if hint := rpHint(pe); hint != "" {
+			attrs = append(attrs, "check", hint)
+		}
 	}
 	// DevInfo echoes what the client sent (its origin, for one); applog
 	// quotes it.
-	applog.Warn(e.App, "passkey "+ceremony+" refused", nil, "reason", reason)
+	applog.Warn(e.App, "passkey "+ceremony+" refused", nil, append([]any{"reason", reason}, attrs...)...)
 	return e.BadRequestError(ceremony+" verification failed", nil)
+}
+
+// rpHint names the setting behind the two refusals the operator's settings
+// cause, in the server log only: an origin that is not SHOPPINGLIST_RP_ORIGIN,
+// and a passkey made for another RP-ID.
+func rpHint(pe *protocol.Error) string {
+	switch {
+	case pe.Details == "Error validating origin":
+		return envRPOrigin + " must be the origin users open, as their address bar shows it (" + rpDocs + ")"
+	case strings.HasPrefix(pe.DevInfo, "RP Hash mismatch"):
+		return "the passkey was made for another " + envRPID + " than this server's; a changed RP-ID strands every passkey (" + rpDocs + ")"
+	}
+	return ""
 }
 
 func registerBegin(wa *wlib.WebAuthn, gate *signup.Gate) func(*core.RequestEvent) error {

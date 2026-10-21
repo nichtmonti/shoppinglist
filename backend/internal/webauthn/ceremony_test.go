@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
 
@@ -225,8 +226,12 @@ func TestLoginRefusesWhatTheKeyDidNotSign(t *testing.T) {
 	t.Run("another RP-ID", func(t *testing.T) {
 		other := *a
 		other.RPID = "evil.example"
+		logs := testutil.CaptureLog(t)
 		if code, body := finishLogin(mux, other.Assert(t, beginLogin(t, mux, "b4")), "b4"); code != http.StatusBadRequest {
 			t.Errorf("finish for another RP-ID = %d %s, want 400", code, body)
+		}
+		if !strings.Contains(logs.String(), "another SHOPPINGLIST_RP_ID") {
+			t.Errorf("the server log does not name the setting: %q", logs.String())
 		}
 	})
 
@@ -508,5 +513,19 @@ func TestRefusedCeremonySaysOnlyThatItFailed(t *testing.T) {
 		if !strings.Contains(logs.String(), "passkey "+ceremony+" refused\" reason=\"Error validating origin :: Expected Values: [https://localhost], Received: https://localhost.evil.example") {
 			t.Errorf("the server log lacks the %s's refused origin: %q", ceremony, logs.String())
 		}
+	}
+	if !strings.Contains(logs.String(), `check="SHOPPINGLIST_RP_ORIGIN must be the origin users open`) {
+		t.Errorf("the server log does not name the setting: %q", logs.String())
+	}
+}
+
+// The RP-ID refusal names its setting too; any other refusal names none.
+func TestRPHintNamesTheSetting(t *testing.T) {
+	rpid := protocol.ErrVerification.WithInfo("RP Hash mismatch. Expected 01 and Received 02")
+	if got := rpHint(rpid); !strings.Contains(got, "another SHOPPINGLIST_RP_ID") {
+		t.Errorf("rpHint(RP hash mismatch) = %q, want it to name SHOPPINGLIST_RP_ID", got)
+	}
+	if got := rpHint(protocol.ErrVerification.WithInfo("User presence flag not set by authenticator")); got != "" {
+		t.Errorf("rpHint(user presence) = %q, want none", got)
 	}
 }
