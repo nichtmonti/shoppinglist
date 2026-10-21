@@ -501,7 +501,6 @@
 	"settings_link_oidc": "Connect with {name}",
 	"settings_link_oidc_hint": "Add your {name} sign-in to this account. Your lists and passkeys stay as they are.",
 	"settings_oidc_linked": "Connected with {name}.",
-	"settings_link_oidc_failed": "Connecting failed. The window was closed or the provider refused.",
 	"settings_link_oidc_in_use": "This sign-in already belongs to another account with its own lists. Sign in with it there, or share lists between the two accounts with an invite.",
 	"settings_oidc_linked_as": "Connected with {name} as {identity}.",
 	"settings_unlink_oidc": "Remove sign-in",

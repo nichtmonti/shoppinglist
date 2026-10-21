@@ -476,7 +476,6 @@
 	"settings_link_oidc": "Mit {name} verbinden",
 	"settings_link_oidc_hint": "Füge deine {name}-Anmeldung zu diesem Konto hinzu. Listen und Passkeys bleiben, wie sie sind.",
 	"settings_oidc_linked": "Verbunden mit {name}.",
-	"settings_link_oidc_failed": "Verbindung fehlgeschlagen. Das Fenster wurde geschlossen oder der Anbieter hat abgelehnt.",
 	"settings_link_oidc_in_use": "Diese Anmeldung gehört schon zu einem anderen Konto mit eigenen Listen. Melde dich dort damit an, oder teile Listen zwischen beiden Konten per Einladung.",
 	"settings_oidc_linked_as": "Verbunden mit {name} als {identity}.",
 	"settings_unlink_oidc": "Anmeldung entfernen",

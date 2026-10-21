@@ -526,7 +526,9 @@ describe('linkOidc() — attach the OIDC login to the current account', () => {
 		exchangeSignsInLinkClient();
 		send.mockRejectedValueOnce(new ClientResponseError({ status: 500 }));
 
-		await expect(linkOidc('google')).rejects.toThrow('settings_link_oidc_failed');
+		// The popup went through: the failure is the request's, worded by its
+		// status, not blamed on the window or the provider.
+		await expect(linkOidc('google')).rejects.toMatchObject({ status: 500 });
 
 		expect(authStore.token).toBe('passkey-token');
 		expect(authStore.save).not.toHaveBeenCalled();

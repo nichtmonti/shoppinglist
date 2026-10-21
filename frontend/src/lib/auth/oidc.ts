@@ -159,9 +159,9 @@ export async function linkOidc(provider: string): Promise<boolean> {
 				body: { token: client.authStore.token }
 			})
 			.catch((e: unknown) => {
-				throw new LocalizedError(
-					t(httpStatus(e) === 409 ? 'settings_link_oidc_in_use' : 'settings_link_oidc_failed')
-				);
+				// The popup has succeeded by now: anything but the 409 is this
+				// request's own failure, which the caller words by its status.
+				throw httpStatus(e) === 409 ? new LocalizedError(t('settings_link_oidc_in_use')) : e;
 			});
 	} finally {
 		if (pendingClient === client) pendingClient = null;
