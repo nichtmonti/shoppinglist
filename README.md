@@ -1,17 +1,28 @@
-# shoppinglist
+<h1 align="center"><img src="frontend/static/favicon.svg" width="44" align="absmiddle" alt=""> shoppinglist</h1>
 
-A shared shopping list for a household, which you host yourself. Everyone on a
-list sees changes within seconds, and it keeps working in a supermarket with
-no signal. It installs to the home screen like an app, signs in with passkeys
-instead of passwords, and needs no email address.
+<p align="center">A shared shopping list for your household, hosted by you. Syncs live, works without signal, signs in with passkeys.</p>
+
+<p align="center">
+  <img src="https://woodpecker.sebastianclermont.de/api/badges/2/status.svg" alt="CI status">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License: AGPL-3.0"></a>
+  <img src="https://img.shields.io/badge/docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white" alt="Docker image for amd64 and arm64">
+  <img src="https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white" alt="Sign in with passkeys or OpenID Connect">
+  <br>
+  <img src="https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/PocketBase-B8DBE4?logo=pocketbase&logoColor=black" alt="PocketBase">
+  <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white" alt="SvelteKit">
+</p>
+
+<p align="center"><a href="#try-it">Try the demo</a> · <a href="docs/deploying.md">Deploy</a> · <a href="docs/using.md">Using it</a> · <a href="CHANGELOG.md">Changelog</a></p>
+
+Everyone on a list sees changes within seconds, and it keeps working in a
+supermarket with no signal. It installs to the home screen like an app and
+needs no password and no email address.
 
 One small server (a single binary or Docker image, also on a Raspberry Pi)
 with a SQLite database: the image is about 50 MB and idles at about 20 MB of
 memory.
-
-**Status:** used every day by its author's household; pre-1.0, so expect the
-occasional breaking change between minor versions (each one is spelled out in
-the [changelog](CHANGELOG.md)).
 
 <p align="center">
   <img src="docs/screenshots/clip.webp" width="560" alt="Two phones: Alice starts an empty list and shares it, Bob joins with the invite and appears in her share sheet; both switch to the editing view, Alice types 3 liter milk and Bob coffee, each appearing on the other phone, the milk with 3 liter as its quantity; back in the shopping view each ticks one off and the other phone follows; Bob's last tick waits in a dead spot, counted in yellow, and arrives once the signal is back">
@@ -75,6 +86,9 @@ the list a household shops from. For recipes, meal plans, a pantry inventory
 or prices, look at Mealie, KitchenOwl or Grocy. It
 also leaves out roles and owners on a list, numeric quantities and units ("2 l"
 is just text), and email or password logins.
+
+It is used every day by its author's household. Before 1.0 a minor version
+can bring a breaking change; the [changelog](CHANGELOG.md) spells out each one.
 
 ## Try it
 
