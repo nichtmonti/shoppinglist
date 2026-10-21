@@ -46,11 +46,13 @@ var photoContentTypes = map[string]string{
 }
 
 // photoDownload is one photo download's outcome: the bytes and their extension,
-// or none, and then whether another try could succeed.
+// or none, and then whether another try could succeed, and the host the
+// allowlist refused, if that was why.
 type photoDownload struct {
-	data  []byte
-	ext   string
-	retry bool
+	data    []byte
+	ext     string
+	retry   bool
+	refused string
 }
 
 // fetchPhoto downloads a product photo for local storage. A failure that can
@@ -68,8 +70,11 @@ func fetchPhoto(rawURL string) photoDownload {
 		return photoDownload{}
 	}
 	u, err := url.Parse(rawURL)
-	if err != nil || u.Scheme != "https" || !allowedPhotoHost(u.Host) {
+	if err != nil || u.Scheme != "https" {
 		return photoDownload{}
+	}
+	if !allowedPhotoHost(u.Host) {
+		return photoDownload{refused: u.Host}
 	}
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {

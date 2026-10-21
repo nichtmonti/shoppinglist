@@ -10,6 +10,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/router"
 
+	"shoppinglist/internal/applog"
 	"shoppinglist/internal/security"
 )
 
@@ -78,7 +79,8 @@ func DeleteAccount(ctx context.Context, app core.App, acct *core.Record) error {
 // than 60 days ago, and show no credential use within the last 60 days (§13).
 // It goes through DeleteAccount: a plain app.Delete would trip the
 // last-credential guard and roll the whole delete back. An account that fails
-// does not stop the others; every failure is returned, joined.
+// does not stop the others; every failure is returned, joined. The deletions
+// are logged, so an operator can answer why an account is gone.
 func SweepOrphans(app core.App) error {
 	var accounts []*core.Record
 	err := app.RecordQuery("accounts").AndWhere(dbx.NewExp(
@@ -94,6 +96,9 @@ func SweepOrphans(app core.App) error {
 		if err := DeleteAccount(context.Background(), app, acct); err != nil {
 			errs = append(errs, fmt.Errorf("account %s: %w", acct.Id, err))
 		}
+	}
+	if deleted := len(accounts) - len(errs); deleted > 0 {
+		applog.Info(app, "deleted accounts on no list and unused for 60 days", "count", deleted)
 	}
 	return errors.Join(errs...)
 }

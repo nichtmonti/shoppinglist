@@ -75,6 +75,12 @@ func settlePhoto(app core.App, ean, rawURL string, got photoDownload) error {
 		if got.retry {
 			return nil
 		}
+		// A site serving its photos from a new host loses every photo until
+		// photoHosts names it.
+		if got.refused != "" {
+			applog.Warn(app, "a product photo's host is not on the allowlist, so it is not stored", nil,
+				"host", got.refused, "barcode", ean)
+		}
 		rec.Set("image_url", "")
 		return app.SaveNoValidate(rec)
 	}

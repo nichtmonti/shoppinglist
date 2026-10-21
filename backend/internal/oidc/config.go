@@ -16,13 +16,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/pocketbase/pocketbase/core"
 
+	"shoppinglist/internal/applog"
 	"shoppinglist/internal/envflag"
 	"shoppinglist/internal/oidclogin"
 	"shoppinglist/internal/settings"
@@ -166,7 +166,7 @@ func Apply(app core.App, env *Config) error {
 	if i >= 0 {
 		stored = &col.OAuth2.Providers[i]
 	}
-	ep, err := endpointsFor(env, stored)
+	ep, err := endpointsFor(app, env, stored)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func Apply(app core.App, env *Config) error {
 // down does not stop the app (passkeys included) from starting; with nothing
 // stored the boot fails ([D-61]). A document that arrives but is wrong always
 // fails it.
-func endpointsFor(env *Config, stored *core.OAuth2ProviderConfig) (oidcEndpoints, error) {
+func endpointsFor(app core.App, env *Config, stored *core.OAuth2ProviderConfig) (oidcEndpoints, error) {
 	if env.Issuer == "" {
 		return oidcEndpoints{AuthURL: env.AuthURL, TokenURL: env.TokenURL, UserinfoURL: env.UserinfoURL}, nil
 	}
@@ -223,7 +223,8 @@ func endpointsFor(env *Config, stored *core.OAuth2ProviderConfig) (oidcEndpoints
 	}
 	if _, unreachable := errors.AsType[fetchError](err); unreachable && stored != nil &&
 		storedIssuer(stored) == issuerOf(env.Issuer) && stored.AuthURL != "" {
-		log.Printf("shoppinglist: WARNING OIDC discovery failed (%v); using the endpoints discovered on an earlier start", err)
+		applog.Warn(app, "OIDC discovery failed; using the endpoints discovered on an earlier start", err,
+			"issuer", env.Issuer)
 		return oidcEndpoints{AuthURL: stored.AuthURL, TokenURL: stored.TokenURL, UserinfoURL: stored.UserInfoURL}, nil
 	}
 	return oidcEndpoints{}, fmt.Errorf("%s: %w", oidcIssuerEnv, err)

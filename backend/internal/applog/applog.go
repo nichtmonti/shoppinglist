@@ -13,11 +13,15 @@ package applog
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
 
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/hook"
+	"github.com/pocketbase/pocketbase/tools/router"
 )
 
 // Info logs msg and the key-value attrs; the container line reads
@@ -54,4 +58,27 @@ func write(app core.App, level slog.Level, msg string, err error, attrs []any) {
 	container := slog.NewTextHandler(log.Writer(), nil)
 	slog.New(slog.NewMultiHandler(app.Logger().Handler(), container)).
 		Log(context.Background(), level, "shoppinglist: "+msg, text...)
+}
+
+// ServerErrors logs every answer of 500 or more with its cause. PocketBase
+// keeps the cause only in its request log, which an instance without the
+// dashboard cannot read and the demo does not keep ([D-209]). It runs outside
+// PocketBase's panic recovery, so a recovered panic is logged with its stack.
+// The route is the pattern, never the path, which can carry a token.
+func ServerErrors() *hook.Handler[*core.RequestEvent] {
+	return &hook.Handler[*core.RequestEvent]{
+		Id:       "shoppinglistServerErrors",
+		Priority: apis.DefaultPanicRecoverMiddlewarePriority - 1,
+		Func: func(e *core.RequestEvent) error {
+			err := e.Next()
+			apiErr, ok := errors.AsType[*router.ApiError](err)
+			if !ok || apiErr.Status < 500 {
+				return err
+			}
+			cause, _ := apiErr.RawData().(error)
+			Error(e.App, "request failed", cause,
+				"route", e.Request.Pattern, "status", apiErr.Status, "message", apiErr.Message)
+			return err
+		},
+	}
 }

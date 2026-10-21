@@ -1,8 +1,10 @@
 package barcode
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/pocketbase/dbx"
@@ -91,6 +93,23 @@ func TestSisterSiteOutageIsNotCached(t *testing.T) {
 	}
 	if _, err := app.FindFirstRecordByFilter("barcode_cache", "barcode = {:barcode}", dbx.Params{"barcode": "4008429081767"}); err == nil {
 		t.Error("a sister-site outage was written to barcode_cache")
+	}
+}
+
+// An outage keeps its cause for the server log: which site, and what it
+// answered.
+func TestUpstreamOutageNamesItsCause(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "slow down", http.StatusTooManyRequests)
+	}))
+	t.Cleanup(srv.Close)
+
+	_, err := queryUpstream(upstreamSite{URL: srv.URL + "/product/%s"}, "4008429081767")
+	if !errors.Is(err, errUpstreamUnavailable) {
+		t.Fatalf("err = %v, want errUpstreamUnavailable", err)
+	}
+	if want := srv.URL + "/product/4008429081767 answered 429 Too Many Requests"; !strings.Contains(err.Error(), want) {
+		t.Errorf("err = %q, want it to name %q", err, want)
 	}
 }
 

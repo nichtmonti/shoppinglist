@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -115,8 +116,12 @@ func main() {
 			if err := e.Next(); err != nil {
 				return err
 			}
+			// A failed seed fails the boot: lists made without the templates
+			// would have no aisles for good, and /api/seed-version would
+			// promise reference rows the database does not hold. Its one
+			// transaction leaves nothing half done, so a restart retries it.
 			if err := seed.Run(e.App); err != nil {
-				applog.Error(e.App, "seed run failed", err)
+				return fmt.Errorf("seed: %w", err)
 			}
 			// §5.9 [D-76]: make the accounts collection's OAuth2 config
 			// match SHOPPINGLIST_OIDC once migrations have created it. Invalid
@@ -126,7 +131,9 @@ func main() {
 			}
 			// [D-241] The first account on an invite-only instance.
 			if env.wacfg.Enabled {
-				logSetupLink(e.App, env)
+				if err := logSetupLink(e.App, env); err != nil {
+					return err
+				}
 			}
 			// A demo instance's accounts have no login by design ([D-234]).
 			if !demoBuild {
@@ -186,8 +193,9 @@ func registerRoutes(r *router.Router[*core.RequestEvent], env *serveEnv) {
 	if !env.adminUI {
 		security.RegisterAdminLockdown(r)
 	}
-	// The failure log wraps PocketBase's own OAuth2 route, so it sits on the
+	// The failure logs wrap PocketBase's own routes too, so they sit on the
 	// root router; every app route goes on the app group.
+	r.Bind(applog.ServerErrors())
 	r.BindFunc(oidc.LogOAuth2Failure)
 	app := security.AppRoutes(r)
 	if env.scanner {

@@ -82,7 +82,7 @@ func lookupHandler(e *core.RequestEvent) error {
 		if hit {
 			return e.JSON(http.StatusOK, productFromRecord(cached, lang))
 		}
-		return e.InternalServerError("barcode service unavailable", nil)
+		return e.InternalServerError("barcode service unavailable", err)
 	}
 	rec, err := saveCache(e.App, ean, found)
 	if err != nil {

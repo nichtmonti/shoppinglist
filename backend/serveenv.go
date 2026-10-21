@@ -180,19 +180,20 @@ func logServeEnv(env *serveEnv) {
 
 // logSetupLink prints the setup link for the first account of an invite-only
 // instance ([D-241]). The token lives in memory, so every boot until that
-// account exists prints a new one.
-func logSetupLink(app core.App, env *serveEnv) {
+// account exists prints a new one. Not knowing whether an account exists
+// fails the boot: an invite-only instance without its link has no way in.
+func logSetupLink(app core.App, env *serveEnv) error {
 	token, ok, err := env.signup.StartSetup(app)
 	if err != nil {
-		log.Printf("shoppinglist: setup link not created: %v", err)
-		return
+		return fmt.Errorf("setup link: %w", err)
 	}
 	if !ok {
-		return
+		return nil
 	}
 	log.Printf("shoppinglist: no accounts yet and %s=invite — create the first account at %s/#setup=%s "+
 		"(valid until the first account exists; every restart before then prints a new link)",
 		signup.Env, env.wacfg.RPOrigin, token)
+	return nil
 }
 
 // resolveServeEnv memoizes buildServeEnv so every caller agrees and the log

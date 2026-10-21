@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -311,8 +312,12 @@ func TestOrphanSweepDeletesOrphansAndSparesTheRest(t *testing.T) {
 	// (d) new account, no membership, no credential yet -> must survive
 	newbie := mk("newbie")
 
+	logs := testutil.CaptureLog(t)
 	mustSweep(t, app, account.SweepOrphans)
 
+	if !strings.Contains(logs.String(), `msg="shoppinglist: deleted accounts on no list and unused for 60 days" count=1`) {
+		t.Errorf("the sweep's deletion is not logged:\n%s", logs)
+	}
 	if exists(t, app, "accounts", orphan.Id) {
 		t.Error("orphan account survived the sweep")
 	}

@@ -235,3 +235,25 @@ func TestADownloadWithoutASlotStartsNothing(t *testing.T) {
 		t.Errorf("photo host asked %d times without a slot, want never", n)
 	}
 }
+
+// A photo on a host the allowlist does not name is dropped for good, so the
+// server log says which host: a site that moved its photos loses them all
+// until photoHosts follows.
+func TestRefusedPhotoHostIsLogged(t *testing.T) {
+	app := testutil.NewApp(t)
+	const url = "https://static.openfoodfacts.org/x.jpg"
+	if _, err := saveCache(app, downloadEAN, &fetchedProduct{Name: "Milch", UpstreamImageURL: url}); err != nil {
+		t.Fatal(err)
+	}
+	logs := testutil.CaptureLog(t)
+
+	if err := settlePhoto(app, downloadEAN, url, fetchPhoto(url)); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(logs.String(), "host=static.openfoodfacts.org barcode="+downloadEAN) {
+		t.Errorf("the refused host is not logged:\n%s", logs)
+	}
+	if got := cacheRow(t, app, downloadEAN).GetString("image_url"); got != "" {
+		t.Errorf("image_url = %q, want it cleared", got)
+	}
+}

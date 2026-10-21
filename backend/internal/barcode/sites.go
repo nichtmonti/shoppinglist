@@ -161,12 +161,14 @@ func fetchProduct(ean string) (*fetchedProduct, error) {
 	return out, nil
 }
 
-// queryUpstream makes one product request. It returns errUpstreamUnavailable
-// unless the site answered: a 404, or a 2xx whose body decodes.
+// queryUpstream makes one product request. It returns errUpstreamUnavailable,
+// wrapped with the cause for the server log, unless the site answered: a 404,
+// or a 2xx whose body decodes.
 func queryUpstream(site upstreamSite, ean string) (*upstreamResponse, error) {
-	resp, err := upstreamGet(fmt.Sprintf(site.URL, ean) + upstreamFields)
+	product := fmt.Sprintf(site.URL, ean)
+	resp, err := upstreamGet(product + upstreamFields)
 	if err != nil {
-		return nil, errUpstreamUnavailable
+		return nil, fmt.Errorf("%w: %w", errUpstreamUnavailable, err)
 	}
 	// Fully consumed by the decoder (or failed mid-read); the Close error is noise.
 	defer func() { _ = resp.Body.Close() }()
@@ -180,10 +182,10 @@ func queryUpstream(site upstreamSite, ean string) (*upstreamResponse, error) {
 		body.Product = nil
 		return &body, nil
 	case resp.StatusCode < 200 || resp.StatusCode >= 300:
-		return nil, errUpstreamUnavailable
+		return nil, fmt.Errorf("%w: %s answered %s", errUpstreamUnavailable, product, resp.Status)
 	}
-	if json.NewDecoder(io.LimitReader(resp.Body, maxUpstreamBytes)).Decode(&body) != nil {
-		return nil, errUpstreamUnavailable
+	if err := json.NewDecoder(io.LimitReader(resp.Body, maxUpstreamBytes)).Decode(&body); err != nil {
+		return nil, fmt.Errorf("%w: %s sent an unreadable body: %w", errUpstreamUnavailable, product, err)
 	}
 	return &body, nil
 }
