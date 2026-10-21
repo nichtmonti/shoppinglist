@@ -31,7 +31,10 @@ variables:
     GOMEMLIMIT: "512MiB"
   - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
   - &go_mod_cache export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod"
-  - &ci_image localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+  # go-task, the gate's runner (tools/task, [D-177]): the osv step runs the
+  # gate's own task.
+  - &install_task go -C tools/task install tool
+  - &ci_image localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-d281e486
 
 when:
   - event: cron
@@ -80,16 +83,9 @@ steps:
       - *go_build_cache
     commands:
       - *go_mod_cache
-      # govulncheck covers the Go side with reachability; this step scans every lockfile (backend/go.mod, the tools/
-      # modules and diff-cover's requirements, root + frontend + e2e pnpm-lock.yaml) against the OSV
-      # advisory DB, dev deps and transitive deps included. The --config flag
-      # is required: a bare osv-scanner.toml applies only to lockfiles in its
-      # OWN directory, so the root file would never see backend/go.mod.
-      # Version from tools/osv-scanner/go.mod ([D-75]). This step stays at the
-      # repo root (it scans every lockfile), so no ../ here.
-      - go -C tools/osv-scanner install tool
-      # --no-call-analysis=go: the tools/<name> modules hold only `tool`
-      # directives, so osv's govulncheck pass finds no packages there and
-      # exits 127 with zero findings. Reachability for the app itself is
-      # govulncheck's job, in the step above ([D-201]).
-      - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go
+      # govulncheck covers the Go side with reachability; this step scans every
+      # lockfile against the OSV advisory DB, dev and transitive dependencies
+      # included, with the gate's own task (Taskfile.yml `osv`: its flags and
+      # why), so the two cannot drift ([D-203]).
+      - *install_task
+      - task osv

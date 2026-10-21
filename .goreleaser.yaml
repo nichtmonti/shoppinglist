@@ -32,6 +32,15 @@ builds:
       - CGO_ENABLED=0
     goos: [linux]
     goarch: [amd64, arm64]
+    # Provenance, before anything is published: a binary built with another
+    # toolchain than the release workflow's EXPECT_GO (backend/go.mod says why
+    # the pin) stops the release. Unset, EXPECT_GO fails the template.
+    hooks:
+      post: &provenance
+        - cmd: >-
+            sh -c 'got=$(go version -m "{{ .Path }}" | head -1 | cut -d" " -f2) &&
+            [ "$got" = "{{ .Env.EXPECT_GO }}" ] ||
+            { echo "{{ .Path }} was built with $got, expected {{ .Env.EXPECT_GO }}" >&2; exit 1; }'
     # Note: backend/cmd/appendseed is dev-time seed-editing tooling and is NOT shipped here.
     # The main binary also embeds the `dictionary-suggestions` curate CLI per §6.13.
 
@@ -50,6 +59,8 @@ builds:
       - CGO_ENABLED=0
     goos: [linux]
     goarch: [amd64, arm64]
+    hooks:
+      post: *provenance
 
 # The "no Docker required" artifact (§14). The SPA is inside the binary
 # ([D-64]), so this is the binary plus documentation — nothing has to stay

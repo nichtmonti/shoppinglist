@@ -15,7 +15,7 @@
 # see e2e.yaml's header for what a fork does about it.
 
 variables:
-  - &ci_image localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+  - &ci_image localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-d281e486
   - &pnpm_cache /var/lib/woodpecker-cache/pnpm:/root/.local/share/pnpm
   - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
   # go-task, the gate's runner (tools/task, [D-177]): the steps run the same
@@ -34,9 +34,8 @@ concurrency: 1
 
 steps:
   # The gate's repo-rules task: the decision log's index against its entries,
-  # relative links and #anchors resolved the way Codeberg resolves them, the
-  # operator's files against the settings the server reads, and the CI image
-  # tag (ci-image.yaml checks it too, before it builds).
+  # relative links and #anchors resolved the way Codeberg resolves them, and
+  # the CI image tag (ci-image.yaml checks it too, before it builds).
   repo-rules:
     image: *ci_image
     volumes:
@@ -67,11 +66,18 @@ steps:
       # The task runs vitest with --silent=passed-only (Taskfile.yml), so the
       # expected stderr of passing tests (loop retries, Svelte dev warnings)
       # stays out of the log and its summary names the failures ([D-203]).
-      # `|| TEST_EXIT=$?`: Woodpecker runs the commands under `sh -e`, so a
-      # bare failing command would end the step before the coverage report.
       # --coverage: the total the unit and component tests reach, and the
-      # changed lines none reaches, printed below ([D-203]). No threshold; it
-      # costs ~20% of the run.
-      - TEST_EXIT=0; task vitest:all -- --coverage || TEST_EXIT=$?
-      - task coverage:frontend || true
-      - exit $TEST_EXIT
+      # changed lines none reaches, reported by the next step ([D-203]). No
+      # threshold; it costs ~20% of the run.
+      - task vitest:all -- --coverage
+
+  # The coverage report on what frontend-test wrote to the shared workspace.
+  # A report: its failure does not fail the pipeline, as e2e.yaml's coverage.
+  frontend-coverage:
+    image: *ci_image
+    failure: ignore
+    volumes:
+      - *go_build_cache
+    commands:
+      - *install_task
+      - task coverage:frontend

@@ -3,7 +3,7 @@
 # work headlessly as well as under VS Code / Codespaces. Every toolchain version
 # is pinned exactly (docs/internals/design.md §14, "Every dependency is pinned to an exact version").
 #
-# Pins:  Go 1.27.2 · Node 26.12.0 · pnpm 12.14.0 (npm) · Playwright Chromium + Firefox (1.64.1)
+# Pins:  Go 1.27.3 · Node 26.12.0 · pnpm 12.14.0 (npm) · Playwright Chromium + Firefox (1.64.1)
 # Go dev tools (staticcheck, gosec, osv-scanner, govulncheck, air, dex): tools/<name>/go.mod [D-75]
 # diff-cover: tools/diff-cover/requirements.txt, hash-pinned [D-203]
 # Binary/module name: `shoppinglist` (matches docs/internals/design.md [D-34] `./shoppinglist` CLI).
@@ -15,7 +15,7 @@
 # the stage devcontainer.json builds. One file, so CI and the devcontainer run
 # the same toolchain.
 
-FROM golang:1.27.2-trixie AS toolchain
+FROM golang:1.27.3-trixie AS toolchain
 
 # --- Base apt deps (xz-utils needed to unpack the Node tarball) ---------------
 # python3-venv: diff-cover runs from a venv of its own, installed from

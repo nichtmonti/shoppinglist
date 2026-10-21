@@ -107,9 +107,14 @@ tasks:
     # A new dependency once brought three advisories that only CI's security
     # workflow saw, after the push. Its inputs are the lockfiles and the
     # waivers; an advisory published later for an unchanged lockfile is still
-    # CI's to find. --no-ignore: a worktree sits under .claude/worktrees, which
-    # the main checkout ignores, and osv reads that .gitignore and finds no
-    # lockfile at all. --no-call-analysis=go as in security.yaml.
+    # CI's to find; security.yaml runs this task. --config: a bare
+    # osv-scanner.toml applies only to lockfiles in its own directory, so the
+    # root file would never see backend/go.mod. --no-ignore: a worktree sits
+    # under .claude/worktrees, which the main checkout ignores, and osv reads
+    # that .gitignore and finds no lockfile at all. --no-call-analysis=go: the
+    # tools/<name> modules hold only `tool` directives, so osv's govulncheck
+    # pass finds no packages there and exits 127; reachability for the app is
+    # govulncheck's job ([D-201]).
     sources:
       - '**/pnpm-lock.yaml'
       - '**/go.mod'

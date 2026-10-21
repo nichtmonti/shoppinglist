@@ -121,7 +121,7 @@ steps:
   # from `release` because the frontend build needs Node and goreleaser's own
   # image has none; it runs in the CI image, as the suites do ([D-203]).
   release-frontend:
-    image: localhost/shoppinglist-ci:go1.27.2-node26.12.0-pw1.64.1-9cc95f85
+    image: localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-d281e486
     commands:
       # go-task as frontend.yaml installs it; .gomod and .task are gitignored,
       # so goreleaser still sees a clean tree.
@@ -164,10 +164,12 @@ steps:
       REGISTRY_TOKEN:
         from_secret: registry_token
       # This image bundles its own Go: an explicit GOTOOLCHAIN keeps the pinned
-      # toolchain binding even if an environment override sets `local`.
-      # Rationale and advisory list: backend/go.mod.
-      GOTOOLCHAIN: go1.27.2
-      EXPECT_GO: go1.27.2
+      # toolchain binding even if an environment override sets `local`, and
+      # .goreleaser.yaml's post-build hook refuses a binary not built with
+      # EXPECT_GO, before anything is published. Rationale and advisory list:
+      # backend/go.mod.
+      GOTOOLCHAIN: go1.27.3
+      EXPECT_GO: go1.27.3
       # Module source owned by the repo, not the agent's environment (go.yaml
       # says why): the official proxy + sumdb.
       GOPROXY: https://proxy.golang.org,direct
@@ -198,16 +200,3 @@ steps:
       # a dirty tree.
       - scripts/release-notes.sh "$CI_COMMIT_TAG" > /tmp/release-notes.md
       - goreleaser release --clean --release-header /tmp/release-notes.md
-      # Post-build provenance gate on what goreleaser actually produced. This
-      # runs AFTER publishing (goreleaser builds and uploads in one pass), so
-      # treat a failure here as "yank the release", not "it was blocked" —
-      # the GOTOOLCHAIN pin above is what prevents it. Every binary under
-      # dist/ is checked, so a per-target gobinary override in
-      # .goreleaser.yaml cannot slip past.
-      - |
-        find dist -type f -name 'shoppinglist*' ! -name '*.tar.gz' ! -name '*.zip' ! -name '*.txt' | while read -r bin; do
-          stamped=$(go version -m "$bin" 2>/dev/null | head -1 | awk '{print $2}')
-          [ -z "$stamped" ] && continue
-          echo "$bin: $stamped"
-          [ "$stamped" = "$EXPECT_GO" ] || { echo "RELEASED ARTIFACT built with $stamped, expected $EXPECT_GO — yank this release"; exit 1; }
-        done

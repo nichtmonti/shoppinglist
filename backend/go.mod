@@ -2,11 +2,12 @@ module shoppinglist
 
 go 1.27
 
-// Minimum toolchain: go1.27.2. PocketBase v0.40 requires Go 1.27 (it moved to
+// Minimum toolchain: go1.27.3. PocketBase v0.40 requires Go 1.27 (it moved to
 // encoding/json/v2) and asks for 1.27.1 for its database/sql and json fixes;
 // 1.27.2 fixes 12 stdlib advisories govulncheck flags as reachable
 // (GO-2026-6599 to -6617, among them html/template, net/http and its bundled
-// http2). The 1.26 floor before it, go1.26.6, fixed 7 more (GO-2026-6218
+// http2), 1.27.3 one more (GO-2026-6809). The 1.26 floor before it,
+// go1.26.6, fixed 7 more (GO-2026-6218
 // net/url, -6091 html/template, -6090 crypto/tls, -6089 net/http, -6088
 // encoding/xml, -5972 encoding/asn1, -5026 idna), all in 1.27.x too.
 // Under GOTOOLCHAIN=auto (the default) the go command upgrades to this
@@ -16,7 +17,7 @@ go 1.27
 // binary against an older stdlib. The release workflow sets GOTOOLCHAIN
 // explicitly so an env override to `local` cannot defeat it. Bump together
 // with the image pins.
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1

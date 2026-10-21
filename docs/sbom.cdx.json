@@ -353,10 +353,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/stdlib@1.27.2",
+			"bom-ref": "pkg:golang/stdlib@1.27.3",
 			"name": "stdlib",
-			"version": "1.27.2",
-			"purl": "pkg:golang/stdlib@1.27.2",
+			"version": "1.27.3",
+			"purl": "pkg:golang/stdlib@1.27.3",
 			"licenses": [
 				{
 					"expression": "BSD-3-Clause"
