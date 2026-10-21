@@ -59,10 +59,9 @@ would otherwise do nothing, and a lockdown such as `SHOPPINGLIST_SIGNUP=closed`
 written wrong would leave the instance open. A variable set to nothing is
 ignored.
 
-`.env.example` sets four values: the version and the domain, which you
-change, and invite-only sign-up and the trusted-proxy header, which suit an
-instance behind a reverse proxy. Everything else in it is commented out and
-off or at its default.
+What `.env.example` sets, and the two values to change, is the guide's
+[configure step](deploying.md#1-configure); everything else in it is
+commented out and off or at its default.
 
 ### Restricting who can sign up
 
@@ -256,21 +255,14 @@ admin dashboard, over plain HTTP.
 
 ### A known-good Caddy config
 
-```caddyfile
-list.example.com {
-	# The one security header the app cannot send itself, since it speaks
-	# plain HTTP to the proxy. The app sends all the others; do not add them.
-	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
-	reverse_proxy 127.0.0.1:8090
-}
-```
-
-Caddy provisions the certificate and sets `X-Forwarded-For` correctly. Drop
-`includeSubDomains` if another subdomain is served without HTTPS. nginx and
-Traefik work too, with the TLS and header lines written out.
-
-**Do not add a Content-Security-Policy at the proxy.** The app sends its own,
-and a browser applies both: a second policy can only block more, and a typical
+The guide's [proxy step](deploying.md#2-put-a-reverse-proxy-in-front) has the
+whole Caddyfile. Its `Strict-Transport-Security` is the one security header
+the app cannot send itself, since it speaks plain HTTP to the proxy; the app
+sends all the others. Caddy provisions the certificate and sets
+`X-Forwarded-For` correctly. Drop `includeSubDomains` if another subdomain is
+served without HTTPS. nginx and Traefik work too, with the TLS and header lines
+written out. A Content-Security-Policy added at the proxy is a second policy,
+and a browser applies both: it can only block more, and a typical
 `script-src 'self'` blanks the page.
 
 ## Running it
@@ -295,11 +287,11 @@ There is no email login, so a lost volume cannot be recovered.
 
 The image runs as an unprivileged user (uid/gid `65532`) and is distroless:
 the binary, CA certificates and time zones, and no shell, so `docker exec …
-sh` does not work. Run the binary's other commands by overriding the entrypoint:
+sh` does not work. Run the binary's other commands by overriding the
+entrypoint, as the guide's [superuser command](deploying.md#3-first-boot)
+does:
 
 ```sh
-docker compose run --rm --entrypoint /shoppinglist shoppinglist \
-  superuser upsert you@example.com 'a-long-random-password' --dir=/pb_data
 docker compose run --rm --entrypoint /shoppinglist shoppinglist --version
 ```
 
@@ -396,32 +388,17 @@ docker compose exec shoppinglist /shoppinglist healthcheck
 
 ## First boot
 
-1. **Check it came up.** A container that exits names the reason in
-   `docker compose logs shoppinglist`, usually the RP-ID or a mistyped value.
-2. **Create the first account.** Under `SHOPPINGLIST_SIGNUP=invite`, open the
-   setup link from the log (`create the first account at https://…/#setup=…`).
-   It admits one account and is gone once that exists. Under `open`, just
-   create one.
-3. **Create the superuser** with `superuser upsert` ([above](#running-it)).
-   Alternatively, with the dashboard on, PocketBase logs a one-time
-   `/_/#/pbinstall/<token>` link at first start, valid for 30 minutes. This account can read and change every
-   list and account and is password-based, so give it a long random password.
-4. **Set the trusted-proxy header** ([step 1](#1-send-the-app-the-real-client-ip)),
-   if it is not in `.env` already.
-5. **Get the backups off the machine:** they run every night into
-   `pb_data/backups/` ([`operating.md`](operating.md#backups)).
-6. **Check the passkey from a real device at the real domain:** reload and
-   sign in again with it. On iOS, try it in the app installed to the home screen as well.
+The guide's [first boot](deploying.md#3-first-boot) is the sequence. Under
+`SHOPPINGLIST_SIGNUP=open` there is no setup link: create the first account
+directly. Check the passkey from a real device at the real domain, and on iOS
+in the app installed to the home screen as well. If the trusted-proxy header is
+not in `.env`, set it before handing out the address
+([step 1](#1-send-the-app-the-real-client-ip)).
 
 ## Upgrades
 
-```sh
-docker compose pull && docker compose up -d
-```
-
-Read the release's [changelog](../CHANGELOG.md) entry first: anything to do
-before upgrading is at its top. Database changes apply at start. Take the new
-release's `docker-compose.yml` too.
+The steps are the guide's [upgrades](deploying.md#upgrades); database changes
+apply at the start that follows them.
 
 **The server backs up the data directory before changing it.** When a start
 has a database change to apply, it first zips the data directory into
