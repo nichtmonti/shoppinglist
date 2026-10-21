@@ -70,7 +70,7 @@ export async function record(
 	await Promise.all(
 		pages.map((page, i) =>
 			page.screencast.start({
-				quality: 90,
+				quality: 100,
 				// The screencast fits 800x800 unless told: the phones' own pixels,
 				// for a clip drawn at SCALE.
 				size: {
@@ -148,7 +148,9 @@ export async function compose(
 					Promise.all(list.map(async (f) => ({ t: f.t, img: await load(f.data) })))
 				)
 			);
-			const PHONE_W = 360;
+			// Each phone at its own width, so its frames are copied pixel for
+			// pixel at SCALE: resampled, text blurs.
+			const PHONE_W = rec.viewportWidth;
 			const scale = PHONE_W / phones[0][0].img.width;
 			const PHONE_H = Math.round(phones[0][0].img.height * scale);
 			const PAD = 24;
