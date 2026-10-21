@@ -34,16 +34,17 @@ import (
 const (
 	// MaxAccountsEnv bounds how many demo accounts exist at once.
 	MaxAccountsEnv = settings.DemoMaxAccountsEnv
-	// StartsPerIPEnv is how many demos one address may start per startWindow.
+	// StartsPerIPEnv is how many demos one address may start per StartWindow.
 	StartsPerIPEnv = settings.DemoStartsPerIPEnv
 
 	sweepJobID    = "__shoppinglist_demo_sweep__"
 	sweepSchedule = "*/10 * * * *" // every 10 minutes: an account outlives Lifetime by at most that
 
 	// startBudget is the per-IP budget on POST /api/demo/start, outside the
-	// §10 table so the normal build's does not name the route.
+	// §10 table so the normal build's does not name the route; StartWindow
+	// is its window.
 	startBudget   = "demo_start"
-	startWindow   = 10 * time.Minute
+	StartWindow   = 10 * time.Minute
 	startsRefusal = "the demo is full right now, try again later"
 )
 
@@ -89,7 +90,7 @@ func Describe(cfg Config) string {
 // RegisterRoutes mounts POST /api/demo/start.
 func RegisterRoutes(r *router.RouterGroup[*core.RequestEvent], cfg Config) {
 	r.POST("/api/demo/start", start(cfg)).
-		BindFunc(security.Limit(startBudget, startWindow, cfg.StartsPerIP)).
+		BindFunc(security.Limit(startBudget, StartWindow, cfg.StartsPerIP)).
 		Bind(apis.RequireGuestOnly())
 }
 
