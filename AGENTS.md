@@ -243,8 +243,10 @@ not equivalent, with that reason in one line beside it.
 **Tool versions live in `tools/`, one Go module per tool** ([D-75],
 `tools/README.md`): `go -C tools/<name> install tool` with no `@version`, the
 module is the pin (Dex runs as `go -C tools/dex tool dex`). diff-cover, the one
-Python tool, is pinned by hashes in `tools/diff-cover/requirements.txt`. Never
-put a version in a command, a Dockerfile ARG or a CI `environment:` block.
+Python tool, is pinned by hashes in `tools/diff-cover/requirements.txt`. A
+version anywhere else (a Dockerfile ARG, a CI `environment:` block, an `npx`
+argument) is one a Renovate manager in `renovate.json5` updates; one that no
+manager reads is not added.
 
 **`-tags no_ui` for any Go command on a tree without a built frontend:**
 `backend/pb_public` is embedded at compile time ([D-64]), and a bare `go
