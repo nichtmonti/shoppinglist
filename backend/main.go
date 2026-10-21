@@ -196,6 +196,7 @@ func registerRoutes(r *router.Router[*core.RequestEvent], env *serveEnv) {
 	// The failure logs wrap PocketBase's own routes too, so they sit on the
 	// root router; every app route goes on the app group.
 	r.Bind(applog.ServerErrors())
+	r.BindFunc(security.ProxyHeaderHint())
 	r.BindFunc(oidc.LogOAuth2Failure)
 	app := security.AppRoutes(r)
 	if env.scanner {
