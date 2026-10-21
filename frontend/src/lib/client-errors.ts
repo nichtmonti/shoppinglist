@@ -50,6 +50,39 @@ export function reportClientError(report: Omit<ClientErrorReport, 'version' | 'a
 	}).catch(() => {});
 }
 
+/**
+ * Reports an error nothing caught: a rejected promise no one awaited, or a
+ * throw in an event handler. SvelteKit's handleError sees only a route's load
+ * and render, and on a phone the console is out of sight ([D-197]). A request
+ * the app cancelled, or one with no connection, is not an error.
+ */
+export function reportUncaught(error: unknown): void {
+	const e = error as { name?: unknown; isAbort?: unknown; status?: unknown } | null;
+	if (e?.name === 'AbortError' || e?.isAbort === true || e?.status === 0) return;
+	const { message, stack } = describeError(error);
+	reportClientError({
+		message,
+		stack,
+		route: '',
+		path: location.pathname,
+		status: 0,
+		context: 'uncaught'
+	});
+}
+
+let watching = false;
+
+/** Sends every uncaught error and rejection on this page to reportUncaught. */
+export function watchUncaughtErrors(): void {
+	if (watching || typeof window === 'undefined') return;
+	watching = true;
+	window.addEventListener('unhandledrejection', (event) => reportUncaught(event.reason));
+	// A resource that failed to load fires `error` too, without an error.
+	window.addEventListener('error', (event) => {
+		if (event.error !== undefined) reportUncaught(event.error);
+	});
+}
+
 /** Test seam: forget which errors were already sent. */
 export function resetClientErrorsForTest(): void {
 	sent.clear();

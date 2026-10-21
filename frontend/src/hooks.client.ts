@@ -1,5 +1,5 @@
 import type { HandleClientError } from '@sveltejs/kit/hooks';
-import { describeError, reportClientError } from '#lib/client-errors.js';
+import { describeError, reportClientError, watchUncaughtErrors } from '#lib/client-errors.js';
 import {
 	claimReload,
 	isModuleLoadError,
@@ -12,6 +12,7 @@ import {
 
 watchResourceFailures();
 watchServiceWorker();
+watchUncaughtErrors();
 
 // Every error SvelteKit catches on the client — a route that throws while it
 // loads or renders — is reported to the server log and carried to the error

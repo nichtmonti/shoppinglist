@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('#lib/pb.js', async () => (await import('#lib/test-kit/pb-mock.js')).pbModuleMock());
 
-import { describeError, reportClientError, resetClientErrorsForTest } from './client-errors';
+import {
+	describeError,
+	reportClientError,
+	reportUncaught,
+	resetClientErrorsForTest
+} from './client-errors';
 import { handleError } from '../hooks.client';
 
 describe('client error reporting', () => {
@@ -19,7 +24,23 @@ describe('client error reporting', () => {
 			setItem: (k: string, v: string) => void store.set(k, v)
 		});
 		assign = vi.fn();
-		vi.stubGlobal('location', { assign });
+		vi.stubGlobal('location', { assign, pathname: '/list/abc' });
+	});
+
+	it('an uncaught error is reported; a cancelled request or one with no connection is not', () => {
+		reportUncaught(Object.assign(new Error('aborted'), { isAbort: true }));
+		reportUncaught(new DOMException('gone', 'AbortError'));
+		reportUncaught(Object.assign(new Error('Failed to fetch'), { status: 0 }));
+		expect(fetchMock).not.toHaveBeenCalled();
+
+		reportUncaught(new DOMException('quota', 'QuotaExceededError'));
+		expect(fetchMock).toHaveBeenCalledOnce();
+		const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+		expect(body).toMatchObject({
+			message: 'QuotaExceededError: quota',
+			path: '/list/abc',
+			context: 'uncaught'
+		});
 	});
 
 	it('describes an Error by name and message, anything else as a string', () => {
