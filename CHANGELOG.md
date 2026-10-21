@@ -9,6 +9,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 ## Unreleased
 
 - **A scanned product's number says what it is.** Under the photo in "Product details" and "Edit item", the long number now has "Barcode" in front of it, and the “Copy barcode” button beside it is gone.
+- **[`CONTRIBUTING.md`](CONTRIBUTING.md) says how to send a change and what it must test.** A change comes as a pull request against `main` on Codeberg; a new feature brings its tests, and a bug fix a test that fails without the fix.
 
 ## v0.17.0: errors that say what went wrong, and a server that stops on a setting it does not know (2026-10)
 

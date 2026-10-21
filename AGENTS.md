@@ -59,6 +59,10 @@ in place of the rest. Never renumber an entry or reuse a number.
 
 ## Run the tests inside the devcontainer
 
+**A change of behaviour brings its test**, under
+[CONTRIBUTING's policy](CONTRIBUTING.md#test): a feature its tests, a fix one
+that fails without it.
+
 **Everything below runs inside the devcontainer**, where Go, node, pnpm and
 Playwright's Chromium and Firefox are (`echo $SHOPPINGLIST_DEVCONTAINER` prints `1`). The
 host has no Go toolchain, and `gate.sh` and `shots.sh` refuse to start there.

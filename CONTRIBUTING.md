@@ -60,6 +60,14 @@ against it: sign in as `anna@example.com` or `bob@example.com`, password
 
 ## Test
 
+**A change of behaviour brings its test.** A new feature adds automated tests
+for what it does, and a bug fix adds a test that fails without the fix. Put
+it in the lowest layer that sees the behaviour: a Go test for the server, a
+vitest test for a component or the sync engine, a Playwright spec for what
+only a browser shows ([the layers](docs/internals/impl-notes.md#test-layers)).
+A refactor keeps the existing tests passing; a change to docs, CI or tooling
+needs none. A pull request that adds no test says why.
+
 In the devcontainer:
 
 ```sh
@@ -88,11 +96,16 @@ state ([details](AGENTS.md#checking-ui-work-with-screenshots)).
 
 ## Before you send a change
 
+Send a change as a pull request against `main` on
+[Codeberg](https://codeberg.org/sclermont/shoppinglist/pulls); CI runs on it,
+and the maintainer reviews it. Before you open one:
+
 - Read the relevant part of the spec, [`docs/internals/design.md`](docs/internals/design.md).
   Code cites it as `§n` and `[D-nn]`; the decisions behind it, with the
   alternatives that were rejected, are in
   [`docs/internals/decisions.md`](docs/internals/decisions.md). A change of
   behaviour updates the spec too.
+- Add the tests the change needs ([the policy](#test)) and run them.
 - If users or operators will notice the change, add a line under
   `## Unreleased` in [`CHANGELOG.md`](CHANGELOG.md) in the same commit.
 - Run `pnpm format` (repo root) to format.
