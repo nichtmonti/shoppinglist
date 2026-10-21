@@ -136,8 +136,9 @@ invite links, an optional egress allowlist) is in the
 
 Database changes apply at start, after the server has zipped the data
 directory into `pb_data/backups/`; restoring that zip with the previous image
-undoes the upgrade. An old `EINKAUFSLISTE_*` setting stops it with the name
-to rename ([details](deploy-reference.md#upgrades)).
+undoes the upgrade. A setting the new release does not know, renamed,
+removed or misspelt, stops it with the name to fix
+([details](deploy-reference.md#upgrades)).
 
 ## Everything else
 
