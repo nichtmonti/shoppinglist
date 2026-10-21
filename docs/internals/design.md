@@ -64,7 +64,7 @@ An installable Progressive Web App for shared shopping lists:
 │  │ - barcode proxy  │ │                              │   │
 │  └──────────────────┘ └──────────────────────────────┘   │
 └──────────────────────────────────────────────────────────┘
-        ▲ HTTPS (auto-TLS)                    ▲ realtime SSE
+        ▲ HTTPS (operator's proxy)            ▲ realtime SSE
 ┌───────┴──────────────────────────────────────┴──────────┐
 │  Browser / installed PWA                                 │
 │  SvelteKit SPA ── Dexie (IndexedDB) ── outbox sync loop  │
@@ -184,7 +184,7 @@ Passkeys stay the default and the only self-serve signup; an operator may add an
 ---
 ## 6. Data model (PocketBase collections)
 
-**Syncable** collections (`items`, `list_categories`): `id` is a **client-minted UUID** for a row a sync op creates, a server id for one a §7.5 route creates; `updated` is **server-stamped** on every write (PB built-in); `deleted_at` is a nullable **tombstone**. `lists` is **not syncable and has no tombstone**: created only by the §7.5 routes, hard-deleted only by the §7.3 cascade [D-08]. `memberships` are **not** tombstoned: leaving is a hard delete (§7). Items have no `position`/order field.
+**Syncable** collections (`items`, `list_categories`): `id` is a **client-minted UUID** for a row a sync op creates, a server id for one a §7.5 route creates; `updated` is **server-stamped** on every write (PB built-in); `deleted_at` is a nullable **tombstone**. `lists` is **not syncable and has no tombstone**: created only by the §7.5 routes, hard-deleted only by the §7.3 cascade [D-08]. `memberships` are **not** tombstoned: leaving is a hard delete (§7). Items have no `position`/order field. The server-only collections, `merge_log` (§8.3), `barcode_cache` (§9.2) and `oidc_identities` (§5.9), have their rules in §11 and their fields in their migrations; so does the hidden `deliveries` column on both syncable collections, the last delivered op ids §8.3 replays from.
 
 ### 6.1 `accounts` (auth collection)
 | Field | Type | Notes |
@@ -225,7 +225,7 @@ A passkey ceremony's session lives in server memory, not in a collection (§5.5,
 | list | relation → lists | |
 | created / updated | | |
 
-No name of its own, no update rule [D-08]; readable only by its owner (the roster route exposes only account + nickname, §7.4). Unique index on `(account, list)`. **No `deleted_at`**: leave = hard delete (§7.2).
+No name of its own, no update rule [D-08]; readable only by its owner (the roster route exposes only account, nickname and join time, §7.4). Unique index on `(account, list)`. **No `deleted_at`**: leave = hard delete (§7.2).
 
 ### 6.6 `items`
 | Field | Type | Notes |
@@ -233,15 +233,15 @@ No name of its own, no update rule [D-08]; readable only by its owner (the roste
 | id | UUID | client-generated |
 | list | relation → lists | |
 | name | string | the name the server merges duplicates on (§8.3 [D-29]) |
-| name_norm | string, server-only | `normalizeName(name)`, indexed with `list`: the [D-29] merge's lookup key; never in the client schema (dropped by `itemRecordMap` and the client's normalizer) |
+| name_norm | string, ignored by the client | `normalizeName(name)`, indexed with `list`: the [D-29] merge's lookup key; never in the client schema (dropped by `itemRecordMap` and the client's normalizer) |
 | name_de, name_en | **string, nullable** | a **scanned** product's name per UI language (§9.2), and the demo's example items' ([D-234]); null on typed items. A member sees their language's, else `name`; **a rename clears both** in the same op. Client-side "already on the list" matching and the typeahead use them; the server's duplicate merge does not [D-21] |
 | quantity | **string (free-text)** | |
 | note | **string, nullable** | optional remark, edited in the detail sheet (§9.1); ordinary field-level sync (§8.3) |
 | category_key | **string, nullable** | `id` of one of *this list's* `list_categories` rows (§6.7), a plain key, not a relation. null **or an unknown/hidden/tombstoned key** ⇒ the list's **Others** category (§6.12) |
 | checked | bool | |
-| checked_at | **datetime, nullable** | **server-stamped by the sync-push route** when an applied op flips `checked` true, nulled when it flips false [D-26]. **Never carried in ops**; the UI shows an optimistic local stamp until the server's arrives. Drives the trip split and newest-first order (§6.10, §9). The §7.5 clear-history route [D-79] is the only other writer (bulk null) |
+| checked_at | **datetime, nullable** | **server-stamped by the sync-push route** when an applied op flips `checked` true, nulled when it flips false [D-26]. **Never carried in ops**; the UI shows an optimistic local stamp until the server's arrives. Drives the trip split and newest-first order (§6.10, §9). Besides the push route, clone and import copy it (§7.5) and the clear-history route [D-79] bulk-nulls it |
 | last_bought_at | **datetime, nullable** | **server-stamped by the sync-push route** to `now()` whenever an applied op flips `checked` true [D-26]; **persists across unchecking**, except for an untick that takes the tick back (`prev_bought_at`, [D-303]). **Never carried in ops.** Dates the previous-items screen and this list's typeahead suggestions (§6.10); `null` = never bought, rendered as no date. The §7.5 clear-history route [D-79] is the only other writer (bulk null); on a **tombstoned** row that purges it from "Frühere Artikel" and re-arms the §13 sweep ([D-100]) |
-| prev_bought_at | **datetime, nullable** | **server-only**: the `last_bought_at` a tick replaced, so an untick that takes the tick back restores it [D-303]; nulled with it by clear-history. Not in the client row shape |
+| prev_bought_at | **datetime, nullable** | **ignored by the client**: the `last_bought_at` a tick replaced, so an untick that takes the tick back restores it [D-303]; nulled with it by clear-history. Not in the client row shape |
 | barcode | **string, nullable** | EAN/UPC from the scanner (§9.2); scan-dedup and re-lookup |
 | image_url | **string, nullable** | product-image **URL** (§9.2), always a **path on our own origin** (`/api/barcode/photo/{token}`); `img-src` is `'self'` ([D-21]). **Server-stamped from `barcode`** by the sync-push route, import and clone: the photo the lookup stored for that barcode, empty when there is none. **Never carried in ops**; a value an op still carries is dropped ([D-266]). Synced as a URL (§8.3), never as bytes; SW-cached. **No per-item icon field** (§9.1) |
 | modified_by | relation → accounts, **non-cascading** | **server-stamped** by the sync-push route on every applied write; conflict attribution ("Anna set it to 3"). `cascadeDelete: false`: deleting the account clears it, rendered as "someone" (§7.4) [D-32] |
@@ -331,7 +331,7 @@ Both buckets are **client-side view filters over `items`**; nothing moves in sto
 
 ### 6.11 Suggestion suppression (account-bound preference) [D-17]
 
-Behind **"nicht mehr vorschlagen"** (§9): a suppressed name leaves the typeahead's *union* (dictionary hits and derived picks alike) **without** erasing history.
+Behind **"Nicht mehr vorschlagen"** (§9): a suppressed name leaves the typeahead's *union* (dictionary hits and derived picks alike) **without** erasing history.
 
 **Not a collection, not synced through the outbox.** A **global, per-account** list of normalized names in `accounts.suppressed_names`, written through PocketBase's ordinary **own-row** path (§11), never `sync/push`, and **mirrored in Dexie** so it applies offline. Each change is kept as a **pending intent** (name → add/remove) until the server confirms it; the mirror is the last confirmed server copy with those intents applied ([D-137]). Delivery applies the intents to the account's current server list, so another device's names survive; it is retried on the next change, at app start, on reconnect and after re-auth. A refused write drops its intents, falls back to the server copy and says so. Simultaneous writes from two devices are last-write-wins.
 
@@ -344,7 +344,7 @@ Both are populated only by an **idempotent boot seeder**, never by hand or clien
 - **Embedded, offline-safe.** `backend/seed/categories.json` and `backend/seed/items.json` are compiled in via Go `embed`; a fresh boot seeds with no network.
 - **Idempotent upsert, gated on `seed_version`.** `category_templates` upsert **by `slug`**; `item_dictionary` **by a deterministic `id` from the canonical `en` name** (`item_cucumber`). Re-running never duplicates (§18). Re-application is gated on a `seed_version` in PocketBase's `_params` table (`backend/seed/seed.go`), so superuser edits survive until the next bump. A bump applies in one transaction with the stored version, so an interrupted one is redone in full; the log says when it starts and how long it took.
 - **What a bump does to existing lists.** A template whose icon changes moves every list's category still on its old icon, and leaves one changed by hand ([D-287]). The boot that crosses seed version 8 folds every list once into [D-300]'s aisles (`seed/fold.go`, [D-302]).
-- **Client re-mirror on version bump.** `GET /api/seed-version` exposes the active version to authenticated clients. The client stores its mirror's version in `meta.seed_version` and compares on the **first drain of each session**; if they differ (or the local dictionary is empty), it re-pulls both collections in full and replaces the mirror, refusing an empty fetch.
+- **Client re-mirror on version bump.** `GET /api/seed-version` exposes the active version to authenticated clients. The client stores its mirror's version in `meta.seed_version` and compares after the **first completed pull of each session**, retrying each cycle until it succeeds; if they differ (or the local dictionary is empty), it re-pulls both collections in full and replaces the mirror, refusing an empty fetch.
 - **Shape.** Template `icon` is stored and synced as the emoji character, drawn with bundled OpenMoji artwork ([D-181], §9.1). A `retired` template is no longer copied into a list, offered to one or used by a text import; it still names the rows lists have and lets a backup carrying its slug import [D-300]. Dictionary fields: §6.9.
 - **Default category seed** (21, walk order through a German supermarket then errands, colours by meaning with neighbours apart: [D-251], [D-300]; copied into each new list at creation, §7.5; editable per list, §6.7):
 
@@ -382,7 +382,7 @@ Both are populated only by an **idempotent boot seeder**, never by hand or clien
 
 Growing the global taxonomy is an **operator** action ([D-15]) with two tools that add no DB-write path, collection, HTTP route or admin-UI mutation.
 
-- **Additive seed-append command** (`cmd/appendseed`, outside the compiled binary; edits only the checked-in seed files): derives each `item_dictionary.id` exactly as the boot seeder does (`item_<normalized-en-name>`, §9 [D-44]), categories by `slug`; appends only entries whose id/slug is not already in `seed/items.json` / `seed/categories.json` (an id-string check, not a semantic one); bumps `seed_version`. A **restart** applies it (§6.12).
+- **Additive seed-append command** (`cmd/appendseed`, outside the compiled binary; edits only the checked-in seed files): derives each `item_dictionary.id` exactly as the boot seeder does (`item_<normalized-en-name>`, §9 [D-44]), categories by `slug`; appends only entries whose id/slug is not already in `seed/items.json` / `seed/categories.json` (an id-string check, not a semantic one); bumps `seed_version`. The seed is embedded, so a **rebuilt and redeployed binary** applies it at its start (§6.12).
 - **`./shoppinglist dictionary-suggestions`**, a read-only CLI subcommand on the binary, run over SSH. It normalizes the names of non-deleted `items` across all lists with the **app's own normalization function**, the one the duplicate merge uses (§9, [D-29], [D-44]); keeps those matching no `item_dictionary.names_i18n` entry; groups them by normalized name, counting **distinct lists** and dropping groups below a threshold (e.g. 3 lists); and prints the groups by list count, descending, each with its **per-category occurrence counts** (`items.category_key → list_categories.id → slug`; a `slug`-less custom category is labelled as such), not one collapsed guess:
   ```
   "kiwi"     (5 lists)  produce: 4, snacks_sweets: 1
@@ -432,7 +432,7 @@ Between triggers the cache may lag.
 
 ### 7.5 List creation (custom route)
 
-`POST /api/lists` `{name}`, in one transaction: the `lists` row, the creator's membership, and a **copy of `category_templates` into `list_categories`**, one row per template with its `slug`/`icon`/`color`/`sort_order` and a **null `name`** (the localized default until renamed, §6.7). It is outside the outbox, so **list creation requires connectivity** [D-09] (§9.3).
+`POST /api/lists` `{name}`, in one transaction: the `lists` row, the creator's membership, and a **copy of `category_templates` into `list_categories`**, one row per non-retired template with its `slug`/`icon`/`color`/`sort_order` and a **null `name`** (the localized default until renamed, §6.7). It is outside the outbox, so **list creation requires connectivity** [D-09] (§9.3).
 
 Two variants build a populated list the same way, in one transaction [D-72]:
 
@@ -479,8 +479,8 @@ A custom, heavily unit-tested engine [D-10]. The app enters it only through `#li
    {
      "op_id": "uuid",              // matches results to ops; with the payload, names a delivery [D-42]
      "collection": "items" | "list_categories",  // lists is never in an op [D-08]
-     "record_id": "uuid",
-     "list_id": "uuid",            // scope key: lets the client drop ops when a list is gone
+     "record_id": "id",            // a create's: 8-64 of [A-Za-z0-9_-]
+     "list_id": "id",              // scope key: lets the client drop ops when a list is gone
      "type": "create" | "update",  // delete = update {deleted: true}; restore = false [D-45]
      "changed": { "field": newValue, ... },   // `deleted` rides here as a boolean signal
      "base":    { "field": baseValue, ... },  // shadow value when the field was first edited (create ⇒ {})
@@ -507,7 +507,7 @@ A custom, heavily unit-tested engine [D-10]. The app enters it only through `#li
 1. **Authorise:** the caller must be a member of `list_id` and the record must belong to that list; else `denied`.
 2. **`create`:**
    - `record_id` already exists (re-delivery) → `noop` with the current record; the merge is **not** re-run [D-42].
-   - `record_id` names another list's row, or another list's `merge_log` entry → `denied`/`bad_record_id`, and that list's row is left alone [D-191].
+   - `record_id` is not 8-64 of `[A-Za-z0-9_-]`, or names another list's row or another list's `merge_log` entry → `denied`/`bad_record_id`, and that list's row is left alone [D-191].
    - The list no longer exists → `gone`; no orphan is stored (§8.6). A deleted list usually answers `denied`/`not_member` at step 1 instead, the cascade having deleted the memberships, and the cycle's membership set notices it (§8.5, [D-138]).
    - A create that would add a row to a list already holding `max_items_per_list` items rows, or 200 `list_categories` rows (tombstones included) → `denied`/`list_full` [D-217] (§10).
    - `items` create whose **normalized name** (§9) matches a **non-tombstoned** item (checked or not; of several, the oldest by `created`, the lower `id` within a millisecond) → **not inserted**; `merged` with the existing row's `record_id`, the discarded id logged in `merge_log` so a retry replays the answer [D-108]. The existing row keeps its fields, **except a re-activated row** (checked, or a remembered tombstone): it gets `checked` = false, `checked_at` = null unless the create checks it (`last_bought_at` persists, §6.6) and takes the create's `quantity` and `note`, reporting no conflict for them [D-200]. A living row's blank `quantity`, `note` or `barcode` takes the create's value, reporting no conflict, a filled barcode with its photo [D-29], [D-266]. Otherwise each field where the create carried a **non-empty, differing** value is reported in `conflicts` (`{field, mine, theirs, theirs_by}`) for the §8.4 toast; none otherwise [D-29].
@@ -636,7 +636,7 @@ An optional scanner adds a product with its picture as an ordinary `items` row (
    - **Device cache:** the never-synced Dexie `scanned_products` store; hits 30 days, misses 24 hours; concurrent scans of one barcode share one request.
    - **Server:** the authenticated `GET /api/barcode/{ean}?lang=de|en` (8 to 14 digits, rate-limited per IP, §10) reads the persistent `barcode_cache` (hits 30 days; misses, and a hit whose photo has not arrived, 5 minutes), then **Open Food Facts**, then the sister database OFF names (**Open Beauty Facts**, **Open Pet Food Facts** or **Open Products Facts**). Upstream calls time out after five seconds. It returns the name in the requested language where the database has it, else the main language, a **same-origin photo path**, and a category slug mapped from the most specific category tag. The server downloads the photo beside the lookup: it waits three seconds for it, then answers without it while the download goes on for up to a minute. A photo that fails for a reason that can pass is retried (§13); one that cannot is not asked for again until the product's refresh. A photo that arrives late goes to every item with that barcode and no photo ([D-21], [D-266]).
    - **Miss everywhere:** "Product not found. Type the name instead." and the normal typeahead; a miss never blocks adding. With the scanner on, each boot checks the four databases can be reached and logs a warning when not ([D-260]).
-3. **Create** the item with `name`, `name_de`/`name_en` (where the database has them), `category_key` and `barcode`; the server stamps `image_url` from the barcode ([D-266]). `image_url` is `/api/barcode/photo/{token}` on our own origin (SW-cached; the category emoji on a miss), stored once on the server and swept 180 days after no item references it (§13). Dedup as in §9.1; a name match typed without a barcode takes the scanned one, and its photo.
+3. **Create** the item with `name`, `name_de`/`name_en` (where the database has them), `category_key` and `barcode`; the server stamps `image_url` from the barcode ([D-266]). `image_url` is `/api/barcode/photo/{token}` on our own origin (SW-cached; the category emoji on a miss), stored once on the server and swept once 180 days past its lookup if no item references it then (§13). Dedup as in §9.1; a name match typed without a barcode takes the scanned one, and its photo.
 
 - **Operator switch ([D-218]).** `SHOPPINGLIST_SCANNER=off` removes the lookup route, the scan button (the shell carries `shoppinglist-scanner=off`) and camera permission (`camera=()`). The photo route stays.
 - **Attribution.** Product images are CC BY-SA, so a "Photo: Open Food Facts contributors" credit sits near the image.
@@ -716,7 +716,7 @@ Rules live in checked-in migrations (§14).
 
 | Collection | list/view | create | update | delete |
 |---|---|---|---|---|
-| `accounts` | self only (`id = @request.auth.id`; `emailVisibility` false) | none (passkey routes, and the §5.9 OIDC hook, which pre-creates at system level [D-76]) | self via **hook-enforced allowlist**: `nickname` + suggestion-suppression prefs (§6.11) only; `handle`/`email`/`verified`/`tokenKey` rejected (email is never set: §4.4, [D-25]) [D-32] | none (account-deletion route only, §4.5) |
+| `accounts` | self only (`id = @request.auth.id`; `emailVisibility` false) | none (passkey routes, and the §5.9 OIDC hook, which pre-creates at system level [D-76]) | self: the update hook refuses a changed `handle` and caps `nickname`, PocketBase's own form refuses the auth fields (`email`, `verified`, `tokenKey`; email is never set: §4.4, [D-25]) [D-32] | none (account-deletion route only, §4.5) |
 | `credentials` | own only | none (passkey routes only) | **deny** (no rule, migration 1778000003; `friendly_name` via `POST /api/credentials/{id}/rename`, §5.4) | own, guarded by the **last-credential delete-hook** (§5.4): refuses removing the last credential of an account with no OIDC login; account-deletion route exempt via a context-scoped bypass ([D-32]) |
 | `lists` | requester has a membership on the list | **deny** (route §7.5) | requester has a membership on the list; `name` only in effect (its only own column), bounded and kept non-empty by the lists update guard [D-08] | **deny** (cascade only) |
 | `memberships` | **own rows only** (roster via route §7.4) | **deny** (join route) | **deny** ([D-08]) | **own only** (= leave, fires cascade §7.3) |
@@ -756,7 +756,7 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 - **N = count of `pending_ops`** (one per record after coalescing), scoped to the list on screen (§8.2); on the home and settings, the whole device's outbox ([D-130]).
 - **Form** ([D-102]): one glyph in a fixed box, so nothing around it moves: a cloud when synced, **the count itself** whenever N>0, a grey `cloud-off` when offline with nothing pending, a grey **clock** when stale, a filled **key** when expired. No two states share a glyph, and the one actionable state is the app bar's only **filled** chip.
 - **Last sync time** comes from `meta.last_synced_at`, stamped by the **leader tab** (§8.7) after each successful drain → digest → repair cycle (§8.2, §8.5), and is shown **only offline**.
-- **States** (Dexie `liveQuery`, the `online` store, `authState`): synced → "All synced", **only while true**; stale (three exchanges in a row have failed with nothing pending) → "No answer from the server · last <time>" ([D-296]); broken (three in a row failed in the app itself) → the same clock, or the count while changes wait, "Sync isn't working"; pending → "N not synced yet…"; offline → "Offline · N pending · last synced <time>"; expired (online, session invalid) → the chip is the one-tap §5.8 re-auth button, whose **failures show as a toast**, a dismissed ceremony staying silent ([D-130]). **Offline wins over an expired token**, since re-auth needs connectivity. The chip complements the §8.4 notices, never blocks use and never auto-hides.
+- **States** (Dexie `liveQuery`, the `online` store, `authState`): synced → "All changes synced", **only while true**; stale (three exchanges in a row have failed with nothing pending) → "No answer from the server · last <time>" ([D-296]); broken (three in a row failed in the app itself) → the same clock, or the count while changes wait, "Sync isn't working"; pending → "{count} changes not synced yet"; offline → "Offline · {count} not synced", "last synced {when}" for a screen reader; expired (online, session invalid) → the chip is the one-tap §5.8 re-auth button, whose **failures show as a toast**, a dismissed ceremony staying silent ([D-130]). **Offline wins over an expired token**, since re-auth needs connectivity. The chip complements the §8.4 notices, never blocks use and never auto-hides.
 - **The line under the list's name** says what the chip cannot ([D-296]): the members while the sync is fine or a change is on its way, otherwise one short status in their place (failing, broken, another tab or this one stuck, stale, offline), amber when something of the user's is not getting out, grey otherwise. A tap on the members opens „Teilen & Mitglieder“ (§7.1), the name keeping the quick switcher; a tap on a status opens a sheet that explains it and offers the one action that helps (send now, sync now, reload; none for another tab). Every tab reads it from `meta.sync_health`, which the leader writes at the start and the end of every exchange (§8.7).
 - **Accessibility.** Each state's full sentence is `.sr-only` inside the chip: it is the accessible name and the announcement of a **permanent** `role="status"` wrapper, so the move into *expired* is announced. **Every `[data-slot="button"]` control has a 44px effective target**; a smaller painted box gets it from an invisible `::after` hit inset, as the chip does, pinned by the target-size sweep [D-56].
 - **Contrast:** the pending glyph, the expired chip and the aisle-count tint clear WCAG AA (≥4.5) in both themes, pinned by `design-tokens.test.ts`, which recomputes every recipe from `app.css` ([D-102]).
@@ -764,7 +764,7 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 ### 12.2 Localization (i18n)
 
 - **The entire app is localized** ([D-22]). Three tiers: (1) **all UI chrome**, including the chip (§12.1) and conflict notices (§8.4), is a translated message, never a literal; (2) **app-seeded vocab**, `category_templates.name_i18n` / `item_dictionary.names_i18n`, rendered in the current locale, falling back to `en`, then the slug; (3) **user-entered text** (item and list names) is never translated.
-- **de + en, additive.** Compile-time i18n with **Paraglide** (`@inlang/paraglide-js`, pinned to 2.x, §2), so no catalog is fetched at runtime and it works from the app-shell cache. A new language is a UI locale file, seed keys, an entry in `project.inlang/settings.json` `locales`, the `Locale` type and a `browserLocale()` prefix (`#lib/i18n`).
+- **de + en, additive.** Compile-time i18n with **Paraglide** (`@inlang/paraglide-js`, pinned to 2.x, §2), so no catalog is fetched at runtime and it works from the app-shell cache. A new language is a UI locale file, seed keys, an entry in `project.inlang/settings.json` `locales` (Paraglide generates the `Locale` type from it) and a `browserLocale()` prefix (`#lib/i18n`).
 - **Locale selection ([D-68], [D-223]):** (1) the explicit choice from the `LocaleToggle` in settings **and on the auth and join screens**, persisted in `meta.locale` and never overridden; (2) the browser's language, when it is a shipped locale (`de*`/`en*` on the lowercased tag); (3) `en`. There is no instance default.
 - **A switch changes the strings in place, in every open tab** [D-291]: nothing is remounted and nothing a screen holds is lost. Lint refuses a message resolved once into a constant of a component script.
 - **Locale stability:** items reference categories by **stable row id** and store free-text names, and a category's default label comes from its seed `slug` (§6.7), so switching language changes labels only, never item↔category mapping or history.
@@ -799,7 +799,7 @@ Scheduled in `internal/jobs`, each sweep written in the package that owns its ta
 - **License:** AGPL-3.0. Settings links `SHOPPINGLIST_SOURCE_URL` (default: this repository), which an operator of a modified version points at theirs ([D-211]).
 - **Backups:** PB scheduled backups, on from the first start: nightly at 03:00 UTC, the newest seven kept, a failure on the container log too ([D-334]); the operator changes them (incl. S3-compatible) in the dashboard, or copies the SQLite file. A start about to apply a migration or a new seed first zips `pb_data` to `pb_data/backups/pb_backup_pre_upgrade_*.zip`, before opening the database, keeping the newest three; it cannot be skipped ([D-183], [D-223]).
 - The **idempotent boot seeder** (§6.12) fills the reference data from the embedded seed files.
-- **Settings are env vars** ([D-65]), each in [`deploy-reference.md`](../deploy-reference.md#environment-variables); `SHOPPINGLIST_APP_URL` and `_TRUSTED_PROXY_HEADER`, when set, win over the admin UI at every boot. Every setting but `SQLITE_PRAGMAS` is `SHOPPINGLIST_`-prefixed; any `EINKAUFSLISTE_` variable refuses the boot, naming each ([D-222]), and so does a `SHOPPINGLIST_` (or `SQLITE_PRAGMA…`) name that is no setting, a removed one included ([D-336]). The compose file hands `.env` over whole ([D-263]). Values only the client acts on (item cap, scanner switch, source link, version) are stamped into the shell document as `shoppinglist-*` meta tags (`internal/ui`).
+- **Settings are env vars** ([D-65]), each in [`deploy-reference.md`](../deploy-reference.md#environment-variables); `SHOPPINGLIST_APP_URL` and `_TRUSTED_PROXY_HEADER`, when set, win over the admin UI at every boot. Every setting but `SQLITE_PRAGMAS` is `SHOPPINGLIST_`-prefixed; each is declared once in `backend/internal/settings/settings.go`, which renders the reference's tables ([D-337]); any non-empty `EINKAUFSLISTE_` variable refuses the boot, naming each ([D-222]), and so does a non-empty `SHOPPINGLIST_` (or `SQLITE_PRAGMA…`) name that is no setting, a removed one included ([D-336]). The compose file hands `.env` over whole ([D-263]). Values only the client acts on (item cap, scanner switch, source link, version) are stamped into the shell document as `shoppinglist-*` meta tags (`internal/ui`).
 
 ### CI (Woodpecker)
 **Tests run against real PocketBase (in-process or the built binary), not mocks**: the security lives in rules and route checks. How to run each layer, the gate and its harnesses: [AGENTS.md](../../AGENTS.md) and [impl-notes.md](impl-notes.md).

@@ -6,7 +6,7 @@ import type { ListSort } from './state/prefs';
 /**
  * The user's lists — their membership rows — in the chosen order:
  * - `alphabetical`: by the list's name, locale-aware;
- * - `custom`: by the saved drag order, lists it does not know yet last;
+ * - `custom`: by the saved drag order, lists it does not know yet first;
  * - `activity` (the default): newest activity first, where activity is the
  *   list index's `updated` — the digest's max_updated, i.e. the newest item or
  *   category change on the list, not the server's lists.updated column.

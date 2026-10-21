@@ -132,7 +132,7 @@ func run(candidatesPath string) error {
 		fmt.Printf("  skipped (already present): %s\n", slug)
 	}
 	if len(newItems) > 0 || len(newCategories) > 0 {
-		fmt.Println("Restart the shoppinglist binary to apply — the boot seeder upserts on the bumped seed_version.")
+		fmt.Println("Rebuild and redeploy the binary to apply: the seed is embedded, and the boot seeder upserts on the bumped seed_version.")
 	}
 	return nil
 }
