@@ -19,9 +19,7 @@ import (
 const repoRoot = "../../../"
 
 // What the docs quote in "…" that no message says, each with why.
-var notMessages = map[string]string{
-	`CHANGELOG.md "Connecting failed. The window was closed or the provider refused."`: "the message this release removed",
-}
+var notMessages = map[string]string{}
 
 // The docs quote the app's English in "…" and its German in „…“, ‹name› for a
 // message's {name}. A quote is a message, or its start: up to the end of a

@@ -6,9 +6,9 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
-## Unreleased
+## v0.17.0: errors that say what went wrong, and a server that stops on a setting it does not know (2026-10)
 
-**For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` (and `SQLITE_PRAGMAS`, if you set it) is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it. If you filter or alert on the server's warnings in the container log, match their new form (below).
+**For operators.** Before upgrading, check that every `SHOPPINGLIST_` variable in your `.env` (and `SQLITE_PRAGMAS`, if you set it) is one the [deployment reference](docs/deploy-reference.md#environment-variables) lists: the server now refuses to start while it finds another, and names it. With passkeys off (`SHOPPINGLIST_PASSKEYS=off`), check that `SHOPPINGLIST_APP_URL` is the `https://` address: a plain `http://` one anywhere but `localhost` stops the server too, as it already did with passkeys on. If you filter or alert on the server's warnings in the container log, match their new form (below).
 
 - **The user guide says what needs a connection** (creating, joining, renaming or leaving a list, invite links, account changes, importing a backup, an unknown barcode), how to sign in through a household's own provider ("Continue with ‹name›"), and "My lists" for the app's start page; the README says where to switch the language.
 - **Citations in the docs and this changelog are links**: a decision such as [D-336] opens its entry in the decision log, and a section such as [§5.7] its heading in the design document.
@@ -36,6 +36,8 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **Connecting your identity provider in settings no longer blames the window or the provider when the server fails afterwards.** Once the provider has accepted, a failure says what happened ("Something went wrong.", or that the connection or the session is the problem) instead of "Connecting failed. The window was closed or the provider refused."
 - **An import that fails because of the connection or the session says so** ("Couldn't reach the server. Try again." or "Your session has expired. Sign in again, then try again.") instead of "Import failed".
 - **Errors in the app that nothing catches are now sent to the server log too** (`client error … context=uncaught`), not only those that break a page: a change the phone could not save, say, used to fail with no trace outside the browser's console ([D-197]).
+- **A sign-in the device cannot store or read reaches the server log.** A phone whose storage refuses the saved sign-in signed you out at every start, or brought a sign-out back after a reload, with no trace outside the browser ([D-197]).
+- **A sign-in screen whose code fails to load shows the error page with "Reload"** instead of a blank page.
 - **A passkey refused because of the server's settings says which one** in the container log: `check="SHOPPINGLIST_RP_ORIGIN must be the origin users open…"` when the address bar's origin differs, and a hint on `SHOPPINGLIST_RP_ID` when a passkey was made for another domain.
 - **The server no longer starts when it cannot apply its built-in aisles and dictionary.** It logged the failure and served on, and lists made then had no aisles for good; nothing is half applied, so the next start tries again. The same holds when an invite-only instance cannot tell whether its first account exists.
 - **Accounts the daily sweep deletes (on no list and unused for 60 days) are logged with their number**, so an operator can tell why an account is gone; the fallback to the OIDC endpoints of an earlier start is logged in the new form too.
