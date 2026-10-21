@@ -12,6 +12,7 @@
 // ONE-WAY: Dexie opens `version(1)` as IndexedDB version 10, so a raw-IndexedDB
 // build opening at version 1 would hit a VersionError and sign everyone out.
 import Dexie from 'dexie';
+import { reportUncaught } from '#lib/client-errors.js';
 
 const STORE = 'kv';
 
@@ -29,9 +30,12 @@ const kv = db.table<string, string>(STORE);
 export async function idbGet(key: string): Promise<string> {
 	// Never throws: awaited on boot (pb.ts's `initialToken`), where an unreadable
 	// store means "not signed in", not "fail to start".
+	// Reported, though: a store that cannot be read signs the user out at
+	// every launch with no reason given.
 	try {
 		return (await kv.get(key)) ?? '';
-	} catch {
+	} catch (error) {
+		reportUncaught(error, 'session storage');
 		return '';
 	}
 }
@@ -39,17 +43,19 @@ export async function idbGet(key: string): Promise<string> {
 export async function idbSet(key: string, value: string): Promise<void> {
 	// Swallows failures: the PocketBase AsyncAuthStore treats a rejecting save()
 	// as a fatal unhandled rejection.
+	// Reported: the next launch would be signed out with no reason given.
 	try {
 		await kv.put(value, key);
-	} catch {
-		/* best-effort persistence */
+	} catch (error) {
+		reportUncaught(error, 'session storage');
 	}
 }
 
 export async function idbDel(key: string): Promise<void> {
+	// Reported: the sign-out would not outlast a reload.
 	try {
 		await kv.delete(key);
-	} catch {
-		/* best-effort */
+	} catch (error) {
+		reportUncaught(error, 'session storage');
 	}
 }
