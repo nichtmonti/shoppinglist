@@ -54,6 +54,9 @@ vi.mock('#lib/actions/lists.js', () => ({
 	exportList: vi.fn(),
 	clearHistory: vi.fn().mockResolvedValue(3)
 }));
+// The leave dialog reads the members again before its confirm works; the
+// roster here is what the tests seed.
+vi.mock('#lib/sync/roster.js', () => ({ refreshRoster: vi.fn().mockResolvedValue([]) }));
 
 import { SHADOW_ITEM_MARKER_PROPERTY_NAME, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
 import { db, type RosterEntry } from '#lib/db.js';
