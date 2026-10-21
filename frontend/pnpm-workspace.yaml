@@ -7,6 +7,9 @@
 allowBuilds:
   esbuild: true
   unrs-resolver: false
+# A release resolves only once it is three days old (minutes), transitives
+# included; renovate.json5 holds its updates to the same age.
+minimumReleaseAge: 4320
 # Dependency-advisory fixes for transitives whose parents pin them too tight to
 # take the fixed version in-range: brace-expansion (minimatch), nanoid+postcss
 # (eslint-plugin-svelte/vite), handlebars (eslint-plugin-boundaries and

@@ -1,0 +1,4 @@
+# pnpm settings for the e2e project.
+# A release resolves only once it is three days old (minutes), transitives
+# included; renovate.json5 holds its updates to the same age.
+minimumReleaseAge: 4320

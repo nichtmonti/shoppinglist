@@ -47,7 +47,10 @@
 		':dependencyDashboard',
 		// An npm release is offered only once it is three days old, time for
 		// the registry and scanners to pull a hijacked one (config:best-practices
-		// has it, config:recommended does not). Security fixes skip the wait.
+		// has it, config:recommended does not). Security fixes skip the wait,
+		// and then need a minimumReleaseAgeExclude entry in the project's
+		// pnpm-workspace.yaml, whose minimumReleaseAge holds every resolution
+		// to the same age.
 		'security:minimumReleaseAgeNpm'
 	],
 

@@ -1,2 +1,5 @@
 # pnpm settings for the root project (prettier, concurrently); frontend/ and
 # e2e/ are projects of their own with their own lockfiles.
+# A release resolves only once it is three days old (minutes), transitives
+# included; renovate.json5 holds its updates to the same age.
+minimumReleaseAge: 4320
