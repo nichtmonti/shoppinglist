@@ -18,6 +18,8 @@
 /backend/pb_public_demo/
 # CI's build of the tools/dex pin for the OIDC browser harness ([D-154])
 /backend/dex
+# what `go build ./cmd/<name>` leaves in backend/
+/backend/appendseed
 # air's build output for scripts/dev.sh ([D-71]) — kept off the
 # backend/shoppinglist path the Playwright harnesses serve (e2e/server.ts)
 /backend/tmp/
