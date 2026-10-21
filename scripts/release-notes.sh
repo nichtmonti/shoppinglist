@@ -25,7 +25,9 @@ here=$(dirname "$0")
 changelog=${CHANGELOG:-$here/../CHANGELOG.md}
 repo_url=${RELEASE_REPO_URL:-${CI_REPO_URL:-}}
 if [ -z "$repo_url" ]; then
-	repo_url=$(git -C "$here" remote get-url origin | sed -E \
+	# Its own step, so a failing git stops the script (sh has no pipefail).
+	origin=$(git -C "$here" remote get-url origin)
+	repo_url=$(echo "$origin" | sed -E \
 		-e 's#^ssh://([^@/]+@)?([^/:]+)(:[0-9]+)?/#https://\2/#' \
 		-e 's#^[^@/]+@([^:/]+):#https://\1/#' \
 		-e 's#\.git$##')

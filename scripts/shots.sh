@@ -108,7 +108,7 @@ trap 'on_signal 129' HUP
 mkdir -p logs/shots
 # shellcheck source=lib/lock.sh
 . scripts/lib/lock.sh
-machine_lock shots
+machine_lock shots || exit 1
 
 OUT_REL="logs/shots/$(date +%Y%m%d-%H%M%S)${LABEL:+-$LABEL}"
 mkdir -p "$OUT_REL"
@@ -157,7 +157,7 @@ if [ -n "${README:-}" ]; then
 	for image in "${IMAGES[@]}"; do
 		read -r left right <<<"${README_SHOTS[$image]}"
 		if [ -z "$right" ]; then
-			cp "$OUT_REL/$left.webp" "docs/screenshots/$image.webp"
+			cp "$OUT_REL/$left.webp" "docs/screenshots/$image.webp" || exit 1
 		elif ! (cd e2e && node shots/pair.ts "$ROOT/$OUT_REL/$left.png" "$ROOT/$OUT_REL/$right.png" \
 			"$ROOT/docs/screenshots/$image.png"); then
 			echo "shots: pairing $image failed" >&2
@@ -167,7 +167,7 @@ if [ -n "${README:-}" ]; then
 	echo "── README images updated in docs/screenshots/: ${IMAGES[*]}"
 elif [ -n "${DOCS:-}" ]; then
 	rm -rf docs/images && mkdir -p docs/images
-	cp "$OUT_REL"/docs/*.png docs/images/
+	cp "$OUT_REL"/docs/*.png docs/images/ || exit 1
 	echo "── deployment reference images updated in docs/images/"
 	ls -l docs/images
 else

@@ -29,6 +29,15 @@ const css = links
 	.map(hrefOf)
 	.filter(Boolean);
 
+// No modulepreload at all is a build this script no longer understands, not
+// a boot that costs nothing.
+if (hrefs.length === 0) {
+	console.error(
+		`no modulepreload links in ${htmlPath}: the build's shape changed, so the budget measures nothing`
+	);
+	process.exit(2);
+}
+
 let total = 0;
 const rows = [];
 for (const href of [...hrefs, ...css]) {

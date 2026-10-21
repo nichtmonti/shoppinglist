@@ -71,9 +71,14 @@ if (process.argv.includes('--check')) {
 	// A deleted entry's citations move to what replaced it; one left behind
 	// points at nothing. CHANGELOG cites them too.
 	const have = new Set(rows.map((r) => r.label));
-	const cited = execFileSync('git', ['grep', '-noE', String.raw`\[D-[0-9]+\]`], {
-		encoding: 'utf8'
-	});
+	// From the top of the tree, wherever it is run from.
+	const cited = execFileSync(
+		'git',
+		['grep', '--full-name', '-noE', String.raw`\[D-[0-9]+\]`, ':/'],
+		{
+			encoding: 'utf8'
+		}
+	);
 	const missing = cited.split('\n').filter((l) => l && !have.has(/\[(D-\d+)\]$/.exec(l)[1]));
 	if (missing.length) {
 		console.error(

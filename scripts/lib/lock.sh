@@ -17,12 +17,15 @@
 # wait for itself: GATE_LOCK_HELD marks the holder's children.
 machine_lock() {
 	[ -n "${GATE_LOCK_HELD:-}" ] && return 0
-	local lock
-	lock="$(git rev-parse --path-format=absolute --git-common-dir)/gate.lock"
-	exec 9>"$lock"
+	local lock dir
+	# Sourced, the caller's shell may not stop on an error: every step that
+	# can leave the run without the lock returns its failure.
+	dir=$(git rev-parse --path-format=absolute --git-common-dir) || return 1
+	lock="$dir/gate.lock"
+	exec 9>"$lock" || return 1
 	if ! flock -n 9; then
 		echo "$1: waiting for the run that holds the machine: $(cat "$lock.who" 2>/dev/null || echo unknown)"
-		flock 9
+		flock 9 || return 1
 	fi
 	echo "$1 in $(pwd -P), pid $$, since $(date +%H:%M:%S)" >"$lock.who"
 	export GATE_LOCK_HELD=1

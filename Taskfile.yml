@@ -5,7 +5,8 @@
 #
 # What runs is decided by the tools, not by path rules here: a task whose
 # `sources` are unchanged since it last PASSED is skipped (a docs edit runs
-# only the repo-rule checks, a failed layer reruns until it passes), `vitest --changed` and the
+# only the repo-rule checks beside gitleaks, gofmt and prettier, which have
+# none; a failed layer reruns until it passes), `vitest --changed` and the
 # changed-file lint scope to the diff, and Go's test cache replays unchanged
 # packages. The checksums live in .task/, per checkout.
 #
@@ -25,8 +26,11 @@ vars:
   # had not changed. Without origin/main (a clone with no remote), HEAD.
   # SINCE is read from the environment: go-task evaluates this before it
   # applies a variable given as an argument (scripts/gate.sh exports one).
+  # A SINCE that names no commit fails the run rather than checking less.
   BASE:
-    sh: git merge-base "${SINCE:-origin/main}" HEAD 2>/dev/null || git rev-parse HEAD
+    sh: |
+      if [ -n "${SINCE:-}" ]; then git merge-base "$SINCE" HEAD
+      else git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD; fi
   LOCK: scripts/lib/lock.sh
   BIN: '{{.ROOT_DIR}}/backend/shoppinglist'
   BIN_NOUI: '{{.ROOT_DIR}}/backend/shoppinglist-no-ui'
@@ -77,7 +81,9 @@ tasks:
     desc: gofmt over the backend
     cmds:
       - defer: *failed
-      - test -z "$(gofmt -l backend | tee /dev/stderr)"
+      # The assignment keeps gofmt's own exit status: a file it cannot parse
+      # fails the layer.
+      - 'files=$(gofmt -l backend) && { [ -z "$files" ] || { echo "$files" >&2; exit 1; }; }'
 
   gitleaks:
     desc: gitleaks over the history (CI's scan) and over the uncommitted changes
@@ -159,12 +165,15 @@ tasks:
       # Exact for every file you touched: typed rules check each file against
       # the whole program. A finding in an untouched file caused by a changed
       # type is CI's full run to catch ([D-243]).
+      # The lists are taken first, so a git that fails stops the layer instead
+      # of passing an empty list.
       - |
-        if git diff --name-only {{.BASE}} | grep -qE '^frontend/(eslint[^/]*\.js|package\.json|pnpm-lock\.yaml|tsconfig[^/]*\.json)$'; then
+        changed=$(git diff --name-only {{.BASE}}) || exit 1
+        if printf '%s\n' "$changed" | grep -qE '^frontend/(eslint[^/]*\.js|package\.json|pnpm-lock\.yaml|tsconfig[^/]*\.json)$'; then
           cd frontend && pnpm lint
         else
-          { git diff --name-only --diff-filter=d {{.BASE}} -- frontend; git ls-files --others --exclude-standard -- frontend; } |
-            grep -E '\.(ts|js|svelte)$' | sed 's#^frontend/##' | sort -u |
+          files=$(git diff --name-only --diff-filter=d {{.BASE}} -- frontend && git ls-files --others --exclude-standard -- frontend) || exit 1
+          printf '%s\n' "$files" | grep -E '\.(ts|js|svelte)$' | sed 's#^frontend/##' | sort -u |
             (cd frontend && xargs -r -d '\n' node scripts/lint.js)
         fi
 
@@ -239,11 +248,15 @@ tasks:
 
   go-test:
     desc: The backend suite, then package main as the demo build ([D-234]); `go test` arguments after `--`
-    sources: &backend
+    sources:
       - backend/**/*.go
       - backend/**/*.json
       - backend/go.mod
       - backend/go.sum
+      # What internal/settings' tests hold the settings to ([D-337]).
+      - docs/deploy-reference.md
+      - .env.example
+      - Dockerfile.demo
       - exclude: backend/pb_data/**/*
       - exclude: backend/pb_public*/**/*
     cmds:
@@ -273,7 +286,13 @@ tasks:
 
   build-backend:
     desc: The binary without the SPA, for the integration project
-    sources: *backend
+    sources:
+      - backend/**/*.go
+      - backend/**/*.json
+      - backend/go.mod
+      - backend/go.sum
+      - exclude: backend/pb_data/**/*
+      - exclude: backend/pb_public*/**/*
     generates:
       - backend/shoppinglist-no-ui
     cmds:

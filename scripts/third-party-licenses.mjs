@@ -160,7 +160,11 @@ function goComponents() {
 		const out = go(
 			[
 				'list',
-				'-e',
+				// no_ui: the SPA it would embed is not built here, and the tag
+				// changes no import. Without -e, a package that fails to load
+				// stops the run instead of leaving its modules out.
+				'-tags',
+				'no_ui',
 				'-deps',
 				'-f',
 				'{{if not .Standard}}{{with .Module}}{{if not .Main}}{{.Path}}\t{{.Version}}\t{{if .Replace}}{{.Replace.Dir}}{{else}}{{.Dir}}{{end}}{{end}}{{end}}{{end}}',

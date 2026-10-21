@@ -37,7 +37,12 @@ case "${1:-}" in
 	echo "$tag"
 	;;
 --check)
-	stale=$(grep -o "$IMAGE:[A-Za-z0-9._-]*" .woodpecker/*.yaml | grep -v ":$IMAGE:$tag\$" || true)
+	named=$(grep -o "$IMAGE:[A-Za-z0-9._-]*" .woodpecker/*.yaml || true)
+	if [ -z "$named" ]; then
+		echo "ci-image-tag: no workflow names $IMAGE at all" >&2
+		exit 1
+	fi
+	stale=$(echo "$named" | grep -v ":$IMAGE:$tag\$" || true)
 	if [ -n "$stale" ]; then
 		echo "$stale" >&2
 		echo "ci-image-tag: the workflows above do not name $IMAGE:$tag; run scripts/ci-image-tag.sh --write" >&2
