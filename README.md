@@ -2,19 +2,21 @@
 
 <p align="center">A shared shopping list for your household, hosted by you. Syncs live, works without signal, signs in with passkeys.</p>
 
-<p align="center">
-  <img src="https://woodpecker.sebastianclermont.de/api/badges/2/status.svg" alt="CI status">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License: AGPL-3.0"></a>
-  <img src="https://img.shields.io/badge/docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white" alt="Docker image for amd64 and arm64">
-  <img src="https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white" alt="Sign in with passkeys or OpenID Connect">
-  <br>
-  <img src="https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white" alt="Go">
-  <img src="https://img.shields.io/badge/PocketBase-B8DBE4?logo=pocketbase&logoColor=black" alt="PocketBase">
-  <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" alt="SQLite">
-  <img src="https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white" alt="SvelteKit">
-</p>
+<div align="center">
 
-<p align="center"><a href="#try-it">Try the demo</a> · <a href="docs/deploying.md">Deploy</a> · <a href="docs/using.md">Using it</a> · <a href="CHANGELOG.md">Changelog</a></p>
+![CI status](https://woodpecker.sebastianclermont.de/api/badges/2/status.svg)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+![Docker image for amd64 and arm64](https://img.shields.io/badge/docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)
+![Sign in with passkeys or OpenID Connect](https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white)
+<br>
+![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
+![PocketBase](https://img.shields.io/badge/PocketBase-B8DBE4?logo=pocketbase&logoColor=black)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white)
+
+[Try the demo](#try-it) · [Deploy](docs/deploying.md) · [Using it](docs/using.md) · [Changelog](CHANGELOG.md)
+
+</div>
 
 Everyone on a list sees changes within seconds, and it keeps working in a
 supermarket with no signal. It installs to the home screen like an app and
