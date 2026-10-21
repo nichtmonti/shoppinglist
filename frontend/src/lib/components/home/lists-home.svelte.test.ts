@@ -123,8 +123,10 @@ async function markPulled(): Promise<void> {
 	await db.meta.put({ key: 'memberships_synced_at', value: '2026-01-01T00:00:00.000Z' });
 }
 
+// [D-123] The card shows what remains as a bare number, a tick when nothing
+// is open and nothing when empty; the words are the link's description.
 describe('ListsHome card counts', () => {
-	it('renders only the remaining count, "alles erledigt ✓", and "leer"', async () => {
+	it('shows the remaining count, and says it, "alles erledigt ✓" or "leer"', async () => {
 		await putMyList('list-mixed', 'Wocheneinkauf');
 		await putMyList('list-done', 'Grillfest');
 		await putMyList('list-empty', 'Baumarkt');
@@ -164,10 +166,12 @@ describe('ListsHome card counts', () => {
 		render(ListsHome);
 
 		await waitFor(() => {
-			expect(within(cardByName('Wocheneinkauf')).getByText('2 offen')).toBeDefined();
-			expect(within(cardByName('Grillfest')).getByText('alles erledigt ✓')).toBeDefined();
-			expect(within(cardByName('Baumarkt')).getByText('leer')).toBeDefined();
+			screen.getByRole('link', { name: 'Wocheneinkauf öffnen', description: '2 offen' });
+			screen.getByRole('link', { name: 'Grillfest öffnen', description: 'alles erledigt ✓' });
+			screen.getByRole('link', { name: 'Baumarkt öffnen', description: 'leer' });
 		});
+		expect(within(cardByName('Wocheneinkauf')).getByText('2')).toBeDefined();
+		expect(within(cardByName('Grillfest')).queryByText(/\d/)).toBeNull();
 	});
 });
 
@@ -209,47 +213,21 @@ describe('ListsHome count before the items are pulled', () => {
 	});
 });
 
-// The member count says a list is shared subtly (meta line, faint) and answers
-// "with how many?".
+// [D-123] Who shares a list is the share sheet's and the list header's to
+// say, not the card's.
 describe('ListsHome member count', () => {
-	it('counts the roster cache on a shared list and stays silent on a solo one', async () => {
+	it('is not on the card of a shared list', async () => {
 		await putMyList('list-shared', 'Familie');
-		await putMyList('list-solo', 'Solo');
 		await putList('list-shared', '2026-01-01T00:00:00.000Z');
-		await putList('list-solo', '2026-01-01T00:00:00.000Z');
 		await db.roster.bulkPut([
 			roster('list-shared', 'account-1', 'Anna'),
-			roster('list-shared', 'account-2', 'Ben'),
-			// A solo list's own roster row must not read as shared — 1 is "only me",
-			// and neither must an empty cache (§7.4 refreshes it on three triggers).
-			roster('list-solo', 'account-1', 'Anna')
+			roster('list-shared', 'account-2', 'Ben')
 		]);
 
 		render(ListsHome);
 
-		await waitFor(() => {
-			expect(within(cardByName('Familie')).getByText('· 2 Mitglieder')).toBeDefined();
-			expect(within(cardByName('Solo')).queryByText(/Mitglied/)).toBeNull();
-			expect(screen.queryByText('👥')).toBeNull();
-		});
-	});
-
-	it('drops the marker when the roster falls back to a single member', async () => {
-		await putMyList('list-a', 'Familie');
-		await putList('list-a', '2026-01-01T00:00:00.000Z');
-		await db.roster.bulkPut([
-			roster('list-a', 'account-1', 'Anna'),
-			roster('list-a', 'account-2', 'Ben')
-		]);
-		render(ListsHome);
-		await waitFor(() =>
-			expect(within(cardByName('Familie')).getByText(/Mitglieder/)).toBeDefined()
-		);
-
-		await db.roster.delete('list-a_account-2');
-		// Dropping back to one member drops the marker entirely rather than
-		// rendering "1 Mitglied" — a list with only you on it is not shared.
-		await waitFor(() => expect(within(cardByName('Familie')).queryByText(/Mitglied/)).toBeNull());
+		await waitFor(() => screen.getByRole('link', { name: 'Familie öffnen', description: 'leer' }));
+		expect(within(cardByName('Familie')).queryByText(/Mitglied/)).toBeNull();
 	});
 });
 

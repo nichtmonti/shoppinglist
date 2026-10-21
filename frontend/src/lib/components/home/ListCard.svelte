@@ -55,7 +55,7 @@
 				buttonVariants({ variant: 'quiet', size: 'icon' }),
 				// 40px, not 2.5rem, which would take 80px from the name at 200% text
 				// ([D-90]); the icon size's inset keeps it 48px to tap.
-				'relative z-1 col-start-2 mt-3.5 me-3.5 size-[40px] self-start'
+				'relative z-1 col-start-2 me-3.5 size-[40px] self-center'
 			)}
 			aria-label={menuLabel}
 		>

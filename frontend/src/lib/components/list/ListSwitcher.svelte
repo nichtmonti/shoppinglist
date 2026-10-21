@@ -11,7 +11,6 @@
 	import Sheet from '#lib/components/ui/Sheet.svelte';
 	import ListSummary from '#lib/components/list/ListSummary.svelte';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import Check from '@lucide/svelte/icons/check';
 	import List from '@lucide/svelte/icons/list';
 	import RuledRows from '#lib/components/common/RuledRows.svelte';
 	import SettingsRow from '#lib/components/settings/SettingsRow.svelte';
@@ -67,7 +66,7 @@
 			{#each $memberships as membership (membership.id)}
 				<!-- aria-current, not a label on the check: a label on a plain span is
 				     dropped by some screen readers. Marked twice, green and ticked, as
-				     a menu's chosen item is. -->
+				     a menu's chosen item is; the tick stands where its count would. -->
 				<button
 					type="button"
 					class={[rowClass, membership.list === currentListId && 'text-primary-text']}
@@ -75,11 +74,8 @@
 					onclick={() => void switchTo(membership.list)}
 				>
 					<span class="flex min-w-0 flex-1 flex-col gap-1.5">
-						<ListSummary {membership} />
+						<ListSummary {membership} current={membership.list === currentListId} />
 					</span>
-					{#if membership.list === currentListId}
-						<Check class="size-4.5 shrink-0 text-primary-text" aria-hidden="true" />
-					{/if}
 				</button>
 			{/each}
 		{/if}

@@ -432,7 +432,7 @@ A device's queued ops for a list it no longer belongs to come back `denied`/`not
 - **(c)** **on miss**: a conflict notice ([§8.4]) naming an uncached member fetches once more, then falls back to "someone" (e.g. a deleted account, [§4.5]);
 - **(d)** when the leave dialog opens ([§7.2]): its confirm stays busy until the read answers, since the roster decides whether it warns that leaving deletes the list for everyone.
 
-Every other reader, the home's member count ([§9.3]) and the list header's member line among them, reads the cache only. Between triggers the cache may lag.
+Every other reader, the list header's member line among them, reads the cache only. Between triggers the cache may lag.
 
 ### 7.5 List creation (custom route)
 
@@ -654,8 +654,7 @@ The app root is the **„Meine Listen“ home**: the user's `memberships` as car
 
 **Per-list card**, computed client-side via `liveQuery`, no new field:
 - the list's `name`;
-- a **remaining count**: „‹open› offen“ (`!checked && !deleted_at`), „alles erledigt ✓“ when nothing is open, „leer“ with no items; no purchased totals;
-- a **member count** when the roster cache ([§7.4]) shows more than one member;
+- a **remaining count** beside the name ([D-123]): the number of open items (`!checked && !deleted_at`), a grey ✓ when nothing is open, nothing with no items, read out as „‹open› offen“, „alles erledigt ✓“ or „leer“; no purchased totals and no member count;
 - an **unsynced dot** with the list's pending count from `pending_ops` ([§8.2]).
 
 **Ordering**, device-local in `meta.list_sort`, never synced ([D-115]):
@@ -1015,6 +1014,7 @@ The standing rules it set are in [§14].
 [D-117]: decisions.md#D-117
 [D-119]: decisions.md#D-119
 [D-121]: decisions.md#D-121
+[D-123]: decisions.md#D-123
 [D-124]: decisions.md#D-124
 [D-130]: decisions.md#D-130
 [D-131]: decisions.md#D-131
