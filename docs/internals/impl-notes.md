@@ -1,23 +1,23 @@
 # Implementation notes
 
-How the test layers, the sync behaviour suite and the supported browser
-baseline are now.
+The test layers, the sync behaviour suite and the supported browser baseline.
 
-## Test layers today
+## Test layers
 
-`scripts/gate.sh` (in the devcontainer; `AGENTS.md` has the full account) runs
-the tasks in `Taskfile.yml` ([D-177]): the non-browser layers whose sources
-changed since they last passed, the browser harnesses only when named
-(`e2e:<name>`, [D-177]), `full` and `e2e` for everything, one gate at a time
-on the machine:
+`scripts/gate.sh` runs these go-task tasks (`Taskfile.yml`, [D-177]) in the
+devcontainer: the non-browser layers whose sources changed since they last
+passed, two at a time; a browser harness only when named (`e2e:<name>`);
+`full` and `e2e` for everything, one gate at a time on the machine. How to run
+them, and what to watch for, is in [`AGENTS.md`](../../AGENTS.md#the-gate).
 
 | Task | What it runs | Port |
 |---|---|---|
 | `deps` | `pnpm install --frozen-lockfile` in `.`, `frontend` and `e2e` when `node_modules` is missing or a lockfile changed | none |
-| `format` | prettier, repo-wide, with its cache | none |
-| `gofmt` | `gofmt -l` over `backend/` | none |
-| `repo-rules` | the decision index, doc links, settings and CI image tag checks, CI's repo-rules step | none |
+| `format` | prettier, repo-wide, with its cache; every run | none |
+| `gofmt` | `gofmt -l` over `backend/`; every run | none |
+| `repo-rules` | `scripts/decisions-index.mjs --check` (the index and every `D-nn` cited), `scripts/doc-links.mjs` (the links, paths, tasks, scripts and sections the docs name) and `scripts/ci-image-tag.sh --check`; every run, CI's repo-rules step | none |
 | `gitleaks` | CI's history scan, then the uncommitted changes and new files; every run ([D-274]) | none |
+| `osv` | osv-scanner over every lockfile, CI's osv-scan step, when a lockfile or `osv-scanner.toml` changed | none |
 | `lint` | the type-aware ESLint config on the changed files (`lint:all` the whole project) | none |
 | `check` | `pnpm check` (svelte-check) | none |
 | `check:e2e` | `tsc` over `e2e/`, which Playwright runs with its types stripped | none |
@@ -26,12 +26,11 @@ on the machine:
 | `vitest` | `vitest run --changed` (server + client projects); the whole suite when a config or `frontend/messages/` changes | none |
 | `build-backend`, `build-app` | `backend/shoppinglist-no-ui` for the integration project, `backend/shoppinglist` (real SPA) for the server-backed harnesses | none |
 | `integration` | the vitest `integration` project: two Dexie clients against the real binary | 8099 |
-| `e2e:functional` | the functional browser suite, `e2e/tests/` | 8097 |
+| `e2e:functional` | the functional browser suite, `e2e/tests/` | 8097 (+8089 invite-only) |
 | `e2e:arch` | the dead-controls gate, `e2e/arch/` ([D-124]) | 8096 |
 | `e2e:oidc` | the OIDC journeys against Dex, `e2e/oidc/` ([D-154]) | 8095 (+8094 OIDC-only, Dex 5557) |
-| `e2e:tiles` | the tile audit on the Vite dev server, `e2e/tiles/` ([D-166]) | 8093 |
+| `e2e:tiles` | the tile audit and the state audit on the Vite dev server, in Chromium and Firefox, `e2e/tiles/` ([D-166], [D-228], [D-301]) | 8093 |
 | `e2e:demo` | the demo binary (`task build-demo`) and its harness, `e2e/demo/` ([D-234]) | 8088 |
-
 
 Passkey ceremonies have a Go-side layer too: `testutil.Authenticator` is a
 software passkey (one ES256 key, a "none" attestation, real signatures) that
@@ -47,20 +46,20 @@ breaking the code.
 CI is six Woodpecker workflows ([D-66]), every check in one image, the
 devcontainer's `toolchain` stage ([D-203]), calling the gate's tasks:
 `ci-image.yaml` builds that image on the agent when the agent lacks it
-([D-203]); `frontend.yaml` runs the repo's rules (`task repo-rules`: decision index,
-doc links, settings, CI image tag), then format, svelte-check, the e2e
-harnesses' tsc and the whole lint (`task format check check:e2e lint:all`),
-then the server + client vitest projects with coverage; `go.yaml` runs gofmt, vet,
-staticcheck, gosec and gitleaks, then the Go suite; `e2e.yaml` builds the
-binary, checks `docs/THIRD_PARTY_LICENSES.md`, and runs the integration
-project and every browser harness; `security.yaml` runs govulncheck,
-and osv-scanner on a weekly cron and a dependency change;
-`release.yaml` publishes a tag after that tag's own `e2e` run passed.
+([D-203]); `frontend.yaml` runs `task repo-rules`, then `task format check
+check:e2e lint:all`, then the server + client vitest projects with coverage;
+`go.yaml` runs `task gofmt go-lint` and `task gitleaks`, then the Go suite;
+`e2e.yaml` builds the binary and holds the boot path to its budget
+(`scripts/bundle-budget.mjs`), checks `docs/THIRD_PARTY_LICENSES.md`, runs the
+integration project and every browser harness, then `task coverage:go` over
+the Go suite and what the servers reached; `security.yaml` runs govulncheck
+and `task osv` on a weekly cron and a dependency change; `release.yaml`
+publishes a tag after that tag's own `e2e` run passed.
 
-## Sync behaviour suite: outcomes that must survive an engine swap (2026-09, [D-174])
+## Sync behaviour suite
 
-`frontend/src/integration/` holds two layers against the real binary, split by what they are
-allowed to know:
+The outcomes that must survive an engine swap ([D-174]). `frontend/src/integration/` holds two
+layers against the real binary, split by what they are allowed to know:
 
 - **`engine/`**: the engine suite and the audit repros. They drive `outbox`, `push`,
   `digest` and `snapshot` directly and assert on engine state. The unit tests in `src/lib/sync/`
@@ -68,10 +67,11 @@ allowed to know:
 - **`behaviour/`**: outcomes only. Simulated **devices** act through the app's own actions (the
   add box's `planAdd`, `#lib/actions/*`) and are judged by what each person sees and was told,
   compared with the server's rows through one shared projection. `world.ts` is the *only* file
-  there that knows how sync works (its `sync()` and the storage `view()` reads); lint refuses
-  a spec there that imports `#lib/sync`, `#lib/db`, `#lib/pb`, `#lib/actions`, the harness or the
-  test kit, statically, dynamically or by a relative path, or that calls `vi.mock` ([D-306]). A new
-  engine rewrites `world.ts`, and every spec must pass unchanged.
+  there that knows how sync works (its `sync()` and the storage `view()` reads); lint
+  (`frontend/eslint.shared.config.js`) refuses a spec there that imports `#lib/sync`, `#lib/db`,
+  `#lib/pb`, `#lib/actions`, the harness or the test kit, statically, dynamically or by a relative
+  path, or that calls `vi.mock` ([D-306]). A new engine rewrites `world.ts`, and every spec must
+  pass unchanged.
 
 Specs: `propagation` (a change reaches everyone), `conflicts` (§8.1–§8.4: disjoint fields merge,
 first-committed-wins with a notice to the loser, identical intent silent, edit-vs-remove, duplicate
@@ -82,11 +82,11 @@ errors, failing reads, a whole trip offline, an expired session) and `fuzz` (bel
 **The network is per device.** Every request carries its bearer token, and the world's fetch
 wrapper keys on it to take one device offline, inject a fault (`unreachable`, `server-error`,
 `lost-response`, where the server acts and the answer never arrives) or give it its own client address via
-`X-Forwarded-For`, which the integration server now trusts (`SHOPPINGLIST_TRUSTED_PROXY_HEADER`):
+`X-Forwarded-For`, which the integration server trusts (`SHOPPINGLIST_TRUSTED_PROXY_HEADER`):
 every PocketBase and §10 limit is per IP, and a stress run from one address measured the rate
 limiter ([D-77]: adapt the harness, never the limit). Two traps it met: PocketBase tokens are
 **deterministic JWTs**, so two devices of one account opened in the same second got the same token
-and the per-token network merged them (each device now impersonates with its own lifetime); and
+and the per-token network merged them (each device impersonates with its own lifetime); and
 the engine emits a `denied/not_member` for a departed member's queue that the app deliberately
 does not show (`state/sync-notices.ts`, [D-138]), so the world reports what the app *shows*.
 
@@ -106,12 +106,12 @@ to a removal. Defaults: 8 seeds ×
 60 steps (~30 s). `STRESS_SEEDS=100,101 STRESS_STEPS=200` for longer runs; `STRESS_TRACE=<name>`
 logs the server's and every device's rows for that name after each step. 60 seeds × 200 steps
 found two gaps (seeds 112 and 136): a check-off dropped by a convergent delete ([D-175]) and a
-restore lifting a tombstone beside a re-added twin ([D-176]). Both are fixed and are now ordinary
+restore lifting a tombstone beside a re-added twin ([D-176]). Both are fixed and are ordinary
 scenarios in `conflicts.test.ts`; the gaps were pinned with `test.fails` while open, which turns
 red the moment a fix lands. That is the pattern to reuse for the next one. After the fixes, 360 seeds × 200 steps
-pass. **Run at most ~100 seeds per invocation:** every seed opens three devices, each a fresh module
-graph with its own fake IndexedDB, and one vitest worker accumulating them ran out of heap around seed
-140 (the run then reports fewer tests than seeds, with an unhandled "Worker exited unexpectedly",
+pass. **Run at most 50 seeds per invocation at 300 steps, ~100 at 200:** every seed opens four
+devices, each a fresh module graph with its own fake IndexedDB, and one vitest worker accumulating
+them ran out of heap around seed 140 at 200 steps (the run then reports fewer tests than seeds, with an unhandled "Worker exited unexpectedly",
 not a sync failure). Batch longer runs. `[sync] reconcile failed to converge` lines during a run with
 injected `lost-response` faults were the engine's own tripwire reporting a create that landed while
 its answer was lost (snapshot.ts `verifyConverged`); the next cycle settled it. Since the digest is

@@ -4,9 +4,9 @@
 # through Vite's /api proxy (frontend/vite.config.ts). That one origin is what
 # makes passkeys work here: open http://localhost:5173, not 127.0.0.1.
 #
-# --oidc also starts Dex (tools/dex/dev.yaml, [D-154]) on 127.0.0.1:5556 and
-# turns the OIDC login on against it: anna@example.com / bob@example.com,
-# password "password". --oidc-only also turns passkeys off ([D-76]).
+# --oidc also starts Dex (tools/dex/dev.yaml, which has its users, [D-154])
+# and turns the OIDC login on against it; --oidc-only also turns passkeys off
+# ([D-76]).
 #
 # concurrently runs the servers and stops them all on Ctrl-C, a TERM, or when
 # one exits; setpriv's parent-death signal stops them when it is SIGKILLed

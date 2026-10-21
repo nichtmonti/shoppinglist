@@ -69,10 +69,12 @@ cd frontend && pnpm test:client # vitest watch for component tests
 ```
 
 The gate is [go-task](https://taskfile.dev) (`Taskfile.yml`; `task --list`
-shows every task) and skips what passed and has not changed since, so a rerun
-repeats only what failed. Its log is `logs/latest.log`. The layers, ports and
-harnesses are in [`AGENTS.md`](AGENTS.md#run-the-tests-inside-the-devcontainer) and
-[`docs/internals/impl-notes.md`](docs/internals/impl-notes.md).
+shows the tasks to run) and skips what passed and has not changed since, so a
+rerun repeats only what failed. Its log is `logs/latest.log`. The layers and
+their ports are in
+[`docs/internals/impl-notes.md`](docs/internals/impl-notes.md#test-layers),
+and how to run them in
+[`AGENTS.md`](AGENTS.md#run-the-tests-inside-the-devcontainer).
 
 Every `git push` first scans the history for secrets with gitleaks (a hook in
 `.githooks/`, which the devcontainer enables). From the host it runs in the

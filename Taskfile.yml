@@ -1,18 +1,19 @@
 # The commit gate and the browser harnesses, as go-task tasks (tools/task,
-# [D-177]). Run them through scripts/gate.sh, which takes the same arguments
-# (`scripts/gate.sh e2e:arch -- --last-failed`) and adds what go-task leaves
-# out; `task --list` shows what is here.
+# [D-177]); docs/internals/impl-notes.md says what each runs. Run them through
+# scripts/gate.sh, which takes the same arguments (`scripts/gate.sh e2e:arch
+# -- --last-failed`) and adds what go-task leaves out. `task --list` shows the
+# tasks to run: gate, gate:full and e2e:lanes have no desc, since the default,
+# `full` and `e2e` run them under the machine lock.
 #
 # What runs is decided by the tools, not by path rules here: a task whose
-# `sources` are unchanged since it last PASSED is skipped (a docs edit runs
-# only the repo-rule checks beside gitleaks, gofmt and prettier, which have
-# none; a failed layer reruns until it passes), `vitest --changed` and the
-# changed-file lint scope to the diff, and Go's test cache replays unchanged
-# packages. The checksums live in .task/, per checkout.
+# `sources` are unchanged since it last PASSED is skipped (one without
+# `sources` runs every time, and a failed layer reruns until it passes),
+# `vitest --changed` and the changed-file lint scope to the diff, and Go's
+# test cache replays unchanged packages. The checksums live in .task/, per
+# checkout.
 #
-# Two layers at a time (.taskrc.yml): lint beside the rest, as before, inside
-# the box's 8 GB. One gate or harness run at a time on the machine
-# (scripts/lib/lock.sh).
+# Two layers at a time (.taskrc.yml), inside the box's 8 GB. One gate or
+# harness run at a time on the machine (scripts/lib/lock.sh).
 version: '3'
 
 output: prefixed
@@ -130,9 +131,10 @@ tasks:
       - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go --no-ignore --experimental-exclude=.gomod
 
   repo-rules:
-    desc: The repo's own rules, as CI checks them (decision index, doc links, CI image tag)
+    desc: The repo's own rules, as CI checks them (decision index, doc links and names, CI image tag)
     # About four seconds, every run, no sources, as gitleaks: doc-links reads
-    # every tracked file, so no list here names its inputs. Without them here
+    # every tracked file (the task list through go-task), so no list here
+    # names its inputs. Without them here
     # a docs-only commit passed the gate and failed CI's frontend and ci-image
     # workflows.
     cmds:
@@ -466,7 +468,7 @@ tasks:
       - 'cd e2e && {{.ROOT_DIR}}/{{.LOCK}} e2e:oidc npx playwright test -c oidc/oidc.config.ts {{.CLI_ARGS}}'
 
   e2e:tiles:
-    desc: The tile audit on the design gallery, no backend (e2e/tiles, 8093, [D-166])
+    desc: The tile and state audits on the design gallery, no backend (e2e/tiles, 8093, [D-166])
     deps: [deps]
     cmds:
       - defer: *failed

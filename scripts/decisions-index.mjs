@@ -69,17 +69,14 @@ if (process.argv.includes('--check')) {
 		process.exit(1);
 	}
 	// A deleted entry's citations move to what replaced it; one left behind
-	// points at nothing. CHANGELOG cites them too.
+	// points at nothing. CHANGELOG cites them too, and code that shows a
+	// decision's number cites it without brackets.
 	const have = new Set(rows.map((r) => r.label));
 	// From the top of the tree, wherever it is run from.
-	const cited = execFileSync(
-		'git',
-		['grep', '--full-name', '-noE', String.raw`\[D-[0-9]+\]`, ':/'],
-		{
-			encoding: 'utf8'
-		}
-	);
-	const missing = cited.split('\n').filter((l) => l && !have.has(/\[(D-\d+)\]$/.exec(l)[1]));
+	const cited = execFileSync('git', ['grep', '--full-name', '-InowE', 'D-[0-9]+', ':/'], {
+		encoding: 'utf8'
+	});
+	const missing = cited.split('\n').filter((l) => l && !have.has(/(D-\d+)$/.exec(l)[1]));
 	if (missing.length) {
 		console.error(
 			`decisions-index: these cite an entry the log does not have:\n${missing.join('\n')}`

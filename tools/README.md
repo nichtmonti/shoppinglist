@@ -9,7 +9,7 @@ Ten programs the gate, the tests, CI and the dev loop depend on, each declared i
 | `gosec/` | [gosec](https://github.com/securego/gosec) | `go-lint` in the gate, `.woodpecker/go.yaml` |
 | `gitleaks/` | [gitleaks](https://github.com/gitleaks/gitleaks), secrets in the history | the gate, the pre-push hook, `.woodpecker/go.yaml` ([D-203], [D-274]) |
 | `govulncheck/` | [govulncheck](https://go.dev/blog/vuln) | `.woodpecker/security.yaml` |
-| `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `.woodpecker/security.yaml` |
+| `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `osv` in the gate, `.woodpecker/security.yaml` |
 | `air/` | [air](https://github.com/air-verse/air) | `scripts/dev.sh` ([D-71]) |
 | `task/` | [go-task](https://taskfile.dev), the runner behind `Taskfile.yml` | `scripts/gate.sh` and CI ([D-177]) |
 | `dex/` | [Dex](https://dexidp.io), an OpenID Connect provider | `scripts/dev.sh --oidc`, the OIDC tests (`backend/internal/dextest`, `e2e/oidc`) and `shots.sh docs` ([D-154]) |
@@ -45,7 +45,7 @@ A `go.mod` is a manifest Renovate's stock `gomod` manager updates, so no
 version string lives in a command, a Dockerfile or a CI block. Not
 `backend/go.mod`, where a linter's requirements would move the app's own
 dependencies (the SQLite driver among them) past the PocketBase approval gate;
-not one shared `tools/go.mod`, where minimal version selection picks one
+not one `go.mod` shared by every tool, where minimal version selection picks one
 dependency set for every tool and `osv-scanner` stopped compiling. [D-75] in
 [`decisions.md`](../docs/internals/decisions.md) has the numbers.
 

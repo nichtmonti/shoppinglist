@@ -22,7 +22,8 @@
 //             hashes (hashin), the one Python tool ([D-203])
 //   custom    the versions that live in shell commands and ARGs, which no
 //             manager can see: the devcontainer's pnpm, Playwright and
-//             NODE_VERSION pins, and GOTOOLCHAIN / EXPECT_GO.
+//             NODE_VERSION pins, GOTOOLCHAIN / EXPECT_GO, and the
+//             devcontainer CLI scripts/agent.sh runs.
 //
 // The CI image ([D-203]) is the devcontainer Dockerfile's toolchain stage,
 // tagged by its content: an update to that Dockerfile rewrites the tag in
@@ -137,6 +138,16 @@
 			managerFilePatterns: ['/^\\.devcontainer\\/Dockerfile$/'],
 			matchStrings: ['ARG PLAYWRIGHT_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
 			depNameTemplate: '@playwright/test',
+			datasourceTemplate: 'npm'
+		},
+		{
+			// The devcontainer CLI scripts/agent.sh runs from the host through
+			// npx, which has no manifest to pin it in.
+			customType: 'regex',
+			description: 'devcontainer CLI in scripts/agent.sh',
+			managerFilePatterns: ['/^scripts\\/agent\\.sh$/'],
+			matchStrings: ['@devcontainers/cli@(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
+			depNameTemplate: '@devcontainers/cli',
 			datasourceTemplate: 'npm'
 		}
 	],
