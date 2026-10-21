@@ -44,7 +44,11 @@
 		// The Dependency Dashboard issue is the review surface for the
 		// approval-gated updates below (PocketBase). Without it those updates
 		// would be invisible rather than deferred.
-		':dependencyDashboard'
+		':dependencyDashboard',
+		// An npm release is offered only once it is three days old, time for
+		// the registry and scanners to pull a hijacked one (config:best-practices
+		// has it, config:recommended does not). Security fixes skip the wait.
+		'security:minimumReleaseAgeNpm'
 	],
 
 	timezone: 'Europe/Berlin',
