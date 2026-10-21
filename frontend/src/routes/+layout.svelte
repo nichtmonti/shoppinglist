@@ -59,6 +59,12 @@
 		});
 	}
 
+	/** Reports an error the page shows in place of what failed, and returns its line. */
+	function reportedDetail(error: unknown): string {
+		reportRenderError(error);
+		return describeError(error).message;
+	}
+
 	let booted = $state(false);
 	// Nothing renders before `setLocale()` has applied, so the first frame is
 	// not in the base locale for a moment. Separate from `booted`, which also
@@ -201,6 +207,9 @@
 	{:else if booted}
 		{#await import('#lib/components/auth/AuthScreen.svelte') then { default: AuthScreen }}
 			<AuthScreen />
+		{:catch error}
+			<!-- Without the sign-in screen, a blank page: say it, and offer the reload. -->
+			<ErrorView detail={reportedDetail(error)} />
 		{/await}
 	{/if}
 </div>

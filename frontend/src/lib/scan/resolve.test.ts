@@ -56,8 +56,7 @@ describe('resolveScannedProduct', () => {
 		});
 
 		expect(transport).toHaveBeenCalledWith(BARCODE_ENDPOINT('3017620422003'));
-		expect(result?.name).toBe('Nutella');
-		expect(result?.fromCache).toBe(false);
+		expect(result).toMatchObject({ name: 'Nutella', fromCache: false });
 
 		const cached = await db.scanned_products.get('3017620422003');
 		expect(cached).toMatchObject({ barcode: '3017620422003', name: 'Nutella' });
