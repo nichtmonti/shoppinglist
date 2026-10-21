@@ -19,6 +19,10 @@ import (
 
 var update = flag.Bool("update", false, "rewrite the rendered blocks in the docs")
 
+// section is a bare §n, which the docs write [§n] so that it links
+// (scripts/decisions-index.mjs); code comments keep it bare.
+var section = regexp.MustCompile(`(^|[^\[])§(\d+(?:\.\d+)*)`)
+
 // Render holds every block named name in the repository file path to what
 // render returns for it. A block is
 //
@@ -26,8 +30,9 @@ var update = flag.Bool("update", false, "rewrite the rendered blocks in the docs
 //	…
 //	<!-- name end -->
 //
-// and render gets the words after the colon. A stale block fails the test, or
-// with -update is rewritten; a file without one fails it either way.
+// and render gets the words after the colon; a §n in what it returns is
+// written [§n], as the docs cite it. A stale block fails the test, or with
+// -update is rewritten; a file without one fails it either way.
 func Render(t *testing.T, path, name string, render func(args []string) string) {
 	t.Helper()
 	root, pkg := repo(t)
@@ -49,7 +54,7 @@ func Render(t *testing.T, path, name string, render func(args []string) string) 
 			args = strings.Fields(string(raw[b[2]:b[3]]))
 		}
 		out.Write(raw[last:b[4]])
-		out.WriteString(render(args))
+		out.WriteString(section.ReplaceAllString(render(args), "${1}[§${2}]"))
 		last = b[5]
 	}
 	out.Write(raw[last:])

@@ -19,55 +19,12 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
+import { anchors, prose, sections as specSections } from './lib/markdown.mjs';
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), '..');
 const files = execFileSync('git', ['ls-files', '*.md'], { cwd: root, encoding: 'utf8' })
 	.split('\n')
 	.filter((f) => f && !f.startsWith('docs/THIRD_PARTY_LICENSES'));
-
-// Fenced blocks and inline code hold examples, not links.
-const prose = (text) =>
-	text.replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '').replace(/`[^`\n]*`/g, '``');
-
-const slug = (heading) => {
-	const text = heading
-		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-		.replace(/<[^>]+>/g, '')
-		.trim();
-	let out = '';
-	let dash = false;
-	for (const ch of text) {
-		if (/[\p{L}\p{N}_]/u.test(ch)) {
-			if (dash && out) out += '-';
-			dash = false;
-			out += ch.toLowerCase();
-		} else dash = true;
-	}
-	return out;
-};
-
-const anchorCache = new Map();
-// Headings are read from the raw text, outside fences, so a code span in a
-// heading still counts.
-const anchors = (file) => {
-	if (!anchorCache.has(file)) {
-		const seen = new Map();
-		const set = new Set();
-		let fence = false;
-		for (const line of readFileSync(file, 'utf8').split('\n')) {
-			if (/^(```|~~~)/.test(line)) fence = !fence;
-			if (fence) continue;
-			const m = /^#{1,6}\s+(.*?)\s*#*$/.exec(line);
-			if (!m) continue;
-			const base = slug(m[1]);
-			const n = seen.get(base) ?? 0;
-			seen.set(base, n + 1);
-			set.add(n ? `${base}-${n}` : base);
-		}
-		anchorCache.set(file, set);
-	}
-	return anchorCache.get(file);
-};
 
 let dead = 0;
 for (const file of files) {
@@ -210,13 +167,7 @@ if (missing.length) {
 
 // A §n or §n.n citation, in the docs or the code, names a numbered heading
 // of the spec.
-const sections = new Set(
-	[
-		...readFileSync(resolve(root, 'docs/internals/design.md'), 'utf8').matchAll(
-			/^#{1,6}\s+(\d+(?:\.\d+)*)/gm
-		)
-	].map((m) => m[1])
-);
+const sections = specSections(resolve(root, 'docs/internals/design.md'));
 const cited = execFileSync('git', ['grep', '-IonE', String.raw`§[0-9]+(\.[0-9]+)*`], {
 	cwd: root,
 	encoding: 'utf8'
