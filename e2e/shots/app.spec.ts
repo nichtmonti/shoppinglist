@@ -413,8 +413,15 @@ for (const locale of LOCALES) {
 				if (want(4, 'scan')) await shoot(page, page, at(4, 'scan'));
 				await aimCamera(page);
 				if (!scanned) {
-					await expect(scanner.locator('img')).toBeVisible({ timeout: 30_000 });
-					if (want(5, 'found')) await shoot(page, page, at(5, 'found'));
+					// Only the found shot needs the photo on the card: the lookup waits
+					// a few seconds for it and then answers without it ([D-21]).
+					if (want(5, 'found')) {
+						await expect(
+							scanner.locator('img'),
+							'the product photo: is the Open Food Facts image host slow?'
+						).toBeVisible({ timeout: 30_000 });
+						await shoot(page, page, at(5, 'found'));
+					}
 					await expect(rows).toHaveCount(before + 1);
 					scanned = true;
 				}
