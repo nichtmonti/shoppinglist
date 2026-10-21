@@ -34,10 +34,10 @@ open **http://localhost:5173**, never `127.0.0.1`.
 - `src/lib/components/`: one directory per surface, most with their
   `*.svelte.test.ts` alongside.
 - `src/integration/`: suites against the real Go binary, a separate vitest
-  project that never runs in the unit sweep. Two layers, kept apart on purpose:
-  `behaviour/` states sync *outcomes* through simulated devices (`world.ts` is
-  its only link to the engine), so it must survive a different sync engine;
-  `engine/` drives the current engine's modules directly.
+  project that never runs in the unit sweep: `behaviour/` states sync
+  *outcomes* and must survive a different sync engine, `engine/` drives the
+  current engine's modules directly
+  ([impl-notes](../docs/internals/impl-notes.md#sync-behaviour-suite)).
 - `messages/` + `project.inlang/`: Paraglide catalogues (§12.2: de + en).
 
 Scaffolded originally with:

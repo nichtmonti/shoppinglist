@@ -20,8 +20,9 @@ comment, check whether it is already said elsewhere.
 **Links are checked the way Codeberg renders them** (`node
 scripts/doc-links.mjs`, in CI): a heading anchor turns every run of
 punctuation into one dash, so keep a linked heading free of punctuation. It
-also checks a `docs/…md#anchor` cited from code, config or a log message, and
-every `<img src>`.
+also checks every `<img src>`, a `docs/…md#anchor` cited from code, config or
+a log message, a repo path, task or `pnpm` script a doc names in backticks,
+and every `§` cited (its header lists the rules).
 
 **A new setting is declared once, in `backend/internal/settings/settings.go`**
 ([D-337]): a field with its name and default as tags and its description as
@@ -68,19 +69,11 @@ included.
 ### The gate
 
 **`scripts/gate.sh` is the commit gate, and it runs no browser
-([D-177]).** It runs `task` (`Taskfile.yml`, go-task from `tools/task`,
-[D-177]) and takes the same arguments. A layer whose inputs have not changed
-since it last passed is skipped, so a docs edit runs only the repo's rule
-checks (decision index, doc links, CI image tag) beside the three
-that run every time (gitleaks, gofmt, prettier with its cache), and a rerun
-repeats only what failed; the rest scope themselves: the type-aware lint on
-the changed files, `vitest --changed`, Go's test cache, prettier's cache.
-Format, gitleaks, lint, check (and `tsc` over `e2e/`, whose types Playwright
-only strips), go vet, staticcheck and gosec as CI runs them, osv-scanner
-when a lockfile changed, the Go suite, vitest and the `integration` project,
-two at a time. A few minutes at most.
-A `pre-push` hook (`.githooks/`) runs gitleaks over the history again before
-every push, in the devcontainer when pushed from the host ([D-274]).
+([D-177]).** It runs `task` (`Taskfile.yml`, go-task from `tools/task`) and
+takes the same arguments. A layer whose inputs have not changed since it last
+passed is skipped and the rest scope themselves to the diff, so a rerun
+repeats only what failed; a few minutes at most. Its layers, what each runs
+and its port are in [impl-notes](docs/internals/impl-notes.md#test-layers).
 
 - **Browser specs run when you name them:** `scripts/gate.sh e2e:functional
   -- tests/conflicts.spec.ts`, or `e2e:arch` (`tiles`, `oidc`, `demo`) for a
@@ -190,12 +183,12 @@ prints both. The functional, OIDC and demo
 suites also keep the failed test's `trace.zip` (`npx playwright show-trace`).
 
 **The integration project has two layers, and only one may know the
-engine.** `frontend/src/integration/behaviour/` states sync outcomes through
-simulated devices with `world.ts` as its single adapter; lint refuses a spec
-there that imports `#lib/sync`, `#lib/db`, `#lib/pb`, `#lib/actions` or the
-harness, or mocks a module. Engine-internal assertions go in
-`integration/engine/` or `src/lib/sync/`. `fuzz.test.ts` takes
-`STRESS_SEEDS`, `STRESS_STEPS` and `STRESS_TRACE` (impl-notes).
+engine.** A spec in `frontend/src/integration/behaviour/` reaches the engine
+through `world.ts` alone, and lint refuses one that reaches past it
+([impl-notes](docs/internals/impl-notes.md#sync-behaviour-suite) says how).
+Engine-internal assertions go in `integration/engine/` or `src/lib/sync/`.
+`fuzz.test.ts` takes `STRESS_SEEDS`, `STRESS_STEPS` and `STRESS_TRACE`
+(impl-notes).
 
 **Worktrees are first-class ([D-177]).** Parallel agents each work in a git
 worktree under `.claude/worktrees/<name>`, inside the bind mount; the gate
@@ -259,12 +252,11 @@ binary links `internal/testutil`/`dextest`/`sectest` or a tool pinned under
 `tools/`; a test helper imported by production code is how it
 happens.
 
-**A dependency change regenerates `docs/THIRD_PARTY_LICENSES.md` and
-`docs/sbom.cdx.json`**: `task licenses` (`task licenses -- --check`
-compares). CI fails a stale file or a licence off the allowlist;
-the gate does not check it.
+**The gate does not check the licence list:** after a dependency change, take
+[CONTRIBUTING's step](CONTRIBUTING.md#before-you-send-a-change), or CI fails
+on a stale file or a licence off the allowlist.
 
-**Ports.** Each harness has one port (above); the shots harness takes 8091
+**Ports.** Each harness has its own (above); the shots harness takes 8091
 (`app`), 8092 (`gallery`) and 8087, 8086 and Dex on 5558 (`docs`); 8099 is the
 integration server. `scripts/dev.sh` holds 8090 (origin `:5173`, Dex on 5556
 with `--oidc`). No harness reuses a running server, so Playwright refuses a
