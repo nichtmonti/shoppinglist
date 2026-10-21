@@ -263,6 +263,14 @@
 			// already has one.
 			matchManagers: ['woodpecker'],
 			pinDigests: false
+		},
+		{
+			// The exception: the release step's image holds both publish tokens,
+			// and a re-pushed tag would hand them over; an exact-version tool
+			// image gains nothing from floating.
+			matchManagers: ['woodpecker'],
+			matchPackageNames: ['goreleaser/goreleaser'],
+			pinDigests: true
 		}
 	]
 }
