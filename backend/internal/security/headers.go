@@ -95,9 +95,10 @@ func isDashboardPath(path string) bool {
 }
 
 // loadCSP extracts the policy SvelteKit baked into index.html and appends
-// frame-ancestors. Any failure (a no_ui build, no meta tag) falls back to the
-// baseline, so the app never boots into a policy that would break it. It reads
-// an fs.FS because the SPA is embedded in the binary ([D-64]).
+// frame-ancestors. Without an index.html (the no_ui build) it is the baseline
+// alone. An index.html without the policy is a broken build, and the binary
+// refuses to start rather than serve the app without its script policy. It
+// reads an fs.FS because the SPA is embedded in the binary ([D-64]).
 func loadCSP(publicFS fs.FS) string {
 	if publicFS == nil {
 		return baselineCSP
@@ -107,12 +108,12 @@ func loadCSP(publicFS fs.FS) string {
 		return baselineCSP
 	}
 	m := metaCSPPattern.FindSubmatch(html)
-	if m == nil {
-		return baselineCSP
+	policy := ""
+	if m != nil {
+		policy = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(string(m[1])), ";"))
 	}
-	policy := strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(string(m[1])), ";"))
 	if policy == "" {
-		return baselineCSP
+		panic("the embedded index.html has no Content-Security-Policy meta tag (vite.config.ts kit.csp): the SPA build is broken")
 	}
 	return policy + "; " + baselineCSP
 }

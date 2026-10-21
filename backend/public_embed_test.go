@@ -29,9 +29,8 @@ func TestPublicFS_RootedAtSPA(t *testing.T) {
 	}
 
 	// SvelteKit's adapter-static shell starts with <!doctype html>. Only the
-	// shape is asserted, deliberately NOT the CSP meta tag: loadCSP falls back
-	// to its baseline by design when the vite.config.ts csp block is absent,
-	// and that fallback is already pinned in internal/security.
+	// shape is asserted: security.loadCSP refuses an index.html without its
+	// CSP meta tag, which internal/security pins.
 	head := strings.ToLower(string(raw))
 	if len(head) > 64 {
 		head = head[:64]

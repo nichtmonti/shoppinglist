@@ -174,7 +174,8 @@ func serveMux(t *testing.T, app core.App, env *serveEnv, before func(*router.Rou
 	t.Helper()
 	// A shell to serve: the no_ui build embeds none ([D-64]).
 	saved := publicFS
-	publicFS = fstest.MapFS{router.IndexPage: {Data: []byte("<html><head></head><body></body></html>")}}
+	publicFS = fstest.MapFS{router.IndexPage: {Data: []byte(`<html><head>` +
+		`<meta http-equiv="content-security-policy" content="default-src 'self'"></head><body></body></html>`)}}
 	t.Cleanup(func() { publicFS = saved })
 	r, err := apis.NewRouter(app)
 	if err != nil {

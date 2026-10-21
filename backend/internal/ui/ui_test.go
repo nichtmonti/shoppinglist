@@ -90,10 +90,8 @@ func TestIndexStampsTheVersion(t *testing.T) {
 	}
 }
 
-// Every "nothing to do or something is off" case serves the embedded file
-// untouched: a shell missing a setting is a nuisance, a corrupted one does
-// not render at all.
-func TestIndexDeclinesRatherThanCorrupts(t *testing.T) {
+// With nothing to stamp, or no build, the embedded file is served untouched.
+func TestIndexDeclinesWithNothingToStamp(t *testing.T) {
 	de := Shell{SourceURL: "https://git.example.org/me/shoppinglist"}
 	for _, tc := range []struct {
 		name  string
@@ -103,8 +101,6 @@ func TestIndexDeclinesRatherThanCorrupts(t *testing.T) {
 		{name: "nothing configured", fsys: buildFS(), shell: Shell{}},
 		{name: "nil FS (a no_ui build)", fsys: nil, shell: de},
 		{name: "FS without an index.html", fsys: fstest.MapFS{}, shell: de},
-		{name: "markup with no head", shell: de,
-			fsys: fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<html><body>hi</body></html>")}}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if out := Index(tc.fsys, tc.shell); out != nil {
@@ -112,6 +108,18 @@ func TestIndexDeclinesRatherThanCorrupts(t *testing.T) {
 			}
 		})
 	}
+}
+
+// A build whose index.html has no <head> stops the start: served as it is,
+// it would silently lack the source link, the scanner switch and the caps.
+func TestIndexRefusesAShellWithoutHead(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Error("Index served a shell it could not stamp")
+		}
+	}()
+	Index(fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<html><body>hi</body></html>")}},
+		Shell{SourceURL: "https://git.example.org/me/shoppinglist"})
 }
 
 // Each field is stamped on its own: an operator who sets only the cap gets

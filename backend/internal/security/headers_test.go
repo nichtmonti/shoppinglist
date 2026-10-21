@@ -93,9 +93,8 @@ func TestRegister_CSPFallsBackWithoutBuild(t *testing.T) {
 	cases := map[string]fs.FS{
 		// The no_ui build's empty embed.FS, and the nil an unwired caller would
 		// pass — both must degrade to the baseline rather than panic.
-		"nil FS":            nil,
-		"empty FS":          fstest.MapFS{},
-		"index without CSP": indexFS("<!doctype html><html><head></head><body></body></html>"),
+		"nil FS":   nil,
+		"empty FS": fstest.MapFS{},
 	}
 
 	for name, fsys := range cases {
@@ -145,6 +144,24 @@ func TestRegister_CSPMirrorsIndexMetaTag(t *testing.T) {
 			}
 		}
 	})
+}
+
+// A build whose index.html lost its policy, or whose tag the pattern no
+// longer reads, stops the start instead of serving the app without one.
+func TestLoadCSP_RefusesAnIndexWithoutItsPolicy(t *testing.T) {
+	for name, html := range map[string]string{
+		"no tag":       "<!doctype html><html><head></head><body></body></html>",
+		"empty policy": `<meta http-equiv="content-security-policy" content=" ;">`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			defer func() {
+				if recover() == nil {
+					t.Error("loadCSP served an index.html without its policy")
+				}
+			}()
+			loadCSP(indexFS(html))
+		})
+	}
 }
 
 func TestLoadCSP_TrimsTrailingSemicolon(t *testing.T) {

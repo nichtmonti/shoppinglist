@@ -138,9 +138,11 @@ var headPattern = regexp.MustCompile(`(?i)<head[^>]*>`)
 // Index returns the shell document to serve: the embedded index.html with one
 // meta tag stamped into its <head> per configured field of `shell`.
 //
-// It returns nil (serve the embedded file untouched) whenever anything is
-// unexpected: nothing configured, no index.html, no <head>. A shell missing a
-// setting is a nuisance; a corrupted one would not render at all.
+// It returns nil (serve the embedded file untouched) when nothing is
+// configured or there is no index.html (the no_ui build). An index.html
+// without a <head> is a broken build, and the binary refuses to start rather
+// than serve a shell that silently lacks the settings (the source link, the
+// scanner switch, the caps).
 func Index(publicFS fs.FS, shell Shell) []byte {
 	if publicFS == nil || shell.Empty() {
 		return nil
@@ -151,7 +153,7 @@ func Index(publicFS fs.FS, shell Shell) []byte {
 	}
 	loc := headPattern.FindIndex(html)
 	if loc == nil {
-		return nil
+		panic("the embedded index.html has no <head> to stamp the settings into: the SPA build is broken")
 	}
 	tags := "\n\t\t" + strings.Join(shell.metas(), "\n\t\t")
 	out := make([]byte, 0, len(html)+len(tags))

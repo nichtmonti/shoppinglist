@@ -53,7 +53,8 @@ stack variables, not in a `.env` file beside the compose file, do not. Two
 `SHOPPINGLIST_BIND` (the published address, default `127.0.0.1:8090`).
 
 **A misspelt name stops the start.** The server refuses to start while a
-`SHOPPINGLIST_` variable is set that is none of the above, and names it: it
+`SHOPPINGLIST_` variable is set that is none of the above, or a
+`SQLITE_PRAGMA…` one other than `SQLITE_PRAGMAS`, and names it: it
 would otherwise do nothing, and a lockdown such as `SHOPPINGLIST_SIGNUP=closed`
 written wrong would leave the instance open. A variable set to nothing is
 ignored.
@@ -431,8 +432,9 @@ and restore that zip ([restoring](operating.md#backups)). Downgrading without
 restoring is not supported.
 
 **Renamed and removed settings** are listed in the changelog, with what to do.
-A removed setting is ignored. An old `EINKAUFSLISTE_*` name (now
-`SHOPPINGLIST_*`) stops the server, which logs the name to rename.
+One still set stops the server, which logs the name to rename or delete: a
+removed setting like a misspelt one, an old `EINKAUFSLISTE_*` name (now
+`SHOPPINGLIST_*`) too.
 
 **Never change collections or their rules in the `/_/` dashboard**
 ([why](operating.md#three-things-not-to-change)).

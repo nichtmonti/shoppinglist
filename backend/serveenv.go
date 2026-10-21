@@ -66,9 +66,13 @@ func parseServeEnv() (*serveEnv, error) {
 		return nil, err
 	}
 	// [D-336] A misspelt name would be ignored, and the lockdown it meant left off.
-	if err := envflag.Unknown("SHOPPINGLIST_", append(settings.Names(), settings.Others...),
-		"docs/deploy-reference.md#environment-variables"); err != nil {
-		return nil, err
+	// The one unprefixed setting: SQLITE_PRAGMA would leave stock WAL on the
+	// network storage it is for. A blanket SQLITE_ would catch SQLite's own.
+	for _, prefix := range []string{"SHOPPINGLIST_", "SQLITE_PRAGMA"} {
+		if err := envflag.Unknown(prefix, append(settings.Names(), settings.Others...),
+			"docs/deploy-reference.md#environment-variables"); err != nil {
+			return nil, err
+		}
 	}
 	// [D-337] Every setting, read once; a value of the wrong kind stops here,
 	// all of them named at once.
