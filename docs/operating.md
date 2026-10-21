@@ -43,8 +43,8 @@ its path on the host.
 
 `pb_data/backups/` also holds the `pb_backup_pre_upgrade_*.zip` files the
 server writes before an upgrade changes the database
-([upgrades](deploy-reference.md#upgrades)); "max backups to keep" applies only
-to the scheduled ones.
+([upgrades](deploy-reference.md#upgrades)); the dashboard's limit applies to
+the scheduled ones only.
 
 **Restoring.** With the dashboard: `/_/` → Settings → Backups → *Restore*,
 on the running server. Without it: stop the container, empty the data
@@ -63,22 +63,31 @@ With `SHOPPINGLIST_ADMIN_UI=off` that command is the only way in.
 
 ## Errors in the browser
 
-When the app fails in the browser, it shows an error page ("Something
-went wrong.") and reports the error to the server, which logs one line:
+The app reports an error in the browser to the server, which logs one line:
 
 ```
-shoppinglist: client error message="TypeError: …" route="/list/[id]" path="/list/…" status=500 version="0.5.1" account="…" agent="Mozilla/5.0 (iPhone; …)" context="" stack="…"
+shoppinglist: client error message="TypeError: …" route="/list/[id]" path="/list/…" status=500 version="X.Y.Z" account="…" agent="Mozilla/5.0 (iPhone; …)" context="" stack="…"
 ```
 
 Find them with `docker compose logs shoppinglist | grep 'client error'`.
-Nothing else is stored. `context=` is `render` for an error while drawing a
-screen; for a screen whose code failed to download (retried before the error
-page shows) it holds the download's details.
+Nothing else is stored. `context=` says what failed:
+
+- `""`: a screen, while it loaded. The app shows its error page,
+  "Something went wrong.".
+- `render`: a screen, after it loaded. The same message takes its place.
+- the download's details (`sw=…`, `pageAge=…`, `recovery=…`): a screen whose
+  code failed to download. The app says "One moment…" and loads the page
+  again, and after a few tries shows the error page.
+- `uncaught`: an error nothing caught, with nothing on screen.
+- any other word names the part of the app it happened in, such as `sync`,
+  `session storage` or `liveQuery …` (the data of one view), with no error
+  page. `sign-out wipe failed; …` is a sign-out that could not clear the
+  device's data and deleted its local database instead.
 
 ## Cron jobs
 
 Six jobs run on their own; there is nothing to configure, but several delete
-data for good. "Daily" is 03:00 UTC.
+data for good. The daily ones run at 03:00 UTC.
 
 | Job | Schedule | What it does |
 |---|---|---|
@@ -103,8 +112,8 @@ docker compose run --rm --entrypoint /shoppinglist shoppinglist dictionary-sugge
 ```
 
 ```
-"kiwi"     (5 lists)  produce: 4, snacks_sweets: 1
-"hummus"   (4 lists)  pantry: 2, dairy_eggs: 1, other: 1
+"kiwi"       (5 lists)  produce: 4, snacks_sweets: 1
+"hummus"     (4 lists)  pantry: 2, dairy_eggs: 1, other: 1
 ```
 
 It lists names seen on at least 3 lists (`--min-lists N`) and changes nothing.

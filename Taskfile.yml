@@ -267,6 +267,15 @@ tasks:
       - Dockerfile.demo
       - docker-compose.yml
       - README.md
+      # What internal/docquotes holds to the messages, the wording rules and
+      # the server's code.
+      - docs/using.md
+      - docs/deploying.md
+      - docs/operating.md
+      - docs/internals/design.md
+      - CHANGELOG.md
+      - frontend/messages/*.json
+      - frontend/src/lib/i18n/wording.json
       - exclude: backend/pb_data/**/*
       - exclude: backend/pb_public*/**/*
     cmds:

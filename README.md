@@ -27,22 +27,22 @@ with a SQLite database: the image is about 50 MB and idles at about 20 MB of
 memory.
 
 <p align="center">
-  <img src="docs/screenshots/clip.webp" width="560" alt="Two phones: Alice starts an empty list and shares it, Bob joins with the invite and appears in her share sheet; both switch to the editing view, Alice types 3 liter milk and Bob coffee, each appearing on the other phone, the milk with 3 liter as its quantity; back in the shopping view each ticks one off and the other phone follows; Bob's last tick waits in a dead spot, counted in yellow, and arrives once the signal is back">
+  <img src="docs/screenshots/clip.webp" width="560" alt="Two phones: Alice starts an empty list and shares it, Bob joins with the invite and appears in her share sheet; both switch to the editing view, Alice types 3 liter milk and Bob coffee, each appearing on the other phone, the milk with 3 liter as its quantity; back in the shopping view each checks one off and the other phone follows; Bob's last check-off waits in a dead spot, counted in yellow, and arrives once the signal is back">
   <br><sub>Two phones, one list: share it, add to it, shop it. Every change shows up on the other phone at once, or as soon as the signal is back.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/plan.png" width="440" title="In the store: big tiles, in aisle order. At home: plan the list, quantities and notes." alt="The shopping view, big tiles under coloured aisle headers, beside the editing view, rows grouped by aisle with quantities and notes">
+  <img src="docs/screenshots/plan.png" width="440" title="In the store: big tiles, in aisle order. At home: plan the list, quantities and notes." alt="The shopping view, big tiles under colored aisle headers, beside the editing view, rows grouped by aisle with quantities and notes">
   <img src="docs/screenshots/add.png" width="440" title="A few letters suggest the item and its aisle; an amount typed with it is the quantity. Or scan a barcode: the product, with its photo." alt="Typing an amount and a few letters opens suggestions, each with its aisle and the amount, beside a scanned product with its photo from Open Food Facts">
   <img src="docs/screenshots/item.png" width="440" title="Tap an item for its quantity, note and aisle. Invite your household by link or QR code." alt="An item's detail sheet with name, quantity, note and aisle, beside the share sheet with members and an invite as link or QR code">
-  <img src="docs/screenshots/lists.png" width="440" title="Several lists, shared or your own. Bought items move to the end. In German or English, light or dark." alt="The home screen with several lists, one shared, beside the end of the shopping view in German and dark mode: the last aisles, such as „Drogerie &amp; Körperpflege“, and the bought items, ticked, under „Erledigt“">
+  <img src="docs/screenshots/lists.png" width="440" title="Several lists, shared or your own. Bought items move to the end. In German or English, light or dark." alt="The home screen with several lists, one shared, beside the end of the shopping view in German and dark mode: the last aisles, such as „Drogerie &amp; Körperpflege“, and the bought items, checked off, under „Erledigt“">
   <br><sub>In the store and at home, adding by name or barcode, one item's details, sharing,
   several lists, the bought items, and the app in German and dark mode.</sub>
 </p>
 
 ## What it does
 
-- **Made for the store.** Big tiles grouped by aisle for ticking off with one
+- **Made for the store.** Big tiles grouped by aisle for checking off with one
   hand, and a separate view for planning. Each list has its own aisle order.
 - **Quick adding.** Suggestions as you type, past items one tap away, and an
   optional barcode scanner backed by [Open Food Facts](https://world.openfoodfacts.org).
@@ -54,10 +54,10 @@ memory.
 - **German and English.** The app follows the browser's language.
 - **No passwords, no emails.** An account is a passkey and a nickname, and
   only the people you share a list with see the nickname. Unless you sign in
-  with your own provider (below), which has its own login.
+  with your own provider (below), which has its own sign-in.
 - **Your own SSO, if you have one.** A family or a club that already runs an
-  OpenID Connect provider (Pocket ID, Keycloak, Authentik, …) can sign in with
-  it ([setting it up](docs/deploy-reference.md#oidc-login)).
+  OpenID Connect provider, such as Pocket ID, Keycloak or Authentik, can sign in
+  with it ([setting it up](docs/deploy-reference.md#oidc-login)).
 - **Easy to run.** One binary with the app built in, for x86 servers and ARM
   boards like the Raspberry Pi, with SQLite as its database. Run it in Docker or
   [standalone](docs/deploy-reference.md#without-docker).
@@ -69,8 +69,8 @@ memory.
 ## Moving from another app
 
 Share a list from another app to the installed app on Android, or paste it
-into **Import list**. Each line becomes an item in its aisle, found by its name
-or by the section it had before, and "1 kg" becomes its quantity. You review
+into "Import list". Each line becomes an item in its aisle, found by its name
+or by the section it had before, and “1 kg” becomes its quantity. You review
 every item before anything is added and choose a new list or one you have.
 
 This reads what Die Einkaufsliste, Mealie and Tandoor copy or share, and plain
@@ -86,8 +86,8 @@ It runs in the browser of any current phone or computer
 ([what you need](docs/using.md#what-you-need)), and it does one thing: being
 the list a household shops from. For recipes, meal plans, a pantry inventory
 or prices, look at Mealie, KitchenOwl or Grocy. It
-also leaves out roles and owners on a list, numeric quantities and units ("2 l"
-is just text), and email or password logins.
+also leaves out roles and owners on a list, numeric quantities and units (“2 l”
+is just text), and sign-in by email or password.
 
 It is used every day by its author's household. Before 1.0 a minor version
 can bring a breaking change; the [changelog](CHANGELOG.md) spells out each one.
@@ -211,7 +211,7 @@ changes the code, coding agents included.
 
 [AGPL-3.0](LICENSE): if you run a modified version as a service for others,
 offer them its source (`SHOPPINGLIST_SOURCE_URL` points the app's "Source
-code" link at yours). Bundled third-party work (OpenMoji artwork, CC BY-SA 4.0;
+code (AGPL-3.0)" link at yours). Bundled third-party work (OpenMoji artwork, CC BY-SA 4.0;
 the Readex Pro typeface, OFL 1.1; and every library) is listed in
 [`docs/THIRD_PARTY_LICENSES.md`](docs/THIRD_PARTY_LICENSES.md). Barcode results
 come from Open Food Facts (ODbL), credited in the app; so does the product

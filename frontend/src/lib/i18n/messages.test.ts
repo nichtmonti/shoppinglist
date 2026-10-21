@@ -1,7 +1,9 @@
 // [D-333] One word per thing, as one look per thing: slips a wording audit
-// found in both languages, refused here so they do not come back.
+// found in both languages, refused here so they do not come back. The rules
+// are wording.json, which internal/docquotes holds the user docs to as well.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import wording from './wording.json';
 
 type Message = string | Message[] | { [key: string]: Message };
 
@@ -17,29 +19,16 @@ function texts(message: Message): string[] {
 		.flatMap(([, value]) => texts(value));
 }
 
-const RULES: Record<string, [RegExp, string][]> = {
-	de: [
-		[/[A-Za-zÄÖÜäöüß]…/, 'a space before „…“, as German sets it'],
-		[/\banle(?:gen|gt)\b|angelegt|anzulegen/, '„erstellen“, the buttons’ word, not „anlegen“']
-	],
-	en: [
-		[/ …/, 'no space before "…", as English sets it'],
-		[/\.\.\./, '"…", not three full stops'],
-		[/’/, 'a straight apostrophe, as the rest'],
-		[/\blogins?\b/i, '"sign-in", not "login"'],
-		[/\b(?:cancelled|colour|grey|any more)\b/i, 'US spelling, as "Color" and "Gray"'],
-		[/\b(?:un)?tick(?:ed)?\b/i, '"check off" and "uncheck", not "tick"']
-	]
-};
-
 describe('the messages keep one wording', () => {
-	for (const [locale, rules] of Object.entries(RULES)) {
+	for (const [locale, rules] of Object.entries(wording)) {
 		it(`in ${locale}`, () => {
 			const slips = Object.entries(read(locale))
 				.filter(([key]) => !key.startsWith('$'))
 				.flatMap(([key, message]) =>
 					texts(message).flatMap((text) =>
-						rules.filter(([pattern]) => pattern.test(text)).map(([, why]) => `${key}: ${why}`)
+						rules
+							.filter(({ pattern }) => new RegExp(pattern).test(text))
+							.map(({ why }) => `${key}: ${why}`)
 					)
 				);
 			expect(slips).toEqual([]);
