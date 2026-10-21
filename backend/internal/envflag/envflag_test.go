@@ -80,17 +80,17 @@ func TestUnknown(t *testing.T) {
 	t.Setenv("ENVFLAGTEST_SIGNUP", "open")
 	t.Setenv("ENVFLAGTEST_EMPTY", " ")
 	known := []string{"ENVFLAGTEST_SIGNUP"}
-	err := Unknown("ENVFLAGTEST_", known, "docs/x.md")
+	err := Unknown("ENVFLAGTEST_", known, "docs/deploy-reference.md")
 	if err == nil {
 		t.Fatal("a misspelt name was accepted; its setting would silently not apply")
 	}
-	if got := err.Error(); !strings.HasPrefix(got, "ENVFLAGTEST_SIGNUPS: ") || !strings.Contains(got, "docs/x.md") ||
+	if got := err.Error(); !strings.HasPrefix(got, "ENVFLAGTEST_SIGNUPS: ") || !strings.Contains(got, "docs/deploy-reference.md") ||
 		strings.Contains(got, "EMPTY") || strings.Contains(got, "ENVFLAGTEST_SIGNUP:") {
 		t.Errorf("error %q, want ENVFLAGTEST_SIGNUPS alone named, and where the settings are", got)
 	}
 
 	t.Setenv("ENVFLAGTEST_SIGNUPS", "")
-	if err := Unknown("ENVFLAGTEST_", known, "docs/x.md"); err != nil {
+	if err := Unknown("ENVFLAGTEST_", known, "docs/deploy-reference.md"); err != nil {
 		t.Errorf("only known and empty names: %v, want nil", err)
 	}
 }

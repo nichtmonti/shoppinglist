@@ -45,7 +45,7 @@ A `go.mod` is a manifest Renovate's stock `gomod` manager updates, so no
 version string lives in a command, a Dockerfile or a CI block. Not
 `backend/go.mod`, where a linter's requirements would move the app's own
 dependencies (the SQLite driver among them) past the PocketBase approval gate;
-not one shared `tools/go.mod`, where minimal version selection picks one
+not one `go.mod` shared by every tool, where minimal version selection picks one
 dependency set for every tool and `osv-scanner` stopped compiling. [D-75] in
 [`decisions.md`](../docs/internals/decisions.md) has the numbers.
 

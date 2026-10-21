@@ -130,9 +130,10 @@ tasks:
       - osv-scanner scan -r . --config osv-scanner.toml --no-call-analysis=go --no-ignore --experimental-exclude=.gomod
 
   repo-rules:
-    desc: The repo's own rules, as CI checks them (decision index, doc links, CI image tag)
+    desc: The repo's own rules, as CI checks them (decision index, doc links and names, CI image tag)
     # About four seconds, every run, no sources, as gitleaks: doc-links reads
-    # every tracked file, so no list here names its inputs. Without them here
+    # every tracked file (the task list through go-task), so no list here
+    # names its inputs. Without them here
     # a docs-only commit passed the gate and failed CI's frontend and ci-image
     # workflows.
     cmds:
