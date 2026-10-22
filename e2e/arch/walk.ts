@@ -42,26 +42,69 @@ interface Signature {
 	effects: number;
 }
 
+/**
+ * What changes on its own timers, after whichever control caused it, and so
+ * would hand the change to a LATER control's verdict: a toast closing (7s), and
+ * the sync chip going from pending to synced (the outbox drains 500ms after a
+ * write, which can be after the next control's baseline settled). Left out of
+ * every hash; a toast appearing still counts, as an effect (installEffectSpies).
+ */
+const NOISE = '[data-sonner-toaster], .chip[role="status"]';
+
+/**
+ * Hash of the WHOLE document element, not just <body> (a theme/locale flip can
+ * change only <html>'s class/lang), less NOISE and whatever matches `skip`.
+ * Walked from the DOM rather than taken from outerHTML: svelte 5 marks an {#if}
+ * block with comment anchors and swaps `<!--[-->` for `<!--[!-->` when the
+ * block empties, so comments are skipped and text is trimmed, and only real
+ * content counts.
+ */
+async function pageHash(page: Page, skip: string | null): Promise<number> {
+	return page.evaluate(
+		({ noise, skip }) => {
+			const leaveOut = skip ? `${noise}, ${skip}` : noise;
+			const serialise = (node: Node): string => {
+				let out = '';
+				for (const child of Array.from(node.childNodes)) {
+					if (child.nodeType === Node.COMMENT_NODE) continue;
+					if (child.nodeType === Node.TEXT_NODE) {
+						out += (child.nodeValue ?? '').trim();
+						continue;
+					}
+					const el = child as HTMLElement;
+					if (el.matches?.(leaveOut)) continue;
+					out += '<' + el.tagName;
+					for (const attr of Array.from(el.attributes)) out += ' ' + attr.name + '=' + attr.value;
+					out += '>' + serialise(el) + '</' + el.tagName + '>';
+				}
+				return out;
+			};
+			const html =
+				'<HTML' +
+				Array.from(document.documentElement.attributes)
+					.map((a) => ` ${a.name}=${a.value}`)
+					.join('') +
+				'>' +
+				serialise(document.documentElement);
+			let h = 0;
+			for (let i = 0; i < html.length; i++) h = (h * 31 + html.charCodeAt(i)) | 0;
+			return h;
+		},
+		{ noise: NOISE, skip }
+	);
+}
+
 /** window.__e2eEffects is installed by installEffectSpies(). */
 async function readSignature(page: Page): Promise<Signature> {
-	return page.evaluate(() => {
-		function hash(s: string): number {
-			let h = 0;
-			for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-			return h;
-		}
-		const effects = (
-			window as unknown as { __e2eEffects?: { clipboard: number; share: number; open: number } }
+	const [url, effects] = await page.evaluate(() => {
+		const fx = (
+			window as unknown as {
+				__e2eEffects?: { clipboard: number; share: number; open: number; toasts: number };
+			}
 		).__e2eEffects;
-		const effectsTotal = effects ? effects.clipboard + effects.share + effects.open : 0;
-		// The WHOLE document element, not just <body>: a theme/locale flip can
-		// change only <html>'s class/lang, with body's own markup untouched.
-		return {
-			url: location.href,
-			domHash: hash(document.documentElement.outerHTML),
-			effects: effectsTotal
-		};
+		return [location.href, fx ? fx.clipboard + fx.share + fx.open + fx.toasts : 0] as const;
 	});
+	return { url, domHash: await pageHash(page, null), effects };
 }
 
 function sigEqual(a: Signature, b: Signature): boolean {
@@ -113,48 +156,26 @@ async function focusMovedAway(locator: Locator): Promise<boolean> {
 }
 
 /**
- * Hash of the page with the walked control's OWN markup taken out.
+ * Hash of the page with the walked control's OWN markup taken out, and with
+ * the group a stateful control belongs to.
  *
- * A control that deletes itself changes `document.outerHTML`, so the plain
- * whole-document hash counts it as alive no matter how useless it is — e.g. an
- * app-bar '+' that only flips `list_view` and thereby removes itself, with no
- * add bar on screen ([D-127]).
- *
- * Asked only when the control has VANISHED, and then the question becomes the
- * honest one: did anything change besides this thing disappearing? A tile
+ * A control that deletes itself changes the document, so the whole-document
+ * hash counts it as alive no matter how useless it is — e.g. an app-bar '+'
+ * that only flips `list_view` and thereby removes itself, with no add bar on
+ * screen ([D-127]). Asked when the control has VANISHED, the question becomes
+ * the honest one: did anything change besides this thing disappearing? A tile
  * check-off still passes (its item turns up in the done section); a
- * self-deleting no-op does not. Deliberately NOT used while the control is
- * still present — a picker whose whole job is to show its own new state would
- * fail a check that excluded its own subtree.
+ * self-deleting no-op does not.
+ *
+ * A radio, tab, checkbox or switch is asked the same question while it is
+ * still there: bits-ui keeps its own state, so the group's aria-checked and
+ * data-state move on any click, wired or not. Only a change outside the group
+ * shows the app answered (the view swapping, the import's count). Any other
+ * control still present is judged on the whole document: a picker whose job is
+ * to show its new state would fail a check that excluded its own subtree.
  */
 async function restHash(page: Page): Promise<number> {
-	return page.evaluate(() => {
-		// Walked from the DOM rather than cut out of outerHTML with a string
-		// replace: svelte 5 marks an {#if} block with comment anchors and swaps
-		// `<!--[-->` for `<!--[!-->` when the block empties, so subtracting the
-		// element's own markup would still leave two differing strings. Comments
-		// are skipped and text is trimmed, so only real content counts.
-		const serialise = (node: Node): string => {
-			let out = '';
-			for (const child of Array.from(node.childNodes)) {
-				if (child.nodeType === Node.COMMENT_NODE) continue;
-				if (child.nodeType === Node.TEXT_NODE) {
-					out += (child.nodeValue ?? '').trim();
-					continue;
-				}
-				const el = child as HTMLElement;
-				if (el.hasAttribute?.('data-dead-walk')) continue; // the control itself
-				out += '<' + el.tagName;
-				for (const attr of Array.from(el.attributes)) out += ' ' + attr.name + '=' + attr.value;
-				out += '>' + serialise(el) + '</' + el.tagName + '>';
-			}
-			return out;
-		};
-		const html = serialise(document.documentElement);
-		let h = 0;
-		for (let i = 0; i < html.length; i++) h = (h * 31 + html.charCodeAt(i)) | 0;
-		return h;
-	});
+	return pageHash(page, '[data-dead-walk], [data-dead-walk-group]');
 }
 
 /**
@@ -167,21 +188,57 @@ async function restHash(page: Page): Promise<number> {
  * change ([D-127]).
  *
  *   control still present -> the whole-document signature must move
- *   control gone          -> the page MINUS its markup must move
+ *   control gone, or one  -> the URL, an effect, or the page MINUS its markup
+ *   that keeps its own       (and its group) must move
+ *   state
  *
  * A self-deleting no-op polls present-and-unchanged, then gone-and-unchanged
  * once its markup is discounted, through to the deadline -> dead.
  */
-async function observedChange(page: Page, before: Signature, beforeRest: number): Promise<boolean> {
+async function observedChange(
+	page: Page,
+	before: Signature,
+	beforeRest: number,
+	stateful: boolean
+): Promise<boolean> {
 	const deadline = Date.now() + 2_500;
 	for (;;) {
 		const gone = (await page.locator('[data-dead-walk]').count()) === 0;
-		if (gone) {
+		if (gone || stateful) {
+			const now = await readSignature(page).catch(() => null);
+			if (now === null || now.url !== before.url || now.effects !== before.effects) return true;
 			const rest = await restHash(page).catch(() => null);
 			if (rest === null || rest !== beforeRest) return true;
 		} else {
 			const now = await readSignature(page).catch(() => null);
 			if (now === null || !sigEqual(now, before)) return true;
+		}
+		if (Date.now() >= deadline) return false;
+		await page.waitForTimeout(100);
+	}
+}
+
+/**
+ * Did a menu item do anything, against `closed`: the page with its menu shut
+ * and nothing picked? A menu closes on any selection, so the plain verdict
+ * passes every item, wired or not. Compared once the menu is gone and nothing
+ * still swallows clicks; a dialog the item opened is its answer.
+ */
+async function observedAfterMenu(page: Page, closed: Signature): Promise<boolean> {
+	const deadline = Date.now() + 2_500;
+	for (;;) {
+		const state = await page
+			.evaluate(() => {
+				if (document.querySelector('[role="menu"]')) return 'open';
+				if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return 'dialog';
+				const blocked = (el: Element): boolean => getComputedStyle(el).pointerEvents === 'none';
+				return blocked(document.documentElement) || blocked(document.body) ? 'closing' : 'shut';
+			})
+			.catch(() => 'navigated');
+		if (state === 'dialog' || state === 'navigated') return true;
+		if (state === 'shut') {
+			const now = await readSignature(page).catch(() => null);
+			if (now === null || !sigEqual(now, closed)) return true;
 		}
 		if (Date.now() >= deadline) return false;
 		await page.waitForTimeout(100);
@@ -194,9 +251,17 @@ async function observedChange(page: Page, before: Signature, beforeRest: number)
 export async function installEffectSpies(page: Page): Promise<void> {
 	await page.addInitScript(() => {
 		const w = window as unknown as {
-			__e2eEffects: { clipboard: number; share: number; open: number };
+			__e2eEffects: { clipboard: number; share: number; open: number; toasts: number };
 		};
-		w.__e2eEffects = { clipboard: 0, share: 0, open: 0 };
+		w.__e2eEffects = { clipboard: 0, share: 0, open: 0, toasts: 0 };
+		// A toast is an answer (NOISE leaves the toaster out of every hash).
+		new MutationObserver((records) => {
+			for (const r of records) {
+				for (const n of Array.from(r.addedNodes)) {
+					if (n instanceof Element && n.matches('[data-sonner-toast]')) w.__e2eEffects.toasts++;
+				}
+			}
+		}).observe(document, { childList: true, subtree: true });
 		try {
 			const clip = (navigator as unknown as { clipboard?: { writeText?: unknown } }).clipboard;
 			if (clip && typeof clip.writeText === 'function') {
@@ -548,6 +613,39 @@ export async function reachSurface(page: Page, path: string): Promise<void> {
 }
 
 /**
+ * Tags the control (`data-dead-walk`) and says how its click is judged: a
+ * menu item against its menu shut, a radio, tab, checkbox or switch on what
+ * changed outside its group (tagged `data-dead-walk-group`), anything else
+ * on the whole page.
+ */
+async function tagControl(locator: Locator): Promise<'menu' | 'stateful' | 'plain'> {
+	return locator.evaluate(
+		(el) => {
+			document
+				.querySelectorAll('[data-dead-walk-group]')
+				.forEach((g) => g.removeAttribute('data-dead-walk-group'));
+			el.setAttribute('data-dead-walk', '');
+			if (el.closest('[role="menu"]')) return 'menu';
+			const role = el.getAttribute('role');
+			if (role === 'radio' || role === 'tab') {
+				(el.closest('[role="radiogroup"], [role="tablist"]') ?? el).setAttribute(
+					'data-dead-walk-group',
+					''
+				);
+				return 'stateful';
+			}
+			if (role === 'checkbox' || role === 'switch') {
+				el.setAttribute('data-dead-walk-group', '');
+				return 'stateful';
+			}
+			return 'plain';
+		},
+		undefined,
+		{ timeout: 5_000 }
+	);
+}
+
+/**
  * Walks every enumerable control of one surface: establish() once to build
  * the control list, then re-establish() before EVERY single click so one
  * control's effect can never leak into the next one's baseline.
@@ -605,24 +703,41 @@ export async function walkSurface(
 			`${surface}: "${desc.name}" (${desc.role}) missing on re-establish`
 		).toBeVisible({ timeout: 10_000 });
 
-		// Tag the control so restHash() can subtract it if the click removes it.
-		// Cleared at the top of every iteration, so a tag never outlives its turn.
-		await locator.evaluate((el) => el.setAttribute('data-dead-walk', ''), undefined, {
-			timeout: 5_000
-		});
+		// Tag the control so restHash() can subtract it if the click removes it,
+		// and a stateful one's group. Cleared at the top of every iteration, so
+		// a tag never outlives its turn.
+		const kind = await tagControl(locator);
+		let target = locator;
+		let closed: Signature | null = null;
+		if (kind === 'menu') {
+			// The baseline a menu item is judged against: its menu shut, nothing
+			// picked. Then the menu is opened again for the click.
+			await page.keyboard.press('Escape');
+			await settleOverlays(page);
+			closed = await stableSignature(page);
+			target = locateControl(await establish(), desc);
+			await expect(target, `${surface}: "${desc.name}" missing on reopening`).toBeVisible({
+				timeout: 10_000
+			});
+			await tagControl(target);
+		}
 		const before = await stableSignature(page);
 		const beforeRest = await restHash(page);
 		const effects = watchSideEffects(page);
 		try {
-			await locator.click({ timeout: 10_000 });
+			await target.click({ timeout: 10_000 });
 			// Ordered cheapest-and-safest first, and `effects.seen()` is asked
 			// once more at the end because a file chooser / download surfaces a
 			// beat after the click — by then the signature poll has waited.
-			let observable = effects.seen() || (await observedChange(page, before, beforeRest));
+			let observable =
+				effects.seen() ||
+				(closed
+					? await observedAfterMenu(page, closed)
+					: await observedChange(page, before, beforeRest, kind === 'stateful'));
 			// Focus is the last resort and only worth asking while the control is
 			// still there to ask about (see focusMovedAway).
 			if (!observable && (await page.locator('[data-dead-walk]').count()) > 0) {
-				observable = await focusMovedAway(locator);
+				observable = await focusMovedAway(target);
 			}
 			observable = observable || effects.seen();
 			expect(
