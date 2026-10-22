@@ -16,6 +16,7 @@ vi.mock('../pb', () => ({
 const { subscribe } = await import('./sse');
 const { db } = await import('../db');
 const { resetDb } = await import('#lib/test-kit/db.js');
+const { endSession, resetSessionForTest } = await import('../auth/session');
 
 describe('subscribe()', () => {
 	let unsubItems: ReturnType<typeof vi.fn<() => Promise<void>>>;
@@ -88,5 +89,39 @@ describe('subscribe()', () => {
 		});
 		expect(await db.items.get('foreign')).toBeUndefined();
 		expect(await db.list_categories.get('cat-foreign')).toBeUndefined();
+	});
+
+	// §5.6 [D-109]: PocketBase keeps the stream open across a sign-out until it
+	// is unsubscribed, so an event arriving after one belongs to the account
+	// that subscribed, not to whoever is signed in by then.
+	it('applies nothing that arrives after a sign-out', async () => {
+		await resetDb();
+		const listeners = new Map<string, Listener>();
+		subscribeImpl = (name, listener) => {
+			listeners.set(name, listener);
+			return Promise.resolve(name === 'items' ? unsubItems : unsubCats);
+		};
+		try {
+			await subscribe('list-1');
+			endSession();
+			listeners.get('items')!({
+				action: 'create',
+				record: {
+					id: 'late',
+					list: 'list-1',
+					name: 'Too late',
+					quantity: '',
+					checked: false,
+					updated: '2024-01-01T00:00:00.000Z',
+					created: '2024-01-01T00:00:00.000Z',
+					deleted_at: null
+				}
+			});
+			// The event's write runs in its own transaction; let it settle.
+			await new Promise((r) => setTimeout(r, 50));
+			expect(await db.items.get('late')).toBeUndefined();
+		} finally {
+			resetSessionForTest();
+		}
 	});
 });

@@ -4,7 +4,7 @@ import { applyServerRows, forgetServerRows } from './apply';
 import { str } from './record';
 import { pb } from '../pb';
 import type { RecordSubscription } from 'pocketbase';
-import { sessionScope } from '../auth/session';
+import { sessionScope, type SessionScope } from '../auth/session';
 
 // Apply one PB realtime event (create/update/delete): the record becomes the
 // row's shadow — or, deleted, stops being one — and the row is recomputed from
@@ -20,12 +20,11 @@ import { sessionScope } from '../auth/session';
 export async function applyEvent(
 	collection: SyncCollection,
 	record: Record<string, unknown>,
-	eventType: 'create' | 'update' | 'delete'
+	eventType: 'create' | 'update' | 'delete',
+	// The account that was signed in when the subscription opened: its events
+	// must not land after its sign-out (§5.6 [D-109]), though the stream outlives it.
+	session: SessionScope = sessionScope()
 ): Promise<void> {
-	// An event for the account that was signed in when this subscription opened
-	// must not land after sign-out (§5.6 [D-109]).
-	const session = sessionScope();
-
 	await db.transaction('rw', collectionTables(collection), async () => {
 		if (!session.owned()) return;
 		if (eventType === 'delete') return forgetServerRows(collection, [String(record.id)]);
@@ -59,9 +58,11 @@ function recordListId(record: unknown): string {
 // policy) — a freshness regression can never become a correctness one.
 export async function subscribe(listId: string): Promise<() => Promise<void>> {
 	const filter = pb.filter('list = {:listId}', { listId });
+	// PocketBase keeps the stream open across a sign-out until it is unsubscribed.
+	const session = sessionScope();
 	const onEvent = (collection: SyncCollection) => (e: RecordSubscription) => {
 		if (recordListId(e.record) === listId) {
-			void applyEvent(collection, e.record, e.action as 'create' | 'update' | 'delete');
+			void applyEvent(collection, e.record, e.action as 'create' | 'update' | 'delete', session);
 		}
 	};
 	const unsubItems = await pb.collection('items').subscribe('*', onEvent('items'), { filter });
