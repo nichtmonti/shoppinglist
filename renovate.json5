@@ -228,6 +228,17 @@
 			}
 		},
 		{
+			// The CI image's golang base stays on one digest until Go itself is
+			// bumped, which moves tag and digest in one PR ([D-339]). A
+			// digest-only update would be a new 3 GB CI image each time Docker
+			// re-publishes the tag; that image only builds and tests.
+			matchManagers: ['dockerfile'],
+			matchFileNames: ['.devcontainer/Dockerfile'],
+			matchPackageNames: ['golang'],
+			matchUpdateTypes: ['digest'],
+			enabled: false
+		},
+		{
 			// The CI image's tag is its content (scripts/ci-image-tag.sh), not a
 			// version Renovate could compare.
 			matchManagers: ['woodpecker'],

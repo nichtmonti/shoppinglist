@@ -9,8 +9,8 @@
 # Docker backend runs a step image it already has instead of pulling it. It
 # stays in the daemon's image store between pipelines, so a run whose tag is
 # there builds nothing, and a Dockerfile change rebuilds the whole stage, a few
-# minutes once per toolchain bump or base digest update (the build cache is
-# pruned after each build, below). An image lost to a prune is rebuilt by the next pipeline.
+# minutes once per toolchain bump (the build cache is pruned after each build,
+# below). An image lost to a prune is rebuilt by the next pipeline.
 # Codeberg's registry could not hold it: its package quota is 1.5 GiB for an
 # account, and the image alone is over a gigabyte compressed ([D-203]).
 #
@@ -51,12 +51,8 @@ steps:
           # needs one again rebuilds it. No braces on a shell variable here
           # (AGENTS.md): Woodpecker would empty it, and `docker image ls ""`
           # lists every image on the agent.
-          #
-          # Besides this one, the newest other CI image stays: while a
-          # Renovate PR changes the toolchain, its pipelines and main's then
-          # keep each other's image instead of rebuilding it in turn.
-          docker image ls localhost/shoppinglist-ci --format '{{.CreatedAt}}|{{.Repository}}:{{.Tag}}' |
-            sort -r | cut -d'|' -f2 | grep -vxF "$IMAGE" | tail -n +2 | xargs -r docker rmi 2>/dev/null || true
+          docker image ls localhost/shoppinglist-ci --format '{{.Repository}}:{{.Tag}}' |
+            grep -vxF "$IMAGE" | xargs -r docker rmi 2>/dev/null || true
           # The base is pinned by digest (repo:tag@sha256:...): every other
           # digest of its repository goes.
           BASE=$(sed -n 's/^FROM \([^ ]*\) AS toolchain$/\1/p' .devcontainer/Dockerfile)
