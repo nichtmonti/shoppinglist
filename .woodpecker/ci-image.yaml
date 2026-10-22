@@ -9,8 +9,8 @@
 # Docker backend runs a step image it already has instead of pulling it. It
 # stays in the daemon's image store between pipelines, so a run whose tag is
 # there builds nothing, and a Dockerfile change rebuilds the whole stage, a few
-# minutes once per toolchain bump (the build cache is pruned after each build,
-# below). An image lost to a prune is rebuilt by the next pipeline.
+# minutes once per toolchain bump or base digest update (the build cache is
+# pruned after each build, below). An image lost to a prune is rebuilt by the next pipeline.
 # Codeberg's registry could not hold it: its package quota is 1.5 GiB for an
 # account, and the image alone is over a gigabyte compressed ([D-203]).
 #
@@ -30,7 +30,8 @@ when:
 
 steps:
   image:
-    image: docker:29-cli
+    # By digest ([D-339]): the step holds the agent's Docker socket, root on the host.
+    image: docker:29-cli@sha256:5e6baf67325a79f64ed3bed6863954d5e05d0f3d4e57cbdb14809346814bbfdb
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:
@@ -43,18 +44,26 @@ steps:
           echo "CI image $IMAGE is not on this agent yet: building it"
           docker build --target toolchain -t "$IMAGE" .devcontainer
           # What the older toolchain left behind, 5-8 GB per bump: its tag
-          # (3.1 GB), the base image's older tags, and the build cache, which
-          # keeps an old image's layers after its tag is gone. The prune
+          # (3.1 GB), the base image's other digests, and the build cache,
+          # which keeps an old image's layers after its tag is gone. The prune
           # clears every build's cache on the agent; it is only cache. An
           # image a running pipeline still uses stays, and a pipeline that
           # needs one again rebuilds it. No braces on a shell variable here
           # (AGENTS.md): Woodpecker would empty it, and `docker image ls ""`
           # lists every image on the agent.
-          docker image ls localhost/shoppinglist-ci --format '{{.Repository}}:{{.Tag}}' |
-            grep -vxF "$IMAGE" | xargs -r docker rmi 2>/dev/null || true
+          #
+          # Besides this one, the newest other CI image stays: while a
+          # Renovate PR changes the toolchain, its pipelines and main's then
+          # keep each other's image instead of rebuilding it in turn.
+          docker image ls localhost/shoppinglist-ci --format '{{.CreatedAt}}|{{.Repository}}:{{.Tag}}' |
+            sort -r | cut -d'|' -f2 | grep -vxF "$IMAGE" | tail -n +2 | xargs -r docker rmi 2>/dev/null || true
+          # The base is pinned by digest (repo:tag@sha256:...): every other
+          # digest of its repository goes.
           BASE=$(sed -n 's/^FROM \([^ ]*\) AS toolchain$/\1/p' .devcontainer/Dockerfile)
-          BASE_REPO=$(echo "$BASE" | cut -d: -f1)
-          [ -n "$BASE_REPO" ] && docker image ls "$BASE_REPO" --format '{{.Repository}}:{{.Tag}}' |
-            grep -vxF "$BASE" | xargs -r docker rmi 2>/dev/null || true
+          BASE_REPO=$(echo "$BASE" | sed 's/[:@].*//')
+          BASE_DIGEST=$(echo "$BASE" | sed -n 's/^[^@]*@//p')
+          [ -n "$BASE_REPO" ] && [ -n "$BASE_DIGEST" ] &&
+            docker image ls "$BASE_REPO" --digests --format '{{.Repository}}@{{.Digest}}' |
+            grep -v '@<none>$' | grep -vxF "$BASE_REPO@$BASE_DIGEST" | xargs -r docker rmi 2>/dev/null || true
           docker builder prune -af
         fi

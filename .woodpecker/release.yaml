@@ -64,7 +64,9 @@ concurrency: 1
 # https://woodpecker-ci.org/docs/usage/services#stopping
 services:
   - name: dind
-    image: docker:29-dind
+    # By digest, as every step image here is ([D-339]): the publish token is
+    # handed to this daemon.
+    image: docker:29-dind@sha256:9e79b879b177fbd72c34376a3dd3d91747da5db49e1f560f76aea59561471977
     privileged: true
     failure: ignore
     # vfs storage = the Woodpecker-documented safe default for DinD on the
@@ -194,7 +196,10 @@ steps:
       # distroless base plus COPY only (no RUN), so nothing executes
       # foreign-arch code during the image build — buildx just packages the
       # prebuilt per-arch binaries goreleaser produced.
-      - docker buildx create --name goreleaser-release --use
+      # BuildKit pushes with the registry token, so its image is pinned too
+      # rather than buildx's floating default (buildx-stable-1); Renovate moves
+      # it (renovate.json5, [D-339]).
+      - docker buildx create --name goreleaser-release --driver-opt image=moby/buildkit:v0.33.1@sha256:cec9f139f45e93c5c69c60f8b07cfad9f43f4ef6b6a6cd917527fea5ff2e3dea --use
       # REGISTRY_TOKEN, not GITEA_TOKEN: see the environment block above.
       # The image lives under the repository owner's namespace (.goreleaser.yaml).
       - echo "$REGISTRY_TOKEN" | docker login codeberg.org -u "$CI_REPO_OWNER" --password-stdin

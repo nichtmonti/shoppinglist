@@ -157,6 +157,18 @@
 			matchStrings: ['@devcontainers/cli@(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
 			depNameTemplate: '@devcontainers/cli',
 			datasourceTemplate: 'npm'
+		},
+		{
+			// The BuildKit image the release's buildx builder runs, pinned in a
+			// command line where the woodpecker manager cannot see it ([D-339]).
+			customType: 'regex',
+			description: 'BuildKit image of the release builder',
+			managerFilePatterns: ['/^\\.woodpecker\\/release\\.yaml$/'],
+			matchStrings: [
+				'image=moby/buildkit:(?<currentValue>v\\d+\\.\\d+\\.\\d+)@(?<currentDigest>sha256:[a-f0-9]+)'
+			],
+			depNameTemplate: 'moby/buildkit',
+			datasourceTemplate: 'docker'
 		}
 	],
 
@@ -257,20 +269,10 @@
 			automerge: false
 		},
 		{
-			// Deliberately NOT enabling pinDigests globally. The other step
-			// images float on a major on purpose (`docker:29-dind`) so the build
-			// cell picks up base security patches without a PR; a digest goes
-			// where the image ships (the Dockerfile's base) or holds the publish
-			// tokens (the rule below, [D-339]).
+			// Every step image by digest ([D-339]): each holds a publish token or
+			// the agent's Docker socket, and a tag can be re-pushed. A base
+			// patch arrives as a digest PR instead of silently.
 			matchManagers: ['woodpecker'],
-			pinDigests: false
-		},
-		{
-			// The exception: the release step's image holds both publish tokens,
-			// and a re-pushed tag would hand them over; an exact-version tool
-			// image gains nothing from floating.
-			matchManagers: ['woodpecker'],
-			matchPackageNames: ['goreleaser/goreleaser'],
 			pinDigests: true
 		}
 	]
