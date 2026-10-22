@@ -3,7 +3,7 @@ import { liveQuery } from 'dexie';
 import { db } from '#lib/db.js';
 import { trackTimers } from '#lib/test-kit/timers.js';
 import { putSynced } from '#lib/test-kit/db.js';
-import { runSyncCycle, resetReferenceMirrorCheck } from './cycle';
+import { cyclesSettled, runSyncCycle, resetReferenceMirrorCheck } from './cycle';
 import { startSyncLoop, syncNow } from './loop';
 import { getMeta } from '#lib/db.js';
 import { SYNC_HEALTH_KEY } from './health';
@@ -649,6 +649,58 @@ describe('startSyncLoop teardown', () => {
 			// Nothing armed either: a post-teardown retry or drain would be
 			// a tracked pending timer first.
 			expect(loopTimers.pending()).toBe(0);
+		} finally {
+			release();
+			stop();
+		}
+	});
+
+	// The debounced drain waits behind a running cycle (afterCycles). Its timer
+	// can fire before stop() and its push run after it, once the cycle ends.
+	it('a drain queued behind a running cycle does not push after stop()', async () => {
+		let release!: () => void;
+		const gate = new Promise<void>((r) => (release = r));
+		let digestCalls = 0;
+		const digestTransport = vi.fn().mockImplementation(() => {
+			digestCalls++;
+			return gate.then(() => []);
+		});
+		const drainTransport = vi.fn().mockResolvedValue({ results: [] });
+		const stop = startSyncLoop({
+			cycleMs: 60_000,
+			retryMs: 30,
+			digestTransport,
+			drain: { transport: drainTransport },
+			snapshotFetcher: vi.fn().mockResolvedValue({ items: [], categories: [] }),
+			snapshotIdsFetcher: vi.fn().mockResolvedValue({ items: [], categories: [] }),
+			mirror: {
+				versionTransport: vi.fn().mockResolvedValue('1'),
+				referenceFetcher: vi.fn().mockResolvedValue({ templates: [], dictionary: [] })
+			}
+		});
+		try {
+			// The initial cycle is held at its digest, so it is still running.
+			await vi.waitFor(() => expect(digestCalls).toBe(1), { timeout: 5000 });
+			await db.pending_ops.add({
+				op_id: 'op-queued',
+				collection: 'items',
+				record_id: 'item-q',
+				list_id: 'list-q',
+				type: 'create',
+				changed: { name: 'Q' },
+				base: {},
+				queued_at: new Date().toISOString()
+			});
+			// The write arms the debounce, and it fires: the drain is queued.
+			await vi.waitFor(() => expect(loopTimers.pending()).toBe(1), { timeout: 5000 });
+			await vi.waitFor(() => expect(loopTimers.pending()).toBe(0), { timeout: 5000 });
+
+			stop();
+			const drainsAtStop = drainTransport.mock.calls.length;
+			release();
+			await cyclesSettled();
+
+			expect(drainTransport.mock.calls.length).toBe(drainsAtStop);
 		} finally {
 			release();
 			stop();

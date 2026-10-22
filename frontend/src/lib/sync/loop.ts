@@ -124,6 +124,8 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 		drainTimer = setTimeout(() => {
 			if (stopped || retryTimer !== null) return;
 			afterCycles(async () => {
+				// Queued behind a running cycle, it can come up after stop().
+				if (stopped) return;
 				void recordStart().catch(() => {});
 				const summary = await drainOutbox(drainOpts).catch((error: unknown) => ({
 					drained: 0,
