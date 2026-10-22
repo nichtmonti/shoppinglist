@@ -116,8 +116,8 @@ From the checkout's root:
 ```sh
 pnpm format:check
 (cd backend && go test -tags no_ui ./...)
-(cd backend && staticcheck -tags no_ui ./... && gosec -tags no_ui ./...)
-(cd frontend && pnpm lint && pnpm check)
+(cd backend && staticcheck -tags no_ui ./... && gosec -tags no_ui ./... && golangci-lint run ./...)
+(cd frontend && pnpm lint && pnpm check && pnpm exec knip)
 (cd e2e && pnpm check)
 (cd frontend && npx vitest run)
 task build-app   # the binary the two below serve

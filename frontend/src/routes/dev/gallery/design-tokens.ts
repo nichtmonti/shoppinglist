@@ -4,7 +4,7 @@
 
 import type { Use } from './button-uses';
 
-export interface Role {
+interface Role {
 	name: string;
 	/** The role's comment in app.css: what carries it. */
 	purpose: string;

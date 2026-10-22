@@ -26,7 +26,7 @@ export const PUSH_STATUSES = [
 	'deleted_conflict'
 ] as const;
 
-export type PushStatus = (typeof PUSH_STATUSES)[number];
+type PushStatus = (typeof PUSH_STATUSES)[number];
 
 // The `denied` reason codes, pinned to the Go side by reasons-contract.test.ts
 // and reason_codes_test.go. A newer server may send one this build does not
@@ -46,7 +46,7 @@ export const DENIED_REASONS = [
 	'list_full'
 ] as const;
 
-export type DeniedReason = (typeof DENIED_REASONS)[number];
+type DeniedReason = (typeof DENIED_REASONS)[number];
 
 // A single push result. `record` is the authoritative current server row, present on
 // every SETTLING status (applied/partial/noop/merged/deleted_conflict), omitted on gone+denied.

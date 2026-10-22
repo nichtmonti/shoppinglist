@@ -32,8 +32,8 @@
 // for the PR's first pipeline ([D-203]). The self-hosted runner must allow that one command:
 // allowedCommands: ['^sh scripts/ci-image-tag\\.sh --write$'].
 //
-// The nine pinned Go tools (staticcheck, gosec, osv-scanner, govulncheck, air,
-// dex, task, gitleaks, gcov2lcov) need no custom manager: each declares itself in its own
+// The eleven pinned Go tools (staticcheck, gosec, golangci-lint, deadcode,
+// osv-scanner, govulncheck, air, dex, task, gitleaks, gcov2lcov) need no custom manager: each declares itself in its own
 // tools/<name>/go.mod and rides the stock `gomod` manager. One module per tool,
 // deliberately, so no tool's dependency resolution moves another's — or the
 // app's ([D-75]).

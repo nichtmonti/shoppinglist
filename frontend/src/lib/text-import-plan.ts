@@ -29,7 +29,7 @@ import type { TextEntry } from './text-import';
 import { t, type Locale } from './i18n';
 import type { ItemEditPatch } from './item-edit';
 
-export type RowStatus =
+type RowStatus =
 	/** Not on the list: it will be created. */
 	| 'new'
 	/** Checked off or in "Frühere Artikel": it comes back instead of a second row. */

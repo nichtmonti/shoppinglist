@@ -69,7 +69,7 @@ export function parseMaxItemsPerList(raw: string | null | undefined): number | n
 
 /** This instance's moved per-list cap, or null where left at the default
  *  (the meta tag is absent then). */
-export const maxItemsPerList: number | null = parseMaxItemsPerList(
+const maxItemsPerList: number | null = parseMaxItemsPerList(
 	shellMeta(shell.max_items_per_list_meta)
 );
 

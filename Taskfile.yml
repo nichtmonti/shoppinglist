@@ -156,7 +156,7 @@ tasks:
       - frontend/src/**/*
       - frontend/messages/**/*
       - frontend/project.inlang/{settings.json,paraglide.config.js}
-      - frontend/*.{js,ts,json}
+      - frontend/*.{js,ts,json,jsonc}
       - frontend/scripts/*.js
       - frontend/src/service-worker/tsconfig.json
       - frontend/pnpm-lock.yaml
@@ -193,12 +193,13 @@ tasks:
       - cd frontend && pnpm lint
 
   check:
-    desc: svelte-check and the service worker's tsc
+    desc: svelte-check, the service worker's tsc, and knip (what nothing uses any more)
     deps: [deps]
     sources: *frontend
     cmds:
       - defer: *failed
       - cd frontend && pnpm check
+      - cd frontend && pnpm exec knip --no-progress
 
   check:e2e:
     desc: tsc over the browser harnesses, which Playwright runs with their types stripped
@@ -215,7 +216,7 @@ tasks:
 
   # --- tests -------------------------------------------------------------------
   go-lint:
-    desc: go vet, go fix, staticcheck and gosec over the backend, CI's go-check step
+    desc: go vet, go fix, staticcheck, gosec, golangci-lint and deadcode over the backend, CI's go-check step
     # [D-273] CI's go-check runs this task, so a pass here is a pass there: a
     # Go toolchain bump once broke both tools in CI alone. Their pins are
     # inputs too, and installing from them is a no-op once built. The memory
@@ -230,6 +231,11 @@ tasks:
       - tools/staticcheck/go.sum
       - tools/gosec/go.mod
       - tools/gosec/go.sum
+      - tools/golangci-lint/go.mod
+      - tools/golangci-lint/go.sum
+      - tools/deadcode/go.mod
+      - tools/deadcode/go.sum
+      - backend/.golangci.yml
       - exclude: backend/pb_data/**/*
       - exclude: backend/pb_public*/**/*
     env:
@@ -238,6 +244,8 @@ tasks:
       - defer: *failed
       - go -C tools/staticcheck install tool
       - go -C tools/gosec install tool
+      - go -C tools/golangci-lint install tool
+      - go -C tools/deadcode install tool
       # `go test` runs only part of vet (no copylocks, no structtag). The demo
       # build swaps one file in package main, which is vetted again with its
       # tag ([D-234]).
@@ -253,6 +261,15 @@ tasks:
       # advisory scanners ([D-203]). A finding is fixed, or gets a `#nosec`
       # with its why at the line.
       - cd backend && gosec -tags no_ui ./...
+      # The bug classes the two above do not look at ([D-340]), as
+      # backend/.golangci.yml lists them.
+      - cd backend && golangci-lint run ./...
+      # [D-340] An exported function nothing calls. One that only the other
+      # build calls is printed by one run, so a line both runs print is dead.
+      - >-
+        cd backend && set -o pipefail &&
+        dead=$({ deadcode -test -tags no_ui ./... && deadcode -test -tags demo,no_ui ./...; } | sort | uniq -d) &&
+        if [ -n "$dead" ]; then echo "$dead"; echo "deadcode: nothing calls these in either build"; exit 1; fi
 
   go-test:
     desc: The backend suite, then package main as the demo build ([D-234]); `go test` arguments after `--`
@@ -338,7 +355,7 @@ tasks:
       - frontend/src/lib/components/add/*.ts
       # The libraries under them (Dexie, pocketbase-js, PocketBase) and the
       # project's own config.
-      - frontend/*.{js,ts,json}
+      - frontend/*.{js,ts,json,jsonc}
       - frontend/pnpm-lock.yaml
       - backend/go.mod
       - backend/go.sum
@@ -436,7 +453,7 @@ tasks:
       - frontend/project.inlang/{settings.json,paraglide.config.js}
       - frontend/static/**/*
       - exclude: frontend/src/lib/paraglide/**/*
-      - frontend/*.{js,ts,json}
+      - frontend/*.{js,ts,json,jsonc}
       - frontend/scripts/*.js
       - frontend/pnpm-lock.yaml
       - backend/**/*.go

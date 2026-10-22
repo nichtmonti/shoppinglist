@@ -21,7 +21,7 @@ export interface ApiFetchOptions {
 
 /** An error for a non-2xx answer, or status 0 for none; `status` is what
  *  isAuthRejected and the sync status (health.ts) read. */
-export type ApiError = Error & { status: number };
+type ApiError = Error & { status: number };
 
 /**
  * Fetch one of the app's own routes as the signed-in account and return its

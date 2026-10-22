@@ -36,7 +36,7 @@ export interface ItemView {
 	bought: boolean;
 }
 
-export interface AisleView {
+interface AisleView {
 	name: string;
 	hidden: boolean;
 	order: number;
@@ -72,7 +72,7 @@ const str = (v: unknown): string => {
 
 /** The shared projection: server rows and device rows are judged by the same
  *  function, so "converged" means the person sees the same thing everywhere. */
-export function project(items: Row[], categories: Row[]): ListView {
+function project(items: Row[], categories: Row[]): ListView {
 	const aisleName = (c: Row) => str(c.name) || str(c.slug);
 	const byId = new Map(categories.map((c) => [str(c.id), c] as const));
 	const others = categories.find((c) => c.slug === 'other');
@@ -99,11 +99,6 @@ export function project(items: Row[], categories: Row[]): ListView {
 			.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
 	};
 	return view;
-}
-
-/** The rows a person can actually see on the list (active and checked). */
-export function shown(view: ListView): ItemView[] {
-	return view.items.filter((i) => i.state !== 'removed');
 }
 
 /** Rows whose normalized name starts with `name`'s, one line each, for STRESS_TRACE. */

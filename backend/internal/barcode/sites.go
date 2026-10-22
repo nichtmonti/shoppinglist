@@ -2,6 +2,7 @@ package barcode
 
 import (
 	"cmp"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,9 +32,10 @@ func SetUserAgent(version, sourceURL string) {
 	userAgent = fmt.Sprintf("shoppinglist/%s (+%s)", version, sourceURL)
 }
 
-// upstreamGet is upstreamClient.Get with the User-Agent set.
+// upstreamGet is upstreamClient.Get with the User-Agent set. It does not end
+// with the caller's request: upstreamClient's timeout bounds it.
 func upstreamGet(rawURL string) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
 	}

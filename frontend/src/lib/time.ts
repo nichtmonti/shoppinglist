@@ -4,7 +4,7 @@
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Local midnight at the start of the calendar day `now` falls in. */
-export function startOfDay(now: number): number {
+function startOfDay(now: number): number {
 	return new Date(now).setHours(0, 0, 0, 0);
 }
 

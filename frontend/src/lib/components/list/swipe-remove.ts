@@ -9,9 +9,9 @@ import { on } from 'svelte/events';
 import { dur } from '#lib/state/motion.js';
 
 /** Movement before the gesture picks an axis; vertical first is a scroll. */
-export const SLOP_PX = 10;
+const SLOP_PX = 10;
 /** Released past this share of the row's width, the row goes. */
-export const COMMIT_SHARE = 0.4;
+const COMMIT_SHARE = 0.4;
 /** Its bounds: a narrow row still needs a deliberate drag, a wide one no
  *  trip across the screen. */
 export const COMMIT_MIN_PX = 96;

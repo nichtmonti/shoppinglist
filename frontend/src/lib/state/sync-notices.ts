@@ -31,7 +31,7 @@ const FIELD_KEYS: Record<string, MessageKey> = {
  * roster refresh, then "someone", which is also right for a deleted account
  * ([D-32]).
  */
-export async function nicknameFor(listId: string, accountId: string | undefined): Promise<string> {
+async function nicknameFor(listId: string, accountId: string | undefined): Promise<string> {
 	if (!accountId) return t('common_someone');
 	const cached = await db.roster.get(rosterKey(listId, accountId));
 	if (cached) return memberName(cached.nickname);

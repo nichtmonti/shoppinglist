@@ -1,12 +1,14 @@
 # Pinned developer tooling
 
-Ten programs the gate, the tests, CI and the dev loop depend on, each declared in
+Twelve programs the gate, the tests, CI and the dev loop depend on, each declared in
 **its own Go module** here, but one Python tool (below):
 
 | Directory | Tool | Used by |
 | --- | --- | --- |
 | `staticcheck/` | [staticcheck](https://staticcheck.dev) | `go-lint` in the gate, `.woodpecker/go.yaml` |
 | `gosec/` | [gosec](https://github.com/securego/gosec) | `go-lint` in the gate, `.woodpecker/go.yaml` |
+| `golangci-lint/` | [golangci-lint](https://golangci-lint.run), only the linters `backend/.golangci.yml` names | `go-lint` in the gate, `.woodpecker/go.yaml` ([D-340]) |
+| `deadcode/` | [deadcode](https://go.dev/blog/deadcode), exported functions nothing calls | `go-lint` in the gate, `.woodpecker/go.yaml` ([D-340]) |
 | `gitleaks/` | [gitleaks](https://github.com/gitleaks/gitleaks), secrets in the history | the gate, the pre-push hook, `.woodpecker/go.yaml` ([D-203], [D-274]) |
 | `govulncheck/` | [govulncheck](https://go.dev/blog/vuln) | `.woodpecker/security.yaml` |
 | `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `osv` in the gate, `.woodpecker/security.yaml` |
@@ -54,7 +56,7 @@ dependency set for every tool and `osv-scanner` stopped compiling. [D-75] in
 Renovate opens a PR per tool. Nothing else needs touching: no version string
 lives outside these files. Renovate raises a module's direct requirement
 only, never an indirect one: when a Go release changes the export data, raise
-`golang.org/x/tools` by hand in `staticcheck/` and `gosec/`
+`golang.org/x/tools` by hand in `staticcheck/`, `gosec/` and `golangci-lint/`
 (`go -C tools/<name> get golang.org/x/tools@latest`); the gate's `go-lint`
 layer fails until it is ([D-273]).
 
@@ -93,3 +95,4 @@ waivers in `osv-scanner.toml`. None of it reaches the app:
 [D-203]: ../docs/internals/decisions.md#D-203
 [D-273]: ../docs/internals/decisions.md#D-273
 [D-274]: ../docs/internals/decisions.md#D-274
+[D-340]: ../docs/internals/decisions.md#D-340

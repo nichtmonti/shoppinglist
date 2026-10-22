@@ -1,0 +1,25 @@
+# golangci-lint runs only the bug classes staticcheck and gosec do not look
+# at ([D-340]); those two keep their own pins and calls ([D-273]).
+version: "2"
+run:
+  build-tags: [no_ui]
+  # Shipped code only: a test's open body or missing context harms no one.
+  tests: false
+linters:
+  default: none
+  enable:
+    - errorlint # a sentinel compared with == or wrapped with %v breaks errors.Is
+    - bodyclose # a response body left open leaks the connection
+    - noctx # an outbound request or listener without a context
+    - exhaustive # a switch over an enum misses a value added later
+    - errcheck # a dropped error
+  exclusions:
+    # golangci-lint's standard exceptions: Close, Flush, print and friends.
+    presets: [std-error-handling]
+    # Test helpers, which never ship (deps_arch_test.go).
+    paths:
+      - internal/testutil/
+      - internal/dextest/
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

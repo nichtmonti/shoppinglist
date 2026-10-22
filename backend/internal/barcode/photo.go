@@ -1,6 +1,7 @@
 package barcode
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -76,7 +77,7 @@ func fetchPhoto(rawURL string) photoDownload {
 	if !allowedPhotoHost(u.Host) {
 		return photoDownload{refused: u.Host}
 	}
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
 	if err != nil {
 		return photoDownload{}
 	}

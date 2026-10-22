@@ -1,0 +1,15 @@
+// knip: the files, exports and dependencies nothing uses any more ([D-340]).
+// Each entry below is something knip cannot see being used.
+{
+	"$schema": "./node_modules/knip/schema-jsonc.json",
+	// Loaded by path, by the Paraglide CLI and its Vite plugin.
+	"entry": ["project.inlang/paraglide.config.js"],
+	// project.inlang/settings.json loads the plugin by path;
+	// vite-plugin-openmoji.ts reads the artwork's files.
+	"ignoreDependencies": ["@inlang/plugin-message-format", "openmoji"],
+	// The integration project builds the backend with the Go toolchain.
+	"ignoreBinaries": ["go"],
+	// shadcn-svelte's barrels export each part under two names on purpose, so a
+	// re-pulled component keeps working.
+	"ignoreIssues": { "src/lib/components/ui/**/index.ts": ["exports", "types"] }
+}

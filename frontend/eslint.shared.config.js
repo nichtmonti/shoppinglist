@@ -20,6 +20,7 @@ import prettier from 'eslint-config-prettier';
 import js from '@eslint/js';
 import betterTailwind from 'eslint-plugin-better-tailwindcss';
 import boundaries from 'eslint-plugin-boundaries';
+import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import ts from 'typescript-eslint';
@@ -444,6 +445,14 @@ export function sharedRest() {
 			// The one place the stock merges are configured.
 			files: ['src/lib/utils.ts'],
 			rules: { 'no-restricted-imports': 'off' }
+		},
+		{
+			// [D-340] An HTML sink (innerHTML, insertAdjacentHTML, document.write …)
+			// takes a literal only: the CSP stops script in injected markup, not
+			// the markup. Tests build their own DOM.
+			files: ['src/**/*.svelte', 'src/**/*.ts'],
+			ignores: ['**/*.test.ts'],
+			...noUnsanitized.configs.recommended
 		},
 		{
 			// [D-221] Outside the engine the synced tables are read, never

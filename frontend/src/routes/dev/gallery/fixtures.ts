@@ -40,7 +40,7 @@ const SEED_SLUG = {
 	home: 'household',
 	others: 'other'
 } as const;
-export type CatId = keyof typeof SEED_SLUG;
+type CatId = keyof typeof SEED_SLUG;
 
 export const TEMPLATES = new Map<string, CategoryTemplate>(
 	(seed as (Omit<CategoryTemplate, 'retired'> & { retired?: boolean })[]).map((t) => [
@@ -77,7 +77,7 @@ const PHOTOS: Record<CatId, string> = {
 
 /** How an item came to be: typed, scanned without a photo, scanned with one,
  *  or scanned with a photo that fails to load. */
-export type Kind = 'plain' | 'scan' | 'photo' | 'failed';
+type Kind = 'plain' | 'scan' | 'photo' | 'failed';
 
 export interface Case {
 	/** Stable, unique, kebab-case: the case's name in URLs and findings. */
@@ -277,7 +277,7 @@ export const CONTENT: Record<Content, { cases: readonly Case[]; kinds: boolean }
 };
 
 /** The item fields that make a case typed, scanned or photographed. */
-export function withKind(c: Case, kind: Kind): Pick<Item, 'barcode' | 'image_url'> {
+function withKind(c: Case, kind: Kind): Pick<Item, 'barcode' | 'image_url'> {
 	switch (kind) {
 		case 'plain':
 			return { barcode: null, image_url: null };

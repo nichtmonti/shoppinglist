@@ -5,6 +5,7 @@
 package health
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -28,10 +29,15 @@ const defaultTimeout = 3 * time.Second
 // unless it answered 2xx. The error says what failed, since an operator reads
 // it from `docker inspect`'s health log.
 func Probe(addr string, timeout time.Duration) error {
-	client := &http.Client{Timeout: timeout}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 
 	url := fmt.Sprintf("http://%s/api/health", addr)
-	resp, err := client.Get(url)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return fmt.Errorf("GET %s: %w", url, err)
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("GET %s: %w", url, err)
 	}

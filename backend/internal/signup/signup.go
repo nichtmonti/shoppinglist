@@ -121,6 +121,7 @@ func (g *Gate) Admit(app core.App, links Links) (Ticket, error) {
 				return Ticket{Invite: h}, err
 			}
 		}
+	case Closed:
 	}
 	return Ticket{}, ErrRefused
 }
@@ -147,6 +148,7 @@ func (g *Gate) Redeem(txApp core.App, t Ticket) (listID string, err error) {
 				return listID, err
 			}
 		}
+	case Closed:
 	}
 	return "", ErrRefused
 }

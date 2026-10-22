@@ -99,7 +99,7 @@ function classifyCeremonyError(e: unknown): Error | null {
  * A passkey the server no longer has, removed in settings or with its account,
  * that the device still offers ([D-293]): retrying it never works.
  */
-export class UnknownPasskeyError extends LocalizedError {}
+class UnknownPasskeyError extends LocalizedError {}
 
 /** Asks the browser to stop offering a passkey the server no longer has; a
  *  browser without the Signal API ignores it. */

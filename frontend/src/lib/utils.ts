@@ -43,7 +43,7 @@ export function conflictingClasses(className: string): string[] {
 	return tokens.filter((t) => !kept.has(t));
 }
 
-export type WithoutChildren<T> = Omit<T, 'children'>;
+type WithoutChildren<T> = Omit<T, 'children'>;
 export type WithoutChild<T> = Omit<T, 'child'>;
 export type WithoutChildrenOrChild<T> = WithoutChild<WithoutChildren<T>>;
 export type WithElementRef<T, R extends HTMLElement = HTMLElement> = T & { ref?: R | null };

@@ -19,9 +19,9 @@ them, and what to watch for, is in [`AGENTS.md`](../../AGENTS.md#the-gate).
 | `gitleaks` | CI's history scan, then the uncommitted changes and new files; every run ([D-274]) | none |
 | `osv` | osv-scanner over every lockfile, CI's osv-scan step, when a lockfile or `osv-scanner.toml` changed | none |
 | `lint` | the type-aware ESLint config on the changed files (`lint:all` the whole project) | none |
-| `check` | `pnpm check` (svelte-check) | none |
+| `check` | `pnpm check` (svelte-check) and knip | none |
 | `check:e2e` | `tsc` over `e2e/`, which Playwright runs with its types stripped | none |
-| `go-lint` | go vet, `go fix -diff`, staticcheck and gosec over `backend/`, CI's go-check step, when the backend or their `tools/` pins changed ([D-273]) | none |
+| `go-lint` | go vet, `go fix -diff`, staticcheck, gosec, golangci-lint and deadcode over `backend/`, CI's go-check step, when the backend or their `tools/` pins changed ([D-273]) | none |
 | `go-test` | `go test -tags no_ui ./...`, the whole Go suite | none |
 | `vitest` | `vitest run --changed` (server + client projects); the whole suite when a config or `frontend/messages/` changes | none |
 | `build-backend`, `build-app` | `backend/shoppinglist-no-ui` for the integration project, `backend/shoppinglist` (real SPA) for the server-backed harnesses | none |

@@ -23,7 +23,7 @@ export const STUCK_MS = 20_000;
  *  every request times out well inside it (a cycle's push and digest, 25 s). */
 export const IN_FLIGHT_MS = 60_000;
 /** Failed tries in a row before it says so: one is retried after 5 s anyway. */
-export const FAILING_AFTER = 3;
+const FAILING_AFTER = 3;
 
 export type SyncLine =
 	| { kind: 'normal' }

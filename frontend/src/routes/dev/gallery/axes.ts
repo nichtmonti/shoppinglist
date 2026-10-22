@@ -8,10 +8,10 @@ import { COMPARISONS } from './comparisons';
 import type { Content, KindChoice, ListState } from './fixtures';
 
 export type Theme = 'light' | 'dark';
-export type Density = 'comfortable' | 'compact' | 'list';
-export type View = 'shop' | 'list';
+type Density = 'comfortable' | 'compact' | 'list';
+type View = 'shop' | 'list';
 
-export type Page = 'list' | 'buttons' | 'design';
+type Page = 'list' | 'buttons' | 'design';
 
 export interface GalleryState {
 	/** The list's states, the button family (ButtonGallery) or the design system (DesignGallery). */
