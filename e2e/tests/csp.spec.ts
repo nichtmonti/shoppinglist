@@ -126,19 +126,30 @@ test('CSP: the response header and the index.html meta tag carry the same policy
 	// cannot express (SvelteKit strips frame-ancestors from meta output).
 	expect(header).toBe(`${meta}; frame-ancestors 'none'`);
 
-	// The directives the app actually depends on, asserted by name so that
-	// dropping one is a test failure rather than a broken feature in the field.
-	for (const directive of [
-		"default-src 'self'",
-		"script-src 'self' 'wasm-unsafe-eval'",
-		"style-src-attr 'unsafe-inline'",
-		"img-src 'self' data:",
-		"connect-src 'self'",
-		"object-src 'none'",
-		"base-uri 'none'"
-	]) {
-		expect(header, `missing directive: ${directive}`).toContain(directive);
-	}
+	// Every directive and its exact sources, so that dropping one breaks here
+	// rather than in the field, and so does widening one ('unsafe-inline' or a
+	// host added to script-src for a library). Only the build's hashes vary.
+	const policy = Object.fromEntries(
+		header.split(';').map((d) => {
+			const [name, ...sources] = d.trim().split(/\s+/);
+			return [name, sources.filter((s) => !s.startsWith("'sha256-"))];
+		})
+	);
+	expect(policy).toEqual({
+		'default-src': ["'self'"],
+		'frame-src': ["'none'"],
+		'worker-src': ["'self'"],
+		'connect-src': ["'self'"],
+		'img-src': ["'self'", 'data:'],
+		'manifest-src': ["'self'"],
+		'object-src': ["'none'"],
+		'script-src': ["'self'", "'wasm-unsafe-eval'"],
+		'style-src': ["'self'"],
+		'style-src-attr': ["'unsafe-inline'"],
+		'base-uri': ["'none'"],
+		'form-action': ["'self'"],
+		'frame-ancestors': ["'none'"]
+	});
 
 	// A non-document response is exactly what the header exists for — the meta
 	// tag cannot reach it.
