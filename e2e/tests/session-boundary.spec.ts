@@ -2,6 +2,7 @@ import { expect, test } from './fixtures';
 import {
 	createList,
 	disableConditionalMediation,
+	nicknameField,
 	registerAccount,
 	storeCount,
 	tapSyncConsole
@@ -34,12 +35,12 @@ test('signing out in one tab ends the session in the other', async ({ page, cont
 	// reads as "logout is broken" rather than "the harness logged back in".
 	await disableConditionalMediation(page);
 	await page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(page.getByLabel('Spitzname', { exact: true })).toBeVisible();
+	await expect(nicknameField(page)).toBeVisible();
 
 	// No reload of `other`: auth lives in memory PER TAB, so a reload would read
 	// the (correctly) cleared token and prove nothing about propagation. The
 	// BroadcastChannel is what has to reach this tab.
-	await expect(other.getByLabel('Spitzname', { exact: true })).toBeVisible();
+	await expect(nicknameField(other)).toBeVisible();
 	await expect(other.getByRole('button', { name: 'Auf diesem Gerät abmelden' })).toHaveCount(0);
 
 	// And it stays wiped: startSyncLoop suppresses focus triggers for
@@ -63,9 +64,9 @@ test('signing in in one tab brings the other tab to that account', async ({ page
 	await page.goto('/settings');
 	await disableConditionalMediation(page);
 	await page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(other.getByLabel('Spitzname', { exact: true })).toBeVisible();
+	await expect(nicknameField(other)).toBeVisible();
 
-	await page.getByLabel('Spitzname', { exact: true }).fill('Zweite');
+	await nicknameField(page).fill('Zweite');
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
 	await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
 

@@ -1,5 +1,11 @@
 import { expect, test, type Locator, type Page } from './fixtures';
-import { addItemByTyping, addVirtualAuthenticator, createList, openListView } from './helpers';
+import {
+	addItemByTyping,
+	addVirtualAuthenticator,
+	createList,
+	nicknameField,
+	openListView
+} from './helpers';
 
 // iOS Safari zooms the viewport whenever a focused text control computes below
 // 16 CSS px, and never zooms back on blur. The app removes the trigger, not
@@ -77,7 +83,7 @@ for (const vp of VIEWPORTS) {
 		test(`no text control is below the 16px focus-zoom floor (${vp.width}px)`, async ({ page }) => {
 			await addVirtualAuthenticator(page);
 			await page.goto('/');
-			const nickname = page.getByLabel('Spitzname', { exact: true });
+			const nickname = nicknameField(page);
 			await expectNoZoom(page, 'auth screen', nickname);
 
 			await nickname.fill(`Zoom${vp.width}`);

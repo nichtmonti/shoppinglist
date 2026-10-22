@@ -53,13 +53,23 @@ export async function addVirtualAuthenticator(
 }
 
 /**
+ * The auth screen's nickname field. By role, not by label: settings' own
+ * "Spitzname" row is labelled by the same text (aria-labelledby), so
+ * `getByLabel` finds it there and "the auth screen is up" holds before a
+ * sign-out from settings has happened.
+ */
+export function nicknameField(page: Page): Locator {
+	return page.getByRole('textbox', { name: 'Spitzname', exact: true });
+}
+
+/**
  * Registers a brand-new passkey account and waits for the §9.3 cold-start
  * home. Resolves the device that holds its passkey.
  */
 export async function registerAccount(page: Page, nickname: string): Promise<VirtualAuthenticator> {
 	const authenticator = await addVirtualAuthenticator(page);
 	await page.goto('/');
-	await page.getByLabel('Spitzname', { exact: true }).fill(nickname);
+	await nicknameField(page).fill(nickname);
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
 	await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
 	return authenticator;

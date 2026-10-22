@@ -4,6 +4,7 @@ import {
 	addVirtualAuthenticator,
 	createList,
 	inviteLinkFor,
+	nicknameField,
 	openListView,
 	registerAccount
 } from './helpers';
@@ -51,7 +52,7 @@ test('a visitor joins via the invite link, then a reset link retires the old one
 	// Create the account inline, from the join screen itself (§7.6: "one
 	// passkey tap → join" — the account-creation half is AuthScreen embedded
 	// right here, not a redirect).
-	await pageB.getByLabel('Spitzname', { exact: true }).fill('Ben');
+	await nicknameField(pageB).fill('Ben');
 	await pageB.getByRole('button', { name: 'Konto erstellen' }).click();
 
 	// The new account joins at once and the list opens ([D-241]): there is

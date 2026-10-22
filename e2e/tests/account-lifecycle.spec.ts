@@ -3,6 +3,7 @@ import {
 	addItemByTyping,
 	createList,
 	itemRow,
+	nicknameField,
 	openListView,
 	registerAccount,
 	shareListWith
@@ -108,7 +109,7 @@ test('delete account: solo list cascades, shared list survives for the other mem
 
 	// The session ends: the app shell swaps to the auth screen on its own
 	// (authState.isValid flips) — no navigation in the delete path.
-	await expect(pageA.getByLabel('Spitzname', { exact: true })).toBeVisible({ timeout: 15_000 });
+	await expect(nicknameField(pageA)).toBeVisible({ timeout: 15_000 });
 
 	// B still has the shared list, its items, and can still work in it — the
 	// §7.3 cascade must not have fired for a list that still has a member.

@@ -4,6 +4,7 @@ import {
 	disableConditionalMediation,
 	FAKE_BARCODE,
 	FAKE_IMAGE_URL,
+	nicknameField,
 	openListView,
 	openShopView,
 	registerAccount,
@@ -111,7 +112,7 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	await disableConditionalMediation(pageB, { acrossNavigations: true });
 	await pageB.goto('/settings');
 	await pageB.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(pageB.getByLabel('Spitzname', { exact: true })).toBeVisible();
+	await expect(nicknameField(pageB)).toBeVisible();
 	await expect.poll(() => pageB.evaluate(() => caches.has('photos'))).toBe(false);
 
 	await ctxA.close();

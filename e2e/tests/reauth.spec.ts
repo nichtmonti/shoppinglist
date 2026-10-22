@@ -4,6 +4,7 @@ import {
 	createList,
 	expireStoredToken,
 	itemRow,
+	nicknameField,
 	openListView,
 	registerAccount
 } from './helpers';
@@ -31,7 +32,7 @@ test('expired token: the app stays usable offline-style, the one-tap re-auth is 
 	// Still the real app — not bounced to the sign-in screen — and the one-tap
 	// re-auth is reachable right where §12.1 puts it, inside the list view.
 	await expect(page.getByRole('button', { name: /Sitzung abgelaufen/ })).toBeVisible();
-	await expect(page.getByLabel('Spitzname', { exact: true })).toHaveCount(0);
+	await expect(nicknameField(page)).toHaveCount(0);
 
 	// Local read/write is unaffected by the expired token (§5.8) — this queues
 	// into the outbox rather than syncing (no valid token to push with).

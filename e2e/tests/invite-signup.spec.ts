@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from './fixtures';
-import { addVirtualAuthenticator, createList, inviteLinkFor } from './helpers';
+import { addVirtualAuthenticator, createList, inviteLinkFor, nicknameField } from './helpers';
 import { INVITE_PORT } from '../server';
 
 // [D-241] SHOPPINGLIST_SIGNUP=invite, end to end on a real server
@@ -28,7 +28,7 @@ async function newDevice(browser: Browser): Promise<Page> {
 }
 
 async function createAccount(page: Page, nickname: string): Promise<void> {
-	await page.getByLabel('Spitzname', { exact: true }).fill(nickname);
+	await nicknameField(page).fill(nickname);
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
 }
 

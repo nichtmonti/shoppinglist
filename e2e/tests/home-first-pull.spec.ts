@@ -1,5 +1,5 @@
 import { expect, test } from './fixtures';
-import { createList, disableConditionalMediation, registerAccount } from './helpers';
+import { createList, disableConditionalMediation, nicknameField, registerAccount } from './helpers';
 
 // [D-182]: signing in starts from an empty local mirror (sign-out wipes it).
 // Until the first sync cycle's digest answers, the home shows a loading state —
@@ -17,7 +17,7 @@ test('a returning account sees its lists loading, never the welcome, after signi
 	await disableConditionalMediation(page, { acrossNavigations: true });
 	await page.goto('/settings');
 	await page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(page.getByLabel('Spitzname', { exact: true })).toBeVisible();
+	await expect(nicknameField(page)).toBeVisible();
 	// [D-185]: the sign-out itself lands on the home, so the next sign-in does
 	// not render /settings first.
 	await expect(page).toHaveURL(/\/$/);

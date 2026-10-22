@@ -4,6 +4,7 @@ import {
 	createList,
 	disableConditionalMediation,
 	itemRow,
+	nicknameField,
 	openListView,
 	readAuthBlob,
 	registerAccount,
@@ -42,17 +43,6 @@ async function authedReadStatus(page: Page): Promise<number> {
 		});
 		return resp.status;
 	}, token);
-}
-
-/** For a 200 where a 401 belongs: whether B still holds the token copied to
- *  it or got a newer one, and that token's expiry against the rotation's time
- *  (PocketBase's tokens carry `exp` only). */
-async function tokenStory(page: Page, copied: string, rotatedAt: number): Promise<string> {
-	const { token } = JSON.parse(await readAuthBlob(page)) as { token: string };
-	const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-	const { exp } = JSON.parse(Buffer.from(payload, 'base64').toString()) as { exp: number };
-	const which = token === copied ? 'the token copied to it' : 'a newer token';
-	return `B holds ${which}, exp ${exp}; the rotation started at ${rotatedAt}`;
 }
 
 test('log out everywhere: the other device’s still-unexpired token stops working', async ({
@@ -94,19 +84,17 @@ test('log out everywhere: the other device’s still-unexpired token stops worki
 	// screen's passkey autofill on its own, and could sign A back in between
 	// two polls for the screen below. The reload further down brings it back.
 	await disableConditionalMediation(pageA);
-	const rotatedAt = Math.floor(Date.now() / 1000);
 	await pageA.getByRole('button', { name: 'Überall abmelden' }).click();
 	// Confirmed first ([D-214]).
 	await pageA.getByRole('alertdialog').getByRole('button', { name: 'Überall abmelden' }).click();
 
 	// The caller's own token dies with the rest: the shell swaps to the auth
 	// screen on its own (authState.isValid flips), no navigation involved.
-	await expect(pageA.getByLabel('Spitzname', { exact: true })).toBeVisible();
+	await expect(nicknameField(pageA)).toBeVisible();
 
 	// The other device is now rejected by the server, even though its JWT has
 	// not expired and it never touched the app.
-	const copied = (JSON.parse(blob) as { token: string }).token;
-	expect(await authedReadStatus(pageB), await tokenStory(pageB, copied, rotatedAt)).toBe(401);
+	expect(await authedReadStatus(pageB)).toBe(401);
 
 	// And the rejection is real at the product level, not just at the API. B's
 	// session is still open (nothing pushed the news to it), so its write lands

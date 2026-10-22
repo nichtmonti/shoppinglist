@@ -6,6 +6,7 @@ import {
 	addVirtualAuthenticator,
 	chooseItemSort,
 	createList,
+	nicknameField,
 	openListView,
 	openShopView,
 	registerAccount,
@@ -261,7 +262,7 @@ async function runTheme(theme: Theme, browser: Browser): Promise<void> {
 	await authPage.emulateMedia({ colorScheme: t.scheme });
 	await addVirtualAuthenticator(authPage);
 	await authPage.goto('/');
-	const nicknameInput = authPage.getByLabel('Spitzname', { exact: true });
+	const nicknameInput = nicknameField(authPage);
 	await expect(nicknameInput).toBeVisible();
 	await assertThemeBase(authPage, theme);
 	await nicknameInput.fill('Anna');
