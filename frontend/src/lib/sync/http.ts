@@ -14,6 +14,8 @@ export interface ApiFetchOptions {
 	 * settles would stall sync until a reload.
 	 */
 	timeoutMs: number;
+	/** Cancels the request when its owner stops (the loop, a sign-out). */
+	signal?: AbortSignal;
 	method?: 'GET' | 'POST';
 	/** Sent as JSON. */
 	body?: unknown;
@@ -22,6 +24,12 @@ export interface ApiFetchOptions {
 /** An error for a non-2xx answer, or status 0 for none; `status` is what
  *  isAuthRejected and the sync status (health.ts) read. */
 type ApiError = Error & { status: number };
+
+/** `signal`, or nothing, plus a timeout: whichever comes first aborts. */
+export function withTimeout(signal: AbortSignal | undefined, ms: number): AbortSignal {
+	const timeout = AbortSignal.timeout(ms);
+	return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
 
 /**
  * Fetch one of the app's own routes as the signed-in account and return its
@@ -46,7 +54,7 @@ export async function apiJson(path: string, opts: ApiFetchOptions): Promise<unkn
 		method: opts.method ?? 'GET',
 		headers,
 		body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
-		signal: AbortSignal.timeout(opts.timeoutMs)
+		signal: withTimeout(opts.signal, opts.timeoutMs)
 	}).catch(noAnswer);
 	if (!resp.ok) {
 		if (resp.status === 401) markAuthExpired();

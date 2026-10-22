@@ -15,7 +15,7 @@ import {
 } from '#lib/sync/snapshot.js';
 import { checkAndMirrorReference, type MirrorOptions } from '#lib/sync/mirror.js';
 import { isAuthRejected, markAuthExpired } from '#lib/auth/state.js';
-import { sessionScope } from '#lib/auth/session.js';
+import { sessionScope, type SessionScope } from '#lib/auth/session.js';
 import type { Table } from 'dexie';
 import { purgeGoneList } from './purge';
 import type { DigestEntry } from './types';
@@ -29,9 +29,9 @@ export interface CycleDeps {
 	snapshotFetcher?: SnapshotFetcher; // reconcileDivergedLists ([D-40] delta and full snapshot)
 	snapshotIdsFetcher?: SnapshotIdsFetcher; // reconcileDivergedLists ([D-40] id set)
 	mirror?: MirrorOptions; // seed_version re-mirror
-	// Whether the caller has stopped: a queued cycle can start long after its
-	// caller tore down, so it checks this before every network call and write.
-	abandoned?: () => boolean;
+	// Aborted when the caller stops: a queued cycle can start long after its
+	// caller tore down. Its requests are cancelled, and it writes nothing more.
+	signal?: AbortSignal;
 }
 
 export interface CycleResult {
@@ -87,10 +87,11 @@ export function runSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
  * Queue `work` on the same chain as the cycles, so it never overlaps one in
  * this tab. The loop's debounced drain goes through here: two concurrent
  * drains on the same outbox can settle a stale server record over a newer
- * local edit (push.ts settleRecord). `work` must not reject.
+ * local edit (push.ts settleRecord). `work` must not reject. Skipped if
+ * `signal` is aborted by its turn: its owner stopped while it waited.
  */
-export function afterCycles(work: () => Promise<void>): void {
-	cycleTail = cycleTail.catch(() => {}).then(work);
+export function afterCycles(work: () => Promise<void>, signal?: AbortSignal): void {
+	cycleTail = cycleTail.catch(() => {}).then(() => (signal?.aborted ? undefined : work()));
 }
 
 /** Resolves once every cycle and drain queued so far has finished, however it ended. */
@@ -118,18 +119,32 @@ async function putOnlyChanged<T extends { id: string }>(
 	if (changed.length > 0) await table.bulkPut(changed);
 }
 
-async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
-	const nothing = (): CycleResult => ({
-		drained: 0,
-		failed: 0,
-		diverged: [],
-		purged: [],
-		mirrored: false
-	});
+const nothing = (): CycleResult => ({
+	drained: 0,
+	failed: 0,
+	diverged: [],
+	purged: [],
+	mirrored: false
+});
 
-	// Captured before the first await and asked before every write (§5.6 [D-109]).
+async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
+	// Captured before the first await (§5.6 [D-109]): the cycle ends with the
+	// session or with its caller, whichever comes first.
 	const session = sessionScope();
-	const abandoned = () => (deps.abandoned?.() ?? false) || !session.owned();
+	const signal = deps.signal ? AbortSignal.any([deps.signal, session.signal]) : session.signal;
+	try {
+		return await syncSteps(deps, { owned: () => !signal.aborted, signal });
+	} catch (error) {
+		// A request cancelled with the cycle ends it with nothing, not a failure.
+		if (signal.aborted) return nothing();
+		throw error;
+	}
+}
+
+async function syncSteps(deps: CycleDeps, scope: SessionScope): Promise<CycleResult> {
+	const { signal } = scope;
+	// Asked before every write, and between the steps.
+	const abandoned = () => signal.aborted;
 	// The check and the write in one transaction, so a sign-out's wipe cannot
 	// land between them and be undone (§5.6 [D-109]). False when abandoned.
 	const writeOwned = (tables: Table[], write: () => Promise<void>) =>
@@ -143,16 +158,14 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 
 	// 1. Drain the outbox.
 	const { drained, failed, error } =
-		deps.push === false
-			? { drained: 0, failed: 0 }
-			: await drainOutbox({ ...deps.drain, abandoned });
+		deps.push === false ? { drained: 0, failed: 0 } : await drainOutbox({ ...deps.drain, signal });
 	if (abandoned()) return nothing();
 
 	// 2. The digest, which carries the memberships ([D-28]). A 401 expires the
 	// session and aborts the cycle before anything is purged.
 	let server: DigestEntry[];
 	try {
-		server = await fetchServerDigest(deps.digestTransport);
+		server = await fetchServerDigest(deps.digestTransport, signal);
 	} catch (error) {
 		if (isAuthRejected(error)) markAuthExpired();
 		throw error;
@@ -208,7 +221,8 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 	await reconcileDivergedLists(
 		{ diverged, server, local },
 		deps.snapshotFetcher,
-		deps.snapshotIdsFetcher
+		deps.snapshotIdsFetcher,
+		scope
 	);
 	if (abandoned()) return nothing();
 
@@ -228,12 +242,12 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 	let mirrored = false;
 	if (!referenceMirrorChecked) {
 		try {
-			mirrored = await checkAndMirrorReference(deps.mirror ?? {});
+			mirrored = await checkAndMirrorReference(deps.mirror ?? {}, signal);
 			referenceMirrorChecked = true;
 		} catch (error) {
 			// Retried next cycle; reported once a session, since a device whose
 			// fetch always fails would otherwise lack the vocabulary unnoticed.
-			reportUncaught(error, 'reference mirror');
+			if (!abandoned()) reportUncaught(error, 'reference mirror');
 		}
 	}
 

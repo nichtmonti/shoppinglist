@@ -533,7 +533,7 @@ describe('snapshot.ts', () => {
 			const items = await db.items.where('list').equals('list-1').toArray();
 			expect(items.map((i) => i.id).sort()).toEqual(['item-a', 'item-c']);
 			expect(fetcher).toHaveBeenCalledTimes(1);
-			expect(idsFetcher).toHaveBeenCalledWith('list-1');
+			expect(idsFetcher).toHaveBeenCalledWith('list-1', expect.any(AbortSignal));
 			expect((await localDigest('list-1')).hash).toBe(server.hash);
 		});
 

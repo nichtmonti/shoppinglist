@@ -1250,7 +1250,7 @@ describe('push', () => {
 		await seedOp({ record_id: item.id });
 		const transport = vi.fn();
 
-		const summary = await drainOutbox({ transport, abandoned: () => true });
+		const summary = await drainOutbox({ transport, signal: AbortSignal.abort() });
 
 		expect(transport).not.toHaveBeenCalled();
 		expect(summary).toEqual({ drained: 0, failed: 0, requeued: 0 });

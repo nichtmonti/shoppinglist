@@ -13,7 +13,11 @@ export interface SnapshotRows {
 	categories: object[];
 }
 
-export type SnapshotFetcher = (listId: string, since?: string) => Promise<SnapshotRows>;
+export type SnapshotFetcher = (
+	listId: string,
+	since?: string,
+	signal?: AbortSignal
+) => Promise<SnapshotRows>;
 
 /** A list's ids, tombstones included: the server's row set without the rows. */
 export interface SnapshotIds {
@@ -21,16 +25,17 @@ export interface SnapshotIds {
 	categories: string[];
 }
 
-export type SnapshotIdsFetcher = (listId: string) => Promise<SnapshotIds>;
+export type SnapshotIdsFetcher = (listId: string, signal?: AbortSignal) => Promise<SnapshotIds>;
 
 // GET /api/sync/snapshot/{listId} ([D-173]); `?since=` asks for the delta,
 // `?ids` for the id set ([D-40]). Not the collection API, which answers a lost
 // list or a rejected token with an empty 200 the sweep would read as "empty
 // list"; this route answers 401/403.
-async function getSnapshot(listId: string, query: string, what: string) {
+async function getSnapshot(listId: string, query: string, what: string, signal?: AbortSignal) {
 	const body = (await apiJson(`/api/sync/snapshot/${encodeURIComponent(listId)}${query}`, {
 		label: 'sync/snapshot',
-		timeoutMs: 10_000
+		timeoutMs: 10_000,
+		signal
 	})) as { items?: unknown; categories?: unknown };
 	if (!Array.isArray(body.items) || !Array.isArray(body.categories)) {
 		throw new Error(`sync/snapshot: response is not ${what}`);
@@ -38,13 +43,17 @@ async function getSnapshot(listId: string, query: string, what: string) {
 	return { items: body.items as unknown[], categories: body.categories as unknown[] };
 }
 
-async function defaultFetcher(listId: string, since?: string): Promise<SnapshotRows> {
+async function defaultFetcher(
+	listId: string,
+	since?: string,
+	signal?: AbortSignal
+): Promise<SnapshotRows> {
 	const query = since ? `?since=${encodeURIComponent(since)}` : '';
-	return (await getSnapshot(listId, query, 'a snapshot')) as SnapshotRows;
+	return (await getSnapshot(listId, query, 'a snapshot', signal)) as SnapshotRows;
 }
 
-async function defaultIdsFetcher(listId: string): Promise<SnapshotIds> {
-	const body = await getSnapshot(listId, '?ids', 'an id set');
+async function defaultIdsFetcher(listId: string, signal?: AbortSignal): Promise<SnapshotIds> {
+	const body = await getSnapshot(listId, '?ids', 'an id set', signal);
 	if (![...body.items, ...body.categories].every((id) => typeof id === 'string')) {
 		throw new Error('sync/snapshot: response is not an id set');
 	}
@@ -58,7 +67,7 @@ export async function reconcileList(
 	fetcher: SnapshotFetcher = defaultFetcher,
 	session: SessionScope = sessionScope()
 ): Promise<void> {
-	const snap = await fetcher(listId);
+	const snap = await fetcher(listId, undefined, session.signal);
 	await db.transaction('rw', allCollectionTables(), async () => {
 		if (!session.owned()) return;
 		await reconcileCollection('items', listId, snap.items);
@@ -102,7 +111,7 @@ async function forgetVanished(
 	idsFetcher: SnapshotIdsFetcher,
 	session: SessionScope
 ): Promise<void> {
-	const ids = await idsFetcher(listId);
+	const ids = await idsFetcher(listId, session.signal);
 	await db.transaction('rw', allCollectionTables(), async () => {
 		if (!session.owned()) return; // see reconcileList
 		await forgetAbsent('items', listId, new Set(ids.items));
@@ -117,7 +126,7 @@ async function applyDelta(
 	fetcher: SnapshotFetcher,
 	session: SessionScope
 ): Promise<void> {
-	const snap = await fetcher(listId, since);
+	const snap = await fetcher(listId, since, session.signal);
 	await db.transaction('rw', allCollectionTables(), async () => {
 		if (!session.owned()) return; // see reconcileList
 		await applyServerRows('items', snap.items);
@@ -139,10 +148,11 @@ export interface DivergenceInput {
 export async function reconcileDivergedLists(
 	input: DivergenceInput,
 	fetcher: SnapshotFetcher = defaultFetcher,
-	idsFetcher: SnapshotIdsFetcher = defaultIdsFetcher
+	idsFetcher: SnapshotIdsFetcher = defaultIdsFetcher,
+	// Captured once for the whole pass (§5.6 [D-109]); a caller passes its own
+	// to end the pass with it.
+	session: SessionScope = sessionScope()
 ): Promise<void> {
-	// Captured once for the whole pass (§5.6 [D-109]).
-	const session = sessionScope();
 	const serverById = new Map(input.server.map((d) => [d.list_id, d]));
 	for (const listId of input.diverged) {
 		if (!session.owned()) return;

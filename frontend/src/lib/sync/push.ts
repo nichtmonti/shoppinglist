@@ -11,23 +11,30 @@ import { purgeGoneList } from './purge';
 import { sessionScope } from '../auth/session';
 
 // A transport sends a batch of ops and returns the server's per-op results.
-export type PushTransport = (ops: PushOp[]) => Promise<{ results: PushResult[] }>;
+export type PushTransport = (
+	ops: PushOp[],
+	signal?: AbortSignal
+) => Promise<{ results: PushResult[] }>;
 
 // The real transport: POST /api/sync/push as the signed-in account.
-async function defaultTransport(ops: PushOp[]): Promise<{ results: PushResult[] }> {
+async function defaultTransport(
+	ops: PushOp[],
+	signal?: AbortSignal
+): Promise<{ results: PushResult[] }> {
 	return (await apiJson('/api/sync/push', {
 		label: 'sync/push',
 		method: 'POST',
 		body: { ops },
-		timeoutMs: 15_000
+		timeoutMs: 15_000,
+		signal
 	})) as { results: PushResult[] };
 }
 
 export interface DrainOptions extends SyncNotices {
 	transport?: PushTransport; // default = defaultTransport (real fetch)
-	// True once the drain's owner stopped (the loop's stop(), a sign-out): no
-	// batch goes out after it, and the rest stay queued.
-	abandoned?: () => boolean;
+	// Aborted when the drain's owner stops (the loop's stop()): the request in
+	// flight is cancelled, no batch goes out after it, and the rest stay queued.
+	signal?: AbortSignal;
 }
 
 export interface DrainSummary {
@@ -46,6 +53,8 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 	const transport = opts.transport ?? defaultTransport;
 	// §5.6 [D-109]: a response after sign-out settles nothing.
 	const session = sessionScope();
+	// Ends with the session or with the owner, whichever comes first.
+	const signal = opts.signal ? AbortSignal.any([opts.signal, session.signal]) : session.signal;
 	const ops = await pendingOpsOrdered();
 	if (ops.length === 0) return { drained: 0, failed: 0, requeued: 0 };
 
@@ -92,11 +101,13 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 			queued_at: o.queued_at
 		}));
 
-		if (opts.abandoned?.()) return { drained, failed, requeued };
+		if (signal.aborted) return { drained, failed, requeued };
 		let resp: { results: PushResult[] };
 		try {
-			resp = await transport(wireOps);
+			resp = await transport(wireOps, signal);
 		} catch (error) {
+			// Cancelled by its owner: not a failure, and the ops stay queued.
+			if (signal.aborted) return { drained, failed, requeued };
 			// A failed send keeps this batch and the rest, in order, for the retry.
 			return { drained, failed: failed + (ops.length - i), requeued, error };
 		}

@@ -51,14 +51,15 @@ export async function localDigests(): Promise<Map<string, Digest>> {
 	return new Map(entries);
 }
 
-export type DigestTransport = () => Promise<DigestEntry[]>;
+export type DigestTransport = (signal?: AbortSignal) => Promise<DigestEntry[]>;
 
-async function defaultDigestTransport(): Promise<DigestEntry[]> {
+async function defaultDigestTransport(signal?: AbortSignal): Promise<DigestEntry[]> {
 	// A 401 (RequireAuth) throws with its status, which the cycle reads to tell
 	// a rejected token from a transient failure.
 	return (await apiJson('/api/sync/digest', {
 		label: 'sync/digest',
-		timeoutMs: 10_000
+		timeoutMs: 10_000,
+		signal
 	})) as DigestEntry[];
 }
 
@@ -89,7 +90,8 @@ export function computeDivergence(
 // The server digest, fetched before the local ones: the purge runs on its
 // membership set first ([D-28]).
 export function fetchServerDigest(
-	transport: DigestTransport = defaultDigestTransport
+	transport: DigestTransport = defaultDigestTransport,
+	signal?: AbortSignal
 ): Promise<DigestEntry[]> {
-	return transport();
+	return transport(signal);
 }

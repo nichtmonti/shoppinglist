@@ -506,7 +506,7 @@ describe('startSyncLoop: an edit made while its op is in flight', () => {
 });
 
 // Teardown completeness: stop() must leave no path that still does work —
-// a cycle queued behind cycleTail is dropped via `abandoned`, a liveQuery
+// a cycle queued behind cycleTail is dropped via its aborted signal, a liveQuery
 // emission after teardown must not re-arm the debounced drain, and a dropped
 // cycle must not fan out to onCycle.
 describe('startSyncLoop teardown', () => {
@@ -574,13 +574,13 @@ describe('startSyncLoop teardown', () => {
 		await vi.waitFor(() => expect(onLeadership.mock.calls).toEqual([[true], [false]]));
 	});
 
-	it('runSyncCycle with abandoned() true touches nothing and settles empty', async () => {
+	it('runSyncCycle with an aborted signal touches nothing and settles empty', async () => {
 		const digestTransport = vi.fn().mockResolvedValue([]);
 		const drainTransport = vi.fn().mockResolvedValue({ results: [] });
 		const result = await runSyncCycle({
 			digestTransport,
 			drain: { transport: drainTransport },
-			abandoned: () => true
+			signal: AbortSignal.abort()
 		});
 		expect(result).toEqual({ drained: 0, failed: 0, diverged: [], purged: [], mirrored: false });
 		expect(digestTransport).not.toHaveBeenCalled();
@@ -704,6 +704,51 @@ describe('startSyncLoop teardown', () => {
 		} finally {
 			release();
 			stop();
+		}
+	});
+
+	// [D-341] stop() cancels what is under way, not only what comes after: the
+	// transports get the loop's signal, and fetch aborts on it.
+	it('a request in flight at stop() has its signal aborted', async () => {
+		let pushSignal: AbortSignal | undefined;
+		const drainTransport = vi.fn().mockImplementation((_ops: unknown, signal?: AbortSignal) => {
+			pushSignal = signal;
+			// Never answers on its own; rejects on abort, as fetch does.
+			return new Promise((_, reject) =>
+				signal?.addEventListener('abort', () => reject(signal.reason as Error))
+			);
+		});
+		await db.pending_ops.add({
+			op_id: 'op-in-flight',
+			collection: 'items',
+			record_id: 'item-f',
+			list_id: 'list-f',
+			type: 'create',
+			changed: { name: 'F' },
+			base: {},
+			queued_at: new Date().toISOString()
+		});
+		const stop = startSyncLoop({
+			cycleMs: 60_000,
+			retryMs: 30,
+			digestTransport: vi.fn().mockResolvedValue([]),
+			drain: { transport: drainTransport },
+			snapshotFetcher: vi.fn().mockResolvedValue({ items: [], categories: [] }),
+			snapshotIdsFetcher: vi.fn().mockResolvedValue({ items: [], categories: [] }),
+			mirror: {
+				versionTransport: vi.fn().mockResolvedValue('1'),
+				referenceFetcher: vi.fn().mockResolvedValue({ templates: [], dictionary: [] })
+			}
+		});
+		try {
+			await vi.waitFor(() => expect(pushSignal).toBeDefined(), { timeout: 5000 });
+			expect(pushSignal?.aborted).toBe(false);
+			stop();
+			expect(pushSignal?.aborted).toBe(true);
+			await cyclesSettled();
+		} finally {
+			stop();
+			await db.pending_ops.delete('op-in-flight');
 		}
 	});
 

@@ -59,7 +59,17 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	// Declared before `cycle`: without Web Locks the first cycle runs
 	// synchronously, and reads these.
 	let retryTimer: ReturnType<typeof setTimeout> | null = null;
-	let stopped = false;
+	// Aborted by stop(): every cycle and drain carries it, so their requests are
+	// cancelled and nothing they queued runs after it ([D-341]).
+	const life = new AbortController();
+	const { signal } = life;
+	const work = opts.signal ? AbortSignal.any([signal, opts.signal]) : signal;
+	// The loop's own follow-up to a cycle or drain, dropped once it stopped.
+	const live =
+		<A extends unknown[]>(fn: (...args: A) => void) =>
+		(...args: A) => {
+			if (!signal.aborted) fn(...args);
+		};
 	const clearRetry = () => {
 		if (retryTimer !== null) {
 			clearTimeout(retryTimer);
@@ -76,80 +86,69 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	const report = (failed: number, error: unknown) => {
 		void recordExchange(failed > 0 ? (error ?? NO_RESULT) : null).catch(() => {});
 	};
-	const cycle = () => {
-		// A retry armed before teardown must not resurrect a stopped loop.
-		if (stopped) return;
+	const cycle = live(() => {
 		clearRetry();
 		inFlight++;
 		void recordStart().catch(() => {});
-		void runSyncCycle({
-			...opts,
-			drain: drainOpts,
-			abandoned: () => stopped || (opts.abandoned?.() ?? false)
-		})
-			.then((result) => {
-				// Not for a stopped loop: onCycle makes network calls.
-				if (stopped) return;
-				report(result.failed, result.error);
-				opts.onCycle?.(result);
-				// A push that failed in a cycle whose digest succeeded retries too
-				// ([D-139]): resending a frozen layer writes nothing, so no
-				// pending_ops change would schedule the next drain.
-				if (result.failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
-			})
-			.catch((err) => {
-				console.error('[sync] cycle failed:', err);
-				// A stopped loop must not re-arm its retry.
-				if (stopped) return;
-				void recordExchange(err).catch(() => {});
-				// [D-164]: a transient failure retries soon rather than a tick later.
-				retryTimer = setTimeout(cycle, retryMs);
-			})
+		void runSyncCycle({ ...opts, drain: drainOpts, signal: work })
+			.then(
+				live((result: CycleResult) => {
+					report(result.failed, result.error);
+					opts.onCycle?.(result);
+					// A push that failed in a cycle whose digest succeeded retries too
+					// ([D-139]): resending a frozen layer writes nothing, so no
+					// pending_ops change would schedule the next drain.
+					if (result.failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
+				})
+			)
+			.catch(
+				live((err: unknown) => {
+					console.error('[sync] cycle failed:', err);
+					void recordExchange(err).catch(() => {});
+					// [D-164]: a transient failure retries soon rather than a tick later.
+					retryTimer = setTimeout(cycle, retryMs);
+				})
+			)
 			.finally(() => {
 				inFlight--;
 				lastCycleFinished = Date.now();
 			});
-	};
+	});
 
 	// The debounced drain on pending_ops changes, subscribed under leadership so
 	// only the leader pushes (§8.7, [D-109]).
 	let drainTimer: ReturnType<typeof setTimeout> | null = null;
 	let sub: { unsubscribe: () => void } | null = null;
-	const scheduleDrain = () => {
-		// Not after stop(), nor while a failure retry is pending, which drains
-		// first anyway ([D-139]).
-		if (stopped || retryTimer !== null) return;
+	// Not while a failure retry is pending, which drains first anyway ([D-139]).
+	const scheduleDrain = live(() => {
+		if (retryTimer !== null) return;
 		if (drainTimer) clearTimeout(drainTimer);
 		// Behind the cycles, so it never overlaps a cycle's own drain.
-		drainTimer = setTimeout(() => {
-			if (stopped || retryTimer !== null) return;
-			afterCycles(async () => {
-				// Queued behind a running cycle, it can come up after stop().
-				if (stopped) return;
-				void recordStart().catch(() => {});
-				const summary = await drainOutbox({ ...drainOpts, abandoned: () => stopped }).catch(
-					(error: unknown) => ({
-						drained: 0,
-						failed: 1,
-						requeued: 0,
-						error
-					})
-				);
-				const { failed } = summary;
-				// A drain that sent nothing spoke to no one.
-				if (!stopped && summary.drained + summary.failed + summary.requeued > 0) {
-					report(failed, summary.error);
-				} else if (!stopped) {
-					void recordEnd().catch(() => {});
-				}
-				// An undelivered push hands over to the one failure retry
-				// ([D-139]); re-queued ops already scheduled their own drain.
-				if (failed > 0 && !stopped && retryTimer === null) {
-					retryTimer = setTimeout(cycle, retryMs);
-				}
-			});
-		}, 500);
-	};
+		drainTimer = setTimeout(
+			live(() => {
+				if (retryTimer !== null) return;
+				afterCycles(async () => {
+					void recordStart().catch(() => {});
+					const summary = await drainOutbox({ ...drainOpts, signal: work }).catch(
+						(error: unknown) => ({ drained: 0, failed: 1, requeued: 0, error })
+					);
+					live(() => {
+						const { failed } = summary;
+						// A drain that sent nothing spoke to no one.
+						if (summary.drained + summary.failed + summary.requeued > 0) {
+							report(failed, summary.error);
+						} else {
+							void recordEnd().catch(() => {});
+						}
+						// An undelivered push hands over to the one failure retry
+						// ([D-139]); re-queued ops already scheduled their own drain.
+						if (failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
+					})();
+				}, work);
+			}),
+			500
+		);
+	});
 
 	const retrigger = () => {
 		if (inFlight > 0 || Date.now() - lastCycleFinished < MIN_RETRIGGER_MS) return;
@@ -185,8 +184,8 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	let tickTimer: ReturnType<typeof setInterval> | null = null;
 
 	// Everything that talks to the server starts here, under leadership.
-	const startLeaderWork = () => {
-		if (stopped) return; // stopped before leadership was granted
+	// Not when stopped before leadership was granted.
+	const startLeaderWork = live(() => {
 		opts.onLeadership?.(true);
 		runNow = cycle;
 		syncNowChannel.onmessage = () => runNow?.();
@@ -201,7 +200,7 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 			// Dead from here on: no queued change starts a drain but the tick.
 			error: (error) => reportUncaught(error, 'outbox count')
 		});
-	};
+	});
 
 	// What startLeaderWork attached: no trigger starts a cycle or a drain after this.
 	const detachTriggers = () => {
@@ -234,8 +233,8 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	const stopLeadership = requestLeadership(startLeaderWork, { onRelease: releaseLeaderWork });
 
 	return () => {
-		if (stopped) return;
-		stopped = true;
+		if (signal.aborted) return;
+		life.abort();
 		detachTriggers();
 		stopLeadership();
 		clearRetry();

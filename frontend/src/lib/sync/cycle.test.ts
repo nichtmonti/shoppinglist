@@ -267,7 +267,7 @@ describe('sync cycle', () => {
 		});
 
 		expect(drainTransport).toHaveBeenCalledTimes(1);
-		expect(snapshotFetcher).toHaveBeenCalledWith(listId);
+		expect(snapshotFetcher).toHaveBeenCalledWith(listId, undefined, expect.any(AbortSignal));
 		expect(result.drained).toBe(1); // 1 op applied
 		expect(result.diverged).toEqual([listId]);
 		expect(result.purged).toEqual([]);

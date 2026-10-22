@@ -4,13 +4,19 @@
 // entry, so nothing writes behind a sign-out's wipe. For a Dexie write, ask
 // inside the transaction: the wipe's transaction cannot interleave there.
 //
-// Sign-out crosses tabs over a BroadcastChannel. Each tab compares only its own
-// counter with itself, so a remote sign-out just bumps this tab's counter.
+// A session is an AbortSignal, aborted when it ends: its requests pass it to
+// fetch and are cancelled with it. Sign-out crosses tabs over a
+// BroadcastChannel; a remote sign-out ends this tab's session too.
 // A sign-in crosses them too: the tabs share the stored token and the local
 // mirror, so a browser profile holds one account at a time ([D-109]), and a
 // tab on another account, or on none, takes up the new one.
 
-let epoch = 0;
+let session = new AbortController();
+
+function endHere(): void {
+	session.abort();
+	session = new AbortController();
+}
 
 const CHANNEL = 'shoppinglist_session';
 let channel: BroadcastChannel | null = null;
@@ -30,7 +36,7 @@ function sessionChannel(): BroadcastChannel {
 				return;
 			}
 			if (data?.type !== 'ended') return;
-			epoch++;
+			endHere();
 			for (const listener of remoteListeners) {
 				try {
 					listener();
@@ -43,15 +49,16 @@ function sessionChannel(): BroadcastChannel {
 	return channel;
 }
 
-/** A captured session: `owned()` stays true until that session ends. */
+/** A captured session: `owned()` stays true, and `signal` unaborted, until that session ends. */
 export interface SessionScope {
 	owned(): boolean;
+	signal: AbortSignal;
 }
 
 /** Capture the live session, before the first await of the work it guards. */
 export function sessionScope(): SessionScope {
-	const captured = epoch;
-	return { owned: () => captured === epoch };
+	const { signal } = session;
+	return { owned: () => !signal.aborted, signal };
 }
 
 /**
@@ -60,13 +67,13 @@ export function sessionScope(): SessionScope {
  * in-flight work is disowned before it could write behind the wipe.
  */
 export function endSession(): void {
-	epoch++;
+	endHere();
 	sessionChannel().postMessage({ type: 'ended' });
 }
 
 /**
- * Register a teardown to run when ANOTHER tab ends the session. The epoch is
- * already bumped when it fires.
+ * Register a teardown to run when ANOTHER tab ends the session. This tab's
+ * session has already ended when it fires.
  */
 export function onRemoteSessionEnd(listener: () => void): () => void {
 	sessionChannel();
@@ -91,7 +98,7 @@ export function onRemoteSessionStart(listener: (accountId: string) => void): () 
 
 /** Test seam: drop cross-tab state between cases. */
 export function resetSessionForTest(): void {
-	epoch = 0;
+	session = new AbortController();
 	remoteListeners.clear();
 	startListeners.clear();
 	channel?.close();

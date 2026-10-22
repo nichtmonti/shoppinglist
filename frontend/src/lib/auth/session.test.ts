@@ -94,6 +94,15 @@ describe('a sign-out in this tab', () => {
 		// logout() clears its own auth itself.
 		expect(ownTeardown).not.toHaveBeenCalled();
 	});
+
+	// [D-341] Its requests pass the session's signal to fetch: they are
+	// cancelled with it, and the next session's work starts unaborted.
+	it('aborts the session signal, and the next session has a fresh one', () => {
+		const inFlight = sessionScope();
+		endSession();
+		expect(inFlight.signal.aborted).toBe(true);
+		expect(sessionScope().signal.aborted).toBe(false);
+	});
 });
 
 // A sign-in crosses tabs too ([D-109]): the tabs share the stored token and
