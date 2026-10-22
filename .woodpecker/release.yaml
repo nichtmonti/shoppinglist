@@ -121,7 +121,7 @@ steps:
   # from `release` because the frontend build needs Node and goreleaser's own
   # image has none; it runs in the CI image, as the suites do ([D-203]).
   release-frontend:
-    image: localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-d281e486
+    image: localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-386ad4a9
     commands:
       # go-task as frontend.yaml installs it; .gomod and .task are gitignored,
       # so goreleaser still sees a clean tree.

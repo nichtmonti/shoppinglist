@@ -13,9 +13,10 @@
 # .woodpecker/ci-image.yaml, its tag printed by scripts/ci-image-tag.sh). `dev`
 # adds what a person or an agent working in the container needs on top, and is
 # the stage devcontainer.json builds. One file, so CI and the devcontainer run
-# the same toolchain.
+# the same toolchain. The base is pinned by digest: the release builds its SPA
+# in this image, and a tag can be re-pushed.
 
-FROM golang:1.27.3-trixie AS toolchain
+FROM golang:1.27.3-trixie@sha256:fbb7ae40b62ff8afe31662df570d39b4f5052ac32b90dae8e60d7657a20a74f4 AS toolchain
 
 # --- Base apt deps (xz-utils needed to unpack the Node tarball) ---------------
 # python3-venv: diff-cover runs from a venv of its own, installed from

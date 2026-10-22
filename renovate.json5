@@ -16,7 +16,8 @@
 //   npm       package.json + frontend/ + e2e/ (three separate pnpm projects,
 //             no workspace root)
 //   gomod     backend/go.mod + tools/<name>/go.mod (the dev tools, [D-75])
-//   dockerfile  Dockerfile (distroless, digest-pinned) + .devcontainer/Dockerfile
+//   dockerfile  Dockerfile and .devcontainer/Dockerfile, both bases digest-pinned
+//             (the CI image builds the released SPA; Renovate moves the digest)
 //   woodpecker  every step image in .woodpecker/
 //   pip_requirements  tools/diff-cover/requirements.txt, versions and their
 //             hashes (hashin), the one Python tool ([D-203])
