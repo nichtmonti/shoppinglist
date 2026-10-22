@@ -129,12 +129,20 @@ test('CSP: the response header and the index.html meta tag carry the same policy
 	// Every directive and its exact sources, so that dropping one breaks here
 	// rather than in the field, and so does widening one ('unsafe-inline' or a
 	// host added to script-src for a library). Only the build's hashes vary.
+	const directives = header.split(';').map((d) => d.trim().split(/\s+/));
 	const policy = Object.fromEntries(
-		header.split(';').map((d) => {
-			const [name, ...sources] = d.trim().split(/\s+/);
-			return [name, sources.filter((s) => !s.startsWith("'sha256-"))];
-		})
+		directives.map(([name, ...sources]) => [name, sources.filter((s) => !s.startsWith("'sha256-"))])
 	);
+	// One hash each: the boot script's and mode-watcher's style; another would
+	// let an inline script or style in.
+	const hashes = Object.fromEntries(
+		directives.map(([name, ...sources]) => [
+			name,
+			sources.filter((s) => s.startsWith("'sha256-")).length
+		])
+	);
+	expect(hashes['script-src'], 'script-src hashes').toBe(1);
+	expect(hashes['style-src'], 'style-src hashes').toBe(1);
 	expect(policy).toEqual({
 		'default-src': ["'self'"],
 		'frame-src': ["'none'"],
