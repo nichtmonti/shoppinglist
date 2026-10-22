@@ -127,12 +127,14 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 				// Queued behind a running cycle, it can come up after stop().
 				if (stopped) return;
 				void recordStart().catch(() => {});
-				const summary = await drainOutbox(drainOpts).catch((error: unknown) => ({
-					drained: 0,
-					failed: 1,
-					requeued: 0,
-					error
-				}));
+				const summary = await drainOutbox({ ...drainOpts, abandoned: () => stopped }).catch(
+					(error: unknown) => ({
+						drained: 0,
+						failed: 1,
+						requeued: 0,
+						error
+					})
+				);
 				const { failed } = summary;
 				// A drain that sent nothing spoke to no one.
 				if (!stopped && summary.drained + summary.failed + summary.requeued > 0) {

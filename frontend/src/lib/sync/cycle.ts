@@ -143,7 +143,9 @@ async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 
 	// 1. Drain the outbox.
 	const { drained, failed, error } =
-		deps.push === false ? { drained: 0, failed: 0 } : await drainOutbox(deps.drain ?? {});
+		deps.push === false
+			? { drained: 0, failed: 0 }
+			: await drainOutbox({ ...deps.drain, abandoned });
 	if (abandoned()) return nothing();
 
 	// 2. The digest, which carries the memberships ([D-28]). A 401 expires the

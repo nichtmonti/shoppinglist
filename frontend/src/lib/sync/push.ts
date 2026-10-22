@@ -25,6 +25,9 @@ async function defaultTransport(ops: PushOp[]): Promise<{ results: PushResult[] 
 
 export interface DrainOptions extends SyncNotices {
 	transport?: PushTransport; // default = defaultTransport (real fetch)
+	// True once the drain's owner stopped (the loop's stop(), a sign-out): no
+	// batch goes out after it, and the rest stay queued.
+	abandoned?: () => boolean;
 }
 
 export interface DrainSummary {
@@ -89,6 +92,7 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 			queued_at: o.queued_at
 		}));
 
+		if (opts.abandoned?.()) return { drained, failed, requeued };
 		let resp: { results: PushResult[] };
 		try {
 			resp = await transport(wireOps);

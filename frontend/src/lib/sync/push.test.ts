@@ -1244,6 +1244,19 @@ describe('push', () => {
 		expect(await db.pending_ops.count()).toBe(0);
 	});
 
+	// The loop can stop while a drain reads the outbox: what it read is not sent.
+	it('an abandoned drain sends nothing and leaves its ops queued', async () => {
+		const item = await seedItem();
+		await seedOp({ record_id: item.id });
+		const transport = vi.fn();
+
+		const summary = await drainOutbox({ transport, abandoned: () => true });
+
+		expect(transport).not.toHaveBeenCalled();
+		expect(summary).toEqual({ drained: 0, failed: 0, requeued: 0 });
+		expect(await db.pending_ops.count()).toBe(1);
+	});
+
 	it('a batch that fails keeps itself and every later batch queued', async () => {
 		for (let i = 0; i < 501; i++) {
 			const item = await seedItem();
