@@ -75,7 +75,9 @@ test('a second visitor joins through the invite and sees changes arrive', async 
 test('signing out deletes the demo account', async ({ page }) => {
 	await startDemo(page);
 	await page.goto('/settings');
-	// Nothing to install, and no passkeys to manage, on a demo.
+	// Nothing to install, and no passkeys to manage, on a demo: checked once
+	// the screen is there, which it is not yet right after the goto.
+	await expect(page.getByRole('button', { name: 'Abmelden und löschen' })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'App installieren' })).toHaveCount(0);
 	await expect(page.getByRole('heading', { name: 'Passkeys' })).toHaveCount(0);
 

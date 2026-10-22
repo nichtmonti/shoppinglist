@@ -53,6 +53,23 @@ export async function addVirtualAuthenticator(
 }
 
 /**
+ * Runs `action` and waits for `marker`, which must not be visible before it.
+ * A wait the screen already satisfies lets a test run on before its action
+ * has landed, and flakes only when the next step outruns the action; checked
+ * first, it fails at once and on every run. For a marker of a new screen or
+ * state; a count or text that only changes needs its own before-and-after.
+ */
+export async function appearsAfter(
+	marker: Locator,
+	action: () => Promise<unknown>,
+	options?: { timeout?: number }
+): Promise<void> {
+	expect(await marker.isVisible(), 'the marker is visible before the action').toBe(false);
+	await action();
+	await expect(marker).toBeVisible(options);
+}
+
+/**
  * The auth screen's nickname field. By role, not by label: settings' own
  * "Spitzname" row is labelled by the same text (aria-labelledby), so
  * `getByLabel` finds it there and "the auth screen is up" holds before a
@@ -141,8 +158,9 @@ export async function shareListWith(owner: Page, joiner: Page): Promise<void> {
 /** Switches to the list view (the only place items are added, §9.1). */
 export async function openListView(page: Page): Promise<void> {
 	await page.getByTestId('view-toggle-list').click();
-	// The add bar exists in the list view only.
-	await expect(page.getByRole('combobox', { name: 'Artikel hinzufügen' })).toBeVisible();
+	// The add bar exists in the list view only, and is its one combobox: by
+	// role alone, it holds in every locale.
+	await expect(page.getByRole('combobox')).toBeVisible();
 }
 
 /** Picks the item order in the app bar's sort menu. Both views start by
@@ -158,18 +176,36 @@ export async function chooseItemSort(page: Page, order: 'az' | 'category'): Prom
 	);
 }
 
-/** Switches to the shop view (the only place items are checked off, §9.1). */
+/** Switches to the shop view (the only place items are checked off, §9.1).
+ *  Not the toggle's `aria-checked`: bits-ui flips that on the click itself.
+ *  The view and the add bar's absence hold in every locale. */
 export async function openShopView(page: Page): Promise<void> {
 	await page.getByTestId('view-toggle-shop').click();
-	await expect(page.getByTestId('view-toggle-shop')).toHaveAttribute('aria-checked', 'true');
-	await expect(page.getByRole('combobox', { name: 'Artikel hinzufügen' })).toHaveCount(0);
+	await expect(page.locator('.shop-view')).toBeVisible();
+	await expect(page.getByRole('combobox')).toHaveCount(0);
 }
 
-/** Types a name into the add box and submits it via Enter (§9). */
+/** Types a name into the add box, submits it via Enter (§9) and waits for
+ *  the add to be stored: the box empties only then (AddBar's commitName), and
+ *  the item's outbox entry is stored with it, so expectSynced() after this
+ *  waits for this item. */
 export async function addItemByTyping(page: Page, name: string): Promise<void> {
 	const input = page.getByRole('combobox', { name: 'Artikel hinzufügen' });
 	await input.fill(name);
 	await input.press('Enter');
+	await expect(input).toHaveValue('');
+}
+
+/**
+ * Every change this device stored has reached the server: its outbox is
+ * empty, and the chip says so. Not the chip alone, which says "synced" before
+ * a write is stored and until its live query has seen it. Sound only after the
+ * awaited change is stored (addItemByTyping waits for that; another change
+ * needs its own local marker first), since the outbox was empty before it too.
+ */
+export async function expectSynced(page: Page): Promise<void> {
+	await expect.poll(() => storeCount(page, 'pending_ops'), { timeout: 15_000 }).toBe(0);
+	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible();
 }
 
 /** The active-list row for an item name (A→Z mode). */
@@ -394,6 +430,28 @@ export async function storeCount(page: Page, store: string): Promise<number> {
 				req.onerror = () => reject(req.error);
 			}),
 		store
+	);
+}
+
+/** A `meta` value as this device stored it (`einkaufsliste_sync`), or
+ *  undefined: what survives a reload, whatever a screen shows already. */
+export async function storedMeta(page: Page, key: string): Promise<unknown> {
+	return page.evaluate(
+		(name) =>
+			new Promise<unknown>((resolve, reject) => {
+				const req = indexedDB.open('einkaufsliste_sync');
+				req.onsuccess = () => {
+					const db = req.result;
+					const query = db.transaction('meta').objectStore('meta').get(name);
+					query.onsuccess = () => {
+						resolve((query.result as { value?: unknown } | undefined)?.value);
+						db.close();
+					};
+					query.onerror = () => reject(query.error);
+				};
+				req.onerror = () => reject(req.error);
+			}),
+		key
 	);
 }
 

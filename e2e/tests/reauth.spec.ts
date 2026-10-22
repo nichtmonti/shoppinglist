@@ -2,6 +2,7 @@ import { expect, test } from './fixtures';
 import {
 	addItemByTyping,
 	createList,
+	expectSynced,
 	expireStoredToken,
 	itemRow,
 	nicknameField,
@@ -44,11 +45,7 @@ test('expired token: the app stays usable offline-style, the one-tap re-auth is 
 	await page.getByRole('button', { name: /Sitzung abgelaufen/ }).click();
 
 	// … and the preserved outbox drains immediately, with no re-adding needed.
-	// The synced sentence exists twice by design — the banner's sr-only text
-	// (AT channel) and the open tooltip's copy (sighted channel).
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 	await expect(itemRow(page, 'Käse')).toBeVisible();
 });
 
@@ -78,7 +75,5 @@ test('expired token: the re-auth tap is reachable from the home and from setting
 
 	// And it works from there: one tap, and the session is valid again.
 	await page.getByRole('button', { name: /Sitzung abgelaufen/ }).click();
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 });

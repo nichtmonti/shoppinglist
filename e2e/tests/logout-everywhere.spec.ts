@@ -1,8 +1,10 @@
 import { expect, test, type Page } from './fixtures';
 import {
 	addItemByTyping,
+	appearsAfter,
 	createList,
 	disableConditionalMediation,
+	expectSynced,
 	itemRow,
 	nicknameField,
 	openListView,
@@ -55,7 +57,7 @@ test('log out everywhere: the other device’s still-unexpired token stops worki
 	await createList(pageA, 'Wochenshop');
 	await openListView(pageA);
 	await addItemByTyping(pageA, 'Milch');
-	await expect(pageA.getByText('Alle Änderungen synchronisiert')).toBeVisible();
+	await expectSynced(pageA);
 
 	// Second device: same account, signed in, syncing from the server on its own.
 	const blob = await readAuthBlob(pageA);
@@ -85,12 +87,12 @@ test('log out everywhere: the other device’s still-unexpired token stops worki
 	// two polls for the screen below. The reload further down brings it back.
 	await disableConditionalMediation(pageA);
 	await pageA.getByRole('button', { name: 'Überall abmelden' }).click();
-	// Confirmed first ([D-214]).
-	await pageA.getByRole('alertdialog').getByRole('button', { name: 'Überall abmelden' }).click();
-
-	// The caller's own token dies with the rest: the shell swaps to the auth
-	// screen on its own (authState.isValid flips), no navigation involved.
-	await expect(nicknameField(pageA)).toBeVisible();
+	// Confirmed first ([D-214]). The caller's own token dies with the rest: the
+	// shell swaps to the auth screen on its own (authState.isValid flips), no
+	// navigation involved.
+	await appearsAfter(nicknameField(pageA), () =>
+		pageA.getByRole('alertdialog').getByRole('button', { name: 'Überall abmelden' }).click()
+	);
 
 	// The other device is now rejected by the server, even though its JWT has
 	// not expired and it never touched the app.
@@ -98,18 +100,21 @@ test('log out everywhere: the other device’s still-unexpired token stops worki
 
 	// And the rejection is real at the product level, not just at the API. B's
 	// session is still open (nothing pushed the news to it), so its write lands
-	// locally — but it cannot reach the server and stays pending in the outbox
-	// instead of settling to "all synced".
+	// locally — but the server refuses it, B shows its session as expired, and
+	// the write stays pending in the outbox. The expired chip, not the pending
+	// one: a refusal turns pending into expired, so pending holds only briefly.
 	await addItemByTyping(pageB, 'Butter');
 	await expect(itemRow(pageB, 'Butter')).toBeVisible();
-	await expect(pageB.getByText(/nicht synchronisiert/)).toBeVisible();
-	await expect(pageB.getByText('Alle Änderungen synchronisiert')).toHaveCount(0);
+	await expect(pageB.getByRole('button', { name: /Sitzung abgelaufen/ })).toBeVisible();
+	expect(await storeCount(pageB, 'pending_ops')).toBe(1);
 
 	// Relaunching B must preserve its offline mirror. The membership set rides
 	// on the digest route behind RequireAuth ([D-28]), so the revoked token is
 	// a 401 there — never an empty set the vanished-list purge would act on —
 	// and the cached membership, its items and the pending Butter write survive.
 	await pageB.reload();
+	// The start's refresh refused first: the counts below come after it.
+	await expect(pageB.getByRole('button', { name: /Sitzung abgelaufen/ })).toBeVisible();
 	await expect(itemRow(pageB, 'Milch')).toBeVisible();
 	await expect(itemRow(pageB, 'Butter')).toBeVisible();
 	expect(await storeCount(pageB, 'memberships')).toBe(1);

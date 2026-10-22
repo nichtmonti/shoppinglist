@@ -4,7 +4,9 @@ import path from 'node:path';
 import { expect, test } from './fixtures';
 import {
 	addItemByTyping,
+	appearsAfter,
 	createList,
+	expectSynced,
 	itemRow,
 	openListView,
 	openSameAccountDevice,
@@ -31,9 +33,7 @@ test('rename, duplicate, export and import a list, and a fresh device sees all t
 	await openListView(pageA);
 	await addItemByTyping(pageA, 'Milch');
 	await addItemByTyping(pageA, 'Butter');
-	await expect(pageA.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(pageA);
 
 	// ---- 1. rename: the list's one name, every member's ([D-08]; list-name.spec
 	// shows a co-member receiving it). Driven from the in-list ⋮
@@ -52,8 +52,11 @@ test('rename, duplicate, export and import a list, and a fresh device sees all t
 	// ---- 2. duplicate ("Duplizieren"): [D-72] POST /api/lists/{id}/clone,
 	// a transactional server route that copies items + categories into a fresh
 	// list. Back to the home for the card's ⋯ menu.
-	await pageA.getByRole('button', { name: 'Zurück' }).click();
-	await expect(pageA.getByRole('button', { name: `Aktionen für ${renamedName}` })).toBeVisible();
+	// The home's card link: the list page's own ⋮ has the same „Aktionen für …"
+	// name as the card's, so that one holds before the trip home.
+	await appearsAfter(pageA.getByRole('link', { name: `${renamedName} öffnen` }), () =>
+		pageA.getByRole('button', { name: 'Zurück' }).click()
+	);
 	await pageA.getByRole('button', { name: `Aktionen für ${renamedName}` }).click();
 	await pageA.getByRole('menuitem', { name: 'Duplizieren' }).click();
 	const cloneDialog = pageA.getByRole('dialog', { name: 'Liste duplizieren' });
@@ -102,9 +105,7 @@ test('rename, duplicate, export and import a list, and a fresh device sees all t
 	await expect(itemRow(pageA, 'Butter')).toBeVisible();
 
 	// Settle + no failure toast before trusting a fresh device.
-	await expect(pageA.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(pageA);
 	await expect(pageA.getByText(/konnte nicht synchronisiert werden/)).toHaveCount(0);
 
 	// ---- fresh same-account device: proof the writes reached the server, not

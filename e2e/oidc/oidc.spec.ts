@@ -2,6 +2,7 @@ import { expect, test } from '../tests/fixtures';
 import {
 	addVirtualAuthenticator,
 	createList,
+	expectSynced,
 	expireStoredToken,
 	registerAccount
 } from '../tests/helpers';
@@ -59,6 +60,9 @@ test('a passkey account links to an OIDC identity and keeps its lists and passke
 	await page.getByRole('button', { name: 'Mit Passkey anmelden' }).click();
 	await home(page);
 	await expect(page.getByText('Baumarkt')).toBeVisible();
+	// Still linked, where settings says so: the home has no link entry at all.
+	await page.goto('/settings');
+	await expect(page.getByText(/^Verbunden mit Dex/)).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Mit Dex verbinden' })).toHaveCount(0);
 
 	// ...and so does the provider.
@@ -256,8 +260,6 @@ test('a re-auth through a removed OIDC login is refused and the passkey takes ov
 
 	// The chip now offers the passkey, which signs back into this account.
 	await chip.click();
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 	await expect(page.getByRole('button', { name: 'Idas Liste', exact: true })).toBeVisible();
 });

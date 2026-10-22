@@ -3,6 +3,7 @@ import {
 	addItemByTyping,
 	chooseItemSort,
 	createList,
+	expectSynced,
 	itemRow,
 	openListView,
 	registerAccount
@@ -82,9 +83,6 @@ test('a shared Die Einkaufsliste list becomes a new list, sorted into our aisles
 	await expect(aisle('Brot')).toHaveAttribute('aria-label', /^Brot & Backwaren, /);
 	await expect(aisle('Erbsenmilch')).toHaveAttribute('aria-label', /^Milch & Kühlregal, /);
 	await expect(itemRow(page, 'Chiasamen')).toHaveCount(0);
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
 });
 
 // [D-292] Safari reloads a tab in the background: the shared list is still
@@ -111,9 +109,7 @@ test('text into an existing list, offline: only what it lacks, through the outbo
 	await createList(page, 'Wocheneinkauf');
 	await openListView(page);
 	await addItemByTyping(page, 'Milch');
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 
 	// Mealie's Markdown copy (a heading, checkboxes, an amount in front),
 	// pasted into the add field: a list goes to the review ([D-271]).
@@ -139,7 +135,5 @@ test('text into an existing list, offline: only what it lacks, through the outbo
 	await expect(itemRow(page, 'Milch')).toHaveCount(1);
 
 	await context.setOffline(false);
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 });

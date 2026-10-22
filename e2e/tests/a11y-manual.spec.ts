@@ -1,5 +1,12 @@
 import { expect, test } from './fixtures';
-import { createList, itemRow, openListView, openShopView, registerAccount } from './helpers';
+import {
+	addItemByTyping,
+	createList,
+	itemRow,
+	openListView,
+	openShopView,
+	registerAccount
+} from './helpers';
 
 // WCAG audit — checks axe cannot do: keyboard-only operation (focus visible,
 // sheet open/close/trap/restore), touch-target sweep (WCAG 2.5.8 ≥24px
@@ -13,8 +20,7 @@ async function setup(page: import('@playwright/test').Page): Promise<string> {
 	await registerAccount(page, 'Kai');
 	const listUrl = await createList(page, 'Küche');
 	await openListView(page);
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).fill('Milch');
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).press('Enter');
+	await addItemByTyping(page, 'Milch');
 	await itemRow(page, 'Milch').getByRole('button', { name: 'Menge hinzufügen' }).click();
 	await page.keyboard.type('1 l');
 	await page.keyboard.press('Enter');
@@ -79,7 +85,6 @@ test('touch targets: every interactive element meets ≥24px painted or ≥44px 
 	page
 }) => {
 	await setup(page);
-	await openShopView(page);
 	const offenders: string[] = [];
 
 	async function sweep(label: string): Promise<void> {
@@ -130,20 +135,30 @@ test('touch targets: every interactive element meets ≥24px painted or ≥44px 
 		offenders.push(...found.map((f) => `${label}: ${f}`));
 	}
 
+	// Each sweep after a marker of what it sweeps: one before it would measure
+	// the screen before, or a menu not yet open, and pass on fewer targets.
+	const menu = page.getByRole('menu');
 	await sweep('list');
 	await page.getByTestId('item-sort').click();
+	await expect(menu).toBeVisible();
 	await sweep('item sort menu');
 	await page.keyboard.press('Escape');
-	await page.getByTestId('view-toggle-shop').click();
+	await expect(menu).toHaveCount(0);
+	await openShopView(page);
+	await expect(page.getByTestId('tile').first()).toBeVisible();
 	await sweep('shop');
 	await page.goto('/');
 	await page.getByRole('button', { name: 'Aktionen für Küche' }).click();
+	await expect(menu).toBeVisible();
 	await sweep('list card menu');
 	await page.keyboard.press('Escape');
+	await expect(menu).toHaveCount(0);
 	await page.getByTestId('list-sort').click();
+	await expect(menu).toBeVisible();
 	await sweep('list sort menu');
 	await page.keyboard.press('Escape');
 	await page.goto('/settings');
+	await expect(page.getByTestId('app-version')).toBeVisible();
 	await sweep('settings');
 
 	expect(offenders, 'targets below 24px painted and below 44px effective').toEqual([]);
@@ -225,12 +240,15 @@ test('lang switches per locale (3.1.1) and every route sets a title (2.4.2)', as
 	const listUrl = await createList(page, 'Bad');
 
 	expect(await page.evaluate(() => document.documentElement.lang)).toBe('de');
-	const deTitles: string[] = [];
-	for (const path of ['/', '/settings', `${listUrl}/categories`]) {
+	// Each route's own title: app.html's static one is there before any route
+	// sets its title, so "not empty" held from the start.
+	for (const [path, title] of [
+		['/settings', 'Einstellungen'],
+		[`${listUrl}/categories`, 'Kategorien'],
+		[listUrl, 'Bad']
+	]) {
 		await page.goto(path);
-		const t = await page.title();
-		deTitles.push(t);
-		expect(t.trim(), `title on ${path}`).not.toBe('');
+		await expect(page, `title on ${path}`).toHaveTitle(title);
 	}
 
 	await page.goto('/settings');
@@ -245,10 +263,12 @@ test('lang switches per locale (3.1.1) and every route sets a title (2.4.2)', as
 		.toBe('en');
 
 	await page.goto(listUrl);
+	// The booted list in English first: app.html's own lang is "en" too.
+	await expect(page.getByTestId('view-toggle-shop')).toHaveText(/Shopping/);
 	await expect
 		.poll(() => page.evaluate(() => document.documentElement.lang), {
 			message: 'lang should survive a hard navigation to the list'
 		})
 		.toBe('en');
-	expect(await page.title()).not.toBe('');
+	await expect(page).toHaveTitle('Bad');
 });

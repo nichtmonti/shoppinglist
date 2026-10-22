@@ -2,10 +2,11 @@ import { expect, test } from './fixtures';
 import {
 	addItemByTyping,
 	createList,
+	expectSynced,
 	itemRow,
 	openListView,
-	openShopView,
 	openSameAccountDevice,
+	openShopView,
 	registerAccount
 } from './helpers';
 
@@ -75,9 +76,7 @@ test('detail-sheet edits, the inline quantity chip, remove and restore all reach
 	await expect(page.locator('[data-testid="tile"]', { hasText: 'Senf' })).toBeVisible();
 
 	// --- proof the writes reached the server: settle, no failure toast ---
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 	await expect(page.getByText(/konnte nicht synchronisiert werden/)).toHaveCount(0);
 
 	// --- a fresh same-account device proves it, not a reload of A (Dexie

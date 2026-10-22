@@ -102,8 +102,16 @@ test('the app column width is invariant across locales, pages and viewport heigh
 				for (const route of routes) {
 					await page.goto(route);
 					// The shell pads the body bottom and uses min-block-size: 100dvh;
-					// measure only once the column has actually rendered.
-					await expect(page.locator('.app-shell')).toBeVisible();
+					// measure only once the route itself has rendered: the shell is
+					// there before it, and a loading placeholder is no layout.
+					if (route === listUrl) {
+						await expect(
+							page.getByRole('button', { name: 'Layoutprobe', exact: true })
+						).toBeVisible();
+					} else if (route === '/') {
+						await expect(page.getByRole('link', { name: /Layoutprobe/ })).toBeVisible();
+					}
+					await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
 					// Settings is this sweep's page that scrolls, at 640px; since
 					// [D-269] it is short enough that it does so only once its last
 					// group and foot have rendered.
@@ -276,12 +284,12 @@ test('aisle headers follow the density tokens in both views', async ({ page }) =
 	// contended CI runner the pull can lose the race to the first evaluate.
 	await expect(page.locator('.cat-head').first()).toBeVisible({ timeout: 15_000 });
 
-	const headerPad = () =>
-		page.evaluate(() => {
-			const head = document.querySelector('.cat-head');
+	const headerPad = (scope = '') =>
+		page.evaluate((within) => {
+			const head = document.querySelector(`${within} .cat-head`);
 			if (!head) throw new Error('no .cat-head rendered');
 			return parseFloat(getComputedStyle(head).paddingBlockStart);
-		});
+		}, scope);
 	const aisleToken = () =>
 		page.evaluate(() =>
 			parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--aisle-py'))
@@ -299,15 +307,16 @@ test('aisle headers follow the density tokens in both views', async ({ page }) =
 	expect(compact).toBe(compactToken);
 	expect(compact).toBeLessThan(comfortable);
 
-	// And the shop view's headers move with the same token. Polled: the view
-	// switch can re-render the header between a visibility check and a
-	// one-shot read, which then finds no .cat-head at all.
-	await page.getByTestId('view-toggle-shop').click();
-	await expect(page.locator('.cat-head').first()).toBeVisible();
+	// And the shop view's headers move with the same token. Its own headers:
+	// both views draw the same AisleHeader, so a bare .cat-head is the list
+	// view's until the swap has landed. Polled: the view switch can re-render
+	// the header between a visibility check and a one-shot read.
+	await openShopView(page);
+	await expect(page.locator('.shop-view .cat-head').first()).toBeVisible();
 	// headerPad THROWS when no header is mounted, and expect.poll fails on a
 	// throw rather than retrying it, so a missing header reads as null here,
 	// which the poll simply retries.
-	await expect.poll(() => headerPad().catch(() => null)).toBe(compactToken);
+	await expect.poll(() => headerPad('.shop-view').catch(() => null)).toBe(compactToken);
 });
 
 test('the tile template follows the density tokens (name scale, note, gap)', async ({ page }) => {
@@ -363,8 +372,9 @@ test('the tile template follows the density tokens (name scale, note, gap)', asy
 
 	// The view swap mounts the tile grid asynchronously (liveQuery → render),
 	// and layout settles a beat later still — a bare page.evaluate has no
-	// auto-wait, so gate the first measurement on the tile being there.
-	await expect(page.locator('[data-testid="tile"]')).toBeVisible();
+	// auto-wait, so gate the first measurement on the tile being there with
+	// its quantity (an empty one draws no .qty).
+	await expect(page.getByTestId('tile').locator('.qty')).toHaveText('1 Packung');
 
 	const comfortable = await read();
 	expect(comfortable.overflows).toBe(false);
@@ -374,6 +384,12 @@ test('the tile template follows the density tokens (name scale, note, gap)', asy
 	await page.evaluate(() => {
 		document.documentElement.dataset.density = 'compact';
 	});
+	// Two frames: the first lays out under the new density and runs the
+	// tile's ResizeObserver; its re-measure lands in the second. A read before
+	// it sees the comfortable door under compact tokens.
+	await page.evaluate(
+		() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+	);
 	// Polled, not read once: the tile's door and clamp come from a measurement
 	// that re-runs a frame after the density change (ResizeObserver), and the
 	// door changes a typed tile's grid rows — a read in the same task sees the

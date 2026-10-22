@@ -2,9 +2,11 @@ import { expect, test } from '../tests/fixtures';
 import {
 	addItemByTyping,
 	createList,
+	expectSynced,
 	expireStoredToken,
 	itemRow,
-	openListView
+	openListView,
+	readAuthBlob
 } from '../tests/helpers';
 import { home, loginAtDex, ownClientIpPerExchange, signInWithDex, signOut } from './dex';
 
@@ -70,9 +72,7 @@ test('an expired OIDC session re-authenticates from the sync chip and drains its
 	await chip.click();
 	await loginAtDex(await popup, 'Gina');
 
-	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(page);
 	await expect(itemRow(page, 'Radieschen')).toBeVisible();
 });
 
@@ -94,6 +94,13 @@ test('an OIDC-only account signs in with the provider again to delete itself', a
 	await (await popup).close();
 	await home(page);
 	await expect(page.getByText('Wochenende')).toBeVisible();
+	// The list above is the local mirror's: the server is asked whether the
+	// account is still there.
+	const { token } = JSON.parse(await readAuthBlob(page)) as { token: string };
+	const refreshed = await page.request.post('/api/collections/accounts/auth-refresh', {
+		headers: { Authorization: `Bearer ${token}` }
+	});
+	expect(refreshed.status(), 'the account survives a cancelled delete').toBe(200);
 
 	await page.goto('/settings');
 	await page.getByRole('button', { name: 'Konto endgültig löschen' }).click();

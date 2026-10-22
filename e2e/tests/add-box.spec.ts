@@ -51,6 +51,9 @@ test('adding a name already on a long list scrolls to its row instead of adding 
 	const input = page.getByRole('combobox', { name: 'Artikel hinzufügen' });
 	await input.fill('Posten-30');
 	await input.press('Enter');
+	// The add has run once the box empties; the count and the focus below held
+	// before it too.
+	await expect(input).toHaveValue('');
 
 	await expect(last).toBeInViewport();
 	await expect(input).toBeFocused();

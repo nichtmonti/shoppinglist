@@ -2,8 +2,10 @@ import { expect, test } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 import { writeFileSync } from 'node:fs';
 import {
+	addItemByTyping,
 	createList,
 	itemRow,
+	nicknameField,
 	openListView,
 	openShopView,
 	registerAccount,
@@ -55,6 +57,10 @@ async function scan(
 	label: string
 ): Promise<void> {
 	await freezeAnimations(page);
+	// Never a screen still loading: its placeholder would be scanned instead.
+	// The caller has waited for a marker of the screen itself, which a
+	// placeholder-free page before any render satisfies as well as this does.
+	await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
 	const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
 	const violations = results.violations.map((v) => ({
 		id: v.id,
@@ -82,6 +88,7 @@ test.describe.configure({ retries: 0, mode: 'serial' });
 test('axe scan: German light walk (auth → previous items)', async ({ page }) => {
 	// 1. Anonymous auth screen (login form, before any ceremony).
 	await page.goto('/');
+	await expect(nicknameField(page)).toBeVisible();
 	await scan(page, 'auth', 'auth-login');
 
 	// 2. Cold-start home with the "Willkommen!" toast.
@@ -94,10 +101,8 @@ test('axe scan: German light walk (auth → previous items)', async ({ page }) =
 	await scan(page, 'list', 'list-empty');
 
 	// 4. Filled list: two plain adds, one category-suggested (Gurke).
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).fill('Milch');
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).press('Enter');
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).fill('Brot');
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).press('Enter');
+	await addItemByTyping(page, 'Milch');
+	await addItemByTyping(page, 'Brot');
 	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).fill('Gur');
 	await expect(page.locator('[data-ta-name="Gurke"] .ta-cat')).toHaveText('Obst & Gemüse');
 
@@ -109,6 +114,7 @@ test('axe scan: German light walk (auth → previous items)', async ({ page }) =
 
 	// 6. Inline quantity editor (chip → input).
 	await itemRow(page, 'Milch').getByRole('button', { name: 'Menge hinzufügen' }).click();
+	await expect(itemRow(page, 'Milch').locator('.qty-edit')).toBeFocused();
 	await scan(page, 'qty-edit', 'qty-editor-open');
 	await page.keyboard.type('500 g');
 	await page.keyboard.press('Enter');
@@ -120,15 +126,19 @@ test('axe scan: German light walk (auth → previous items)', async ({ page }) =
 	await scan(page, 'detail-sheet', 'detail-sheet-note');
 	await page.keyboard.press('Escape');
 
-	// 8. By-category grouping (aisle headers).
+	// 8. By-category grouping (aisle headers), where both views start
+	// ([D-115]): the pick keeps it, and the scan waits for the menu to go.
 	await page.getByTestId('item-sort').click();
+	await expect(page.getByRole('menu')).toBeVisible();
 	await scan(page, 'item-order', 'item-order-menu');
 	await page.getByRole('menuitemradio', { name: 'Kategorie' }).click();
+	await expect(page.getByRole('menu')).toHaveCount(0);
 	await expect(page.getByText('Obst & Gemüse').first()).toBeVisible();
 	await scan(page, 'list', 'list-grouped');
 
 	// 9. Shop view, unchecked tiles.
 	await openShopView(page);
+	await expect(page.getByTestId('tile').first()).toBeVisible();
 	await scan(page, 'shop', 'shop-tiles');
 
 	// 10. Check one off — ShopView's done section, toast.
@@ -138,7 +148,8 @@ test('axe scan: German light walk (auth → previous items)', async ({ page }) =
 
 	// 11. Previous-items screen.
 	await page.goto(`${listUrl}/previous`);
-	await expect(page).toHaveURL(/\/previous$/);
+	// The route's own title: the URL is there before the screen is.
+	await expect(page).toHaveTitle(/Frühere Artikel/);
 	await scan(page, 'previous', 'previous-items');
 });
 
@@ -149,6 +160,7 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 
 	// 13. Settings screen.
 	await page.goto('/settings');
+	await expect(page.getByTestId('app-version')).toBeVisible();
 	await scan(page, 'settings', 'settings');
 
 	// 14. Category editor page.
@@ -170,7 +182,7 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 	await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
 	await page.getByRole('button', { name: 'Back' }).click();
 	await page.goto(listUrl!);
-	await page.getByTestId('view-toggle-list').click();
+	await openListView(page);
 	await scan(page, 'list', 'list-en');
 	await openShopView(page);
 	await scan(page, 'shop', 'shop-en');
@@ -178,13 +190,15 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 	// 17. Dark theme (English): home, list, shop, settings.
 	await page.emulateMedia({ colorScheme: 'dark' });
 	await page.goto('/');
+	await expect(page.getByRole('link', { name: 'Open Wochenshop' })).toBeVisible();
 	await scan(page, 'home', 'home-dark');
 	await page.goto(listUrl!);
-	await page.getByTestId('view-toggle-list').click();
+	await openListView(page);
 	await scan(page, 'list', 'list-dark');
 	await openShopView(page);
 	await scan(page, 'shop', 'shop-dark');
 	await page.goto('/settings');
+	await expect(page.getByTestId('app-version')).toBeVisible();
 	await scan(page, 'settings', 'settings-dark');
 });
 

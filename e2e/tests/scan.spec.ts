@@ -1,5 +1,6 @@
 import { expect, test, type Page } from './fixtures';
 import {
+	appearsAfter,
 	createList,
 	disableConditionalMediation,
 	FAKE_BARCODE,
@@ -111,8 +112,9 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	// No passkey sign-in straight back after the sign-out.
 	await disableConditionalMediation(pageB, { acrossNavigations: true });
 	await pageB.goto('/settings');
-	await pageB.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(nicknameField(pageB)).toBeVisible();
+	await appearsAfter(nicknameField(pageB), () =>
+		pageB.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click()
+	);
 	await expect.poll(() => pageB.evaluate(() => caches.has('photos'))).toBe(false);
 
 	await ctxA.close();

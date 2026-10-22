@@ -1,5 +1,6 @@
 import { expect, test } from './fixtures';
 import {
+	appearsAfter,
 	createList,
 	disableConditionalMediation,
 	nicknameField,
@@ -34,8 +35,9 @@ test('signing out in one tab ends the session in the other', async ({ page, cont
 	// Otherwise the virtual authenticator signs the tab straight back in, which
 	// reads as "logout is broken" rather than "the harness logged back in".
 	await disableConditionalMediation(page);
-	await page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(nicknameField(page)).toBeVisible();
+	await appearsAfter(nicknameField(page), () =>
+		page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click()
+	);
 
 	// No reload of `other`: auth lives in memory PER TAB, so a reload would read
 	// the (correctly) cleared token and prove nothing about propagation. The
@@ -48,8 +50,17 @@ test('signing out in one tab ends the session in the other', async ({ page, cont
 	// that could repopulate the tables can only start after that cooldown —
 	// hence the clock moved past it before the focus event.
 	await other.clock.fastForward(3500);
+	// An absence needs a window: the tables are empty already, so a poll of
+	// them would pass before a cycle could have answered. No cycle starts.
+	const cycled = other
+		.waitForRequest((r) => r.url().includes('/api/sync/'), { timeout: 5_000 })
+		.then(
+			() => true,
+			() => false
+		);
 	await other.evaluate(() => window.dispatchEvent(new Event('focus')));
-	await expect.poll(() => storeCount(other, 'memberships'), { timeout: 10_000 }).toBe(0);
+	expect(await cycled).toBe(false);
+	expect(await storeCount(other, 'memberships')).toBe(0);
 });
 
 // [D-109] The tabs share the stored token and the local mirror, so a browser
@@ -63,8 +74,9 @@ test('signing in in one tab brings the other tab to that account', async ({ page
 
 	await page.goto('/settings');
 	await disableConditionalMediation(page);
-	await page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click();
-	await expect(nicknameField(other)).toBeVisible();
+	await appearsAfter(nicknameField(other), () =>
+		page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click()
+	);
 
 	await nicknameField(page).fill('Zweite');
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();

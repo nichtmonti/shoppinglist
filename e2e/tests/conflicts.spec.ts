@@ -151,9 +151,10 @@ test('passive conflict notices: same-field, delete-vs-edit and duplicate-name me
 		pageB.getByText('„Käse“ war schon auf der Liste. Die Menge „1 Kilo“ von Anna wurde behalten.')
 	).toBeVisible();
 	// Exactly one Käse row, carrying A's (the survivor's) quantity — B's
-	// duplicate optimistic row is gone, not merely hidden.
-	await expect(pageB.locator('[data-testid="row"]', { hasText: 'Käse' })).toHaveCount(1);
+	// duplicate optimistic row is gone, not merely hidden. The quantity first:
+	// B had one Käse row before the merge too.
 	await expect(kaeseB.getByRole('button', { name: 'Menge bearbeiten' })).toContainText('1 Kilo');
+	await expect(pageB.locator('[data-testid="row"]', { hasText: 'Käse' })).toHaveCount(1);
 
 	await ctxA.close();
 	await ctxB.close();

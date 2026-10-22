@@ -2,6 +2,7 @@ import { expect, test } from './fixtures';
 import {
 	addItemByTyping,
 	createList,
+	expectSynced,
 	itemRow,
 	openListView,
 	openShopView,
@@ -47,6 +48,8 @@ test('offline shop: add + check while offline, reconnect, second client converge
 	// clicking the matching row, not Enter.)
 	await pageA.getByRole('combobox', { name: 'Artikel hinzufügen' }).fill('Milch');
 	await pageA.locator('[data-ta-name="Milch"]').click();
+	// The box empties once the pick is stored; the one row held before it too.
+	await expect(pageA.getByRole('combobox', { name: 'Artikel hinzufügen' })).toHaveValue('');
 	await expect(pageA.locator('[data-testid="row"]', { hasText: 'Milch' })).toHaveCount(1);
 
 	// Check off via the shop view (§9.1: list view is planning-only; checking
@@ -61,7 +64,7 @@ test('offline shop: add + check while offline, reconnect, second client converge
 
 	// --- reconnect: the outbox drains and the chip settles ---
 	await ctxA.setOffline(false);
-	await expect(pageA.getByText('Alle Änderungen synchronisiert')).toBeVisible({ timeout: 15_000 });
+	await expectSynced(pageA);
 
 	// --- second client converges ---
 	// B was on the route the whole time; SSE (§8.5's freshness layer) should

@@ -1,7 +1,9 @@
 import { expect, test, type Page } from './fixtures';
 import {
 	addItemByTyping,
+	appearsAfter,
 	createList,
+	expectSynced,
 	itemRow,
 	nicknameField,
 	openListView,
@@ -46,16 +48,18 @@ test('leave a shared list: the leaver loses it locally, the other member keeps i
 	await pageB.getByRole('button', { name: 'Liste verlassen' }).click();
 	await pageB.getByRole('alertdialog').getByRole('button', { name: 'Liste verlassen' }).click();
 
-	// B lands on the home without it, and it stays gone across a reload —
-	// proving the server-side membership delete, not just the local §8.6 purge.
+	// B lands on the home without it.
 	await expect(pageB).toHaveURL(/\/$/, { timeout: 15_000 });
-	await pageB.goto('/');
 	await expect(pageB.getByRole('link', { name: 'Wochenshop öffnen' })).toHaveCount(0);
 
-	// A is not the last one out, so §7.3 must NOT have cascaded the list away.
+	// A is not the last one out, so §7.3 must NOT have cascaded the list away,
+	// and the server's roster no longer has B: the members line says so only
+	// once it has heard from the server (it read „2 Mitglieder" before), which
+	// B's local §8.6 purge alone could not make it say.
 	await pageA.reload();
 	await openListView(pageA);
 	await expect(itemRow(pageA, 'Milch')).toBeVisible({ timeout: 15_000 });
+	await expect(pageA.getByTestId('members-line')).toHaveText(/nur du/, { timeout: 15_000 });
 
 	await ctxA.close();
 	await ctxB.close();
@@ -105,11 +109,13 @@ test('delete account: solo list cascades, shared list survives for the other mem
 		pageA.getByText('Anmeldung abgebrochen. Dein Konto wurde nicht gelöscht.')
 	).toBeVisible();
 	await passkeyA.setUserVerified(true);
-	await pageA.getByRole('button', { name: 'Konto löschen' }).click();
-
 	// The session ends: the app shell swaps to the auth screen on its own
 	// (authState.isValid flips) — no navigation in the delete path.
-	await expect(nicknameField(pageA)).toBeVisible({ timeout: 15_000 });
+	await appearsAfter(
+		nicknameField(pageA),
+		() => pageA.getByRole('button', { name: 'Konto löschen' }).click(),
+		{ timeout: 15_000 }
+	);
 
 	// B still has the shared list, its items, and can still work in it — the
 	// §7.3 cascade must not have fired for a list that still has a member.
@@ -118,7 +124,7 @@ test('delete account: solo list cascades, shared list survives for the other mem
 	await expect(itemRow(pageB, 'Milch')).toBeVisible({ timeout: 15_000 });
 	await addItemByTyping(pageB, 'Butter');
 	await expect(itemRow(pageB, 'Butter')).toBeVisible();
-	await expect(pageB.getByText('Alle Änderungen synchronisiert')).toBeVisible({ timeout: 15_000 });
+	await expectSynced(pageB);
 
 	await ctxA.close();
 	await ctxB.close();

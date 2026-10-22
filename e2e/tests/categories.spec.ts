@@ -4,6 +4,7 @@ import {
 	backOverLayer,
 	chooseItemSort,
 	createList,
+	expectSynced,
 	itemRow,
 	openListView,
 	openSameAccountDevice,
@@ -109,11 +110,13 @@ test('the category editor: add, rename, hide, reorder, restore and reset all rea
 	const itemDetails = pageA.getByRole('dialog', { name: 'Artikel bearbeiten' });
 	await itemDetails.getByRole('radio', { name: 'Feinkost', exact: true }).click();
 	await pageA.keyboard.press('Escape');
+	// Stored here first: the edit's outbox entry goes in with it.
+	await expect(
+		itemRow(pageA, 'Trüffelöl').getByRole('button', { name: /Feinkost.*Trüffelöl/ })
+	).toBeVisible();
 
 	// Proof the writes reached the server, not just the local mirror.
-	await expect(pageA.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(pageA);
 	await expect(pageA.getByText(/konnte nicht synchronisiert werden/)).toHaveCount(0);
 
 	// ---- device B: a fresh mirror — everything above must be visible ----
@@ -154,9 +157,7 @@ test('the category editor: add, rename, hide, reorder, restore and reset all rea
 	).toBeVisible();
 	await expect(pageA.locator('.catedit-row').filter({ hasText: 'Speisekammer' })).toHaveCount(0);
 
-	await expect(pageA.getByText('Alle Änderungen synchronisiert').first()).toBeVisible({
-		timeout: 15_000
-	});
+	await expectSynced(pageA);
 	await expect(pageA.getByText(/konnte nicht synchronisiert werden/)).toHaveCount(0);
 
 	// ---- device B again, reloaded for convergence: both originals are back ----

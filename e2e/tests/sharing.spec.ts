@@ -3,6 +3,7 @@ import {
 	addItemByTyping,
 	addVirtualAuthenticator,
 	createList,
+	expectSynced,
 	inviteLinkFor,
 	nicknameField,
 	openListView,
@@ -32,7 +33,7 @@ test('a visitor joins via the invite link, then a reset link retires the old one
 	await createList(pageA, 'Getränke');
 	await openListView(pageA);
 	await addItemByTyping(pageA, 'Wasser');
-	await expect(pageA.getByText('Alle Änderungen synchronisiert')).toBeVisible();
+	await expectSynced(pageA);
 
 	const oldLink = await inviteLinkFor(pageA);
 

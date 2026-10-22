@@ -183,6 +183,12 @@ e2e:<name>`) or by hand as below.
 - **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from `task
   build-demo`.
 
+**A wait names a state its action creates** ([D-342]), never one the screen
+before already shows: a new screen by an element of its own (`appearsAfter()`
+in `e2e/tests/helpers.ts` checks it was absent first), a server effect by its
+response, a sync by `expectSynced()`, which waits on the outbox, not on the
+chip's "Alle Änderungen synchronisiert", true before a write is stored.
+
 A failed or timed-out test in the functional, arch, OIDC or demo suite writes
 `page-diagnosis.md` next to Playwright's `error-context.md` ([D-247]); CI
 prints both. The functional, OIDC and demo
@@ -366,3 +372,4 @@ hand-drawn copy where it can be named.
 [D-333]: docs/internals/decisions.md#D-333
 [D-336]: docs/internals/decisions.md#D-336
 [D-337]: docs/internals/decisions.md#D-337
+[D-342]: docs/internals/decisions.md#D-342

@@ -6,7 +6,8 @@ import {
 	itemRow,
 	openListView,
 	openShopView,
-	registerAccount
+	registerAccount,
+	storedMeta
 } from './helpers';
 
 // A de↔en locale switch re-renders seeded vocab while the item↔category
@@ -36,9 +37,8 @@ test('de↔en locale switch re-renders seeded vocab while item↔category mappin
 	await page.locator('[data-ta-name="Gurke"]').click();
 	await expect(itemRow(page, 'Gurke')).toBeVisible();
 
-	// By-category grouping surfaces the seeded aisle label in German.
-	await page.getByTestId('item-sort').click();
-	await page.getByRole('menuitemradio', { name: 'Kategorie' }).click();
+	// By-category grouping, where both views start ([D-115]), surfaces the
+	// seeded aisle label in German.
 	await expect(page.getByText('Obst & Gemüse')).toBeVisible();
 
 	// Switch the UI language to English via settings, item still active — the
@@ -49,6 +49,9 @@ test('de↔en locale switch re-renders seeded vocab while item↔category mappin
 	await page.goto('/settings');
 	await page.getByRole('radio', { name: 'English' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
+	// The screen switches before the choice is stored, and the goto below
+	// would abort that write.
+	await expect.poll(() => storedMeta(page, 'locale')).toBe('en');
 	await page.getByRole('button', { name: 'Back' }).click();
 	// settings' back() always returns to home (/), not the previously-open
 	// list — re-enter it directly. No need to reselect the list-view tab: it's
@@ -75,8 +78,10 @@ test('de↔en locale switch re-renders seeded vocab while item↔category mappin
 	await page.goto('/settings');
 	await page.getByRole('radio', { name: 'Deutsch' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
+	await expect.poll(() => storedMeta(page, 'locale')).toBe('de');
 	await page.getByRole('button', { name: 'Zurück' }).click();
 	await page.goto(listUrl);
+	await expect(page.getByTestId('view-toggle-shop')).toHaveText(/Einkaufen/);
 	await expect(page.locator('[data-testid="done-head"]')).toBeVisible();
 	await expect(page.locator('[data-testid="done-row"]', { hasText: 'Gurke' })).toBeVisible();
 	// Still checked off, not back on the active tiles.
