@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('#lib/pb.js', async () => (await import('#lib/test-kit/pb-mock.js')).pbModuleMock());
 
-import { apiJson } from './http';
+import { anySignal, apiJson } from './http';
 import { failureOf } from './health';
 
 const opts = { label: 'sync/digest', timeoutMs: 1_000 };
@@ -39,5 +39,28 @@ describe('apiJson', () => {
 		const error = await failure(() => Promise.resolve(new Response(null, { status: 503 })));
 		expect(error).toMatchObject({ status: 503 });
 		expect(failureOf(error)).toBe('server');
+	});
+});
+
+// [D-341] Below Safari 17.4 and Chrome 116 there is no AbortSignal.any; the
+// sync engine must still stop on either signal there.
+describe('anySignal without AbortSignal.any', () => {
+	const native = Object.getOwnPropertyDescriptor(AbortSignal, 'any')!;
+	afterEach(() => {
+		Object.defineProperty(AbortSignal, 'any', native);
+	});
+
+	it('aborts with the first source, and with one already aborted', () => {
+		// As the browsers below the floor: no such method.
+		Object.defineProperty(AbortSignal, 'any', { value: undefined, configurable: true });
+		const a = new AbortController();
+		const b = new AbortController();
+		const combined = anySignal([a.signal, b.signal]);
+		expect(combined.aborted).toBe(false);
+		b.abort('stopped');
+		expect(combined.aborted).toBe(true);
+		expect(combined.reason).toBe('stopped');
+
+		expect(anySignal([AbortSignal.abort('gone'), a.signal]).aborted).toBe(true);
 	});
 });

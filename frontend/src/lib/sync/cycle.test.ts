@@ -3,7 +3,7 @@ import { db } from '#lib/db.js';
 import { authState } from '#lib/auth/state.js';
 import { putSynced } from '#lib/test-kit/db.js';
 import { runSyncCycle, resetReferenceMirrorCheck } from './cycle';
-import { purgeList } from './purge';
+import { purgeGoneList, purgeList } from './purge';
 
 describe('sync cycle', () => {
 	beforeEach(async () => {
@@ -845,6 +845,18 @@ describe('sync cycle', () => {
 		expect(await db.lists.get(listY)).not.toBeUndefined();
 		expect(await db.memberships.get('memY')).not.toBeUndefined();
 		expect(await db.items.get('itemY')).not.toBeUndefined();
+	});
+
+	// §5.6 [D-109]: a purge for work that has ended (a sign-out, a stopped loop)
+	// deletes nothing and raises no notice; the check is inside its transaction.
+	it('a gone-list purge for ended work deletes nothing and announces nothing', async () => {
+		await db.lists.put({ id: 'listZ', name: 'Zelt', updated: '2024-01-01T00:00:00.000Z' });
+		const onGone = vi.fn();
+
+		await purgeGoneList('listZ', onGone, () => false);
+
+		expect(await db.lists.get('listZ')).toBeDefined();
+		expect(onGone).not.toHaveBeenCalled();
 	});
 
 	// [putOnlyChanged] The per-cycle memberships/lists upserts bulkPut only new

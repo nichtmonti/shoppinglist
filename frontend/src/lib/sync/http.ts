@@ -25,10 +25,30 @@ export interface ApiFetchOptions {
  *  isAuthRejected and the sync status (health.ts) read. */
 type ApiError = Error & { status: number };
 
+/**
+ * A signal that aborts with the first of `signals` ([D-341]). AbortSignal.any
+ * is Safari 17.4 and Chrome 116, above the app's floor (impl-notes, "Supported
+ * browser baseline"): below it, the same from a controller and a listener on
+ * each source.
+ */
+export function anySignal(signals: AbortSignal[]): AbortSignal {
+	// eslint-disable-next-line no-restricted-properties -- the one feature-detected use
+	if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals);
+	const controller = new AbortController();
+	for (const source of signals) {
+		if (source.aborted) {
+			controller.abort(source.reason);
+			break;
+		}
+		source.addEventListener('abort', () => controller.abort(source.reason), { once: true });
+	}
+	return controller.signal;
+}
+
 /** `signal`, or nothing, plus a timeout: whichever comes first aborts. */
 export function withTimeout(signal: AbortSignal | undefined, ms: number): AbortSignal {
 	const timeout = AbortSignal.timeout(ms);
-	return signal ? AbortSignal.any([signal, timeout]) : timeout;
+	return signal ? anySignal([signal, timeout]) : timeout;
 }
 
 /**

@@ -7,6 +7,7 @@ import { cyclesSettled, runSyncCycle, resetReferenceMirrorCheck } from './cycle'
 import { startSyncLoop, syncNow } from './loop';
 import { getMeta } from '#lib/db.js';
 import { SYNC_HEALTH_KEY } from './health';
+import { endSession, resetSessionForTest } from '#lib/auth/session.js';
 
 // The loop schedules with plain timers — a failed cycle arms
 // setTimeout(cycle, retryMs) and a pending_ops change the 500ms drain
@@ -582,7 +583,14 @@ describe('startSyncLoop teardown', () => {
 			drain: { transport: drainTransport },
 			signal: AbortSignal.abort()
 		});
-		expect(result).toEqual({ drained: 0, failed: 0, diverged: [], purged: [], mirrored: false });
+		expect(result).toEqual({
+			drained: 0,
+			failed: 0,
+			diverged: [],
+			purged: [],
+			mirrored: false,
+			cancelled: true
+		});
 		expect(digestTransport).not.toHaveBeenCalled();
 		expect(drainTransport).not.toHaveBeenCalled();
 	});
@@ -749,6 +757,45 @@ describe('startSyncLoop teardown', () => {
 		} finally {
 			stop();
 			await db.pending_ops.delete('op-in-flight');
+		}
+	});
+
+	// A sign-out cancels the cycle's request: that ends the cycle as cancelled,
+	// not as a sync that worked (no onCycle) nor one that failed (no retry).
+	it('a sign-out during a request ends the cycle as cancelled', async () => {
+		let digestSignal: AbortSignal | undefined;
+		const digestTransport = vi.fn().mockImplementation((signal?: AbortSignal) => {
+			digestSignal = signal;
+			return new Promise((_, reject) =>
+				signal?.addEventListener('abort', () => reject(signal.reason as Error))
+			);
+		});
+		const onCycle = vi.fn();
+		const stop = startSyncLoop({
+			cycleMs: 60_000,
+			retryMs: 30,
+			digestTransport,
+			drain: { transport: vi.fn().mockResolvedValue({ results: [] }) },
+			snapshotFetcher: vi.fn().mockResolvedValue({ items: [], categories: [] }),
+			snapshotIdsFetcher: vi.fn().mockResolvedValue({ items: [], categories: [] }),
+			mirror: {
+				versionTransport: vi.fn().mockResolvedValue('1'),
+				referenceFetcher: vi.fn().mockResolvedValue({ templates: [], dictionary: [] })
+			},
+			onCycle
+		});
+		try {
+			await vi.waitFor(() => expect(digestSignal).toBeDefined(), { timeout: 5000 });
+			endSession();
+			expect(digestSignal?.aborted).toBe(true);
+			await cyclesSettled();
+			// Several retry periods (30ms): a cancelled cycle arms no retry.
+			await new Promise((r) => setTimeout(r, 150));
+			expect(onCycle).not.toHaveBeenCalled();
+			expect(digestTransport).toHaveBeenCalledTimes(1);
+		} finally {
+			stop();
+			resetSessionForTest();
 		}
 	});
 

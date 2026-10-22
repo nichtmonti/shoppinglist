@@ -2,7 +2,7 @@
 import { collectionTables, db, shadowTable, type OpLayer, type PendingOp } from '../db';
 import { recompute } from './apply';
 import { asLayered, isSignal, materialize } from './materialize';
-import { apiJson } from './http';
+import { anySignal, apiJson } from './http';
 import { pendingOpsOrdered } from './outbox';
 import { normalizeRecord } from './record';
 import { MAX_OPS_PER_PUSH } from '#lib/field-contract.js';
@@ -54,7 +54,7 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 	// §5.6 [D-109]: a response after sign-out settles nothing.
 	const session = sessionScope();
 	// Ends with the session or with the owner, whichever comes first.
-	const signal = opts.signal ? AbortSignal.any([opts.signal, session.signal]) : session.signal;
+	const signal = opts.signal ? anySignal([opts.signal, session.signal]) : session.signal;
 	const ops = await pendingOpsOrdered();
 	if (ops.length === 0) return { drained: 0, failed: 0, requeued: 0 };
 
@@ -64,6 +64,8 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 	// Lists purged by a `gone` in this drain: later results for them are ignored.
 	const purged = new Set<string>();
 	for (let i = 0; i < ops.length; i += MAX_OPS_PER_PUSH) {
+		// Its owner stopped: nothing more is frozen or sent, and the rest stay queued.
+		if (signal.aborted) return { drained, failed, requeued };
 		const snapshot = ops.slice(i, i + MAX_OPS_PER_PUSH);
 
 		// Freeze each op's payload (db.ts PendingOp): a layer already in flight is
@@ -101,7 +103,6 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 			queued_at: o.queued_at
 		}));
 
-		if (signal.aborted) return { drained, failed, requeued };
 		let resp: { results: PushResult[] };
 		try {
 			resp = await transport(wireOps, signal);
@@ -128,7 +129,7 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 				failed++;
 				continue;
 			}
-			await applyResult(op, result, opts);
+			await applyResult(op, result, { ...opts, signal });
 			if (result.status === 'gone') purged.add(op.list_id);
 			// An op edited mid-flight keeps its pending layer, queued for the next push (keepPending).
 			if (await db.pending_ops.get(op.op_id)) requeued++;
@@ -204,7 +205,7 @@ async function applyResult(op: PendingOp, result: PushResult, opts: DrainOptions
 		}
 		case 'gone':
 			// §8.6 cleanup: wipe the list's local data + all its ops.
-			await purgeGoneList(op.list_id, opts.onGone);
+			await purgeGoneList(op.list_id, opts.onGone, () => !opts.signal?.aborted);
 			break;
 	}
 }

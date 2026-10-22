@@ -98,6 +98,8 @@ export function onRemoteSessionStart(listener: (accountId: string) => void): () 
 
 /** Test seam: drop cross-tab state between cases. */
 export function resetSessionForTest(): void {
+	// Work a previous test left running ends with its session.
+	session.abort();
 	session = new AbortController();
 	remoteListeners.clear();
 	startListeners.clear();

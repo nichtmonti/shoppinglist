@@ -4,6 +4,7 @@
 import { reportUncaught } from '#lib/client-errors.js';
 import { db } from '#lib/db.js';
 import { drainOutbox, type DrainOptions } from '#lib/sync/push.js';
+import { anySignal } from '#lib/sync/http.js';
 import { requestLeadership } from '#lib/sync/leader.js';
 import { trackVisibility, type VisibilityTracker } from '#lib/sync/visibility.js';
 import { NO_RESULT, recordEnd, recordExchange, recordStart } from '#lib/sync/health.js';
@@ -63,12 +64,12 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	// cancelled and nothing they queued runs after it ([D-341]).
 	const life = new AbortController();
 	const { signal } = life;
-	const work = opts.signal ? AbortSignal.any([signal, opts.signal]) : signal;
+	const work = opts.signal ? anySignal([signal, opts.signal]) : signal;
 	// The loop's own follow-up to a cycle or drain, dropped once it stopped.
 	const live =
 		<A extends unknown[]>(fn: (...args: A) => void) =>
 		(...args: A) => {
-			if (!signal.aborted) fn(...args);
+			if (!work.aborted) fn(...args);
 		};
 	const clearRetry = () => {
 		if (retryTimer !== null) {
@@ -93,6 +94,11 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 		void runSyncCycle({ ...opts, drain: drainOpts, signal: work })
 			.then(
 				live((result: CycleResult) => {
+					// Ended by a sign-out: no exchange to report, nothing to fan out.
+					if (result.cancelled) {
+						void recordEnd().catch(() => {});
+						return;
+					}
 					report(result.failed, result.error);
 					opts.onCycle?.(result);
 					// A push that failed in a cycle whose digest succeeded retries too

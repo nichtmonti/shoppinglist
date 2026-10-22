@@ -17,6 +17,7 @@ import { checkAndMirrorReference, type MirrorOptions } from '#lib/sync/mirror.js
 import { isAuthRejected, markAuthExpired } from '#lib/auth/state.js';
 import { sessionScope, type SessionScope } from '#lib/auth/session.js';
 import type { Table } from 'dexie';
+import { anySignal } from './http';
 import { purgeGoneList } from './purge';
 import type { DigestEntry } from './types';
 
@@ -41,6 +42,8 @@ export interface CycleResult {
 	purged: string[]; // lists purged (vanished)
 	mirrored: boolean; // whether a reference re-mirror happened
 	error?: unknown; // what stopped the drain, if a send failed ([D-296])
+	// Ended by its caller or a sign-out ([D-341]): no exchange, success or failure.
+	cancelled?: true;
 }
 
 // The seed_version re-mirror check runs once per page session (§6.12): the
@@ -119,19 +122,21 @@ async function putOnlyChanged<T extends { id: string }>(
 	if (changed.length > 0) await table.bulkPut(changed);
 }
 
+// What an abandoned cycle returns: every early return below is one.
 const nothing = (): CycleResult => ({
 	drained: 0,
 	failed: 0,
 	diverged: [],
 	purged: [],
-	mirrored: false
+	mirrored: false,
+	cancelled: true
 });
 
 async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
 	// Captured before the first await (§5.6 [D-109]): the cycle ends with the
 	// session or with its caller, whichever comes first.
 	const session = sessionScope();
-	const signal = deps.signal ? AbortSignal.any([deps.signal, session.signal]) : session.signal;
+	const signal = deps.signal ? anySignal([deps.signal, session.signal]) : session.signal;
 	try {
 		return await syncSteps(deps, { owned: () => !signal.aborted, signal });
 	} catch (error) {
@@ -181,7 +186,7 @@ async function syncSteps(deps: CycleDeps, scope: SessionScope): Promise<CycleRes
 	const serverListIds = new Set(memberships.map((m) => m.list));
 	for (const local of localMemberships) {
 		if (!serverListIds.has(local.list)) {
-			await purgeGoneList(local.list, deps.drain?.onGone);
+			await purgeGoneList(local.list, deps.drain?.onGone, () => scope.owned());
 			purged.push(local.list);
 		}
 	}

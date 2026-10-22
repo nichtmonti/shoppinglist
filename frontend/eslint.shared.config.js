@@ -435,6 +435,18 @@ export function sharedRest() {
 				// stock import straight back.
 				'no-restricted-imports': ['error', { paths: themeMergePaths }],
 
+				// [D-341] Above the app's browser floor (impl-notes): sync stopped
+				// dead on iOS 16.4–17.3 when it was called directly.
+				'no-restricted-properties': [
+					'error',
+					{
+						object: 'AbortSignal',
+						property: 'any',
+						message:
+							'Safari 17.4 and Chrome 116, above the floor: use anySignal from #lib/sync/http.js.'
+					}
+				],
+
 				'boundaries/dependencies': [
 					'error',
 					{ default: 'disallow', checkInternals: true, policies: layerPolicies }
