@@ -8,7 +8,8 @@
 # bind-mounts (a cold staticcheck peaks near 900 MiB, a warm one near 100 MiB):
 #   /var/lib/woodpecker-cache/go-build     → /root/.cache/go-build     (GOCACHE)
 #   /var/lib/woodpecker-cache/staticcheck  → /root/.cache/staticcheck  (facts)
-# Those two are safe to share across pipelines because they are
+#   /var/lib/woodpecker-cache/golangci-lint → /root/.cache/golangci-lint (analysis)
+# Those three are safe to share across pipelines because they are
 # content-addressed: a corrupt or truncated entry degrades to a cache MISS,
 # never a wrong answer. The MODULE cache is not — a truncated extraction in a
 # shared module cache yields empty source files that even `go mod verify`
@@ -77,6 +78,9 @@ steps:
       # it. Best-effort: dockerd creates the source dir when missing, and the
       # first run against an empty one is cold (GOMEMLIMIT covers it).
       - /var/lib/woodpecker-cache/staticcheck:/root/.cache/staticcheck
+      # golangci-lint's analysis cache, likewise its own ($HOME/.cache/golangci-lint),
+      # likewise best-effort: a cold one only costs time.
+      - /var/lib/woodpecker-cache/golangci-lint:/root/.cache/golangci-lint
     commands:
       # [D-60] Modules live in the workspace, not a host volume: downloaded
       # once here, reused by this workflow's later steps (go's per-module file
