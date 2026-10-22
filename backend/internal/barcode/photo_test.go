@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -54,6 +55,9 @@ type upstream struct {
 	photoCode int
 	// photoDelay, when set, is how long /photo waits before it answers.
 	photoDelay time.Duration
+	// photoCut, when set, makes /photo promise more bytes than it sends, so
+	// the download breaks off mid-body.
+	photoCut bool
 	// mu guards photoHits and siteHits: the lookup asks the sites at once, so
 	// the handlers write them from several goroutines. Read them through
 	// photoCount and siteCounts.
@@ -90,6 +94,9 @@ func newUpstream(t *testing.T) *upstream {
 			return
 		}
 		w.Header().Set("Content-Type", u.photoType)
+		if u.photoCut {
+			w.Header().Set("Content-Length", strconv.Itoa(len(u.photoBody)+1024))
+		}
 		w.WriteHeader(u.photoCode)
 		_, _ = w.Write(u.photoBody)
 	})
@@ -358,6 +365,33 @@ func TestPhotoRejectionsLeaveTheLookupUsable(t *testing.T) {
 			}
 			if body.ImageURL != "" {
 				t.Errorf("image_url = %q, want empty", body.ImageURL)
+			}
+		})
+	}
+}
+
+// [D-21] A failure that can pass is retried, one that would come out the
+// same is not: a wrong call either loses a photo to a short outage or asks
+// for a missing one forever.
+func TestFetchPhotoRetriesOnlyWhatCanPass(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		setup func(*upstream)
+		retry bool
+	}{
+		{"unavailable", func(u *upstream) { u.photoCode = http.StatusServiceUnavailable }, true},
+		{"rate-limited", func(u *upstream) { u.photoCode = http.StatusTooManyRequests }, true},
+		{"timed out upstream", func(u *upstream) { u.photoCode = http.StatusRequestTimeout }, true},
+		{"cut off mid-body", func(u *upstream) { u.photoCut = true }, true},
+		{"unreachable", func(u *upstream) { u.server.Close() }, true},
+		{"not found", func(u *upstream) { u.photoCode = http.StatusNotFound }, false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			up := newUpstream(t)
+			test.setup(up)
+			got := fetchPhoto(up.server.URL + "/photo")
+			if got.data != nil || got.retry != test.retry {
+				t.Errorf("fetchPhoto = %d bytes, retry %v; want nothing, retry %v", len(got.data), got.retry, test.retry)
 			}
 		})
 	}
