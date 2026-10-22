@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **A list change that arrives just after you sign out in another tab is no longer kept.** It could be stored on this device for whoever signs in next ([D-109]).
 - **A passkey with an RSA key shorter than 2048 bits is refused**, when it is created and at every sign-in, as NIST's minimum through 2030 asks. Passkeys from phones, password managers and security keys use elliptic-curve or 2048-bit RSA keys, so none is affected.
 - **The cards under "My lists" are one line.** Each shows the list's name and, beside it, how many items are still open, a grey ✓ when everything is checked off, and nothing for an empty list. The number of members is gone from the cards; the list's header and "Share & members" still show it. In the list switcher, the list you are in has its green tick where its number would be ([D-123]).
 - **A scanned product's number says what it is.** Under the photo in "Product details" and "Edit item", the long number now has "Barcode" in front of it, and the “Copy barcode” button beside it is gone.
