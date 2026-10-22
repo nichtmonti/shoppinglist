@@ -6,7 +6,7 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
-## Unreleased
+## v0.17.1: nothing from a list kept past a sign-out in another tab, one-line list cards, and releases you can rebuild yourself (2026-10)
 
 - **A list change that arrives just after you sign out in another tab is no longer kept.** It could be stored on this device for whoever signs in next ([D-109]).
 - **A passkey with an RSA key shorter than 2048 bits is refused**, when it is created and at every sign-in, as NIST's minimum through 2030 asks. Passkeys from phones, password managers and security keys use elliptic-curve or 2048-bit RSA keys, so none is affected.
