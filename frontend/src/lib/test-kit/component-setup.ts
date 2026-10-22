@@ -33,6 +33,13 @@ beforeEach(async () => {
 	setLocale('de');
 	// What a tab keeps for a reload (#lib/safe-storage) is per test.
 	sessionStorage.clear();
+	// No network: a request nothing stubbed (the failure report a test of an
+	// error path sends, [D-197]) fails as offline does, instead of happy-dom
+	// connecting to localhost:3000. A test that needs fetch stubs its own.
+	vi.stubGlobal(
+		'fetch',
+		vi.fn(() => Promise.reject(new TypeError('no network in component tests')))
+	);
 });
 
 // SvelteKit's router does not run under testing-library, and every sheet,
