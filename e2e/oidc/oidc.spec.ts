@@ -46,6 +46,9 @@ test('a passkey account links to an OIDC identity and keeps its lists and passke
 	await page.getByRole('button', { name: 'Mit Dex verbinden' }).click();
 	await loginAtDex(await popup, 'Bob');
 	// Linked: the entry's precondition is gone ([D-25]: the server says so).
+	// The row saying so first, as the entry also reads "Abbrechen" while the
+	// link is pending.
+	await expect(page.getByText(/^Verbunden mit Dex/)).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Mit Dex verbinden' })).toHaveCount(0);
 	// The login was attached to this account ([D-76]): the session, and the
 	// nickname with it, are still the passkey account's.
@@ -133,6 +136,7 @@ test('an OIDC account adds a passkey, signs in with it, and may remove it again'
 
 	await signOut(page);
 	await page.getByRole('button', { name: 'Mit Passkey anmelden' }).click();
+	await home(page);
 	expect(await nicknameInSettings(page)).toBe('Cleo');
 
 	// Its only passkey, but not its only login ([D-25]): the guard lets it go.

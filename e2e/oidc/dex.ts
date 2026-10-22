@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '../tests/fixtures';
-import { disableConditionalMediation } from '../tests/helpers';
+import { disableConditionalMediation, readAuthBlob } from '../tests/helpers';
 
 // The Dex round trips both OIDC specs share (oidc.spec.ts, and the
 // passkeys-off instance's oidc-only.spec.ts, [D-76]).
@@ -63,10 +63,12 @@ export async function signOut(page: Page): Promise<void> {
 
 /**
  * The lists home, after a sign-in that happened on another route. Waits for
- * the auth screen to go first: navigating mid-sign-in would abort it.
+ * the sign-in to be stored first: navigating mid-sign-in would abort it. The
+ * Dex button going is no sign of that, as it reads "Abbrechen" while the
+ * exchange is still pending.
  */
 export async function home(page: Page): Promise<void> {
-	await expect(page.getByRole('button', { name: 'Weiter mit Dex' })).toHaveCount(0);
+	await expect.poll(() => readAuthBlob(page), { timeout: 15_000 }).not.toBe('');
 	await page.goto('/');
 	await expect(page.getByRole('button', { name: 'Neue Liste' }).first()).toBeVisible();
 }
