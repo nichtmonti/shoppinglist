@@ -36,6 +36,19 @@ func TestProbeHealthy(t *testing.T) {
 	}
 }
 
+// A timeout of 0 is no deadline, as it was when the probe used
+// http.Client.Timeout: an operator's `--timeout 0` must not fail at once.
+func TestProbeWithoutTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	if err := Probe(addrOf(t, srv), 0); err != nil {
+		t.Fatalf("Probe with no timeout: %v", err)
+	}
+}
+
 func TestProbeUnhealthyStatus(t *testing.T) {
 	for _, status := range []int{http.StatusInternalServerError, http.StatusNotFound, http.StatusServiceUnavailable} {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

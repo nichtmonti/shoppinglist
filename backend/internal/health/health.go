@@ -29,7 +29,11 @@ const defaultTimeout = 3 * time.Second
 // unless it answered 2xx. The error says what failed, since an operator reads
 // it from `docker inspect`'s health log.
 func Probe(addr string, timeout time.Duration) error {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	// 0 or less means no deadline, as http.Client.Timeout read it.
+	ctx, cancel := context.Background(), context.CancelFunc(func() {})
+	if timeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+	}
 	defer cancel()
 
 	url := fmt.Sprintf("http://%s/api/health", addr)
