@@ -32,11 +32,12 @@ async function defaultReferenceFetcher(signal?: AbortSignal): Promise<{
 }> {
 	// requestKey null: the SDK's auto-cancellation would otherwise put its own
 	// signal in place of this one, and the timeout would never fire.
-	const options = { signal: withTimeout(signal, REFERENCE_TIMEOUT_MS), requestKey: null };
+	const combined = withTimeout(signal, REFERENCE_TIMEOUT_MS);
+	const options = { signal: combined.signal, requestKey: null };
 	const [templates, dictionary] = await Promise.all([
 		pb.collection('category_templates').getFullList(options),
 		pb.collection('item_dictionary').getFullList(options)
-	]);
+	]).finally(combined.release);
 	// PB JSONField (name_i18n / names_i18n) serializes as the parsed object; the rows already
 	// match the Dexie schema. Coerce default_category nullability defensively.
 	return {

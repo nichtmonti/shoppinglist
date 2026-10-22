@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db, getMeta } from '#lib/db.js';
 import { failureOf, recordExchange, recordStart, SYNC_HEALTH_KEY } from './health';
+import { endSession, resetSessionForTest, sessionScope } from '#lib/auth/session.js';
 
 describe('failureOf', () => {
 	it('reads a 429 as the rate limit, another answer as the server, none as the connection', () => {
@@ -60,5 +61,25 @@ describe('recordExchange', () => {
 			failures: 0,
 			reason: null
 		});
+	});
+});
+
+// §5.6 [D-109]: the status is account data the sign-out wipes, so an exchange
+// that outlives its account's session writes nothing behind the wipe.
+describe('an exchange whose session has ended', () => {
+	beforeEach(async () => {
+		await db.meta.delete(SYNC_HEALTH_KEY);
+	});
+
+	it('records nothing', async () => {
+		const exchange = sessionScope();
+		endSession();
+		try {
+			await recordStart(new Date(), exchange);
+			await recordExchange(null, new Date(), exchange);
+			expect(await getMeta(SYNC_HEALTH_KEY)).toBeUndefined();
+		} finally {
+			resetSessionForTest();
+		}
 	});
 });

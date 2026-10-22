@@ -52,15 +52,26 @@ describe('anySignal without AbortSignal.any', () => {
 
 	it('aborts with the first source, and with one already aborted', () => {
 		// As the browsers below the floor: no such method.
-		Object.defineProperty(AbortSignal, 'any', { value: undefined, configurable: true });
+		Reflect.deleteProperty(AbortSignal, 'any');
 		const a = new AbortController();
 		const b = new AbortController();
-		const combined = anySignal([a.signal, b.signal]);
+		const { signal: combined } = anySignal([a.signal, b.signal]);
 		expect(combined.aborted).toBe(false);
 		b.abort('stopped');
 		expect(combined.aborted).toBe(true);
 		expect(combined.reason).toBe('stopped');
 
-		expect(anySignal([AbortSignal.abort('gone'), a.signal]).aborted).toBe(true);
+		expect(anySignal([AbortSignal.abort('gone'), a.signal]).signal.aborted).toBe(true);
+	});
+
+	// The loop's and the session's signals live for hours: once its work is
+	// done, a combination must no longer hang on them.
+	it('lets go of its sources once released', () => {
+		Reflect.deleteProperty(AbortSignal, 'any');
+		const longLived = new AbortController();
+		const { signal, release } = anySignal([longLived.signal]);
+		release();
+		longLived.abort();
+		expect(signal.aborted).toBe(false);
 	});
 });

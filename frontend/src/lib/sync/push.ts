@@ -8,7 +8,7 @@ import { normalizeRecord } from './record';
 import { MAX_OPS_PER_PUSH } from '#lib/field-contract.js';
 import type { PushOp, PushResult, SyncNotices } from './types';
 import { purgeGoneList } from './purge';
-import { sessionScope } from '../auth/session';
+import { sessionScope, type SessionScope } from '../auth/session';
 
 // A transport sends a batch of ops and returns the server's per-op results.
 export type PushTransport = (
@@ -50,11 +50,25 @@ export interface DrainSummary {
 // Sends every queued op, oldest first, in batches of at most MAX_OPS_PER_PUSH
 // (the server refuses a larger push, §8.3).
 export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary> {
-	const transport = opts.transport ?? defaultTransport;
 	// §5.6 [D-109]: a response after sign-out settles nothing.
 	const session = sessionScope();
 	// Ends with the session or with the owner, whichever comes first.
-	const signal = opts.signal ? anySignal([opts.signal, session.signal]) : session.signal;
+	const combined = opts.signal
+		? anySignal([opts.signal, session.signal])
+		: { signal: session.signal, release() {} };
+	try {
+		return await drainWith(opts, session, combined.signal);
+	} finally {
+		combined.release();
+	}
+}
+
+async function drainWith(
+	opts: DrainOptions,
+	session: SessionScope,
+	signal: AbortSignal
+): Promise<DrainSummary> {
+	const transport = opts.transport ?? defaultTransport;
 	const ops = await pendingOpsOrdered();
 	if (ops.length === 0) return { drained: 0, failed: 0, requeued: 0 };
 
@@ -114,11 +128,10 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 		}
 
 		const byId = new Map(resp.results.map((r) => [r.op_id, r]));
-		for (const [j, op] of batch.entries()) {
+		for (const op of batch) {
 			// Per result: a sign-out can land between two settles.
-			if (!session.owned()) {
-				return { drained, failed: failed + (ops.length - i - j), requeued };
-			}
+			// Cancelled, not failed: the rest stay queued for that account.
+			if (!session.owned()) return { drained, failed, requeued };
 			if (purged.has(op.list_id)) {
 				drained++;
 				continue;
@@ -129,7 +142,7 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 				failed++;
 				continue;
 			}
-			await applyResult(op, result, { ...opts, signal });
+			await applyResult(op, result, opts, session);
 			if (result.status === 'gone') purged.add(op.list_id);
 			// An op edited mid-flight keeps its pending layer, queued for the next push (keepPending).
 			if (await db.pending_ops.get(op.op_id)) requeued++;
@@ -139,7 +152,12 @@ export async function drainOutbox(opts: DrainOptions = {}): Promise<DrainSummary
 	return { drained, failed, requeued };
 }
 
-async function applyResult(op: PendingOp, result: PushResult, opts: DrainOptions): Promise<void> {
+async function applyResult(
+	op: PendingOp,
+	result: PushResult,
+	opts: DrainOptions,
+	session: SessionScope
+): Promise<void> {
 	switch (result.status) {
 		case 'applied':
 		case 'partial':
@@ -205,7 +223,8 @@ async function applyResult(op: PendingOp, result: PushResult, opts: DrainOptions
 		}
 		case 'gone':
 			// §8.6 cleanup: wipe the list's local data + all its ops.
-			await purgeGoneList(op.list_id, opts.onGone, () => !opts.signal?.aborted);
+			// Like every settle here: the answer is the server's, so it applies while the session lasts.
+			await purgeGoneList(op.list_id, opts.onGone, () => session.owned());
 			break;
 	}
 }

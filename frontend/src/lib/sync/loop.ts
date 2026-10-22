@@ -5,6 +5,7 @@ import { reportUncaught } from '#lib/client-errors.js';
 import { db } from '#lib/db.js';
 import { drainOutbox, type DrainOptions } from '#lib/sync/push.js';
 import { anySignal } from '#lib/sync/http.js';
+import { sessionScope } from '#lib/auth/session.js';
 import { requestLeadership } from '#lib/sync/leader.js';
 import { trackVisibility, type VisibilityTracker } from '#lib/sync/visibility.js';
 import { NO_RESULT, recordEnd, recordExchange, recordStart } from '#lib/sync/health.js';
@@ -64,7 +65,8 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	// cancelled and nothing they queued runs after it ([D-341]).
 	const life = new AbortController();
 	const { signal } = life;
-	const work = opts.signal ? anySignal([signal, opts.signal]) : signal;
+	const combined = opts.signal ? anySignal([signal, opts.signal]) : { signal, release() {} };
+	const work = combined.signal;
 	// The loop's own follow-up to a cycle or drain, dropped once it stopped.
 	const live =
 		<A extends unknown[]>(fn: (...args: A) => void) =>
@@ -83,38 +85,42 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	// Running cycles: returning to a tab fires focus and visibilitychange
 	// together, and they should cost one cycle.
 	let inFlight = 0;
-	// What an exchange's outcome tells the status ([D-296]).
-	const report = (failed: number, error: unknown) => {
-		void recordExchange(failed > 0 ? (error ?? NO_RESULT) : null).catch(() => {});
+	// One exchange's status ([D-296]), written for the account it started under:
+	// none of it lands behind that account's sign-out (§5.6 [D-109]).
+	const startExchange = () => {
+		const scope = sessionScope();
+		const write = (record: Promise<void>) => void record.catch(() => {});
+		write(recordStart(new Date(), scope));
+		return {
+			report: (failed: number, error: unknown) =>
+				write(recordExchange(failed > 0 ? (error ?? NO_RESULT) : null, new Date(), scope)),
+			fail: (error: unknown) => write(recordExchange(error, new Date(), scope)),
+			// Without an outcome: nothing was sent, or it was cancelled.
+			end: () => write(recordEnd(new Date(), scope))
+		};
 	};
 	const cycle = live(() => {
 		clearRetry();
 		inFlight++;
-		void recordStart().catch(() => {});
+		const exchange = startExchange();
 		void runSyncCycle({ ...opts, drain: drainOpts, signal: work })
-			.then(
-				live((result: CycleResult) => {
-					// Ended by a sign-out: no exchange to report, nothing to fan out.
-					if (result.cancelled) {
-						void recordEnd().catch(() => {});
-						return;
-					}
-					report(result.failed, result.error);
-					opts.onCycle?.(result);
-					// A push that failed in a cycle whose digest succeeded retries too
-					// ([D-139]): resending a frozen layer writes nothing, so no
-					// pending_ops change would schedule the next drain.
-					if (result.failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
-				})
-			)
-			.catch(
-				live((err: unknown) => {
-					console.error('[sync] cycle failed:', err);
-					void recordExchange(err).catch(() => {});
-					// [D-164]: a transient failure retries soon rather than a tick later.
-					retryTimer = setTimeout(cycle, retryMs);
-				})
-			)
+			.then((result: CycleResult) => {
+				// Cancelled (stop() or a sign-out): no outcome, nothing to fan out.
+				if (result.cancelled || work.aborted) return exchange.end();
+				exchange.report(result.failed, result.error);
+				opts.onCycle?.(result);
+				// A push that failed in a cycle whose digest succeeded retries too
+				// ([D-139]): resending a frozen layer writes nothing, so no
+				// pending_ops change would schedule the next drain.
+				if (result.failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
+			})
+			.catch((err: unknown) => {
+				if (work.aborted) return exchange.end();
+				console.error('[sync] cycle failed:', err);
+				exchange.fail(err);
+				// [D-164]: a transient failure retries soon rather than a tick later.
+				retryTimer = setTimeout(cycle, retryMs);
+			})
 			.finally(() => {
 				inFlight--;
 				lastCycleFinished = Date.now();
@@ -134,22 +140,21 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 			live(() => {
 				if (retryTimer !== null) return;
 				afterCycles(async () => {
-					void recordStart().catch(() => {});
+					const exchange = startExchange();
 					const summary = await drainOutbox({ ...drainOpts, signal: work }).catch(
 						(error: unknown) => ({ drained: 0, failed: 1, requeued: 0, error })
 					);
-					live(() => {
-						const { failed } = summary;
-						// A drain that sent nothing spoke to no one.
-						if (summary.drained + summary.failed + summary.requeued > 0) {
-							report(failed, summary.error);
-						} else {
-							void recordEnd().catch(() => {});
-						}
-						// An undelivered push hands over to the one failure retry
-						// ([D-139]); re-queued ops already scheduled their own drain.
-						if (failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
-					})();
+					if (work.aborted) return exchange.end();
+					const { failed } = summary;
+					// A drain that sent nothing spoke to no one.
+					if (summary.drained + summary.failed + summary.requeued > 0) {
+						exchange.report(failed, summary.error);
+					} else {
+						exchange.end();
+					}
+					// An undelivered push hands over to the one failure retry
+					// ([D-139]); re-queued ops already scheduled their own drain.
+					if (failed > 0 && retryTimer === null) retryTimer = setTimeout(cycle, retryMs);
 				}, work);
 			}),
 			500
@@ -241,6 +246,7 @@ export function startSyncLoop(opts: SyncLoopOptions = {}): () => void {
 	return () => {
 		if (signal.aborted) return;
 		life.abort();
+		combined.release();
 		detachTriggers();
 		stopLeadership();
 		clearRetry();

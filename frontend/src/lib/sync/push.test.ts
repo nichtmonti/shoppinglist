@@ -1346,7 +1346,8 @@ describe('push', () => {
 			})
 		});
 
-		expect(summary).toEqual({ drained: 1, failed: 1, requeued: 0 });
+		// B is cancelled, not failed: no failure status and no retry for an ended session.
+		expect(summary).toEqual({ drained: 1, failed: 0, requeued: 0 });
 		expect((await db.items.get(b.id))?.updated).not.toBe('srv-b');
 		expect(await db.pending_ops.get(opB.op_id)).toBeDefined();
 		resetSessionForTest();

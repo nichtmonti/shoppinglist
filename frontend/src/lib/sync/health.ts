@@ -4,6 +4,7 @@
 // only the leader, which may be hidden.
 import { db, getMeta, setMeta } from '#lib/db.js';
 import { httpStatus } from '#lib/http-status.js';
+import type { SessionScope } from '#lib/auth/session.js';
 
 /** Why a send or a cycle failed, as far as the user can act on it. */
 export type SyncFailure = 'connection' | 'server' | 'rate' | 'app';
@@ -43,29 +44,41 @@ export function failureOf(error: unknown): SyncFailure {
 	return 'server';
 }
 
-async function update(change: (prev: SyncHealth) => SyncHealth): Promise<void> {
+// `scope`: the account the exchange belongs to. The status is account data
+// (account-data.ts), so nothing lands behind that account's sign-out (§5.6 [D-109]).
+async function update(
+	change: (prev: SyncHealth) => SyncHealth,
+	scope?: SessionScope
+): Promise<void> {
 	await db.transaction('rw', db.meta, async () => {
+		if (scope && !scope.owned()) return;
 		const prev = (await getMeta(SYNC_HEALTH_KEY)) ?? NO_HEALTH;
 		await setMeta(SYNC_HEALTH_KEY, change(prev));
 	});
 }
 
 /** Records that an exchange starts. */
-export function recordStart(at = new Date()): Promise<void> {
-	return update((prev) => ({ ...prev, started_at: at.toISOString() }));
+export function recordStart(at = new Date(), scope?: SessionScope): Promise<void> {
+	return update((prev) => ({ ...prev, started_at: at.toISOString() }), scope);
 }
 
 /** Records how one ended: `null` for one that worked, else what failed. */
-export function recordExchange(error: unknown, at = new Date()): Promise<void> {
+export function recordExchange(
+	error: unknown,
+	at = new Date(),
+	scope?: SessionScope
+): Promise<void> {
 	const ended_at = at.toISOString();
-	return update((prev) =>
-		error === null
-			? { ...prev, ended_at, ok_at: ended_at, failures: 0, reason: null }
-			: { ...prev, ended_at, failures: prev.failures + 1, reason: failureOf(error) }
+	return update(
+		(prev) =>
+			error === null
+				? { ...prev, ended_at, ok_at: ended_at, failures: 0, reason: null }
+				: { ...prev, ended_at, failures: prev.failures + 1, reason: failureOf(error) },
+		scope
 	);
 }
 
 /** Records that one ended without speaking to the server: a drain with nothing to send. */
-export function recordEnd(at = new Date()): Promise<void> {
-	return update((prev) => ({ ...prev, ended_at: at.toISOString() }));
+export function recordEnd(at = new Date(), scope?: SessionScope): Promise<void> {
+	return update((prev) => ({ ...prev, ended_at: at.toISOString() }), scope);
 }

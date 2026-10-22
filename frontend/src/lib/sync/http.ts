@@ -25,30 +25,46 @@ export interface ApiFetchOptions {
  *  isAuthRejected and the sync status (health.ts) read. */
 type ApiError = Error & { status: number };
 
+/** A combined signal, and `release()` for when the work it guards is done. */
+export interface CombinedSignal {
+	signal: AbortSignal;
+	release: () => void;
+}
+
 /**
  * A signal that aborts with the first of `signals` ([D-341]). AbortSignal.any
  * is Safari 17.4 and Chrome 116, above the app's floor (impl-notes, "Supported
  * browser baseline"): below it, the same from a controller and a listener on
- * each source.
+ * each source, which `release()` removes, or a long-lived source (the loop's,
+ * the session's) would keep one per cycle and request until it aborts.
  */
-export function anySignal(signals: AbortSignal[]): AbortSignal {
-	// eslint-disable-next-line no-restricted-properties -- the one feature-detected use
-	if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals);
-	const controller = new AbortController();
-	for (const source of signals) {
-		if (source.aborted) {
-			controller.abort(source.reason);
-			break;
-		}
-		source.addEventListener('abort', () => controller.abort(source.reason), { once: true });
+export function anySignal(signals: AbortSignal[]): CombinedSignal {
+	if ('any' in AbortSignal) {
+		// eslint-disable-next-line no-restricted-properties -- the one feature-detected use
+		return { signal: AbortSignal.any(signals), release() {} };
 	}
-	return controller.signal;
+	const controller = new AbortController();
+	const unlink = new AbortController();
+	const release = () => unlink.abort();
+	const aborted = signals.find((source) => source.aborted);
+	if (aborted) {
+		controller.abort(aborted.reason);
+		return { signal: controller.signal, release };
+	}
+	for (const source of signals) {
+		const forward = () => {
+			controller.abort(source.reason);
+			release();
+		};
+		source.addEventListener('abort', forward, { signal: unlink.signal });
+	}
+	return { signal: controller.signal, release };
 }
 
 /** `signal`, or nothing, plus a timeout: whichever comes first aborts. */
-export function withTimeout(signal: AbortSignal | undefined, ms: number): AbortSignal {
+export function withTimeout(signal: AbortSignal | undefined, ms: number): CombinedSignal {
 	const timeout = AbortSignal.timeout(ms);
-	return signal ? anySignal([signal, timeout]) : timeout;
+	return signal ? anySignal([signal, timeout]) : { signal: timeout, release() {} };
 }
 
 /**
@@ -70,18 +86,23 @@ export async function apiJson(path: string, opts: ApiFetchOptions): Promise<unkn
 		});
 		throw error;
 	};
-	const resp = await fetch(path, {
-		method: opts.method ?? 'GET',
-		headers,
-		body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
-		signal: withTimeout(opts.signal, opts.timeoutMs)
-	}).catch(noAnswer);
-	if (!resp.ok) {
-		if (resp.status === 401) markAuthExpired();
-		const error: ApiError = Object.assign(new Error(`${opts.label} failed: ${resp.status}`), {
-			status: resp.status
-		});
-		throw error;
+	const { signal, release } = withTimeout(opts.signal, opts.timeoutMs);
+	try {
+		const resp = await fetch(path, {
+			method: opts.method ?? 'GET',
+			headers,
+			body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+			signal
+		}).catch(noAnswer);
+		if (!resp.ok) {
+			if (resp.status === 401) markAuthExpired();
+			const error: ApiError = Object.assign(new Error(`${opts.label} failed: ${resp.status}`), {
+				status: resp.status
+			});
+			throw error;
+		}
+		return await resp.json().catch(noAnswer);
+	} finally {
+		release();
 	}
-	return resp.json().catch(noAnswer);
 }

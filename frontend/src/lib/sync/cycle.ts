@@ -77,9 +77,11 @@ function assertMembershipData(recs: unknown): asserts recs is Membership[] {
 let cycleTail: Promise<unknown> = Promise.resolve();
 
 export function runSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
+	// The account that asked, not whoever is signed in when its turn comes (§5.6 [D-109]).
+	const session = sessionScope();
 	const next = cycleTail.then(
-		() => executeSyncCycle(deps),
-		() => executeSyncCycle(deps) // a failed predecessor must not poison the chain
+		() => executeSyncCycle(deps, session),
+		() => executeSyncCycle(deps, session) // a failed predecessor must not poison the chain
 	);
 	// Keep the chain alive regardless of THIS cycle's outcome; the caller still sees the rejection.
 	cycleTail = next.catch(() => {});
@@ -132,17 +134,20 @@ const nothing = (): CycleResult => ({
 	cancelled: true
 });
 
-async function executeSyncCycle(deps: CycleDeps = {}): Promise<CycleResult> {
-	// Captured before the first await (§5.6 [D-109]): the cycle ends with the
-	// session or with its caller, whichever comes first.
-	const session = sessionScope();
-	const signal = deps.signal ? anySignal([deps.signal, session.signal]) : session.signal;
+async function executeSyncCycle(deps: CycleDeps, session: SessionScope): Promise<CycleResult> {
+	// The cycle ends with the session or with its caller, whichever comes first.
+	const combined = deps.signal
+		? anySignal([deps.signal, session.signal])
+		: { signal: session.signal, release() {} };
+	const { signal } = combined;
 	try {
 		return await syncSteps(deps, { owned: () => !signal.aborted, signal });
 	} catch (error) {
 		// A request cancelled with the cycle ends it with nothing, not a failure.
 		if (signal.aborted) return nothing();
 		throw error;
+	} finally {
+		combined.release();
 	}
 }
 
