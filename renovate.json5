@@ -257,11 +257,11 @@
 			automerge: false
 		},
 		{
-			// Deliberately NOT enabling pinDigests globally. The remaining step
+			// Deliberately NOT enabling pinDigests globally. The other step
 			// images float on a major on purpose (`docker:29-dind`) so the build
-			// cell picks up base security patches without a PR; the production
-			// image is the only place reproducibility is worth a digest, and it
-			// already has one.
+			// cell picks up base security patches without a PR; a digest goes
+			// where the image ships (the Dockerfile's base) or holds the publish
+			// tokens (the rule below, [D-339]).
 			matchManagers: ['woodpecker'],
 			pinDigests: false
 		},

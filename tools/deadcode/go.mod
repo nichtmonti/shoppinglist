@@ -1,5 +1,5 @@
-// deadcode — see ../README.md. Exported Go functions nothing calls in either
-// build ([D-340]); staticcheck's U1000 covers the unexported ones.
+// deadcode — see ../README.md. Go functions nothing calls in either build,
+// tests counting as callers ([D-340]).
 // One module per tool, deliberately ([D-75]).
 
 module shoppinglist/tools/deadcode

@@ -8,7 +8,7 @@ Twelve programs the gate, the tests, CI and the dev loop depend on, each declare
 | `staticcheck/` | [staticcheck](https://staticcheck.dev) | `go-lint` in the gate, `.woodpecker/go.yaml` |
 | `gosec/` | [gosec](https://github.com/securego/gosec) | `go-lint` in the gate, `.woodpecker/go.yaml` |
 | `golangci-lint/` | [golangci-lint](https://golangci-lint.run), only the linters `backend/.golangci.yml` names | `go-lint` in the gate, `.woodpecker/go.yaml` ([D-340]) |
-| `deadcode/` | [deadcode](https://go.dev/blog/deadcode), exported functions nothing calls | `go-lint` in the gate, `.woodpecker/go.yaml` ([D-340]) |
+| `deadcode/` | [deadcode](https://go.dev/blog/deadcode), functions nothing calls, tests included | `go-lint` in the gate, `.woodpecker/go.yaml` ([D-340]) |
 | `gitleaks/` | [gitleaks](https://github.com/gitleaks/gitleaks), secrets in the history | the gate, the pre-push hook, `.woodpecker/go.yaml` ([D-203], [D-274]) |
 | `govulncheck/` | [govulncheck](https://go.dev/blog/vuln) | `.woodpecker/security.yaml` |
 | `osv-scanner/` | [osv-scanner](https://google.github.io/osv-scanner/) | `osv` in the gate, `.woodpecker/security.yaml` |

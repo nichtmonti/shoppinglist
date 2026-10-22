@@ -146,7 +146,7 @@ old enough. Concrete cases already in the tree, each checked against the floor:
 | `dvh` | app shell, drawer cap | Safari 15.4, Chrome 108 |
 | Web Locks | `sync/leader.ts` | Safari 15.4, Chrome 69, and `requestLeadership` has an explicit no-Locks fallback path |
 | `BroadcastChannel` | `#lib/auth/session` ([D-109]) | Safari 15.4, Chrome 54; guarded, and the local half of the session boundary works without it |
-| `AbortSignal.any` | `sync/http.ts` `anySignal` ([D-341]) | Safari 17.4, Chrome 116, Firefox 124, **above the floor**; `anySignal` builds the same from a controller and listeners where it is missing, and lint refuses a direct call |
+| `AbortSignal.any` | `sync/http.ts` `anySignal` ([D-341]) | Safari 17.4 and Chrome 116, **above the floor** (Firefox 124 is within it); `anySignal` builds the same from a controller and listeners where it is missing, and lint refuses a direct call |
 | Module service worker | `src/service-worker/`, registered by SvelteKit 3 with `type: 'module'` ([D-242]) | Safari/iOS 15, Chrome 91, **Firefox 147, above the floor**; an older Firefox runs the app online but registers no worker, so it has no offline cold start and cannot install it |
 
 The rule to follow when adding one: **check the specific feature, not the

@@ -264,12 +264,14 @@ tasks:
       # The bug classes the two above do not look at ([D-340]), as
       # backend/.golangci.yml lists them.
       - cd backend && golangci-lint run ./...
-      # [D-340] An exported function nothing calls. One that only the other
-      # build calls is printed by one run, so a line both runs print is dead.
+      # [D-340] A function nothing calls, tests included (-test). One that
+      # only the other build calls is printed by one run, so a line both runs
+      # print is dead; the price is a file only one build compiles
+      # (demo_on.go, demo_off.go), whose dead code one run alone prints.
       - >-
         cd backend && set -o pipefail &&
         dead=$({ deadcode -test -tags no_ui ./... && deadcode -test -tags demo,no_ui ./...; } | sort | uniq -d) &&
-        if [ -n "$dead" ]; then echo "$dead"; echo "deadcode: nothing calls these in either build"; exit 1; fi
+        if [ -n "$dead" ]; then echo "$dead"; echo "deadcode: nothing calls these, tests included, in either build"; exit 1; fi
 
   go-test:
     desc: The backend suite, then package main as the demo build ([D-234]); `go test` arguments after `--`
@@ -355,7 +357,7 @@ tasks:
       - frontend/src/lib/components/add/*.ts
       # The libraries under them (Dexie, pocketbase-js, PocketBase) and the
       # project's own config.
-      - frontend/*.{js,ts,json,jsonc}
+      - frontend/*.{js,ts,json}
       - frontend/pnpm-lock.yaml
       - backend/go.mod
       - backend/go.sum
@@ -453,7 +455,7 @@ tasks:
       - frontend/project.inlang/{settings.json,paraglide.config.js}
       - frontend/static/**/*
       - exclude: frontend/src/lib/paraglide/**/*
-      - frontend/*.{js,ts,json,jsonc}
+      - frontend/*.{js,ts,json}
       - frontend/scripts/*.js
       - frontend/pnpm-lock.yaml
       - backend/**/*.go

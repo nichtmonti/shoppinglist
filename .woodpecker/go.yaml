@@ -1,5 +1,5 @@
 # Woodpecker CI — Go workflow (docs/internals/design.md §14).
-# gofmt, vet, staticcheck and gosec (fast-fail), then the backend test suite,
+# gofmt, vet, staticcheck, gosec, golangci-lint and deadcode (fast-fail), then the backend test suite,
 # in the CI image ([D-203]). Runs in
 # parallel with frontend.yaml on every push/PR; e2e.yaml waits on both. The
 # advisory scanners (govulncheck, osv-scan) live in security.yaml.
@@ -83,7 +83,8 @@ steps:
       # locks make concurrent access safe), wiped with the workspace.
       - *go_mod_cache
       # The gate's own tasks ([D-177], [D-273]): gofmt, then go vet, go fix,
-      # staticcheck and gosec, each installed from its tools/ pin. This step's
+      # staticcheck, gosec, golangci-lint and deadcode, each installed from
+      # its tools/ pin. This step's
       # GOMEMLIMIT wins over the task's own: go-task lets the environment it
       # is started in override a task's `env`.
       - go -C tools/task install tool
