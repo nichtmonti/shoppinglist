@@ -10,7 +10,16 @@ import playwright from 'eslint-plugin-playwright';
 const recommended = playwright.configs['flat/recommended'];
 
 export default defineConfig(
-	{ ignores: ['**/test-results/**', 'playwright-report/**'] },
+	// What .gitignore keeps out of e2e/: Playwright's and the shots' output.
+	{
+		ignores: [
+			'**/test-results/**',
+			'playwright-report/**',
+			'blob-report/**',
+			'playwright/.cache/**',
+			'shots/out/**'
+		]
+	},
 	// A stale disable is an error too, or it outlives its reason unnoticed.
 	{ linterOptions: { reportUnusedDisableDirectives: 'error' } },
 	js.configs.recommended,
@@ -32,7 +41,8 @@ export default defineConfig(
 			...Object.fromEntries(
 				Object.entries(recommended.rules).map(([rule, level]) => [
 					rule,
-					level === 'off' ? 'off' : 'error'
+					// An entry with options keeps them; only its level is raised.
+					Array.isArray(level) ? ['error', ...level.slice(1)] : level === 'off' ? 'off' : 'error'
 				])
 			),
 			// A harness walks routes, locales and a diagnostics switch in loops;

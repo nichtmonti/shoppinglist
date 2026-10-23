@@ -195,7 +195,7 @@ function goComponents() {
 	// a version no release is built with.
 	const goVersion = go(['env', 'GOVERSION']).trim();
 	const { Toolchain } = JSON.parse(go(['mod', 'edit', '-json']));
-	if (Toolchain && Toolchain !== goVersion)
+	if (Toolchain && Toolchain !== 'default' && Toolchain !== goVersion)
 		throw new Error(
 			`this Go is ${goVersion}, backend/go.mod's toolchain line is ${Toolchain}: bring ` +
 				".devcontainer/Dockerfile's golang image and go.mod to one version, then rebuild the devcontainer"

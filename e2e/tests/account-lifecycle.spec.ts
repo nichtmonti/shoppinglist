@@ -117,10 +117,8 @@ test('delete account: solo list cascades, shared list survives for the other mem
 	await passkeyA.setUserVerified(true);
 	// The session ends: the app shell swaps to the auth screen on its own
 	// (authState.isValid flips) — no navigation in the delete path.
-	await appearsAfter(
-		nicknameField(pageA),
-		() => pageA.getByRole('button', { name: 'Konto löschen' }).click(),
-		{ timeout: 15_000 }
+	await appearsAfter(nicknameField(pageA), () =>
+		pageA.getByRole('button', { name: 'Konto löschen' }).click()
 	);
 
 	// B still has the shared list, its items, and can still work in it — the

@@ -204,14 +204,16 @@ export async function addItemByTyping(page: Page, name: string): Promise<void> {
  * its live query has seen it. Sound only after the awaited change is stored
  * (addItemByTyping waits for that; another change needs its own local marker
  * first), since the outbox was empty before it too. A change the server
- * refuses leaves the outbox as well: a spec about the outcome reads it where
- * the server shows it, on a second device or a fresh load.
+ * refuses leaves the outbox as well, with a notice that it was undone or not
+ * added, which fails this; a refusal without one (`not_member`) does not, so
+ * a spec about the outcome still reads it where the server shows it.
  */
 export async function expectSynced(page: Page): Promise<void> {
 	// A read that fails mid-navigation is a "not yet": expect.poll would
 	// fail at the first throw.
 	await expect.poll(() => storeCount(page, 'pending_ops').catch(() => -1)).toBe(0);
 	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible();
+	await expect(page.getByText(/wurde rückgängig gemacht|wurde nicht hinzugefügt/)).toHaveCount(0);
 }
 
 /** The active-list row for an item name (A→Z mode). */
