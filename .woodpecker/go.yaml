@@ -93,12 +93,16 @@ steps:
       # is started in override a task's `env`.
       - go -C tools/task install tool
       - task gofmt go-lint
-      # Secrets in the history ([D-203]): every commit the clone holds, on every
-      # push (the whole history took 12 s in 2026-10). A finding is a token or
-      # key that reached git, and the fix is rotating it, not hiding it: a
-      # deliberate test value goes into .gitleaksignore by its fingerprint.
-      # The gate's gitleaks task: the history scan, plus scans of the
-      # uncommitted and untracked files, which a CI clone has none of.
+      # Secrets in the history ([D-203]): every commit, on every push (the
+      # whole history took 15 s in 2026-10). A push's clone holds its last
+      # commit alone, where a secret added and removed again within the push
+      # is not, so it fetches the rest first; a tag's clone has it all. A
+      # finding is a token or key that reached git, and the fix is rotating
+      # it, not hiding it: a deliberate test value goes into .gitleaksignore
+      # by its fingerprint. The gate's gitleaks task: the history scan, plus
+      # scans of the uncommitted and untracked files, which a CI clone has
+      # none of.
+      - if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch -q --unshallow origin; fi
       - task gitleaks
 
   go-test:
