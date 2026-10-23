@@ -249,6 +249,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 | [D-341] | Sync work stops on an AbortSignal, not on checked flags |  |
 | [D-342] | A browser wait names a state its action creates |  |
 | [D-343] | Every build is tested as an update of the previous release |  |
+| [D-344] | A tab reloads when another tab's newer build upgrades the database |  |
 
 <!-- decisions-index:end -->
 
@@ -914,6 +915,8 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 
 <a id="D-343"></a>**[D-343] Every build is tested as an update of the previous release (2026-10).** A page stays open across a deploy and a phone holds edits it has not sent, so a build must take over the previous release's database, its queued ops and its passkeys. Each suite tests one build against itself, and a change made to client and server together passes it, while every tab still running the release before loses what it held. `task e2e:upgrade` builds the previous release from its tag (`git describe --tags --abbrev=0 HEAD^`, on a release commit the one before it) in a worktree outside the checkout, and runs two checks against this build. `e2e/upgrade/` is one household's story: an edit made while the server is down for the update, sent by the page still on the previous build; edits still queued when the page loads the new one, which keeps its outbox and sends them; a device that never ran the previous build sees all of them and restores a backup the previous build saved ([D-72]); and the old passkey signs in. Then the previous release's own sync suite runs against this server, its engine standing in for the page still open. CI runs both on every push. *Rejected:* recorded wire fixtures (a fixture from this build tests this build's client); a migration test on a hand-made database (it holds what the test's author thought of, not what the release wrote). ([§8.2], [§8.3], [§14], [D-174], [D-177], [D-293])
 
+<a id="D-344"></a>**[D-344] A tab reloads when another tab's newer build upgrades the database (2026-10).** Tabs and an installed app's windows share one IndexedDB, and a build that raises the Dexie schema upgrades it from whichever window loads first. Dexie then closes each older window's connection and reopens it on that window's next read, under the older schema: it patches the stores back towards that schema (a version above the new build's), and the older code goes on writing rows and ops in the shape the upgrade migrated away from, which the new build reads as its own. `reloadOnUpgrade()` takes Dexie's `versionchange` event with a new version and reloads the window, which then loads the new build from the server or the updated service worker. A deletion from another window (a sign-out's wipe) has no new version and leaves the window be. What the window had not stored is lost, as on any reload; what it stored is in the upgraded database. A window of a build from before this one still reopens under its own schema once. *Rejected:* a banner asking for a reload (the older window keeps writing until someone reads it); blocking the upgrade until every older window closes (an installed app's window stays open for days, and the new build would not start). ([§8.7], [§8.8], [D-13], [D-343])
+
 <a id="D-176"></a>**[D-176] A restore merges into a living row of the same name instead of lifting its tombstone beside it (2026-09).** [D-29] merges duplicate names on create; a restore (from "Frühere Artikel", or the add box on a dedup hit) must too, since a device that never learned of a purchase cannot match that row, and a name re-added meanwhile would appear twice. When an `items` update clears `deleted` on a tombstone and a living row with the same normalized name is on the list, the server merges into it (`status: "merged"`, the survivor's id and record) by the create-merge's rules: the survivor keeps its values and is re-activated if checked (unless the op checks it), and differing non-empty values come back as `conflicts` ([§8.4]). The survivor takes the tombstone's `last_bought_at` if newer, and the tombstone's is cleared so the name does not also sit in "Frühere Artikel"; the tombstone stays removed. The merge is logged in `merge_log` under the tombstone's id and the op, and a restore consults it first: a retry of the same op replays and cannot un-check a purchase made in between ([D-108]), while a later restore of the same tombstone by another op (a phone offline since the first) is decided anew. The client needs no change. ([§8.3], [§6.10], [D-29], [D-108], [D-174])
 
 <a id="D-175"></a>**[D-175] A check-off riding a convergent delete still records the purchase (2026-09).** [§8.3]'s convergent delete answers an op deleting an already-removed row, but the op may carry a coalesced `checked`, whose server-stamped `last_bought_at` is how [§6.10] remembers purchases; answering `noop` lost a purchase made offline by one member when another removed the row first. Such an op stamps `last_bought_at` on the tombstone and answers `applied` with the record; the row stays removed and `checked` is left alone. Without a check-off it stays the silent `noop`. ([§8.3], [§6.10], [D-26], [D-174])
@@ -1075,6 +1078,7 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 [§8.5]: design.md#8-5-inbound-changes
 [§8.6]: design.md#8-6-gone-handling
 [§8.7]: design.md#8-7-multi-tab-multi-context-coordination
+[§8.8]: design.md#8-8-local-storage-durability
 [§9]: design.md#9-display-sorting-item-entry-history
 [§9.1]: design.md#9-1-two-views-shop-tiles-and-list-rows
 [§9.2]: design.md#9-2-adding-by-barcode-scan
@@ -1326,3 +1330,4 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 [D-341]: #D-341
 [D-342]: #D-342
 [D-343]: #D-343
+[D-344]: #D-344

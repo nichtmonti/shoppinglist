@@ -1,7 +1,16 @@
 // Schema smoke test for the Dexie database.
 import Dexie from 'dexie';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { AppDB, db, type Item, type PendingOp, getMeta, ownMembership, setMeta } from './db';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {
+	AppDB,
+	db,
+	type Item,
+	type PendingOp,
+	getMeta,
+	ownMembership,
+	reloadOnUpgrade,
+	setMeta
+} from './db';
 import { wipeLocalAccountData } from '#lib/auth/account-data.js';
 
 // Helper for creating valid test items.
@@ -619,5 +628,38 @@ describe('the v8 migration', () => {
 		expect(await v8.meta.where('key').startsWith('invite_token_').count()).toBe(0);
 		expect((await v8.meta.get('locale'))?.value).toBe('de');
 		v8.close();
+	});
+});
+
+// [D-344] Another tab on a newer build upgrades the database this one has open.
+describe('reloadOnUpgrade()', () => {
+	const NAME = 'upgrade-reload-test';
+	afterEach(async () => {
+		await Dexie.delete(NAME);
+	});
+
+	async function openTab(): Promise<{ tab: AppDB; reload: () => void }> {
+		const tab = new AppDB(NAME);
+		const reload = vi.fn();
+		reloadOnUpgrade(tab, reload);
+		await tab.open();
+		return { tab, reload };
+	}
+
+	it('reloads a tab whose database a newer build upgraded', async () => {
+		const { tab, reload } = await openTab();
+		const newer = new Dexie(NAME);
+		newer.version(1000).stores({ meta: 'key' });
+		await newer.open();
+		expect(reload).toHaveBeenCalledTimes(1);
+		newer.close();
+		tab.close();
+	});
+
+	it('leaves it be when another tab deletes the database', async () => {
+		const { tab, reload } = await openTab();
+		await Dexie.delete(NAME);
+		expect(reload).not.toHaveBeenCalled();
+		tab.close();
 	});
 });

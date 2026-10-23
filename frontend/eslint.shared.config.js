@@ -304,7 +304,8 @@ const layers = (names) => names.split(' ').map(layer);
 
 // What each layer may import, values and types. The store's Dexie upgrades
 // run engine code; pb.ts announces a restored session ([D-109]); the root
-// layout imports app.css (`app`).
+// layout imports app.css (`app`), and hooks.client.ts has the store reload
+// the tab on another tab's upgrade ([D-344]).
 const allowed = {
 	paraglide: 'paraglide',
 	pure: 'pure i18n paraglide',
@@ -320,7 +321,7 @@ const allowed = {
 	components: 'components scan demo state actions sync auth pure i18n paraglide',
 	routes: 'routes app components demo state actions sync client auth pure i18n',
 	'service-worker': 'service-worker pure',
-	app: 'pure',
+	app: 'pure store',
 	behaviour: 'behaviour world pure',
 	world: '*',
 	integration: '*',

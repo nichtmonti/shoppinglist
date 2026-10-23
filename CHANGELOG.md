@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **An app tab left open from before an update reloads when another tab brings the update's new storage.** It kept running the old version on the device's updated storage and could save changes in the old shape. No update so far has changed that storage; the first one that does reloads such a tab ([D-344]).
 - **A list's own screens keep their name in the browser tab.** When the list loaded slowly, its categories, previous items and import screens could show the list's name there instead.
 
 ## v0.17.1: nothing from a list kept past a sign-out in another tab, one-line list cards, and releases you can rebuild yourself (2026-10)
@@ -987,3 +988,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-336]: docs/internals/decisions.md#D-336
 [D-337]: docs/internals/decisions.md#D-337
 [D-338]: docs/internals/decisions.md#D-338
+[D-344]: docs/internals/decisions.md#D-344

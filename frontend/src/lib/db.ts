@@ -322,6 +322,20 @@ export const SHADOW_TABLES = {
 export const db = new AppDB();
 
 /**
+ * Reloads the tab once another tab's newer build has upgraded `database`
+ * ([D-344]). Dexie closes this tab's connection and reopens on its next
+ * read, under this tab's older schema: it patches the stores back to that
+ * schema and goes on writing rows the upgrade migrated. A deletion (a
+ * sign-out's wipe in another tab) has no new version and reopens the same
+ * schema.
+ */
+export function reloadOnUpgrade(database: Dexie, reload: () => void): void {
+	database.on('versionchange', (event) => {
+		if (event.newVersion) reload();
+	});
+}
+
+/**
  * The view table of a §8.3 push collection; the one place the cast from
  * Dexie's union of typed tables lives.
  */
