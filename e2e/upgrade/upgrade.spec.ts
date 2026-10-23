@@ -21,8 +21,8 @@ import { expect, test, type Page } from '../tests/fixtures';
 // a phone holds edits it has not sent: an edit made while the server is down
 // for the update, sent by the page still running the previous build, and
 // edits still waiting when the phone loads the new build. Every one arrives,
-// the database the previous release wrote is this build's, and its passkey
-// still signs in.
+// the database the previous release wrote is this build's, a backup it saved
+// restores, and its passkey still signs in.
 
 const PREVIOUS = process.env.E2E_PREVIOUS_BIN;
 const CURRENT = process.env.SHOPPINGLIST_BIN ?? 'backend/shoppinglist';
@@ -40,17 +40,21 @@ async function startServer(port: string, bin: string, fresh: boolean): Promise<C
 		// As Playwright's webServer: the log only, not PocketBase's request lines.
 		stdio: ['ignore', 'ignore', 'inherit']
 	});
-	// A server that refuses to start says why on stderr, above this failure.
 	const health = () =>
 		fetch(spec.url)
 			.then((r) => r.status)
 			.catch(() => 0);
-	await expect.poll(health, { timeout: 60_000 }).toBe(200);
+	// A server that refuses to start says why on stderr, above this failure.
+	const early = once(server, 'exit').then(([code]) => `${bin} exited (${code}) before it answered`);
+	const up = expect.poll(health, { timeout: 60_000 }).toBe(200);
+	const failure = await Promise.race([up.then(() => undefined), early]);
+	if (failure) throw new Error(failure);
 	return server;
 }
 
 /** Stops it as a deploy does, and waits until it has exited. */
 async function stopServer(server: ChildProcess): Promise<void> {
+	if (server.exitCode !== null || server.signalCode !== null) return;
 	const exited = once(server, 'exit');
 	server.kill('SIGTERM');
 	await exited;
@@ -77,6 +81,18 @@ test('an update loses nothing a device or the server was holding', async ({
 		await addItemByTyping(page, 'Brot');
 		await expectSynced(page);
 		const previousBuild = await buildOf(page);
+
+		// A backup saved on the previous release ([D-72]).
+		await page.getByRole('button', { name: 'Zurück' }).click();
+		await page.getByRole('button', { name: 'Aktionen für Vorrat', exact: true }).click();
+		const [download] = await Promise.all([
+			page.waitForEvent('download'),
+			page.getByRole('menuitem', { name: 'Backup exportieren' }).click()
+		]);
+		const backup = test.info().outputPath(download.suggestedFilename());
+		await download.saveAs(backup);
+		await page.getByRole('link', { name: 'Vorrat öffnen' }).click();
+		await openListView(page);
 
 		// The server is down for the update: the edit waits in the outbox.
 		await stopServer(server);
@@ -116,15 +132,26 @@ test('an update loses nothing a device or the server was holding', async ({
 		await expect(
 			itemRow(other.page, 'Brot').getByRole('button', { name: 'Menge bearbeiten' })
 		).toContainText('2');
+
+		// The previous release's backup restores on this one.
+		await other.page.getByRole('button', { name: 'Zurück' }).click();
+		await other.page.getByRole('button', { name: 'Liste importieren' }).click();
+		await other.page.locator('input[type="file"]').setInputFiles(backup);
+		await expect(other.page).toHaveURL(/\/list\/[^/]+$/);
+		await openListView(other.page);
+		for (const name of ['Milch', 'Brot']) {
+			await expect(itemRow(other.page, name)).toBeVisible();
+		}
 		await other.context.close();
 
-		// The passkey the previous release registered signs in on this one.
+		// The passkey the previous release registered signs in on this one (to the
+		// home with both lists, the original and its restored copy).
 		await disableConditionalMediation(page, { acrossNavigations: true });
 		await page.goto('/settings');
 		await appearsAfter(nicknameField(page), () =>
 			page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click()
 		);
-		await appearsAfter(page.getByRole('link', { name: 'Vorrat öffnen' }), () =>
+		await appearsAfter(page.getByRole('link', { name: 'Vorrat öffnen' }).first(), () =>
 			page.getByRole('button', { name: 'Mit Passkey anmelden' }).click()
 		);
 	} finally {
