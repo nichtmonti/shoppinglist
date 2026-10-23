@@ -118,7 +118,7 @@ pnpm format:check
 (cd backend && go test -tags no_ui ./...)
 (cd backend && staticcheck -tags no_ui ./... && gosec -tags no_ui ./... && golangci-lint run ./...)
 (cd frontend && pnpm lint && pnpm check && pnpm exec knip)
-(cd e2e && pnpm check)
+(cd e2e && pnpm check && pnpm lint)
 (cd frontend && npx vitest run)
 task build-app   # the binary the two below serve
 (cd e2e && E2E_PORT=8097 npx playwright test)

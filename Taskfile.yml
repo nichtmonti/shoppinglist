@@ -202,17 +202,18 @@ tasks:
       - cd frontend && pnpm exec knip --no-progress
 
   check:e2e:
-    desc: tsc over the browser harnesses, which Playwright runs with their types stripped
+    desc: tsc and the typed ESLint over the browser harnesses, which Playwright runs with their types stripped
     deps: [deps]
     sources:
       - e2e/**/*.ts
+      - e2e/eslint.config.js
       - e2e/tsconfig.json
       - e2e/package.json
       - e2e/pnpm-lock.yaml
       - exclude: e2e/node_modules/**/*
     cmds:
       - defer: *failed
-      - cd e2e && pnpm check
+      - cd e2e && pnpm check && pnpm lint
 
   # --- tests -------------------------------------------------------------------
   go-lint:

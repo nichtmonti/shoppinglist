@@ -131,6 +131,7 @@ async function settledNames(): Promise<string[]> {
 	await expect
 		.poll(async () => {
 			const previous = current;
+			// eslint-disable-next-line playwright/no-wait-for-timeout -- two reads apart: the order has settled when they agree
 			await page.waitForTimeout(300);
 			current = await arrangedNames();
 			return current.join('|') === previous.join('|');

@@ -48,7 +48,7 @@ test('the category editor: add, rename, hide, reorder, restore and reset all rea
 	await addForm.getByTestId('emoji-grid').getByRole('radio', { name: '🧄', exact: true }).click();
 	await addForm.getByTestId('color-grid').getByRole('radio', { name: 'Pink', exact: true }).click();
 	await addForm.getByRole('button', { name: 'Speichern' }).click();
-	await expect(addForm).not.toBeVisible();
+	await expect(addForm).toBeHidden();
 	await expect(pageA.locator('.catedit-row').filter({ hasText: 'Feinkost' })).toBeVisible();
 
 	// ---- 2. rename a seeded category, and change its emoji/color too ----
@@ -64,7 +64,7 @@ test('the category editor: add, rename, hide, reorder, restore and reset all rea
 		.getByRole('radio', { name: 'Petrol', exact: true })
 		.click();
 	await editForm.getByRole('button', { name: 'Speichern' }).click();
-	await expect(editForm).not.toBeVisible();
+	await expect(editForm).toBeHidden();
 	await expect(pageA.locator('.catedit-row').filter({ hasText: 'Speisekammer' })).toBeVisible();
 
 	// ---- 3. hide a different seeded category ----
@@ -151,7 +151,7 @@ test('the category editor: add, rename, hide, reorder, restore and reset all rea
 	const resetForm = pageA.getByRole('dialog', { name: 'Kategorie bearbeiten' });
 	// Reset writes `name: null` — no layer had ever pushed that before this spec.
 	await resetForm.getByRole('button', { name: 'Auf Standard zurücksetzen' }).click();
-	await expect(resetForm).not.toBeVisible();
+	await expect(resetForm).toBeHidden();
 	await expect(
 		pageA.locator('.catedit-row').filter({ hasText: 'Konserven & Vorräte' })
 	).toBeVisible();

@@ -38,7 +38,9 @@ async function settle(page: Page) {
 		// Bounded: a lazy image outside the viewport never loads, so its decode
 		// never settles.
 		const decoded = Promise.all(
-			[...document.images].map((img) => (img.complete ? null : img.decode().catch(() => null)))
+			[...document.images]
+				.filter((img) => !img.complete)
+				.map((img) => img.decode().catch(() => null))
 		);
 		await Promise.race([decoded, new Promise((r) => setTimeout(r, 1000))]);
 		await frame();

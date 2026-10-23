@@ -287,6 +287,7 @@ test.describe('as an iPhone', () => {
 		await expect(page.locator('[data-testid="row"]', { hasText: tap.label })).toBeVisible();
 		// A fall-through click opens the sheet a beat after the pick; give it room
 		// to appear so a pass is a real absence, not a race won.
+		// eslint-disable-next-line playwright/no-wait-for-timeout -- the absence below needs its window ([D-342])
 		await page.waitForTimeout(500);
 		await expect(
 			page.locator('[data-vaul-drawer-direction="bottom"]'),

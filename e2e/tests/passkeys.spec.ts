@@ -28,6 +28,7 @@ test('settings opens with its passkeys: no frame without them', async ({ page })
 	});
 	await link.click();
 	await expect(passkeyRows(page)).toHaveCount(1);
+	// eslint-disable-next-line playwright/no-wait-for-timeout -- the frames recorded meanwhile are the check
 	await page.waitForTimeout(500);
 	const frames = await page.evaluate(() => {
 		const w = window as unknown as { __frames: number[]; __recording: boolean };

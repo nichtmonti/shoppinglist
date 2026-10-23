@@ -85,6 +85,24 @@ async function scan(
 
 test.describe.configure({ retries: 0, mode: 'serial' });
 
+test.afterAll(() => {
+	writeFileSync(
+		new URL('../test-results/a11y-findings.json', import.meta.url),
+		JSON.stringify({ scans, totalViolations }, null, 2)
+	);
+	console.log(`A11Y-SCAN ${scans.length} states scanned, ${totalViolations} violations total`);
+	for (const s of scans) {
+		if (s.violations.length > 0) {
+			console.log(
+				`A11Y-VIOLATION ${s.label}: ${s.violations
+					.map((v) => `${v.id}(${v.impact}, ${v.nodes.length} nodes)`)
+					.join(', ')}`
+			);
+		}
+	}
+	expect(totalViolations, 'axe violations found — see test-results/a11y-findings.json').toBe(0);
+});
+
 test('axe scan: German light walk (auth → previous items)', async ({ page }) => {
 	// 1. Anonymous auth screen (login form, before any ceremony).
 	await page.goto('/');
@@ -169,7 +187,7 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 	await scan(page, 'categories', 'category-editor');
 
 	// 15. Share sheet (invite link visible).
-	await page.goto(listUrl!);
+	await page.goto(listUrl);
 	await page.getByTestId('list-menu').click();
 	await page.getByRole('button', { name: 'Teilen & Mitglieder' }).click();
 	await showInviteLink(page);
@@ -181,7 +199,7 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 	await page.getByRole('radio', { name: 'English' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
 	await page.getByRole('button', { name: 'Back' }).click();
-	await page.goto(listUrl!);
+	await page.goto(listUrl);
 	await openListView(page);
 	await scan(page, 'list', 'list-en');
 	await openShopView(page);
@@ -192,7 +210,7 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 	await page.goto('/');
 	await expect(page.getByRole('link', { name: 'Open Wochenshop' })).toBeVisible();
 	await scan(page, 'home', 'home-dark');
-	await page.goto(listUrl!);
+	await page.goto(listUrl);
 	await openListView(page);
 	await scan(page, 'list', 'list-dark');
 	await openShopView(page);
@@ -210,7 +228,7 @@ test('axe scan: scan overlay unsupported state (mediaDevices stubbed)', async ({
 	const p2 = await ctx.newPage();
 	await p2.goto('/');
 	await registerAccount(p2, 'Aria2');
-	const listUrl = await createList(p2, 'Wochenshop');
+	await createList(p2, 'Wochenshop');
 	await openListView(p2);
 	// Freeze the page clock so the unsupported-state auto-reset (1.2s) cannot
 	// close the overlay while axe is analysing; under load the reset can
@@ -221,22 +239,4 @@ test('axe scan: scan overlay unsupported state (mediaDevices stubbed)', async ({
 	await scan(p2, 'scan', 'scan-unsupported');
 	await p2.keyboard.press('Escape');
 	await ctx.close();
-});
-
-test.afterAll(() => {
-	writeFileSync(
-		new URL('../test-results/a11y-findings.json', import.meta.url),
-		JSON.stringify({ scans, totalViolations }, null, 2)
-	);
-	console.log(`A11Y-SCAN ${scans.length} states scanned, ${totalViolations} violations total`);
-	for (const s of scans) {
-		if (s.violations.length > 0) {
-			console.log(
-				`A11Y-VIOLATION ${s.label}: ${s.violations
-					.map((v) => `${v.id}(${v.impact}, ${v.nodes.length} nodes)`)
-					.join(', ')}`
-			);
-		}
-	}
-	expect(totalViolations, 'axe violations found — see test-results/a11y-findings.json').toBe(0);
 });

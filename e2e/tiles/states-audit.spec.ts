@@ -49,7 +49,7 @@ function smallTargets(page: Page) {
 		const controls = document.querySelectorAll<HTMLElement>(
 			'[data-variant="current"] .frame :is(button, a[href], input, select, textarea, [role="button"])'
 		);
-		const describe = (el: Element | null) => {
+		const describeEl = (el: Element | null) => {
 			if (!el) return 'nothing';
 			const name = [...el.classList].find((c) => !c.startsWith('svelte-'));
 			return `${el.tagName.toLowerCase()}${name ? `.${name}` : ''}`;
@@ -64,7 +64,7 @@ function smallTargets(page: Page) {
 				const at = (r: number) => document.elementFromPoint(x + dx * r, y + dy * r);
 				let r = 0;
 				while (r < 32 && el.contains(at(r + 1))) r += 1;
-				return [r, describe(at(r + 1))];
+				return [r, describeEl(at(r + 1))];
 			};
 			const short: string[] = [];
 			for (const [axis, a, b] of [
@@ -78,7 +78,7 @@ function smallTargets(page: Page) {
 			const where = el.closest<HTMLElement>('[data-item]')?.dataset.item ?? '-';
 			const view = el.closest<HTMLElement>('.frame')?.dataset.view;
 			const density = el.closest<HTMLElement>('.panel')?.dataset.density;
-			findings.push(`${view}/${density} ${where}: ${describe(el)} ${short.join(', ')}`);
+			findings.push(`${view}/${density} ${where}: ${describeEl(el)} ${short.join(', ')}`);
 		}
 		return [...new Set(findings)];
 	});

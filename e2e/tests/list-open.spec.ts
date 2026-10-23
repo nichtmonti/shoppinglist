@@ -80,6 +80,7 @@ test('a list opens whole: no frame without its name or its items', async ({ page
 	await recordFrames(page);
 	await card.click();
 	await expect(page.locator('[data-testid="tile"]')).toHaveCount(ITEMS.length);
+	// eslint-disable-next-line playwright/no-wait-for-timeout -- the frames recorded meanwhile are the check
 	await page.waitForTimeout(500);
 	expectWhole(await stopRecording(page), 'Wocheneinkauf');
 
@@ -89,6 +90,7 @@ test('a list opens whole: no frame without its name or its items', async ({ page
 	await recordFrames(page);
 	await card.click();
 	await expect(page.locator('[data-testid="tile"]')).toHaveCount(ITEMS.length);
+	// eslint-disable-next-line playwright/no-wait-for-timeout -- the frames recorded meanwhile are the check
 	await page.waitForTimeout(500);
 	expectWhole(await stopRecording(page), 'Wocheneinkauf');
 });
@@ -119,6 +121,7 @@ test('the home screen starts whole after a cold start: no frame without its list
 	});
 	await page.reload();
 	await expect(page.getByRole('link', { name: /Baumarkt|Wocheneinkauf/ })).toHaveCount(2);
+	// eslint-disable-next-line playwright/no-wait-for-timeout -- the frames recorded meanwhile are the check
 	await page.waitForTimeout(500);
 	const frames = await page.evaluate(
 		() => (window as unknown as { __frames: { cards: number; busy: boolean }[] }).__frames

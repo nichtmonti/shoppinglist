@@ -39,7 +39,8 @@ test('a route whose code fails to load recovers with a full page load after a pa
 		timeout: 15_000
 	});
 	await expect(page.locator('[role=alert].error-view')).toHaveCount(0);
-	expect(JSON.parse((await report).postData() ?? '{}').context).toContain('recovery=reload-1500ms');
+	const sent = JSON.parse((await report).postData() ?? '{}') as { context?: string };
+	expect(sent.context).toContain('recovery=reload-1500ms');
 });
 
 test('a route that keeps failing shows the error page and is reported, without looping', async ({
@@ -67,7 +68,7 @@ test('a route that keeps failing shows the error page and is reported, without l
 	await expect(alert).toContainText('Etwas ist schiefgelaufen.', { timeout: 20_000 });
 	await expect(page.getByTestId('error-detail')).toContainText('TypeError');
 	await expect(alert.getByRole('button', { name: 'Neu laden' })).toBeVisible();
-	const sent = JSON.parse((await report).postData() ?? '{}');
+	const sent = JSON.parse((await report).postData() ?? '{}') as { message?: string };
 	expect(sent).toMatchObject({ route: '/list/[id]', status: 500 });
 	expect(sent.message).toContain('TypeError');
 	// Two retries, then the guard holds: the last failure schedules no reload,

@@ -148,7 +148,7 @@ async function rgb(
 	prop: 'backgroundColor' | 'color' = 'backgroundColor'
 ): Promise<Parsed> {
 	const raw = await locator.evaluate(
-		(el, p) => getComputedStyle(el)[p as keyof CSSStyleDeclaration] as string,
+		(el, p: 'backgroundColor' | 'color') => getComputedStyle(el)[p],
 		prop
 	);
 	return parseColor(raw);

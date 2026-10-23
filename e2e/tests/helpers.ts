@@ -64,7 +64,7 @@ export async function appearsAfter(
 	action: () => Promise<unknown>,
 	options?: { timeout?: number }
 ): Promise<void> {
-	expect(await marker.isVisible(), 'the marker is visible before the action').toBe(false);
+	await expect(marker, 'the marker is visible before the action').toBeHidden();
 	await action();
 	await expect(marker).toBeVisible(options);
 }

@@ -52,6 +52,7 @@ test("a tap on a tile another device's tick just slid into place ticks nothing",
 	);
 	await page.mouse.click(slot.x + slot.width / 2, slot.y + slot.height / 2);
 
+	// eslint-disable-next-line playwright/no-wait-for-timeout -- the absence below needs its window ([D-342])
 	await page.waitForTimeout(1000);
 	await expect(bread).toBeVisible();
 

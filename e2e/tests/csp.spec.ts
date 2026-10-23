@@ -120,6 +120,8 @@ test('CSP: the response header and the index.html meta tag carry the same policy
 	const meta = await page
 		.locator('meta[http-equiv="content-security-policy" i]')
 		.getAttribute('content');
+	// The value is compared with the header below; the tag is index.html's own.
+	// eslint-disable-next-line playwright/prefer-web-first-assertions
 	expect(meta, 'no CSP meta tag in index.html — check kit.csp in vite.config.ts').toBeTruthy();
 
 	// The header is the meta policy verbatim, plus the one directive a meta CSP

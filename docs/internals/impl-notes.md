@@ -20,7 +20,7 @@ them, and what to watch for, is in [`AGENTS.md`](../../AGENTS.md#the-gate).
 | `osv` | osv-scanner over every lockfile, CI's osv-scan step, when a lockfile or `osv-scanner.toml` changed | none |
 | `lint` | the type-aware ESLint config on the changed files (`lint:all` the whole project) | none |
 | `check` | `pnpm check` (svelte-check) and knip | none |
-| `check:e2e` | `tsc` over `e2e/`, which Playwright runs with its types stripped | none |
+| `check:e2e` | `tsc` and the typed ESLint (eslint-plugin-playwright) over `e2e/`, which Playwright runs with its types stripped | none |
 | `go-lint` | go vet, `go fix -diff`, staticcheck, gosec, golangci-lint and deadcode over `backend/`, CI's go-check step, when the backend or their `tools/` pins changed ([D-273]) | none |
 | `go-test` | `go test -tags no_ui ./...`, the whole Go suite | none |
 | `vitest` | `vitest run --changed` (server + client projects); the whole suite when a config or `frontend/messages/` changes | none |

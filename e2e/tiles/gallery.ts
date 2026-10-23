@@ -33,7 +33,7 @@ function param(value: string | number | boolean | string[]): string {
 
 export function galleryUrl(query: GalleryQuery = {}): string {
 	const params = new URLSearchParams();
-	for (const [key, value] of Object.entries(query))
+	for (const [key, value] of Object.entries(query) as [string, GalleryQuery[keyof GalleryQuery]][])
 		if (value !== undefined) params.set(key, param(value));
 	const search = params.toString();
 	return `/dev/gallery${search ? `?${search}` : ''}`;

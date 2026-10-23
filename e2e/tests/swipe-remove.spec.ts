@@ -31,6 +31,7 @@ async function touchDrag(page: Page, name: string, dx: number, dy = 0): Promise<
 	await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(0) });
 	for (let i = 1; i <= 12; i++) {
 		await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: at(i / 12) });
+		// eslint-disable-next-line playwright/no-wait-for-timeout -- a finger's pace: one move a frame
 		await page.waitForTimeout(16);
 	}
 	await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
@@ -65,6 +66,7 @@ test('a short drag snaps back, a vertical one scrolls, and neither removes', asy
 
 	await touchDrag(page, 'Milch', -30);
 	await touchDrag(page, 'Milch', -120, 200);
+	// eslint-disable-next-line playwright/no-wait-for-timeout -- the absence below needs its window ([D-342])
 	await page.waitForTimeout(300);
 
 	await expect(rowOf(page, 'Milch')).toBeVisible();

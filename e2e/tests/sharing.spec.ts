@@ -83,9 +83,10 @@ test('a visitor joins via the invite link, then a reset link retires the old one
 	await expect(
 		pageA.getByText('Neuer Link erstellt. Der alte funktioniert nicht mehr.')
 	).toBeVisible();
-	const newLink = await pageA.locator('[data-testid="invite-link"] span').innerText();
+	const linkText = pageA.locator('[data-testid="invite-link"] span');
+	await expect(linkText).not.toHaveText(oldLink);
+	const newLink = await linkText.innerText();
 	await pageA.keyboard.press('Escape');
-	expect(newLink).not.toBe(oldLink);
 
 	// The OLD link is now dead — a fresh, signed-out visitor sees the §7.6
 	// generic invalid-invite state (never distinguish revoked/expired/not-found).

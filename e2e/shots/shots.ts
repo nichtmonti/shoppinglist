@@ -26,8 +26,14 @@ export type Locale = 'de' | 'en';
 export type Theme = 'light' | 'dark';
 
 const messages: Record<Locale, Record<string, string>> = {
-	de: JSON.parse(readFileSync(resolve(REPO, 'frontend/messages/de.json'), 'utf8')),
-	en: JSON.parse(readFileSync(resolve(REPO, 'frontend/messages/en.json'), 'utf8'))
+	de: JSON.parse(readFileSync(resolve(REPO, 'frontend/messages/de.json'), 'utf8')) as Record<
+		string,
+		string
+	>,
+	en: JSON.parse(readFileSync(resolve(REPO, 'frontend/messages/en.json'), 'utf8')) as Record<
+		string,
+		string
+	>
 };
 
 /** The app's copy for `key` in `locale` — so one script drives both languages. */

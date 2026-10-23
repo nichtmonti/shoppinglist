@@ -12,7 +12,7 @@ const DICT_DB = 'einkaufsliste_sync';
 test('dictionary mirror self-heal', async ({ page }) => {
 	await page.goto('/');
 	await registerAccount(page, 'DictProbe');
-	const listUrl = await createList(page, 'Wochenshop');
+	await createList(page, 'Wochenshop');
 	await openListView(page);
 
 	const combobox = page.getByRole('combobox');
