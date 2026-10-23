@@ -87,7 +87,7 @@ steps:
   # The arch walk ([D-124]) is single-worker on its own server; the OIDC
   # journeys ([D-154]) start Dex from tools/dex; the tile audit ([D-166])
   # runs the Vite dev server; the demo harness ([D-234]) builds its own
-  # binary first.
+  # binary first, and the upgrade harness ([D-343]) the previous release's.
   e2e:
     image: *ci_image
     volumes:
@@ -95,7 +95,10 @@ steps:
       - *go_build_cache
     commands:
       - *install_task
-      - task e2e:functional e2e:arch e2e:oidc e2e:tiles e2e:demo
+      # The previous release's tag, and the history that finds it, for the
+      # upgrade harness ([D-343]): a push's clone has neither, a tag's both.
+      - if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch -q --tags --unshallow origin; fi
+      - task e2e:functional e2e:arch e2e:oidc e2e:tiles e2e:demo e2e:upgrade
 
   # Go coverage ([D-203]): the backend suite (go.yaml's run, mostly from the
   # test cache) with what the integration and browser suites' servers

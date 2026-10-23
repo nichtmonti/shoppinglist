@@ -182,6 +182,14 @@ e2e:<name>`) or by hand as below.
   `node`, not `pnpm exec`, whose process group hung every run.
 - **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from `task
   build-demo`.
+- **Upgrade, `e2e/upgrade/`** ([D-343]), 8085: the previous release's server
+  and page, then this build's on the same port and data; then that release's
+  `integration` project against this server on 8084. `task prev-release`
+  builds it from its tag in a worktree under `~/.cache/shoppinglist-prev`, out
+  of the checkout so the repo-wide layers never read its lockfiles; the host's
+  `git worktree list` shows it as prunable. A server variable of the harness's
+  own is `E2E_`-named: the previous release refuses a `SHOPPINGLIST_` name it
+  does not know ([D-336]).
 
 **A wait names a state its action creates** ([D-342]), never one the screen
 before already shows: a new screen by an element of its own (`appearsAfter()`
@@ -374,3 +382,4 @@ hand-drawn copy where it can be named.
 [D-336]: docs/internals/decisions.md#D-336
 [D-337]: docs/internals/decisions.md#D-337
 [D-342]: docs/internals/decisions.md#D-342
+[D-343]: docs/internals/decisions.md#D-343

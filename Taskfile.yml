@@ -527,6 +527,40 @@ tasks:
       - defer: *failed
       - cd e2e && SHOPPINGLIST_DEMO_BIN='{{.BIN_DEMO}}' {{.ROOT_DIR}}/{{.LOCK}} e2e:demo npx playwright test -c demo/demo.config.ts {{.CLI_ARGS}}
 
+  # --- the previous release ([D-343]) ---------------------------------------------
+  # The release this build updates: on a release commit the one before it,
+  # otherwise the newest. Its worktree sits outside the checkout, whose
+  # repo-wide layers (osv, prettier) would read its lockfiles as this one's,
+  # and shares this one's objects, which a partial clone (CI's) fetches when
+  # they are first read.
+  prev-release:
+    desc: The previous release's worktree and both its binaries, built once per tag
+    vars: &prev
+      PREV_TAG:
+        sh: git describe --tags --abbrev=0 HEAD^
+      PREV_DIR:
+        sh: echo "${XDG_CACHE_HOME:-$HOME/.cache}/shoppinglist-prev/$(git describe --tags --abbrev=0 HEAD^)"
+    status:
+      - test -x {{.PREV_DIR}}/backend/shoppinglist -a -x {{.PREV_DIR}}/backend/shoppinglist-no-ui
+    cmds:
+      - defer: *failed
+      # One release's worktree at a time: the one before it goes.
+      - rm -rf "$(dirname {{.PREV_DIR}})" && git worktree prune
+      - git worktree add -q --detach {{.PREV_DIR}} {{.PREV_TAG}}
+      # Its binaries write no coverage: their counters are another tree's.
+      - cd {{.PREV_DIR}} && env -u GOCOVERDIR task deps build-app build-backend
+
+  e2e:upgrade:
+    desc: The previous release updated to this build (e2e/upgrade, 8085, and its sync suite on 8084, [D-343])
+    deps: [deps, prev-release, build-app, build-backend]
+    vars: *prev
+    cmds:
+      - defer: *failed
+      - cd e2e && SHOPPINGLIST_BIN='{{.BIN}}' E2E_PREVIOUS_BIN='{{.PREV_DIR}}/backend/shoppinglist' {{.ROOT_DIR}}/{{.LOCK}} e2e:upgrade npx playwright test -c upgrade/upgrade.config.ts {{.CLI_ARGS}}
+      # Its engine, as a page still running it after the update, against this server.
+      # The lock from here: in the clone, lock.sh would find the clone's own.
+      - '{{.LOCK}} e2e:upgrade sh -c "cd {{.PREV_DIR}}/frontend && SHOPPINGLIST_BIN={{.BIN_NOUI}} INTEGRATION_PORT=8084 npx vitest run --project integration --silent=passed-only"'
+
   e2e:
     desc: Every harness, in two lanes (what CI runs)
     cmds:
@@ -539,6 +573,8 @@ tasks:
       # the other lane built the demo; alone it passed).
       - task: build-app
       - task: build-demo
+      - task: build-backend
+      - task: prev-release
       - task: e2e:browsers
 
   # The two lanes run side by side, so every harness writes its own
@@ -561,3 +597,4 @@ tasks:
       - task: e2e:tiles
       - task: e2e:oidc
       - task: e2e:demo
+      - task: e2e:upgrade
