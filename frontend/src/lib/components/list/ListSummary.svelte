@@ -61,7 +61,7 @@
 	>
 	<span class="flex flex-none items-center gap-2.5">
 		{#if pending > 0}
-			<Badge id={idBase && `${idBase}-pending`} tone="amber">
+			<Badge id={idBase && `${idBase}-pending`} tone="amber" data-testid="card-unsynced">
 				<i class="dot size-1.5 rounded-full bg-amber" aria-hidden="true"></i>{t(
 					'home_card_unsynced',
 					{ count: pending }

@@ -4,7 +4,8 @@ import {
 	createList,
 	openListView,
 	openShopView,
-	registerAccount
+	registerAccount,
+	showInviteLink
 } from '../tests/helpers';
 import { expandDoneSection, installEffectSpies, reachSurface, walkSurface } from './walk';
 import { guardTest, watchPage } from '../diagnose';
@@ -129,17 +130,20 @@ function arrangedNames(): Promise<string[]> {
 
 /** The arrangement once it has stopped moving: two reads 300ms apart agree. */
 async function settledNames(): Promise<string[]> {
-	let current = await arrangedNames();
+	// The poll's first read is only the baseline: it returns false, so the
+	// earliest pass compares two reads one interval apart.
+	let current: string[] | null = null;
 	await expect
-		.poll(async () => {
-			const previous = current;
-			// eslint-disable-next-line playwright/no-wait-for-timeout -- two reads apart: the order has settled when they agree
-			await page.waitForTimeout(300);
-			current = await arrangedNames();
-			return current.join('|') === previous.join('|');
-		})
+		.poll(
+			async () => {
+				const previous = current;
+				current = await arrangedNames();
+				return previous !== null && current.join('|') === previous.join('|');
+			},
+			{ intervals: [300] }
+		)
 		.toBe(true);
-	return current;
+	return current ?? [];
 }
 
 /** Puts an arrangement back in `order`, using its own ↑ buttons. Every arrow
@@ -345,6 +349,16 @@ test('dead-controls: list ⋮ settings sheet', async () => {
 		const sheet = page.locator('[data-vaul-drawer-direction="bottom"]');
 		await expect(sheet).toBeVisible();
 		return sheet;
+	});
+	// "Teilen & Mitglieder": the link's two tabs, share, copy, and the reset and
+	// revoke that only open their confirmation. The link is made first, as
+	// without one the sheet offers only "Link erstellen".
+	await walkSurface(page, 'share sheet', async () => {
+		await reachSurface(page, listPath);
+		await page.getByTestId('list-menu').click();
+		await page.getByRole('button', { name: 'Teilen & Mitglieder' }).click();
+		await showInviteLink(page);
+		return page.getByRole('dialog', { name: 'Teilen & Mitglieder' });
 	});
 });
 
