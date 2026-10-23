@@ -186,8 +186,9 @@ e2e:<name>`) or by hand as below.
 **A wait names a state its action creates** ([D-342]), never one the screen
 before already shows: a new screen by an element of its own (`appearsAfter()`
 in `e2e/tests/helpers.ts` checks it was absent first), a server effect by its
-response, a sync by `expectSynced()`, which waits on the outbox, not on the
-chip's "Alle Änderungen synchronisiert", true before a write is stored.
+response, a sync by `expectSynced()`, which waits for the outbox to drain:
+the chip's "Alle Änderungen synchronisiert" alone is true before a write is
+stored.
 
 A failed or timed-out test in the functional, arch, OIDC or demo suite writes
 `page-diagnosis.md` next to Playwright's `error-context.md` ([D-247]); CI

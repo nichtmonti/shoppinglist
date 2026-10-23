@@ -64,7 +64,9 @@ export async function appearsAfter(
 	action: () => Promise<unknown>,
 	options?: { timeout?: number }
 ): Promise<void> {
-	await expect(marker, 'the marker is visible before the action').toBeHidden();
+	// Read once, not waited for: a marker on its way out would pass a wait.
+	// eslint-disable-next-line playwright/prefer-web-first-assertions
+	expect(await marker.isVisible(), 'the marker is visible before the action').toBe(false);
 	await action();
 	await expect(marker).toBeVisible(options);
 }
@@ -197,14 +199,18 @@ export async function addItemByTyping(page: Page, name: string): Promise<void> {
 }
 
 /**
- * Every change this device stored has reached the server: its outbox is
- * empty, and the chip says so. Not the chip alone, which says "synced" before
- * a write is stored and until its live query has seen it. Sound only after the
- * awaited change is stored (addItemByTyping waits for that; another change
- * needs its own local marker first), since the outbox was empty before it too.
+ * Every change this device stored has left its outbox, and the chip says so.
+ * Not the chip alone, which says "synced" before a write is stored and until
+ * its live query has seen it. Sound only after the awaited change is stored
+ * (addItemByTyping waits for that; another change needs its own local marker
+ * first), since the outbox was empty before it too. A change the server
+ * refuses leaves the outbox as well: a spec about the outcome reads it where
+ * the server shows it, on a second device or a fresh load.
  */
 export async function expectSynced(page: Page): Promise<void> {
-	await expect.poll(() => storeCount(page, 'pending_ops'), { timeout: 15_000 }).toBe(0);
+	// A read that fails mid-navigation is a "not yet": expect.poll would
+	// fail at the first throw.
+	await expect.poll(() => storeCount(page, 'pending_ops').catch(() => -1)).toBe(0);
 	await expect(page.getByText('Alle Änderungen synchronisiert').first()).toBeVisible();
 }
 
@@ -225,19 +231,7 @@ export function itemRow(page: Page, name: string) {
 
 /** The page's persisted auth blob (`{token, record}` JSON, or '' when signed out). */
 export async function readAuthBlob(page: Page): Promise<string> {
-	return page.evaluate(async () => {
-		// No version argument: the store is Dexie-managed, and Dexie scales its
-		// version, so this opens whatever version the app created.
-		const db = await new Promise<IDBDatabase>((resolve, reject) => {
-			const req = indexedDB.open('einkaufsliste');
-			req.onsuccess = () => resolve(req.result);
-			req.onerror = () => reject(req.error);
-		});
-		return new Promise<string>((resolve) => {
-			const r = db.transaction('kv', 'readonly').objectStore('kv').get('pb_auth');
-			r.onsuccess = () => resolve((r.result as string) ?? '');
-		});
-	});
+	return ((await idbRead(page, 'einkaufsliste', 'kv', 'pb_auth')) as string | undefined) ?? '';
 }
 
 /** Replaces the page's persisted auth blob; the app reads it on its next boot. */
@@ -414,44 +408,53 @@ export function tapSyncConsole(page: Page, label: string): void {
  * screen shows it.
  */
 export async function storeCount(page: Page, store: string): Promise<number> {
-	return page.evaluate(
-		(name) =>
-			new Promise<number>((resolve, reject) => {
-				const req = indexedDB.open('einkaufsliste_sync');
-				req.onsuccess = () => {
-					const db = req.result;
-					const query = db.transaction(name).objectStore(name).count();
-					query.onsuccess = () => {
-						resolve(query.result);
-						db.close();
-					};
-					query.onerror = () => reject(query.error);
-				};
-				req.onerror = () => reject(req.error);
-			}),
-		store
-	);
+	return (await idbRead(page, 'einkaufsliste_sync', store, null)) as number;
 }
 
 /** A `meta` value as this device stored it (`einkaufsliste_sync`), or
  *  undefined: what survives a reload, whatever a screen shows already. */
 export async function storedMeta(page: Page, key: string): Promise<unknown> {
+	const row = await idbRead(page, 'einkaufsliste_sync', 'meta', key);
+	return (row as { value?: unknown } | undefined)?.value;
+}
+
+/**
+ * One read of the app's IndexedDB as it stands: a count of `store`, or the
+ * row at `key`. It never creates anything (an open without a version creates
+ * an empty database, and a connection left open would block the app's own
+ * upgrade of it), refuses a store that is not there, and always closes.
+ */
+async function idbRead(
+	page: Page,
+	dbName: string,
+	store: string,
+	key: string | null
+): Promise<unknown> {
 	return page.evaluate(
-		(name) =>
+		({ dbName, store, key }) =>
 			new Promise<unknown>((resolve, reject) => {
-				const req = indexedDB.open('einkaufsliste_sync');
+				const req = indexedDB.open(dbName);
+				req.onupgradeneeded = () => req.transaction?.abort();
+				req.onerror = () => reject(req.error ?? new Error(`no ${dbName} database`));
 				req.onsuccess = () => {
 					const db = req.result;
-					const query = db.transaction('meta').objectStore('meta').get(name);
-					query.onsuccess = () => {
-						resolve((query.result as { value?: unknown } | undefined)?.value);
+					try {
+						if (!db.objectStoreNames.contains(store)) {
+							throw new Error(`no ${store} store in ${dbName}`);
+						}
+						const objects = db.transaction(store, 'readonly').objectStore(store);
+						const query = key === null ? objects.count() : objects.get(key);
+						query.onsuccess = () => resolve(query.result);
+						query.onerror = () => reject(query.error);
+					} catch (error) {
+						reject(error instanceof Error ? error : new Error(String(error)));
+					} finally {
+						// Closes once the read's transaction has finished.
 						db.close();
-					};
-					query.onerror = () => reject(query.error);
+					}
 				};
-				req.onerror = () => reject(req.error);
 			}),
-		key
+		{ dbName, store, key }
 	);
 }
 

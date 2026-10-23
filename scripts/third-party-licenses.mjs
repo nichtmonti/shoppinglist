@@ -197,7 +197,8 @@ function goComponents() {
 	const { Toolchain } = JSON.parse(go(['mod', 'edit', '-json']));
 	if (Toolchain && Toolchain !== goVersion)
 		throw new Error(
-			`this Go is ${goVersion}, backend/go.mod builds with ${Toolchain}: rebuild the devcontainer`
+			`this Go is ${goVersion}, backend/go.mod's toolchain line is ${Toolchain}: bring ` +
+				".devcontainer/Dockerfile's golang image and go.mod to one version, then rebuild the devcontainer"
 		);
 	modules.set('stdlib', {
 		name: 'Go standard library and runtime',

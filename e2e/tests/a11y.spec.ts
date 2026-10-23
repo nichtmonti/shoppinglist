@@ -9,7 +9,8 @@ import {
 	openListView,
 	openShopView,
 	registerAccount,
-	showInviteLink
+	showInviteLink,
+	storedMeta
 } from './helpers';
 
 // WCAG audit — the axe runtime scan. Walks every screen state the app
@@ -198,6 +199,9 @@ test('axe scan: settings, categories, share, English, dark', async ({ page }) =>
 	await page.goto('/settings');
 	await page.getByRole('radio', { name: 'English' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
+	// The screen switches before the choice is stored; a navigation would abort
+	// the write.
+	await expect.poll(() => storedMeta(page, 'locale').catch(() => undefined)).toBe('en');
 	await page.getByRole('button', { name: 'Back' }).click();
 	await page.goto(listUrl);
 	await openListView(page);

@@ -51,7 +51,7 @@ test('de↔en locale switch re-renders seeded vocab while item↔category mappin
 	await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
 	// The screen switches before the choice is stored, and the goto below
 	// would abort that write.
-	await expect.poll(() => storedMeta(page, 'locale')).toBe('en');
+	await expect.poll(() => storedMeta(page, 'locale').catch(() => undefined)).toBe('en');
 	await page.getByRole('button', { name: 'Back' }).click();
 	// settings' back() always returns to home (/), not the previously-open
 	// list — re-enter it directly. No need to reselect the list-view tab: it's
@@ -78,7 +78,7 @@ test('de↔en locale switch re-renders seeded vocab while item↔category mappin
 	await page.goto('/settings');
 	await page.getByRole('radio', { name: 'Deutsch' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
-	await expect.poll(() => storedMeta(page, 'locale')).toBe('de');
+	await expect.poll(() => storedMeta(page, 'locale').catch(() => undefined)).toBe('de');
 	await page.getByRole('button', { name: 'Zurück' }).click();
 	await page.goto(listUrl);
 	await expect(page.getByTestId('view-toggle-shop')).toHaveText(/Einkaufen/);

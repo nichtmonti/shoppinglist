@@ -2,14 +2,17 @@
 // here is a promise nobody awaits: an un-awaited `page.click()` or `expect()`
 // lets the test run on (no-floating-promises, missing-playwright-await).
 // Every rule kept is an error; a warning nobody reads is no check.
+import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import playwright from 'eslint-plugin-playwright';
 
 const recommended = playwright.configs['flat/recommended'];
 
-export default tseslint.config(
+export default defineConfig(
 	{ ignores: ['**/test-results/**', 'playwright-report/**'] },
+	// A stale disable is an error too, or it outlives its reason unnoticed.
+	{ linterOptions: { reportUnusedDisableDirectives: 'error' } },
 	js.configs.recommended,
 	...tseslint.configs.recommendedTypeChecked,
 	{

@@ -42,6 +42,12 @@ test('leave a shared list: the leaver loses it locally, the other member keeps i
 	await shareListWith(pageA, pageB);
 	await openListView(pageB);
 	await expect(itemRow(pageB, 'Milch')).toBeVisible({ timeout: 15_000 });
+	// A's roster as the server has it now, B included: the one after B leaves
+	// is then a change, not the cache A held before B joined.
+	await pageA.reload();
+	await expect(pageA.getByTestId('members-line')).toHaveText('geteilt · 2 Mitglieder', {
+		timeout: 15_000
+	});
 
 	// B leaves from the list's own ⋮ (two-step in-UI confirm, §7.2 [D-270]).
 	await pageB.getByTestId('list-menu').click();
@@ -53,8 +59,8 @@ test('leave a shared list: the leaver loses it locally, the other member keeps i
 	await expect(pageB.getByRole('link', { name: 'Wochenshop öffnen' })).toHaveCount(0);
 
 	// A is not the last one out, so §7.3 must NOT have cascaded the list away,
-	// and the server's roster no longer has B: the members line says so only
-	// once it has heard from the server (it read „2 Mitglieder" before), which
+	// and the server's roster no longer has B: A's line, „2 Mitglieder" from its
+	// cache at first, says "nur du" only once the server has answered, which
 	// B's local §8.6 purge alone could not make it say.
 	await pageA.reload();
 	await openListView(pageA);

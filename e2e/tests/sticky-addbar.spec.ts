@@ -81,10 +81,8 @@ test('category-sorted list: the bar pins, the headers stick below it, and the op
 	await page.getByTestId('item-sort').click();
 	await page.getByRole('menuitemradio', { name: 'Kategorie' }).click();
 	await expect(page.locator('.cat-head').first()).toBeVisible();
-	// Poll, don't snapshot: the 18 adds above are fire-and-forget by design
-	// (fill+Enter with no per-row wait), so the last commits can still be in
-	// flight — and draining through the sync loop — when a single-shot count
-	// runs. Polling waits the backlog out instead of racing it.
+	// Poll, don't snapshot: the adds above are stored, but the headers render
+	// from a live query a beat later, so a single-shot count races it.
 	await expect
 		.poll(async () => page.locator('.cat-head').count(), { timeout: 15_000 })
 		.toBeGreaterThanOrEqual(3);

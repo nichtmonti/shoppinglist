@@ -5,7 +5,8 @@ import {
 	itemRow,
 	openListView,
 	openShopView,
-	registerAccount
+	registerAccount,
+	storedMeta
 } from './helpers';
 
 // WCAG audit — checks axe cannot do: keyboard-only operation (focus visible,
@@ -24,6 +25,9 @@ async function setup(page: import('@playwright/test').Page): Promise<string> {
 	await itemRow(page, 'Milch').getByRole('button', { name: 'Menge hinzufügen' }).click();
 	await page.keyboard.type('1 l');
 	await page.keyboard.press('Enter');
+	await expect(
+		itemRow(page, 'Milch').getByRole('button', { name: 'Menge bearbeiten' })
+	).toContainText('1 l');
 	return listUrl;
 }
 
@@ -254,6 +258,9 @@ test('lang switches per locale (3.1.1) and every route sets a title (2.4.2)', as
 	await page.goto('/settings');
 	await page.getByRole('radio', { name: 'English' }).click();
 	await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
+	// The screen switches before the choice is stored; a navigation would abort
+	// the write.
+	await expect.poll(() => storedMeta(page, 'locale').catch(() => undefined)).toBe('en');
 	// The <html lang> flips via a layout effect on hydration — poll rather than
 	// assert once, or a slow hydrate loses the race.
 	await expect

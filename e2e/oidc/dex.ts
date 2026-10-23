@@ -62,13 +62,16 @@ export async function signOut(page: Page): Promise<void> {
 }
 
 /**
- * The lists home, after a sign-in that happened on another route. Waits for
- * the sign-in to be stored first: navigating mid-sign-in would abort it. The
+ * The lists home, after a sign-in that happened on another route (or at once,
+ * when the session is already stored). Waits for the sign-in to be stored
+ * first: navigating mid-sign-in would abort it. The
  * Dex button going is no sign of that, as it reads "Abbrechen" while the
  * exchange is still pending.
  */
 export async function home(page: Page): Promise<void> {
-	await expect.poll(() => readAuthBlob(page), { timeout: 15_000 }).not.toBe('');
+	// A read that fails mid-navigation is a "not yet": expect.poll would fail
+	// at the first throw.
+	await expect.poll(() => readAuthBlob(page).catch(() => '')).not.toBe('');
 	await page.goto('/');
 	await expect(page.getByRole('button', { name: 'Neue Liste' }).first()).toBeVisible();
 }

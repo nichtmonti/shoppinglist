@@ -45,8 +45,8 @@ steps:
       - task repo-rules
 
   # The gate's static layers at full scope (Taskfile.yml): prettier over the
-  # repo, svelte-check, tsc over the e2e harnesses, the whole type-aware
-  # lint. The `deps` task installs node_modules from the lockfiles first.
+  # repo, svelte-check, tsc and the typed lint over the e2e harnesses, the
+  # whole type-aware lint. The `deps` task installs node_modules from the lockfiles first.
   frontend-check:
     image: *ci_image
     volumes:
