@@ -85,7 +85,11 @@
 </script>
 
 <svelte:head>
-	<title>{membership?.name ?? t('common_app_name')}</title>
+	<!-- On the list page only: a sub-screen sets its own, and this one, rerun
+	     when the membership arrives late, would overwrite it. -->
+	{#if onListPage}
+		<title>{membership?.name ?? t('common_app_name')}</title>
+	{/if}
 </svelte:head>
 
 {#if onListPage}

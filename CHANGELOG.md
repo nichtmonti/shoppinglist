@@ -6,6 +6,10 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
+## Unreleased
+
+- **A list's own screens keep their name in the browser tab.** When the list loaded slowly, its categories, previous items and import screens could show the list's name there instead.
+
 ## v0.17.1: nothing from a list kept past a sign-out in another tab, one-line list cards, and releases you can rebuild yourself (2026-10)
 
 - **A list change that arrives just after you sign out in another tab is no longer kept.** It could be stored on this device for whoever signs in next ([D-109]).
