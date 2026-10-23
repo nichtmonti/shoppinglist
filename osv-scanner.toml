@@ -48,14 +48,3 @@ reason = "tools/dex runs HTTP-only on loopback for tests; the TLS listener is ne
 [[IgnoredVulns]]
 id = "GO-2026-5932"
 reason = "openpgp is unmaintained with no fix and ships in every x/crypto; the app never imports it, and the dev tools (Dex, gitleaks) are not shipped"
-
-# GHSA-vfj7-8cjw-p6xm — braces 3.0.3 (frontend/pnpm-lock.yaml, dev only):
-# stack exhaustion on deeply nested brace patterns, every version affected,
-# no fix released. micromatch 4.0.8 brings it, pinned exactly by
-# eslint-plugin-boundaries 7.2.0, the lint's layer table ([D-306]); the
-# patterns it expands are the lint config's own, never input from anyone
-# else, and nothing of it ships. Revisit when braces releases a fix or the
-# plugin moves off micromatch.
-[[IgnoredVulns]]
-id = "GHSA-vfj7-8cjw-p6xm"
-reason = "braces 3.0.3 has no fix; it runs only in the lint, on the lint config's own patterns, and does not ship"
