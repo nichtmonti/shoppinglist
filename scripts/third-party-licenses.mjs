@@ -189,9 +189,19 @@ function goComponents() {
 			modules.set(line, { name, version, dir });
 		}
 	}
+	// The stdlib ships at the version of the Go that builds the binary, which
+	// is what runs here; under GOTOOLCHAIN=local that is the container's, and a
+	// container older than go.mod's toolchain line would rewrite the file with
+	// a version no release is built with.
+	const goVersion = go(['env', 'GOVERSION']).trim();
+	const { Toolchain } = JSON.parse(go(['mod', 'edit', '-json']));
+	if (Toolchain && Toolchain !== goVersion)
+		throw new Error(
+			`this Go is ${goVersion}, backend/go.mod builds with ${Toolchain}: rebuild the devcontainer`
+		);
 	modules.set('stdlib', {
 		name: 'Go standard library and runtime',
-		version: go(['env', 'GOVERSION']).trim(),
+		version: goVersion,
 		dir: go(['env', 'GOROOT']).trim()
 	});
 	return [...modules.values()]
