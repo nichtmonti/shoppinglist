@@ -73,8 +73,14 @@ async function pageHash(page: Page, skip: string | null): Promise<number> {
 					}
 					const el = child as HTMLElement;
 					if (el.matches?.(leaveOut)) continue;
+					// A walked tab's panels: bits-ui shows and hides them from its own
+					// value, so only their content is the app's answer.
+					const panel = el.hasAttribute('data-dead-walk-panel');
 					out += '<' + el.tagName;
-					for (const attr of Array.from(el.attributes)) out += ' ' + attr.name + '=' + attr.value;
+					for (const attr of Array.from(el.attributes)) {
+						if (panel && (attr.name === 'hidden' || attr.name === 'data-state')) continue;
+						out += ' ' + attr.name + '=' + attr.value;
+					}
 					out += '>' + serialise(el) + '</' + el.tagName + '>';
 				}
 				return out;
@@ -234,7 +240,12 @@ async function observedAfterMenu(page: Page, closed: Signature): Promise<boolean
 				const blocked = (el: Element): boolean => getComputedStyle(el).pointerEvents === 'none';
 				return blocked(document.documentElement) || blocked(document.body) ? 'closing' : 'shut';
 			})
-			.catch(() => 'navigated');
+			.catch((error: unknown) => {
+				// A navigation destroys the context the read ran in; any other
+				// failure is the walk's own and must not pass the item.
+				if (/context was destroyed|navigat/i.test(String(error))) return 'navigated';
+				throw error;
+			});
 		if (state === 'dialog' || state === 'navigated') return true;
 		if (state === 'shut') {
 			const now = await readSignature(page).catch(() => null);
@@ -258,7 +269,10 @@ export async function installEffectSpies(page: Page): Promise<void> {
 		new MutationObserver((records) => {
 			for (const r of records) {
 				for (const n of Array.from(r.addedNodes)) {
-					if (n instanceof Element && n.matches('[data-sonner-toast]')) w.__e2eEffects.toasts++;
+					// The first toast arrives inside the list svelte-sonner mounts for it.
+					if (!(n instanceof Element)) continue;
+					const toast = '[data-sonner-toast]';
+					w.__e2eEffects.toasts += n.matches(toast) ? 1 : n.querySelectorAll(toast).length;
 				}
 			}
 		}).observe(document, { childList: true, subtree: true });
@@ -612,6 +626,13 @@ export async function reachSurface(page: Page, path: string): Promise<void> {
 	);
 }
 
+/** How each kind of control was judged, for the DEAD message. */
+const JUDGED = {
+	menu: 'against its menu closed with nothing picked',
+	stateful: 'outside its own group, which bits-ui updates on any click',
+	plain: 'on the whole page'
+} as const;
+
 /**
  * Tags the control (`data-dead-walk`) and says how its click is judged: a
  * menu item against its menu shut, a radio, tab, checkbox or switch on what
@@ -621,17 +642,19 @@ export async function reachSurface(page: Page, path: string): Promise<void> {
 async function tagControl(locator: Locator): Promise<'menu' | 'stateful' | 'plain'> {
 	return locator.evaluate(
 		(el) => {
-			document
-				.querySelectorAll('[data-dead-walk-group]')
-				.forEach((g) => g.removeAttribute('data-dead-walk-group'));
+			for (const tag of ['data-dead-walk-group', 'data-dead-walk-panel']) {
+				document.querySelectorAll(`[${tag}]`).forEach((t) => t.removeAttribute(tag));
+			}
 			el.setAttribute('data-dead-walk', '');
 			if (el.closest('[role="menu"]')) return 'menu';
 			const role = el.getAttribute('role');
 			if (role === 'radio' || role === 'tab') {
-				(el.closest('[role="radiogroup"], [role="tablist"]') ?? el).setAttribute(
-					'data-dead-walk-group',
-					''
-				);
+				const group = el.closest('[role="radiogroup"], [role="tablist"]') ?? el;
+				group.setAttribute('data-dead-walk-group', '');
+				for (const tab of Array.from(group.querySelectorAll('[aria-controls]'))) {
+					const id = tab.getAttribute('aria-controls');
+					if (id) document.getElementById(id)?.setAttribute('data-dead-walk-panel', '');
+				}
 				return 'stateful';
 			}
 			if (role === 'checkbox' || role === 'switch') {
@@ -721,19 +744,20 @@ export async function walkSurface(
 			});
 			await tagControl(target);
 		}
-		const before = await stableSignature(page);
-		const beforeRest = await restHash(page);
+		// A menu item's baseline is `closed`; any other control's is taken now.
+		const before = closed ? null : await stableSignature(page);
+		const beforeRest = closed ? null : await restHash(page);
 		const effects = watchSideEffects(page);
 		try {
 			await target.click({ timeout: 10_000 });
 			// Ordered cheapest-and-safest first, and `effects.seen()` is asked
 			// once more at the end because a file chooser / download surfaces a
 			// beat after the click — by then the signature poll has waited.
-			let observable =
-				effects.seen() ||
-				(closed
-					? await observedAfterMenu(page, closed)
-					: await observedChange(page, before, beforeRest, kind === 'stateful'));
+			let observable = effects.seen();
+			if (!observable && closed) observable = await observedAfterMenu(page, closed);
+			if (!observable && before && beforeRest !== null) {
+				observable = await observedChange(page, before, beforeRest, kind === 'stateful');
+			}
 			// Focus is the last resort and only worth asking while the control is
 			// still there to ask about (see focusMovedAway).
 			if (!observable && (await page.locator('[data-dead-walk]').count()) > 0) {
@@ -743,8 +767,8 @@ export async function walkSurface(
 			expect(
 				observable,
 				`${surface}: "${desc.name}" (${desc.role}) is a DEAD CONTROL — nothing ` +
-					`observable changed after clicking it (no URL, DOM, focus, download, new tab, ` +
-					`file-chooser or clipboard/share effect)`
+					`observable changed after clicking it (no URL, DOM, focus, toast, download, ` +
+					`new tab, file-chooser or clipboard/share effect; judged ${JUDGED[kind]})`
 			).toBe(true);
 		} finally {
 			effects.dispose();

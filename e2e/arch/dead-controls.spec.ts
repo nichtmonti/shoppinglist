@@ -24,9 +24,11 @@ import { guardTest, watchPage } from '../diagnose';
 // checkbox/menuitem/menuitemradio/tab). For each one: re-establish the
 // surface from scratch, take a STABLE "before" signature of the page, click
 // exactly that one control, and assert something in the signature changed —
-// the URL, the rendered DOM, the focused element, a download/file-chooser/
-// clipboard/share/window.open call. Fail loudly, naming the surface and the
-// control's accessible name, if nothing did.
+// the URL, the rendered DOM, the focused element, a toast, a download/file-
+// chooser/clipboard/share/window.open call. A radio, tab, checkbox or switch
+// is judged outside its own group and a menu item against its menu closed
+// ([D-127], walk.ts). Fail loudly, naming the surface and the control's
+// accessible name, if nothing did.
 //
 // WHY ONLY THE DEFAULT-STATE SNAPSHOT: the control list for a surface is
 // captured ONCE, from its closed/default rendering, before anything is
