@@ -1260,6 +1260,30 @@ describe('push', () => {
 		expect(stored?.changed).toEqual(op.changed);
 	});
 
+	// [D-341] The loop can stop while a batch is being frozen, an IndexedDB
+	// transaction: the frozen batch is not sent, and stays queued for the next.
+	it('a drain stopped while it freezes a batch does not send it', async () => {
+		const item = await seedItem();
+		const op = await seedOp({ record_id: item.id });
+		const transport = vi.fn();
+		const owner = new AbortController();
+		const transaction = db.transaction.bind(db) as (...args: unknown[]) => Promise<unknown>;
+		const spy = vi.spyOn(db, 'transaction').mockImplementation(((...args: unknown[]) =>
+			transaction(...args).then((frozen) => {
+				owner.abort();
+				return frozen;
+			})) as typeof db.transaction);
+		try {
+			const summary = await drainOutbox({ transport, signal: owner.signal });
+			expect(transport).not.toHaveBeenCalled();
+			expect(summary).toEqual({ drained: 0, failed: 0, requeued: 0 });
+			// Frozen, so the next drain resends it as it was.
+			expect((await db.pending_ops.get(op.op_id))?.inflight?.changed).toEqual(op.changed);
+		} finally {
+			spy.mockRestore();
+		}
+	});
+
 	it('a batch that fails keeps itself and every later batch queued', async () => {
 		for (let i = 0; i < 501; i++) {
 			const item = await seedItem();

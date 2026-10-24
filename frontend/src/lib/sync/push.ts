@@ -117,6 +117,8 @@ async function drainWith(
 			queued_at: o.queued_at
 		}));
 
+		// Stopped while the batch froze: it stays queued, frozen, for the next drain.
+		if (signal.aborted) return { drained, failed, requeued };
 		let resp: { results: PushResult[] };
 		try {
 			resp = await transport(wireOps, signal);
