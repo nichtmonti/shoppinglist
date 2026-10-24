@@ -1,5 +1,6 @@
 import type { HandleClientError } from '@sveltejs/kit/hooks';
 import Dexie from 'dexie';
+import { updated } from '$app/state';
 import { describeError, reportClientError, watchUncaughtErrors } from '#lib/client-errors.js';
 import {
 	claimReload,
@@ -15,6 +16,13 @@ import { db, reloadOnUpgrade } from '#lib/db.js';
 watchResourceFailures();
 watchServiceWorker();
 reloadOnUpgrade(db, () => location.reload());
+// [D-346] A window still on the previous build reloads into the new one when
+// it is next hidden; SvelteKit looks for a new version whenever it is shown.
+if (typeof document !== 'undefined') {
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'hidden' && updated.current) location.reload();
+	});
+}
 // A change the device's database refused (full, or its connection lost) is
 // gone unless the user hears of it ([D-293]); the toasts load lazily, off the
 // boot path.

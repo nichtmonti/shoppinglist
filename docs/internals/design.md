@@ -565,7 +565,7 @@ On `status: "gone"` or the membership set ([§8.5]) showing the list vanished (u
 
 ### 8.7 Multi-tab / multi-context coordination
 
-PWA windows and browser tabs share one IndexedDB. **Exactly one sync loop runs** [D-13]: the holder of the Web Lock `"sync-leader"` (`navigator.locks.request`) leads and drains the shared outbox; other tabs enqueue ops and read via Dexie `liveQuery`. Leadership hands over when the leader closes. A leader the browser suspends in the background keeps the lock and is never stolen from; when a list's edit has waited 20 s with no exchange started, a follower says to close the other tab ([§12.1], [D-288], [D-296]). A tab whose database another tab's newer build has upgraded reloads into that build ([D-344]).
+PWA windows and browser tabs share one IndexedDB. **Exactly one sync loop runs** [D-13]: the holder of the Web Lock `"sync-leader"` (`navigator.locks.request`) leads and drains the shared outbox; other tabs enqueue ops and read via Dexie `liveQuery`. Leadership hands over when the leader closes. A leader the browser suspends in the background keeps the lock and is never stolen from; when a list's edit has waited 20 s with no exchange started, a follower says to close the other tab ([§12.1], [D-288], [D-296]). A tab whose database another tab's newer build has upgraded reloads into that build ([D-344]), and a window still on the previous build reloads when it is next hidden ([D-346]).
 
 ### 8.8 Local storage durability
 
@@ -1102,3 +1102,4 @@ The standing rules it set are in [§14].
 [D-343]: decisions.md#D-343
 [D-344]: decisions.md#D-344
 [D-345]: decisions.md#D-345
+[D-346]: decisions.md#D-346

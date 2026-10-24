@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **An app window left open across an update switches to the new version** the next time you leave it, instead of running the old one until it is closed ([D-346]).
 - **For operators: a server started on data a newer version has changed refuses to start**, and names the backup the newer version made before changing it. Going back to an older image without restoring that backup used to start and run the old version over a database it did not know ([D-345]).
 - **An app tab left open from before an update reloads when another tab brings the update's new storage.** It kept running the old version on the device's updated storage and could save changes in the old shape ([D-344]).
 - **A list's own screens keep their name in the browser tab.** When the list loaded slowly, its categories, previous items and import screens could show the list's name there instead.
@@ -991,3 +992,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-338]: docs/internals/decisions.md#D-338
 [D-344]: docs/internals/decisions.md#D-344
 [D-345]: docs/internals/decisions.md#D-345
+[D-346]: docs/internals/decisions.md#D-346
