@@ -80,48 +80,52 @@ for (const vp of VIEWPORTS) {
 	test.describe(vp.name, () => {
 		test.use({ viewport: { width: vp.width, height: vp.height } });
 
-		test(`no text control is below the 16px focus-zoom floor (${vp.width}px)`, async ({ page }) => {
-			await addVirtualAuthenticator(page);
-			await page.goto('/');
-			const nickname = nicknameField(page);
-			await expectNoZoom(page, 'auth screen', nickname);
+		test(
+			`no text control is below the 16px focus-zoom floor (${vp.width}px)`,
+			{ tag: '@chromium' },
+			async ({ page }) => {
+				await addVirtualAuthenticator(page);
+				await page.goto('/');
+				const nickname = nicknameField(page);
+				await expectNoZoom(page, 'auth screen', nickname);
 
-			await nickname.fill(`Zoom${vp.width}`);
-			await page.getByRole('button', { name: 'Konto erstellen' }).click();
-			await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
+				await nickname.fill(`Zoom${vp.width}`);
+				await page.getByRole('button', { name: 'Konto erstellen' }).click();
+				await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
 
-			await page.getByRole('button', { name: 'Neue Liste' }).first().click();
-			const prompt = page.getByRole('dialog', { name: 'Neue Liste' });
-			await expectNoZoom(page, 'new-list prompt', prompt.getByLabel('Name der Liste'));
-			await page.keyboard.press('Escape');
+				await page.getByRole('button', { name: 'Neue Liste' }).first().click();
+				const prompt = page.getByRole('dialog', { name: 'Neue Liste' });
+				await expectNoZoom(page, 'new-list prompt', prompt.getByLabel('Name der Liste'));
+				await page.keyboard.press('Escape');
 
-			const listUrl = await createList(page, 'Zoomprobe');
-			await openListView(page);
-			await expectNoZoom(
-				page,
-				'list view',
-				page.getByRole('combobox', { name: 'Artikel hinzufügen' })
-			);
+				const listUrl = await createList(page, 'Zoomprobe');
+				await openListView(page);
+				await expectNoZoom(
+					page,
+					'list view',
+					page.getByRole('combobox', { name: 'Artikel hinzufügen' })
+				);
 
-			await addItemByTyping(page, 'Zoommilch');
-			const row = page.locator('[data-testid="row"]').filter({ hasText: 'Zoommilch' });
-			await row.locator('.qty').click();
-			await expectNoZoom(page, 'inline quantity editor', row.locator('.qty-edit'));
-			await page.keyboard.press('Escape');
+				await addItemByTyping(page, 'Zoommilch');
+				const row = page.locator('[data-testid="row"]').filter({ hasText: 'Zoommilch' });
+				await row.locator('.qty').click();
+				await expectNoZoom(page, 'inline quantity editor', row.locator('.qty-edit'));
+				await page.keyboard.press('Escape');
 
-			await row.locator('.row-name').click();
-			await expectNoZoom(page, 'item detail sheet', page.locator('#detail-note'));
-			await page.keyboard.press('Escape');
+				await row.locator('.row-name').click();
+				await expectNoZoom(page, 'item detail sheet', page.locator('#detail-note'));
+				await page.keyboard.press('Escape');
 
-			await page.goto('/settings');
-			// The nickname row opens its prompt ([D-269]).
-			await page.getByRole('button', { name: /^Spitzname/ }).click();
-			await expectNoZoom(page, 'settings', page.getByRole('textbox', { name: 'Spitzname' }));
-			await page.keyboard.press('Escape');
+				await page.goto('/settings');
+				// The nickname row opens its prompt ([D-269]).
+				await page.getByRole('button', { name: /^Spitzname/ }).click();
+				await expectNoZoom(page, 'settings', page.getByRole('textbox', { name: 'Spitzname' }));
+				await page.keyboard.press('Escape');
 
-			await page.goto(`${listUrl}/categories`);
-			await page.getByTestId('ce-add').click();
-			await expectNoZoom(page, 'category form', page.locator('#ce-form-name'));
-		});
+				await page.goto(`${listUrl}/categories`);
+				await page.getByTestId('ce-add').click();
+				await expectNoZoom(page, 'category form', page.locator('#ce-form-name'));
+			}
+		);
 	});
 }

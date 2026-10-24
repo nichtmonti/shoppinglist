@@ -378,30 +378,34 @@ async function runTheme(theme: Theme, browser: Browser): Promise<void> {
 	await ctx.close();
 }
 
-test('visual gate: token fidelity in light and dark across all screens', async ({ browser }) => {
-	test.setTimeout(240_000);
-	if (DIAG) mkdirSync(SHOT_DIR, { recursive: true });
+test(
+	'visual gate: token fidelity in light and dark across all screens',
+	{ tag: '@chromium' },
+	async ({ browser }) => {
+		test.setTimeout(240_000);
+		if (DIAG) mkdirSync(SHOT_DIR, { recursive: true });
 
-	await test.step('light theme', () => runTheme('light', browser));
-	await test.step('dark theme', () => runTheme('dark', browser));
+		await test.step('light theme', () => runTheme('light', browser));
+		await test.step('dark theme', () => runTheme('dark', browser));
 
-	// Cross-theme: every category-tinted surface must follow the theme (the
-	// --cat-* re-key proof) — identical values would mean the dark palette
-	// leaked light cat tokens.
-	expect(observed['chip-light'], 'cat-chip bg must differ between themes').not.toEqual(
-		observed['chip-dark']
-	);
-	expect(observed['cathead-light'], 'cat-head bg must differ between themes').not.toEqual(
-		observed['cathead-dark']
-	);
-	expect(
-		observed['settingschip-light'],
-		'settings pressed chip bg must differ between themes'
-	).not.toEqual(observed['settingschip-dark']);
-
-	if (DIAG)
-		writeFileSync(
-			path.join(SHOT_DIR, 'observed.json'),
-			JSON.stringify({ themes: THEMES, observed }, null, 2)
+		// Cross-theme: every category-tinted surface must follow the theme (the
+		// --cat-* re-key proof) — identical values would mean the dark palette
+		// leaked light cat tokens.
+		expect(observed['chip-light'], 'cat-chip bg must differ between themes').not.toEqual(
+			observed['chip-dark']
 		);
-});
+		expect(observed['cathead-light'], 'cat-head bg must differ between themes').not.toEqual(
+			observed['cathead-dark']
+		);
+		expect(
+			observed['settingschip-light'],
+			'settings pressed chip bg must differ between themes'
+		).not.toEqual(observed['settingschip-dark']);
+
+		if (DIAG)
+			writeFileSync(
+				path.join(SHOT_DIR, 'observed.json'),
+				JSON.stringify({ themes: THEMES, observed }, null, 2)
+			);
+	}
+);

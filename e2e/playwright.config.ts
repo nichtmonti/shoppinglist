@@ -24,5 +24,20 @@ export default defineConfig({
 		locale: LOCALE,
 		trace: 'retain-on-failure'
 	},
-	projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }]
+	projects: [
+		{ name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+		// [D-347] Accounts are made in Chromium (tests/helpers.ts registerAccount).
+		// @chromium: a test that needs what only Chromium offers here: a passkey
+		// ceremony (CDP's virtual authenticator) or another CDP call, routing a
+		// service worker's own requests, a synthetic paste's data, or text
+		// sized to Chromium's metrics.
+		// One worker: each holds a Chromium for its sign-ups as well, and two
+		// beside the Chromium project's ran the 8 GB box out of memory.
+		{
+			name: 'firefox',
+			use: { ...devices['Desktop Firefox'] },
+			grepInvert: /@chromium/,
+			workers: 1
+		}
+	]
 });

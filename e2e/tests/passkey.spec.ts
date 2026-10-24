@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures';
 import { addVirtualAuthenticator, nicknameField } from './helpers';
 
-test('passkey register then reload keeps the session', async ({ page }) => {
+test('passkey register then reload keeps the session', { tag: '@chromium' }, async ({ page }) => {
 	await addVirtualAuthenticator(page);
 	// Relative, so this follows the config's baseURL — which is also the origin
 	// the passkey ceremony is signed against (an absolute URL here would send

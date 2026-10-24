@@ -2,7 +2,7 @@
 // are ListActions' ([D-270]). ListsHome owns one of these and hands it to
 // HomeDialogs, which renders the sheets it opens; neither touches Dexie or
 // PocketBase (mutations go through #lib/actions/lists.ts).
-import { closeLayers, goForward } from '#lib/history-layers.svelte.js';
+import { goForward } from '#lib/history-layers.svelte.js';
 import { resolve } from '$app/paths';
 import { AsyncDialog } from '#lib/state/async-action.svelte.js';
 import { createList } from '#lib/actions/lists.js';
@@ -42,12 +42,10 @@ export class HomeActions {
 	// `svelte/no-navigation-without-resolve` lets no fragment through `goto()`.
 	submitJoin = (input: string): void => {
 		const token = tokenFromInput(input);
-		this.dialog.close();
-		// The dialog's history entry comes off first, or back would hit a dead
-		// step behind the join screen.
-		void closeLayers().then(() => {
-			window.location.href = `${resolve('/join')}#${token}`;
-		});
+		// The join screen takes the dialog's history entry, so back from it is
+		// the home with no dead step between. Not back over the entry and then
+		// a new one: Firefox made that load replace the home's entry instead.
+		window.location.replace(`${resolve('/join')}#${token}`);
 	};
 
 	// [D-254] Import is its own screen: a pasted or shared text list, or a

@@ -32,39 +32,43 @@ async function createAccount(page: Page, nickname: string): Promise<void> {
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
 }
 
-test('the first account by the setup link, the next by a list invite, none without a link', async ({
-	browser
-}) => {
-	const stranger = await newDevice(browser);
-	await stranger.goto(ORIGIN + '/');
-	await expect(stranger.getByText(/nur mit einem Einladungslink/)).toBeVisible();
-	await expect(stranger.getByRole('button', { name: 'Konto erstellen' })).toHaveCount(0);
+test(
+	'the first account by the setup link, the next by a list invite, none without a link',
+	{ tag: '@chromium' },
+	async ({ browser }) => {
+		const stranger = await newDevice(browser);
+		await stranger.goto(ORIGIN + '/');
+		await expect(stranger.getByText(/nur mit einem Einladungslink/)).toBeVisible();
+		await expect(stranger.getByRole('button', { name: 'Konto erstellen' })).toHaveCount(0);
 
-	const link = setupLink();
-	expect(link.startsWith(ORIGIN + '/#setup=')).toBe(true);
+		const link = setupLink();
+		expect(link.startsWith(ORIGIN + '/#setup=')).toBe(true);
 
-	const owner = await newDevice(browser);
-	await owner.goto(link);
-	// The token leaves the address bar as soon as it is read.
-	await expect(owner).toHaveURL(ORIGIN + '/');
-	await createAccount(owner, 'Alice');
-	await expect(owner.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
-	await createList(owner, 'Familie');
-	const invite = await inviteLinkFor(owner);
-	expect(invite.startsWith(ORIGIN + '/join#')).toBe(true);
+		const owner = await newDevice(browser);
+		await owner.goto(link);
+		// The token leaves the address bar as soon as it is read.
+		await expect(owner).toHaveURL(ORIGIN + '/');
+		await createAccount(owner, 'Alice');
+		await expect(owner.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
+		await createList(owner, 'Familie');
+		const invite = await inviteLinkFor(owner);
+		expect(invite.startsWith(ORIGIN + '/join#')).toBe(true);
 
-	// The family member: the invite's preview, an account, and the list.
-	const joiner = await newDevice(browser);
-	await joiner.goto(invite);
-	await expect(joiner.getByText('Zum Beitreten brauchst du ein Konto.')).toBeVisible();
-	await createAccount(joiner, 'Bob');
-	await expect(joiner).toHaveURL(/\/list\/[^/]+$/, { timeout: 15_000 });
-	await expect(joiner.getByRole('button', { name: 'Familie', exact: true })).toBeVisible();
+		// The family member: the invite's preview, an account, and the list.
+		const joiner = await newDevice(browser);
+		await joiner.goto(invite);
+		await expect(joiner.getByText('Zum Beitreten brauchst du ein Konto.')).toBeVisible();
+		await createAccount(joiner, 'Bob');
+		await expect(joiner).toHaveURL(/\/list\/[^/]+$/, { timeout: 15_000 });
+		await expect(joiner.getByRole('button', { name: 'Familie', exact: true })).toBeVisible();
 
-	// The setup link is spent: an account exists.
-	const late = await newDevice(browser);
-	await late.goto(link);
-	await createAccount(late, 'Mallory');
-	await expect(late.getByText('Dieser Link gilt nicht mehr. Bitte um einen neuen.')).toBeVisible();
-	await expect(late.getByText('Willkommen!')).toHaveCount(0);
-});
+		// The setup link is spent: an account exists.
+		const late = await newDevice(browser);
+		await late.goto(link);
+		await createAccount(late, 'Mallory');
+		await expect(
+			late.getByText('Dieser Link gilt nicht mehr. Bitte um einen neuen.')
+		).toBeVisible();
+		await expect(late.getByText('Willkommen!')).toHaveCount(0);
+	}
+);

@@ -26,7 +26,7 @@ them, and what to watch for, is in [`AGENTS.md`](../../AGENTS.md#the-gate).
 | `vitest` | `vitest run --changed` (server + client projects); the whole suite when a config or `frontend/messages/` changes | none |
 | `build-backend`, `build-app` | `backend/shoppinglist-no-ui` for the integration project, `backend/shoppinglist` (real SPA) for the server-backed harnesses | none |
 | `integration` | the vitest `integration` project: two Dexie clients against the real binary | 8099 |
-| `e2e:functional` | the functional browser suite, `e2e/tests/` | 8097 (+8089 invite-only) |
+| `e2e:functional` | the functional browser suite, `e2e/tests/`, in Chromium and Firefox ([D-347]) | 8097 (+8089 invite-only) |
 | `e2e:arch` | the dead-controls gate, `e2e/arch/` ([D-124]) | 8096 |
 | `e2e:oidc` | the OIDC journeys against Dex, `e2e/oidc/` ([D-154]) | 8095 (+8094 OIDC-only, Dex 5557) |
 | `e2e:tiles` | the tile audit and the state audit on the Vite dev server, in Chromium and Firefox, `e2e/tiles/` ([D-166], [D-228], [D-301]) | 8093 |
@@ -188,3 +188,4 @@ behaviour is unverified**.
 [D-306]: decisions.md#D-306
 [D-341]: decisions.md#D-341
 [D-343]: decisions.md#D-343
+[D-347]: decisions.md#D-347

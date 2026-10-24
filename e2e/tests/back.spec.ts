@@ -118,6 +118,8 @@ test('a pasted invite link or bare code opens the join screen, and back goes hom
 	const invite = await inviteLinkFor(owner);
 
 	const joiner = await (await browser.newContext()).newPage();
+	// A page outside the app first: Firefox drops a new tab's about:blank.
+	await joiner.goto('/api/health');
 	await registerAccount(joiner, 'Paul');
 	// The cold-start home: the joiner has no list yet.
 	const home = joiner.getByText('Willkommen!');
@@ -136,10 +138,9 @@ test('a pasted invite link or bare code opens the join screen, and back goes hom
 	await expect(home).toBeVisible();
 	expect(path(joiner.url())).toBe('/');
 	await expect(dialog).toHaveCount(0);
-	// No dead step behind the join screen: one more back leaves the app, which
-	// this tab opened on a blank page.
+	// No dead step behind the join screen: one more back leaves the app.
 	await joiner.goBack();
-	await expect(joiner).toHaveURL('about:blank');
+	await expect(joiner).toHaveURL(/\/api\/health$/);
 	await joiner.goForward();
 	await expect(home).toBeVisible();
 

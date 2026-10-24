@@ -900,7 +900,7 @@ describe('ListsHome create/join/rename dialogs', () => {
 		render(ListsHome);
 		await fireEvent.click(await screen.findByRole('button', { name: 'Mit Einladung beitreten' }));
 
-		// The handoff to the join screen itself is a `location.href` assignment
+		// The handoff to the join screen itself is a `location.replace()`
 		// (the token must be in the fragment on first paint), a full page load a
 		// component test does not follow — so this covers the part that
 		// changed: the ask.

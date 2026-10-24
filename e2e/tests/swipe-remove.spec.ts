@@ -38,38 +38,46 @@ async function touchDrag(page: Page, name: string, dx: number, dy = 0): Promise<
 	await cdp.detach();
 }
 
-test('a row swiped left is removed, and Rückgängig brings it back', async ({ page }) => {
-	await registerAccount(page, 'Anna');
-	await createList(page, 'Wochenshop');
-	await openListView(page);
-	await addItems(page, 'Milch', 'Brot');
+test(
+	'a row swiped left is removed, and Rückgängig brings it back',
+	{ tag: '@chromium' },
+	async ({ page }) => {
+		await registerAccount(page, 'Anna');
+		await createList(page, 'Wochenshop');
+		await openListView(page);
+		await addItems(page, 'Milch', 'Brot');
 
-	await touchDrag(page, 'Milch', -260);
-	await expect(rowOf(page, 'Milch')).toHaveCount(0);
-	await expect(rowOf(page, 'Brot')).toBeVisible();
-	await expect(page.getByRole('dialog')).toHaveCount(0);
+		await touchDrag(page, 'Milch', -260);
+		await expect(rowOf(page, 'Milch')).toHaveCount(0);
+		await expect(rowOf(page, 'Brot')).toBeVisible();
+		await expect(page.getByRole('dialog')).toHaveCount(0);
 
-	// The adds left their own toasts, each with a Rückgängig.
-	await page
-		.getByRole('listitem')
-		.filter({ hasText: '„Milch“ entfernt' })
-		.getByRole('button', { name: 'Rückgängig' })
-		.click();
-	await expect(rowOf(page, 'Milch')).toBeVisible();
-});
+		// The adds left their own toasts, each with a Rückgängig.
+		await page
+			.getByRole('listitem')
+			.filter({ hasText: '„Milch“ entfernt' })
+			.getByRole('button', { name: 'Rückgängig' })
+			.click();
+		await expect(rowOf(page, 'Milch')).toBeVisible();
+	}
+);
 
-test('a short drag snaps back, a vertical one scrolls, and neither removes', async ({ page }) => {
-	await registerAccount(page, 'Anna');
-	await createList(page, 'Wochenshop');
-	await openListView(page);
-	await addItems(page, 'Milch');
+test(
+	'a short drag snaps back, a vertical one scrolls, and neither removes',
+	{ tag: '@chromium' },
+	async ({ page }) => {
+		await registerAccount(page, 'Anna');
+		await createList(page, 'Wochenshop');
+		await openListView(page);
+		await addItems(page, 'Milch');
 
-	await touchDrag(page, 'Milch', -30);
-	await touchDrag(page, 'Milch', -120, 200);
-	// eslint-disable-next-line playwright/no-wait-for-timeout -- the absence below needs its window ([D-342])
-	await page.waitForTimeout(300);
+		await touchDrag(page, 'Milch', -30);
+		await touchDrag(page, 'Milch', -120, 200);
+		// eslint-disable-next-line playwright/no-wait-for-timeout -- the absence below needs its window ([D-342])
+		await page.waitForTimeout(300);
 
-	await expect(rowOf(page, 'Milch')).toBeVisible();
-	await expect(rowOf(page, 'Milch')).not.toHaveAttribute('style', /translateX/);
-	await expect(page.getByTestId('swipe-under')).toHaveCount(0);
-});
+		await expect(rowOf(page, 'Milch')).toBeVisible();
+		await expect(rowOf(page, 'Milch')).not.toHaveAttribute('style', /translateX/);
+		await expect(page.getByTestId('swipe-under')).toHaveCount(0);
+	}
+);

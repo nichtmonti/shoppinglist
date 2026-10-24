@@ -71,65 +71,67 @@ test('leave a shared list: the leaver loses it locally, the other member keeps i
 	await ctxB.close();
 });
 
-test('delete account: solo list cascades, shared list survives for the other member', async ({
-	browser
-}) => {
-	const ctxA = await browser.newContext();
-	const pageA = await ctxA.newPage();
-	const passkeyA = await registerAccount(pageA, 'Anna');
+test(
+	'delete account: solo list cascades, shared list survives for the other member',
+	{ tag: '@chromium' },
+	async ({ browser }) => {
+		const ctxA = await browser.newContext();
+		const pageA = await ctxA.newPage();
+		const passkeyA = await registerAccount(pageA, 'Anna');
 
-	// A solo list, which §4.5 must cascade-delete...
-	await createList(pageA, 'Nur ich');
-	await openListView(pageA);
-	await addItemByTyping(pageA, 'Zahnpasta');
-	await expect(itemRow(pageA, 'Zahnpasta')).toBeVisible();
+		// A solo list, which §4.5 must cascade-delete...
+		await createList(pageA, 'Nur ich');
+		await openListView(pageA);
+		await addItemByTyping(pageA, 'Zahnpasta');
+		await expect(itemRow(pageA, 'Zahnpasta')).toBeVisible();
 
-	// ...and a shared one, which must survive for B with its items.
-	await pageA.goto('/');
-	await createList(pageA, 'Familie');
-	await openListView(pageA);
-	await addItemByTyping(pageA, 'Milch');
-	await expect(itemRow(pageA, 'Milch')).toBeVisible();
+		// ...and a shared one, which must survive for B with its items.
+		await pageA.goto('/');
+		await createList(pageA, 'Familie');
+		await openListView(pageA);
+		await addItemByTyping(pageA, 'Milch');
+		await expect(itemRow(pageA, 'Milch')).toBeVisible();
 
-	const ctxB = await browser.newContext();
-	const pageB = await ctxB.newPage();
-	await registerAccount(pageB, 'Ben');
-	await shareListWith(pageA, pageB);
-	await openListView(pageB);
-	await expect(itemRow(pageB, 'Milch')).toBeVisible({ timeout: 15_000 });
+		const ctxB = await browser.newContext();
+		const pageB = await ctxB.newPage();
+		await registerAccount(pageB, 'Ben');
+		await shareListWith(pageA, pageB);
+		await openListView(pageB);
+		await expect(itemRow(pageB, 'Milch')).toBeVisible({ timeout: 15_000 });
 
-	await openSettings(pageA);
-	await pageA.getByRole('button', { name: 'Konto endgültig löschen' }).click();
-	// The confirmation states the split before the user commits to it.
-	// One shared, one solo: each half in its own sentence, singular ([D-214]).
-	await expect(
-		pageA.getByText(
-			'Deine geteilte Liste bleibt bei ihren Mitgliedern. Deine eigene Liste wird endgültig gelöscht.'
-		)
-	).toBeVisible();
-	// Deleting asks for the passkey first ([D-309]): a dismissed prompt
-	// deletes nothing and says so in the open confirmation.
-	await passkeyA.setUserVerified(false);
-	await pageA.getByRole('button', { name: 'Konto löschen' }).click();
-	await expect(
-		pageA.getByText('Anmeldung abgebrochen. Dein Konto wurde nicht gelöscht.')
-	).toBeVisible();
-	await passkeyA.setUserVerified(true);
-	// The session ends: the app shell swaps to the auth screen on its own
-	// (authState.isValid flips) — no navigation in the delete path.
-	await appearsAfter(nicknameField(pageA), () =>
-		pageA.getByRole('button', { name: 'Konto löschen' }).click()
-	);
+		await openSettings(pageA);
+		await pageA.getByRole('button', { name: 'Konto endgültig löschen' }).click();
+		// The confirmation states the split before the user commits to it.
+		// One shared, one solo: each half in its own sentence, singular ([D-214]).
+		await expect(
+			pageA.getByText(
+				'Deine geteilte Liste bleibt bei ihren Mitgliedern. Deine eigene Liste wird endgültig gelöscht.'
+			)
+		).toBeVisible();
+		// Deleting asks for the passkey first ([D-309]): a dismissed prompt
+		// deletes nothing and says so in the open confirmation.
+		await passkeyA.setUserVerified(false);
+		await pageA.getByRole('button', { name: 'Konto löschen' }).click();
+		await expect(
+			pageA.getByText('Anmeldung abgebrochen. Dein Konto wurde nicht gelöscht.')
+		).toBeVisible();
+		await passkeyA.setUserVerified(true);
+		// The session ends: the app shell swaps to the auth screen on its own
+		// (authState.isValid flips) — no navigation in the delete path.
+		await appearsAfter(nicknameField(pageA), () =>
+			pageA.getByRole('button', { name: 'Konto löschen' }).click()
+		);
 
-	// B still has the shared list, its items, and can still work in it — the
-	// §7.3 cascade must not have fired for a list that still has a member.
-	await pageB.reload();
-	await openListView(pageB);
-	await expect(itemRow(pageB, 'Milch')).toBeVisible({ timeout: 15_000 });
-	await addItemByTyping(pageB, 'Butter');
-	await expect(itemRow(pageB, 'Butter')).toBeVisible();
-	await expectSynced(pageB);
+		// B still has the shared list, its items, and can still work in it — the
+		// §7.3 cascade must not have fired for a list that still has a member.
+		await pageB.reload();
+		await openListView(pageB);
+		await expect(itemRow(pageB, 'Milch')).toBeVisible({ timeout: 15_000 });
+		await addItemByTyping(pageB, 'Butter');
+		await expect(itemRow(pageB, 'Butter')).toBeVisible();
+		await expectSynced(pageB);
 
-	await ctxA.close();
-	await ctxB.close();
-});
+		await ctxA.close();
+		await ctxB.close();
+	}
+);

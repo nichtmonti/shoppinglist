@@ -466,33 +466,35 @@ test('the list density renders check-off rows with the note back [D-83, D-313]',
 // tile's ResizeObserver on its CONTENT box — compact's smaller padding still
 // changes that width. A guard for that behaviour: if the observer ever moved to
 // the border box, a phone would keep the previous density's cut state.
-test('switching density re-measures the tile even when its width does not change', async ({
-	page
-}) => {
-	// Long enough that a full-width phone tile needs two lines for it at
-	// comfortable (which fit) and cuts it at compact (one line beside the note).
-	const NAME = 'Spülmaschinentabs Classic Multi-Power mit Zitrone';
-	await page.setViewportSize({ width: 375, height: 800 });
-	await registerAccount(page, 'Dichte');
-	await createList(page, 'Dichtewechsel');
-	await openListView(page);
-	await addItemByTyping(page, NAME);
-	await page.getByTestId('row').first().getByRole('button', { name: NAME, exact: true }).click();
-	await page.getByPlaceholder('z. B. nur Marke X').fill('die grossen');
-	await page.keyboard.press('Escape');
-	await expect(page.getByTestId('row').filter({ hasText: 'die grossen' })).toBeVisible();
-	await openShopView(page);
-	const tile = page.locator('[data-testid="tile"]').first();
-	await expect(tile).toBeVisible();
+test(
+	'switching density re-measures the tile even when its width does not change',
+	{ tag: '@chromium' },
+	async ({ page }) => {
+		// Long enough that a full-width phone tile needs two lines for it at
+		// comfortable (which fit) and cuts it at compact (one line beside the note).
+		const NAME = 'Spülmaschinentabs Classic Multi-Power mit Zitrone';
+		await page.setViewportSize({ width: 375, height: 800 });
+		await registerAccount(page, 'Dichte');
+		await createList(page, 'Dichtewechsel');
+		await openListView(page);
+		await addItemByTyping(page, NAME);
+		await page.getByTestId('row').first().getByRole('button', { name: NAME, exact: true }).click();
+		await page.getByPlaceholder('z. B. nur Marke X').fill('die grossen');
+		await page.keyboard.press('Escape');
+		await expect(page.getByTestId('row').filter({ hasText: 'die grossen' })).toBeVisible();
+		await openShopView(page);
+		const tile = page.locator('[data-testid="tile"]').first();
+		await expect(tile).toBeVisible();
 
-	await page.evaluate(() => (document.documentElement.dataset.density = 'comfortable'));
-	await expect(tile).not.toHaveAttribute('data-door', ''); // two lines: it fits
-	// offsetWidth, not getBoundingClientRect: the latter includes the tiles'
-	// pop-in scale animation, and the tile's ResizeObserver sees layout width.
-	const width = await tile.evaluate((el) => (el as HTMLElement).offsetWidth);
+		await page.evaluate(() => (document.documentElement.dataset.density = 'comfortable'));
+		await expect(tile).not.toHaveAttribute('data-door', ''); // two lines: it fits
+		// offsetWidth, not getBoundingClientRect: the latter includes the tiles'
+		// pop-in scale animation, and the tile's ResizeObserver sees layout width.
+		const width = await tile.evaluate((el) => (el as HTMLElement).offsetWidth);
 
-	await page.evaluate(() => (document.documentElement.dataset.density = 'compact'));
-	// The premise: the switch leaves the layout width alone at this viewport.
-	expect(await tile.evaluate((el) => (el as HTMLElement).offsetWidth)).toBe(width);
-	await expect(tile).toHaveAttribute('data-door', '');
-});
+		await page.evaluate(() => (document.documentElement.dataset.density = 'compact'));
+		// The premise: the switch leaves the layout width alone at this viewport.
+		expect(await tile.evaluate((el) => (el as HTMLElement).offsetWidth)).toBe(width);
+		await expect(tile).toHaveAttribute('data-door', '');
+	}
+);

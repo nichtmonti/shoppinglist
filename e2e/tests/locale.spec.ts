@@ -90,30 +90,34 @@ test('de↔en locale switch re-renders seeded vocab while item↔category mappin
 
 // [D-291] [D-292] The invitation screen holds a token it took out of the URL;
 // a language switch there, either way, and a reload of the tab keep it.
-test('an invitation survives a language switch and a reload', async ({ browser }) => {
-	const owner = await (await browser.newContext()).newPage();
-	await registerAccount(owner, 'Anna');
-	await createList(owner, 'Getränke');
-	const link = await inviteLinkFor(owner);
+test(
+	'an invitation survives a language switch and a reload',
+	{ tag: '@chromium' },
+	async ({ browser }) => {
+		const owner = await (await browser.newContext()).newPage();
+		await registerAccount(owner, 'Anna');
+		await createList(owner, 'Getränke');
+		const link = await inviteLinkFor(owner);
 
-	const guest = await (await browser.newContext()).newPage();
-	await addVirtualAuthenticator(guest);
-	await guest.goto(link);
-	await expect(guest.getByText('Getränke')).toBeVisible();
+		const guest = await (await browser.newContext()).newPage();
+		await addVirtualAuthenticator(guest);
+		await guest.goto(link);
+		await expect(guest.getByText('Getränke')).toBeVisible();
 
-	const toggle = guest.getByTestId('auth-locale');
-	await toggle.getByRole('radio', { name: 'English' }).click();
-	await expect(guest.getByRole('heading', { level: 1, name: 'Join list' })).toBeVisible();
-	await expect(guest.getByText('Getränke')).toBeVisible();
+		const toggle = guest.getByTestId('auth-locale');
+		await toggle.getByRole('radio', { name: 'English' }).click();
+		await expect(guest.getByRole('heading', { level: 1, name: 'Join list' })).toBeVisible();
+		await expect(guest.getByText('Getränke')).toBeVisible();
 
-	await toggle.getByRole('radio', { name: 'Deutsch' }).click();
-	await expect(guest.getByRole('heading', { level: 1, name: 'Liste beitreten' })).toBeVisible();
-	await expect(guest.getByText('Getränke')).toBeVisible();
+		await toggle.getByRole('radio', { name: 'Deutsch' }).click();
+		await expect(guest.getByRole('heading', { level: 1, name: 'Liste beitreten' })).toBeVisible();
+		await expect(guest.getByText('Getränke')).toBeVisible();
 
-	await guest.reload();
-	await expect(guest.getByText('Getränke')).toBeVisible();
-	await expect(guest.getByRole('alert')).toHaveCount(0);
-});
+		await guest.reload();
+		await expect(guest.getByText('Getränke')).toBeVisible();
+		await expect(guest.getByRole('alert')).toHaveCount(0);
+	}
+);
 
 // [D-291] The language is shared by every tab of the app, and a switch in one
 // changes the others in place: what they hold, a half-typed item here, stays.

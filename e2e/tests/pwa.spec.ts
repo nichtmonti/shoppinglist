@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures';
+import { reloadInPage } from './helpers';
 
 // The app shell loads with the network disabled from a cold start, and
 // Chromium reports the app installable. A truly-never-visited device
@@ -13,38 +14,29 @@ import { expect, test } from './fixtures';
 // `Page.getInstallabilityErrors` CDP method is the actual mechanism Lighthouse's
 // PWA-installable audit queries, so asserting on it directly is the real
 // check, not a stand-in for one.
-test('PWA: app shell cold-starts with the network disabled, and Chromium reports it installable', async ({
-	page,
-	context
-}) => {
-	await page.goto('/');
-	// `.ready` is the correct primitive here — it resolves once there IS an
-	// active worker AND it has claimed this page (self.clients.claim() in the
-	// activate handler), unlike polling getRegistration().active, which can
-	// observe a registration that exists but hasn't claimed this client yet.
-	await page.evaluate(() => navigator.serviceWorker.ready);
+test(
+	'PWA: app shell cold-starts with the network disabled, and Chromium reports it installable',
+	{ tag: '@chromium' },
+	async ({ page, context }) => {
+		await page.goto('/');
+		// `.ready` is the correct primitive here — it resolves once there IS an
+		// active worker AND it has claimed this page (self.clients.claim() in the
+		// activate handler), unlike polling getRegistration().active, which can
+		// observe a registration that exists but hasn't claimed this client yet.
+		await page.evaluate(() => navigator.serviceWorker.ready);
 
-	const cdp = await context.newCDPSession(page);
-	const { installabilityErrors } = await cdp.send('Page.getInstallabilityErrors');
-	expect(installabilityErrors).toEqual([]);
+		const cdp = await context.newCDPSession(page);
+		const { installabilityErrors } = await cdp.send('Page.getInstallabilityErrors');
+		expect(installabilityErrors).toEqual([]);
 
-	await context.setOffline(true);
-	// Not page.reload() — Playwright/CDP's offline emulation can abort a
-	// CDP-driven Page.reload() at the network layer before the active service
-	// worker gets a chance to intercept it. A same-page `location.reload()`
-	// goes through the renderer's normal navigation/fetch pipeline instead,
-	// where the service worker DOES get first refusal — the real-world path an
-	// actual offline reload takes.
-	// Waited for from before the reload: waitForLoadState would see the old
-	// page, already loaded, and return at once.
-	const reloaded = page.waitForEvent('load');
-	await page.evaluate(() => location.reload());
-	await reloaded;
+		await context.setOffline(true);
+		await reloadInPage(page);
 
-	// The shell mounted — Svelte rendered *something* below the layout's own
-	// markup — entirely from cache, with no network at all.
-	await expect(page.locator('[data-testid="app-shell"]')).toBeVisible({ timeout: 15_000 });
-});
+		// The shell mounted — Svelte rendered *something* below the layout's own
+		// markup — entirely from cache, with no network at all.
+		await expect(page.locator('[data-testid="app-shell"]')).toBeVisible({ timeout: 15_000 });
+	}
+);
 
 // [D-293] A server that is down behind a proxy answers navigations with its
 // own error page, and a dead connection with nothing: either way the cached
@@ -53,57 +45,60 @@ for (const [what, answer] of [
 	['answers 502', 'error'],
 	['never answers', 'hang']
 ] as const) {
-	test(`the app opens from its cached shell when the server ${what}`, async ({ page, context }) => {
-		await page.goto('/');
-		await page.evaluate(() => navigator.serviceWorker.ready);
+	test(
+		`the app opens from its cached shell when the server ${what}`,
+		{ tag: '@chromium' },
+		async ({ page, context }) => {
+			await page.goto('/');
+			await page.evaluate(() => navigator.serviceWorker.ready);
 
-		let routed = 0;
-		await context.route(
-			(url) => url.pathname === '/',
-			async (route) => {
-				routed++;
-				if (answer === 'error') {
-					await route.fulfill({ status: 502, contentType: 'text/html', body: 'Bad Gateway' });
+			let routed = 0;
+			await context.route(
+				(url) => url.pathname === '/',
+				async (route) => {
+					routed++;
+					if (answer === 'error') {
+						await route.fulfill({ status: 502, contentType: 'text/html', body: 'Bad Gateway' });
+					}
+					// 'hang': never settled, as a connection that stalls.
 				}
-				// 'hang': never settled, as a connection that stalls.
-			}
-		);
-		const reloaded = page.waitForEvent('load');
-		await page.evaluate(() => location.reload());
-		await reloaded;
+			);
+			await reloadInPage(page);
 
-		await expect(page.locator('[data-testid="app-shell"]')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByText('Bad Gateway')).toHaveCount(0);
-		// The worker's own request met the route: the shell is what answered.
-		expect(routed).toBeGreaterThan(0);
-	});
+			await expect(page.locator('[data-testid="app-shell"]')).toBeVisible({ timeout: 15_000 });
+			await expect(page.getByText('Bad Gateway')).toHaveCount(0);
+			// The worker's own request met the route: the shell is what answered.
+			expect(routed).toBeGreaterThan(0);
+		}
+	);
 }
 
 // [D-298] The build's chunks come from the cache through the browser's static
 // route, never through the worker: a worker stopped while a page loads aborts
 // what it was answering, and a page whose boot chunk is aborted stays blank.
-test('the build’s chunks are answered by the static route, not the worker', async ({
-	page,
-	context
-}) => {
-	await page.goto('/');
-	await page.evaluate(() => navigator.serviceWorker.ready);
+test(
+	'the build’s chunks are answered by the static route, not the worker',
+	{ tag: '@chromium' },
+	async ({ page, context }) => {
+		await page.goto('/');
+		await page.evaluate(() => navigator.serviceWorker.ready);
 
-	const cdp = await context.newCDPSession(page);
-	await cdp.send('Network.enable');
-	const sources = new Map<string, string>();
-	cdp.on('Network.responseReceived', ({ response }) => {
-		const path = new URL(response.url).pathname;
-		if (/^\/_app\/immutable\/.*\.(js|css)$/.test(path)) {
-			sources.set(path, response.serviceWorkerRouterInfo?.actualSourceType ?? 'none');
-		}
-	});
-	await page.reload();
-	await expect(page.locator('[data-testid="app-shell"]')).toBeVisible();
+		const cdp = await context.newCDPSession(page);
+		await cdp.send('Network.enable');
+		const sources = new Map<string, string>();
+		cdp.on('Network.responseReceived', ({ response }) => {
+			const path = new URL(response.url).pathname;
+			if (/^\/_app\/immutable\/.*\.(js|css)$/.test(path)) {
+				sources.set(path, response.serviceWorkerRouterInfo?.actualSourceType ?? 'none');
+			}
+		});
+		await page.reload();
+		await expect(page.locator('[data-testid="app-shell"]')).toBeVisible();
 
-	expect(sources.size).toBeGreaterThan(0);
-	expect([...sources].filter(([, source]) => source !== 'cache')).toEqual([]);
-});
+		expect(sources.size).toBeGreaterThan(0);
+		expect([...sources].filter(([, source]) => source !== 'cache')).toEqual([]);
+	}
+);
 
 // [D-202] Under the worker, every screen's code is imported once the first
 // screen is up, so a later tap imports nothing. The home alone loads two.

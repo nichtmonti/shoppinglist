@@ -166,7 +166,10 @@ only the functional suite. Run one through the gate (`scripts/gate.sh
 e2e:<name>`) or by hand as below.
 
 - **Functional, `e2e/tests/`**, 8097, plus an invite-only server on 8089 for
-  `invite-signup.spec.ts` ([D-241]).
+  `invite-signup.spec.ts` ([D-241]), in Chromium and Firefox ([D-347]):
+  `registerAccount` makes a Firefox test's account in Chromium, and a test
+  that needs what only Chromium offers here (a passkey ceremony, CDP) carries
+  `@chromium`. One project: `-- --project=chromium`.
 - **Arch, `e2e/arch/`** ([D-124]), 8096, single worker: presses every visible
   control on every surface and fails unless something observable changes. Its
   own server because its request burst trips PocketBase's per-IP rule beside
@@ -386,3 +389,4 @@ hand-drawn copy where it can be named.
 [D-337]: docs/internals/decisions.md#D-337
 [D-342]: docs/internals/decisions.md#D-342
 [D-343]: docs/internals/decisions.md#D-343
+[D-347]: docs/internals/decisions.md#D-347

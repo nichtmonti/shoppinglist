@@ -10,6 +10,7 @@ import {
 	openShopView,
 	registerAccount,
 	shareListWith,
+	reloadInPage,
 	stubBarcodeLookup
 } from './helpers';
 import { aimCamera, installCamera } from './camera';
@@ -89,14 +90,9 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	// §9.2 "SW-cached" [D-21]: the service worker kept the photo…
 	await expect.poll(() => photoCached(pageB), { timeout: 10_000 }).toBe(true);
 
-	// …so it is still there offline, after a reload. Not page.reload(): CDP's
-	// offline emulation can abort it before the worker sees it (pwa.spec.ts).
+	// …so it is still there offline, after a reload.
 	await ctxB.setOffline(true);
-	// Waited for from before the reload: waitForLoadState would see the old
-	// page, already loaded, and return at once.
-	const reloaded = pageB.waitForEvent('load');
-	await pageB.evaluate(() => location.reload());
-	await reloaded;
+	await reloadInPage(pageB);
 	await openShopView(pageB);
 	const offlinePhoto = pageB
 		.locator('[data-testid="tile"]', { hasText: 'Testprodukt Sonnencreme' })

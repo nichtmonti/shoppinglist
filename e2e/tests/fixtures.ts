@@ -15,18 +15,32 @@
 // machine's own address and shares its budgets with every other such spec.
 import { test as base } from '@playwright/test';
 import { guardTest } from '../diagnose';
+import { passkeyDevice } from './helpers';
 
 export * from '@playwright/test';
 
 let serial = 0;
 
-export const test = base.extend({
+export const test = base.extend<object, { passkeyBrowser: void }>({
 	extraHTTPHeaders: async ({ extraHTTPHeaders }, use, testInfo) => {
 		serial += 1;
 		// 10.100+ per worker: e2e/oidc/dex.ts's OIDC exchanges use 10.1.
 		const ip = `10.${100 + (testInfo.workerIndex % 100)}.${(serial >> 8) & 255}.${serial & 255}`;
-		await use({ ...extraHTTPHeaders, 'X-Forwarded-For': ip });
+		const headers = { ...extraHTTPHeaders, 'X-Forwarded-For': ip };
+		passkeyDevice.headers = headers;
+		await use(headers);
 	},
+	// [D-347] Outside Chromium, accounts are made in a Chromium of the worker's
+	// own (helpers.ts registerAccount).
+	passkeyBrowser: [
+		async ({ browserName, playwright }, use) => {
+			if (browserName === 'chromium') return use();
+			passkeyDevice.browser = await playwright.chromium.launch();
+			await use();
+			await passkeyDevice.browser.close();
+		},
+		{ scope: 'worker', auto: true }
+	],
 	// Every test's page is watched, and a failed or timed-out test writes, once
 	// it has ended, what the page was doing to page-diagnosis.md ([D-247],
 	// ../diagnose.ts).

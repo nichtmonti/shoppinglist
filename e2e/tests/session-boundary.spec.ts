@@ -66,23 +66,27 @@ test('signing out in one tab ends the session in the other', async ({ page, cont
 // [D-109] The tabs share the stored token and the local mirror, so a browser
 // profile holds one account at a time: a sign-in in one tab brings every other
 // tab to that account, here one left on the sign-in screen by the sign-out.
-test('signing in in one tab brings the other tab to that account', async ({ page, context }) => {
-	await registerAccount(page, 'Erste');
-	const other = await context.newPage();
-	await other.goto('/');
-	await expect(other.getByText('Willkommen!')).toBeVisible();
+test(
+	'signing in in one tab brings the other tab to that account',
+	{ tag: '@chromium' },
+	async ({ page, context }) => {
+		await registerAccount(page, 'Erste');
+		const other = await context.newPage();
+		await other.goto('/');
+		await expect(other.getByText('Willkommen!')).toBeVisible();
 
-	await page.goto('/settings');
-	await disableConditionalMediation(page);
-	await appearsAfter(nicknameField(other), () =>
-		page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click()
-	);
+		await page.goto('/settings');
+		await disableConditionalMediation(page);
+		await appearsAfter(nicknameField(other), () =>
+			page.getByRole('button', { name: 'Auf diesem Gerät abmelden' }).click()
+		);
 
-	await nicknameField(page).fill('Zweite');
-	await page.getByRole('button', { name: 'Konto erstellen' }).click();
-	await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
+		await nicknameField(page).fill('Zweite');
+		await page.getByRole('button', { name: 'Konto erstellen' }).click();
+		await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
 
-	await expect(other.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
-	await other.goto('/settings');
-	await expect(other.getByTestId('settings-nickname')).toContainText('Zweite');
-});
+		await expect(other.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
+		await other.goto('/settings');
+		await expect(other.getByTestId('settings-nickname')).toContainText('Zweite');
+	}
+);

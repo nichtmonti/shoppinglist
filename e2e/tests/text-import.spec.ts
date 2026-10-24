@@ -101,39 +101,40 @@ test('a shared list survives a reload of the review, and one Back leaves it', as
 	await expect(page).toHaveURL(/\/import$/);
 });
 
-test('text into an existing list, offline: only what it lacks, through the outbox', async ({
-	page,
-	context
-}) => {
-	await registerAccount(page, 'Ole');
-	await createList(page, 'Wocheneinkauf');
-	await openListView(page);
-	await addItemByTyping(page, 'Milch');
-	await expectSynced(page);
+test(
+	'text into an existing list, offline: only what it lacks, through the outbox',
+	{ tag: '@chromium' },
+	async ({ page, context }) => {
+		await registerAccount(page, 'Ole');
+		await createList(page, 'Wocheneinkauf');
+		await openListView(page);
+		await addItemByTyping(page, 'Milch');
+		await expectSynced(page);
 
-	// Mealie's Markdown copy (a heading, checkboxes, an amount in front),
-	// pasted into the add field: a list goes to the review ([D-271]).
-	await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).evaluate((input, text) => {
-		const data = new DataTransfer();
-		data.setData('text/plain', text);
-		input.dispatchEvent(
-			new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })
-		);
-	}, '# Einkauf\n- [ ] Milch\n- [ ] 2 Brot\n- [ ] Eier');
-	await expect(page).toHaveURL(/\/list\/[^/]+\/import$/);
+		// Mealie's Markdown copy (a heading, checkboxes, an amount in front),
+		// pasted into the add field: a list goes to the review ([D-271]).
+		await page.getByRole('combobox', { name: 'Artikel hinzufügen' }).evaluate((input, text) => {
+			const data = new DataTransfer();
+			data.setData('text/plain', text);
+			input.dispatchEvent(
+				new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })
+			);
+		}, '# Einkauf\n- [ ] Milch\n- [ ] 2 Brot\n- [ ] Eier');
+		await expect(page).toHaveURL(/\/list\/[^/]+\/import$/);
 
-	const milk = page.getByRole('checkbox', { name: 'Milch' });
-	await expect(milk).toBeDisabled();
-	await expect(milk).toHaveAccessibleDescription('schon auf der Liste');
+		const milk = page.getByRole('checkbox', { name: 'Milch' });
+		await expect(milk).toBeDisabled();
+		await expect(milk).toHaveAccessibleDescription('schon auf der Liste');
 
-	await context.setOffline(true);
-	await page.getByRole('button', { name: '2 Artikel hinzufügen' }).click();
-	await expect(page.getByText('2 Artikel hinzugefügt')).toBeVisible();
-	await expect(itemRow(page, 'Brot')).toBeVisible();
-	await expect(itemRow(page, 'Brot')).toContainText('2');
-	await expect(itemRow(page, 'Eier')).toBeVisible();
-	await expect(itemRow(page, 'Milch')).toHaveCount(1);
+		await context.setOffline(true);
+		await page.getByRole('button', { name: '2 Artikel hinzufügen' }).click();
+		await expect(page.getByText('2 Artikel hinzugefügt')).toBeVisible();
+		await expect(itemRow(page, 'Brot')).toBeVisible();
+		await expect(itemRow(page, 'Brot')).toContainText('2');
+		await expect(itemRow(page, 'Eier')).toBeVisible();
+		await expect(itemRow(page, 'Milch')).toHaveCount(1);
 
-	await context.setOffline(false);
-	await expectSynced(page);
-});
+		await context.setOffline(false);
+		await expectSynced(page);
+	}
+);

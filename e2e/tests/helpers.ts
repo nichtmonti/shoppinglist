@@ -2,13 +2,14 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
 	expect,
+	test,
 	type APIRequestContext,
 	type Browser,
 	type BrowserContext,
 	type Locator,
 	type Page
 } from '@playwright/test';
-import { SUPERUSER } from '../server';
+import { LOCALE, SUPERUSER } from '../server';
 
 // Shared flows for the E2E harnesses: accounts, lists, views, a second device,
 // the stored session, and the sync engine's own state.
@@ -86,12 +87,71 @@ export function nicknameField(page: Page): Locator {
  * home. Resolves the device that holds its passkey.
  */
 export async function registerAccount(page: Page, nickname: string): Promise<VirtualAuthenticator> {
+	if (page.context().browser()?.browserType().name() !== 'chromium' && passkeyDevice.browser) {
+		return registerOnPasskeyDevice(page, nickname, passkeyDevice.browser);
+	}
 	const authenticator = await addVirtualAuthenticator(page);
 	await page.goto('/');
 	await nicknameField(page).fill(nickname);
 	await page.getByRole('button', { name: 'Konto erstellen' }).click();
 	await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
 	return authenticator;
+}
+
+/**
+ * Reloads through the page itself, `location.reload()`, and waits for the new
+ * document. Not page.reload(): offline emulation can abort that before the
+ * service worker sees it, where the page's own reload is the path a real
+ * offline reload takes. Not the `load` event: Firefox's driver reports none
+ * for a document the worker serves offline.
+ */
+export async function reloadInPage(page: Page): Promise<void> {
+	await page.evaluate(() => ((window as { reloadMark?: boolean }).reloadMark = true));
+	// It settles with the old document, or rejects as that document goes.
+	await page.evaluate(() => location.reload()).catch(() => {});
+	await expect
+		.poll(() =>
+			page.evaluate(() => !(window as { reloadMark?: boolean }).reloadMark).catch(() => false)
+		)
+		.toBe(true);
+}
+
+/**
+ * Where a browser other than Chromium signs up ([D-347]): Playwright offers
+ * the virtual authenticator in Chromium alone. tests/fixtures.ts sets it per
+ * worker, and the test's client address with it, which the sign-up shares.
+ */
+export const passkeyDevice: { browser?: Browser; headers: Record<string, string> } = {
+	headers: {}
+};
+
+/** The account is made in Chromium and its stored sign-in copied over, as a
+ *  second device of it would hold one; its passkey stays behind. */
+async function registerOnPasskeyDevice(
+	page: Page,
+	nickname: string,
+	browser: Browser
+): Promise<VirtualAuthenticator> {
+	const context = await browser.newContext({
+		baseURL: test.info().project.use.baseURL,
+		locale: LOCALE,
+		extraHTTPHeaders: passkeyDevice.headers
+	});
+	const signup = await context.newPage();
+	await registerAccount(signup, nickname);
+	const blob = await readAuthBlob(signup);
+	await context.close();
+	await page.goto('/');
+	// Booted first: a reload mid-boot aborts its imports, which Firefox reports.
+	await expect(nicknameField(page)).toBeVisible();
+	await writeAuthBlob(page, blob);
+	await page.reload();
+	await expect(page.getByText('Willkommen!')).toBeVisible({ timeout: 15_000 });
+	return {
+		setUserVerified: () => {
+			throw new Error('the passkey is in Chromium: tag this test @chromium');
+		}
+	};
 }
 
 /**
