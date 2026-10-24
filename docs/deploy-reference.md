@@ -440,8 +440,9 @@ server refuses to start and changes nothing. The zip sits on the same disk as
 the data, so it protects against a bad upgrade, not a lost disk.
 
 **To undo an upgrade,** stop the container, go back to the previous image tag,
-and restore that zip ([restoring](operating.md#backups)). Downgrading without
-restoring is not supported.
+and restore that zip ([restoring](operating.md#backups)). Without the restore,
+the older version refuses to start on data a newer one has changed, and says
+so.
 
 **Renamed and removed settings** are listed in the changelog, with what to do.
 One still set stops the server like a

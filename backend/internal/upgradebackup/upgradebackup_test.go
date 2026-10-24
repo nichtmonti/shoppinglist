@@ -275,3 +275,34 @@ func TestFailedRenameRemovesTheTempArchive(t *testing.T) {
 		t.Errorf("temp archive left behind: %v", err)
 	}
 }
+
+// [D-345] A database a newer release migrated refuses a serve boot of this
+// one, naming the migration it does not know and the backup to restore.
+func TestRegisterRefusesADatabaseANewerReleaseMigrated(t *testing.T) {
+	dir, _ := upToDate(t)
+	const newer = "1999999999_from_a_newer_release.go"
+	db, err := dbx.Open("sqlite", filepath.Join(dir, "data.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.NewQuery("INSERT INTO _migrations (file, applied) VALUES ({:f}, 1)").Bind(dbx.Params{"f": newer}).Execute(); err != nil {
+		t.Fatal(err)
+	}
+	_ = db.Close()
+
+	app := pocketbase.NewWithConfig(pocketbase.Config{DefaultDataDir: dir, HideStartBanner: true})
+	Register(app, true)
+	err = app.Bootstrap()
+	defer app.ClearBootstrap()
+	if err == nil || !strings.Contains(err.Error(), newer) || !strings.Contains(err.Error(), Prefix) {
+		t.Fatalf("Bootstrap = %v, want a refusal naming %s and the pre-upgrade backup", err, newer)
+	}
+
+	// Another subcommand knows only the system migrations, so it cannot tell.
+	other := pocketbase.NewWithConfig(pocketbase.Config{DefaultDataDir: dir, HideStartBanner: true})
+	Register(other, false)
+	if err := other.Bootstrap(); err != nil {
+		t.Fatalf("non-serve Bootstrap = %v, want it left alone", err)
+	}
+	defer other.ClearBootstrap()
+}

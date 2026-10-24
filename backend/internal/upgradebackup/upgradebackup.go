@@ -47,6 +47,11 @@ func Register(app core.App, withApp bool) {
 			files, seedV := migrationFiles(core.SystemMigrations), ""
 			if withApp {
 				files, seedV = append(files, migrationFiles(core.AppMigrations)...), seed.CurrentSeedVersion
+				// Only serve knows every migration: another subcommand's list
+				// lacks the app's own.
+				if err := refuseNewer(e.App.DataDir(), files); err != nil {
+					return err
+				}
 			}
 			path, reason, err := Run(e.App.DataDir(), files, seedV, time.Now())
 			if err != nil {
@@ -114,6 +119,38 @@ func Run(dataDir string, migrations []string, seedVersion string, now time.Time)
 	return path, reason, nil
 }
 
+// refuseNewer refuses a database that has applied a migration missing from
+// migrations ([D-345]): a newer release changed it, and this binary's code
+// over a schema it does not know is not a state anyone tested. That release
+// backed pb_data up before the change.
+func refuseNewer(dataDir string, migrations []string) error {
+	dbPath := filepath.Join(dataDir, "data.db")
+	if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	db, err := dbx.Open("sqlite", dbPath+"?_pragma=query_only(1)&_pragma=busy_timeout(10000)")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	applied, err := appliedMigrations(db)
+	if err != nil {
+		return err
+	}
+	var unknown []string
+	for _, f := range applied {
+		if !slices.Contains(migrations, f) {
+			unknown = append(unknown, f)
+		}
+	}
+	if len(unknown) == 0 {
+		return nil
+	}
+	return fmt.Errorf("pb_data was changed by a newer version of the server (%s), which this one cannot run on: "+
+		"start that version again, or restore the backup it made before the change, pb_data/backups/%s<time>.zip "+
+		"(docs/deploy-reference.md#upgrades)", strings.Join(unknown, ", "), Prefix)
+}
+
 // pendingChange reads the applied migrations and the stored seed version on a
 // query-only connection closed before the archive is made. A database without
 // the migrations table has never been bootstrapped and needs no backup.
@@ -124,11 +161,8 @@ func pendingChange(dbPath string, migrations []string, seedVersion string) (stri
 	}
 	defer db.Close()
 
-	if ok, err := hasTable(db, "_migrations"); err != nil || !ok {
-		return "", err
-	}
-	var applied []string
-	if err := db.NewQuery("SELECT file FROM _migrations").Column(&applied); err != nil {
+	applied, err := appliedMigrations(db)
+	if err != nil || applied == nil {
 		return "", err
 	}
 	var pending []string
@@ -152,6 +186,17 @@ func pendingChange(dbPath string, migrations []string, seedVersion string) (stri
 		}
 	}
 	return strings.Join(reasons, "; "), nil
+}
+
+// appliedMigrations is nil for a database without the migrations table, one
+// that was never bootstrapped.
+func appliedMigrations(db *dbx.DB) ([]string, error) {
+	if ok, err := hasTable(db, "_migrations"); err != nil || !ok {
+		return nil, err
+	}
+	applied := []string{}
+	err := db.NewQuery("SELECT file FROM _migrations").Column(&applied)
+	return applied, err
 }
 
 func hasTable(db *dbx.DB, name string) (bool, error) {
