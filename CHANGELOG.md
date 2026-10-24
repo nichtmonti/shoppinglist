@@ -8,7 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
-- **An app tab left open from before an update reloads when another tab brings the update's new storage.** It kept running the old version on the device's updated storage and could save changes in the old shape. No update so far has changed that storage; the first one that does reloads such a tab ([D-344]).
+- **An app tab left open from before an update reloads when another tab brings the update's new storage.** It kept running the old version on the device's updated storage and could save changes in the old shape ([D-344]).
 - **A list's own screens keep their name in the browser tab.** When the list loaded slowly, its categories, previous items and import screens could show the list's name there instead.
 
 ## v0.17.1: nothing from a list kept past a sign-out in another tab, one-line list cards, and releases you can rebuild yourself (2026-10)

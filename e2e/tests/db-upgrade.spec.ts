@@ -31,5 +31,8 @@ test('a tab reloads when another tab upgrades the database', async ({ page, cont
 			})
 	);
 	await reloaded;
-	await expect(page.getByText('Willkommen!')).toBeVisible();
+	const navigation = await page.evaluate(
+		() => (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
+	);
+	expect(navigation).toBe('reload');
 });

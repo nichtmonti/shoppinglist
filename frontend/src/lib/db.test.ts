@@ -652,8 +652,12 @@ describe('reloadOnUpgrade()', () => {
 		newer.version(1000).stores({ meta: 'key' });
 		await newer.open();
 		expect(reload).toHaveBeenCalledTimes(1);
+		// Until the reload lands, nothing reopens it under the old schema.
+		expect(tab.isOpen()).toBe(false);
+		await expect(tab.meta.put({ key: 'locale', value: 'de' })).rejects.toThrow(
+			Dexie.DatabaseClosedError
+		);
 		newer.close();
-		tab.close();
 	});
 
 	it('leaves it be when another tab deletes the database', async () => {

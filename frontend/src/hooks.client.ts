@@ -14,12 +14,16 @@ import { db, reloadOnUpgrade } from '#lib/db.js';
 
 watchResourceFailures();
 watchServiceWorker();
-reloadOnUpgrade(db, () => location.reload());
+// [D-202]'s guard: two windows that upgrade each other cannot reload forever.
+reloadOnUpgrade(db, () => {
+	const delay = claimReload(new URL(location.href));
+	if (delay !== null) setTimeout(() => location.reload(), delay);
+});
 // A change the device's database refused (full, or its connection lost) is
 // gone unless the user hears of it ([D-293]); the toasts load lazily, off the
 // boot path.
-// A closed database (a sign-out's reload; another tab's upgrade reloads this
-// one) and a failed read lose nothing, so only a refused write says so.
+// A closed database (a sign-out's reload, another tab's upgrade) and a failed
+// read lose nothing, so only a refused write says so.
 const REFUSED_WRITE = ['QuotaExceededError', 'AbortError', 'ConstraintError', 'UnknownError'];
 watchUncaughtErrors((error) => {
 	if (!(error instanceof Dexie.DexieError) || !REFUSED_WRITE.includes(error.name)) return;

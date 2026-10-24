@@ -322,16 +322,19 @@ export const SHADOW_TABLES = {
 export const db = new AppDB();
 
 /**
- * Reloads the tab once another tab's newer build has upgraded `database`
- * ([D-344]). Dexie closes this tab's connection and reopens on its next
- * read, under this tab's older schema: it patches the stores back to that
- * schema and goes on writing rows the upgrade migrated. A deletion (a
- * sign-out's wipe in another tab) has no new version and reopens the same
- * schema.
+ * Closes `database` for good and reloads the tab once another tab's newer
+ * build has upgraded it ([D-344]). Dexie's own handler closes the connection
+ * and reopens it on the next read, under this tab's older schema: it patches
+ * the stores back to that schema and goes on writing rows the upgrade
+ * migrated. Returning false skips that handler. A deletion (the sign-out's
+ * fallback in another tab) has no new version and is left to it.
  */
 export function reloadOnUpgrade(database: Dexie, reload: () => void): void {
 	database.on('versionchange', (event) => {
-		if (event.newVersion) reload();
+		if (!event.newVersion) return;
+		database.close({ disableAutoOpen: true });
+		reload();
+		return false;
 	});
 }
 
