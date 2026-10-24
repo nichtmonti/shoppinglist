@@ -24,6 +24,10 @@ variables:
   - &ci_image localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-386ad4a9
   - &pnpm_cache /var/lib/woodpecker-cache/pnpm:/root/.local/share/pnpm
   - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
+  # The previous release's worktree and binary (task prev-release, [D-343]):
+  # built once per tag rather than on every push. Its git metadata is the
+  # pipeline's own and goes with it; the suite run from the tree needs none.
+  - &prev_release_cache /var/lib/woodpecker-cache/shoppinglist-prev:/root/.cache/shoppinglist-prev
   # go-task and Go's state: the module cache per pipeline in the workspace
   # ([D-60], go.yaml), the build cache shared; the official proxy and sumdb.
   # GOCOVERDIR: every binary the steps build is built with -cover and writes
@@ -93,6 +97,7 @@ steps:
     volumes:
       - *pnpm_cache
       - *go_build_cache
+      - *prev_release_cache
     commands:
       - *install_task
       # The previous release's tag, and the history that finds it, for the

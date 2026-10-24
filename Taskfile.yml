@@ -549,7 +549,8 @@ tasks:
       - >-
         git worktree list --porcelain | sed -n 's|^worktree \({{.PREV_ROOT}}/.*\)|\1|p' |
         while read -r tree; do git worktree remove --force "$tree"; done
-      - rm -rf {{.PREV_ROOT}}
+      # Its entries, not the directory: CI keeps it on a volume (e2e.yaml).
+      - mkdir -p {{.PREV_ROOT}} && find {{.PREV_ROOT}} -mindepth 1 -maxdepth 1 -exec rm -rf {} +
       - git worktree add -q --detach {{.PREV_ROOT}}/{{.PREV_TAG}} {{.PREV_TAG}}
       # Its binary writes no coverage: its counters belong to another tree.
       - cd {{.PREV_ROOT}}/{{.PREV_TAG}} && env -u GOCOVERDIR task deps build-app

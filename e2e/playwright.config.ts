@@ -32,12 +32,13 @@ export default defineConfig({
 		// service worker's own requests, a synthetic paste's data, or text
 		// sized to Chromium's metrics.
 		// One worker: each holds a Chromium for its sign-ups as well, and two
-		// beside the Chromium project's ran the 8 GB box out of memory.
+		// beside the Chromium project's ran the 8 GB box out of memory. CI's
+		// agent has the room for two.
 		{
 			name: 'firefox',
 			use: { ...devices['Desktop Firefox'] },
 			grepInvert: /@chromium/,
-			workers: 1
+			workers: process.env.CI ? 2 : 1
 		}
 	]
 });
