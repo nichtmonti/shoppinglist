@@ -20,7 +20,7 @@ const PORT = basePort('8093');
 
 export default defineConfig({
 	testDir: './',
-	// Its own, beside this config: a run never empties another harness's traces.
+	// Its own, beside this config: lanes run harnesses side by side (Taskfile e2e:lanes).
 	outputDir: 'test-results',
 	// A geometry fault is deterministic; a retry would only hide a settle bug
 	// in the audit itself.

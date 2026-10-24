@@ -575,22 +575,45 @@ tasks:
       - cd {{.PREV_ROOT}}/{{.PREV_TAG}}/frontend && SHOPPINGLIST_BIN='{{.BIN_NOUI}}' INTEGRATION_PORT=8084 npx vitest run --project integration --silent=passed-only
 
   e2e:
-    desc: Every harness, one after another, as CI runs them
+    desc: Every harness, one after another as CI runs them; LANES=2 runs two side by side
     cmds:
-      - '{{.LOCK}} e2e task e2e:all'
+      - '{{.LOCK}} e2e task e2e:all LANES={{.LANES}}'
 
   e2e:all:
     cmds:
       # Every binary before any browser: a build beside a running suite starves
-      # it on the box's four cores. One harness at a time for the same reason:
-      # two side by side took as long as one after the other, and timed out.
+      # it on the box's four cores. One harness at a time by default for the
+      # same reason: on four cores two side by side took as long as one after
+      # the other, and timed out. LANES=2 is for a bigger box.
       - task: build-app
       - task: build-demo
       - task: build-backend
       - task: prev-release
+      - task: '{{if eq .LANES "2"}}e2e:lanes{{else}}e2e:in-turn{{end}}'
+
+  e2e:in-turn:
+    internal: true
+    cmds:
+      - task: e2e:lane-a
+      - task: e2e:lane-b
+
+  # Side by side, every harness writes its own test-results/ beside its config:
+  # Playwright's default is one folder beside package.json, which each harness
+  # empties at its start, deleting the other lane's traces mid-run.
+  e2e:lanes:
+    internal: true
+    deps: [e2e:lane-a, e2e:lane-b]
+
+  e2e:lane-a:
+    internal: true
+    cmds:
       - task: e2e:functional
       - task: e2e:arch
-      - task: e2e:oidc
+
+  e2e:lane-b:
+    internal: true
+    cmds:
       - task: e2e:tiles
+      - task: e2e:oidc
       - task: e2e:demo
       - task: e2e:upgrade

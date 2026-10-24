@@ -50,7 +50,7 @@ function appServer(port: string, extra: Record<string, string>) {
 
 export default defineConfig({
 	testDir: './',
-	// Its own, beside this config: a run never empties another harness's traces.
+	// Its own, beside this config: lanes run harnesses side by side (Taskfile e2e:lanes).
 	outputDir: 'test-results',
 	workers: 1,
 	// Same ceilings as the functional suite (playwright.config.ts).

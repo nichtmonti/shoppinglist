@@ -89,7 +89,9 @@ and its port are in [impl-notes](docs/internals/impl-notes.md#test-layers).
   gate's job.
 - **`scripts/gate.sh full` is for a release or a toolchain bump**: every
   non-browser layer at full scope. `scripts/gate.sh e2e` runs every harness, one
-  after another, as CI does. The changed-file layers check everything not yet on
+  after another, as CI does; `scripts/gate.sh e2e LANES=2` runs them in two
+  lanes side by side, which on this box's four cores is no faster and times
+  out. The changed-file layers check everything not yet on
   `origin/main`, committed or not, on any branch; `SINCE=<ref>` picks another
   base.
 - **One gate runs at a time on the machine**, in any checkout or worktree, and
