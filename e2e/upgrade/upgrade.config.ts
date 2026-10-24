@@ -10,7 +10,7 @@ import { basePort, LOCALE } from '../server';
 //
 // Run it as `scripts/gate.sh e2e:upgrade`, which builds both binaries first;
 // by hand, from e2e/ after `task build-app prev-release`:
-//   E2E_PORT=8085 E2E_PREVIOUS_BIN=… npx playwright test -c upgrade/upgrade.config.ts
+//   E2E_PORT=8085 E2E_PREVIOUS_DIR=~/.cache/shoppinglist-prev/<tag> npx playwright test -c upgrade/upgrade.config.ts
 const PORT = basePort('8085');
 
 export default defineConfig({

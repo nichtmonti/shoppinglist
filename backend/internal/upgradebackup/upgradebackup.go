@@ -49,7 +49,7 @@ func Register(app core.App, withApp bool) {
 				files, seedV = append(files, migrationFiles(core.AppMigrations)...), seed.CurrentSeedVersion
 				// Only serve knows every migration: another subcommand's list
 				// lacks the app's own.
-				if err := refuseNewer(e.App.DataDir(), files); err != nil {
+				if err := refuseNewer(e.App.DataDir(), files, slices.Max(migrationFiles(core.AppMigrations))); err != nil {
 					return err
 				}
 			}
@@ -120,10 +120,13 @@ func Run(dataDir string, migrations []string, seedVersion string, now time.Time)
 }
 
 // refuseNewer refuses a database that has applied a migration missing from
-// migrations ([D-345]): a newer release changed it, and this binary's code
-// over a schema it does not know is not a state anyone tested. That release
-// backed pb_data up before the change.
-func refuseNewer(dataDir string, migrations []string) error {
+// migrations and named after newest, this binary's newest own one ([D-345]):
+// a newer release changed it, and this binary's code over a schema it does
+// not know is not a state anyone tested. That release backed pb_data up
+// before the change. One named before it is a file PocketBase has since
+// deleted, as it announces for its v0.23 upgrade. The names start with a
+// 10-digit timestamp, so they sort by it.
+func refuseNewer(dataDir string, migrations []string, newest string) error {
 	dbPath := filepath.Join(dataDir, "data.db")
 	if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
 		return nil
@@ -139,7 +142,7 @@ func refuseNewer(dataDir string, migrations []string) error {
 	}
 	var unknown []string
 	for _, f := range applied {
-		if !slices.Contains(migrations, f) {
+		if f > newest && !slices.Contains(migrations, f) {
 			unknown = append(unknown, f)
 		}
 	}

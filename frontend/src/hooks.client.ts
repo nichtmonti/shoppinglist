@@ -14,11 +14,7 @@ import { db, reloadOnUpgrade } from '#lib/db.js';
 
 watchResourceFailures();
 watchServiceWorker();
-// [D-202]'s guard: two windows that upgrade each other cannot reload forever.
-reloadOnUpgrade(db, () => {
-	const delay = claimReload(new URL(location.href));
-	if (delay !== null) setTimeout(() => location.reload(), delay);
-});
+reloadOnUpgrade(db, () => location.reload());
 // A change the device's database refused (full, or its connection lost) is
 // gone unless the user hears of it ([D-293]); the toasts load lazily, off the
 // boot path.

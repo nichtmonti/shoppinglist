@@ -279,7 +279,7 @@ func TestFailedRenameRemovesTheTempArchive(t *testing.T) {
 // [D-345] A database a newer release migrated refuses a serve boot of this
 // one, naming the migration it does not know and the backup to restore.
 func TestRegisterRefusesADatabaseANewerReleaseMigrated(t *testing.T) {
-	dir, _ := upToDate(t)
+	dir, known := upToDate(t)
 	const newer = "1999999999_from_a_newer_release.go"
 	db, err := dbx.Open("sqlite", filepath.Join(dir, "data.db"))
 	if err != nil {
@@ -298,6 +298,14 @@ func TestRegisterRefusesADatabaseANewerReleaseMigrated(t *testing.T) {
 		t.Fatalf("Bootstrap = %v, want a refusal naming %s and the pre-upgrade backup", err, newer)
 	}
 
+	// Called directly: the newer migration counts until it is known.
+	if err := refuseNewer(dir, known, "1778000025_x.go"); err == nil {
+		t.Fatal("refuseNewer passed a migration named after the newest known one")
+	}
+	if err := refuseNewer(dir, append(known, newer), "1778000025_x.go"); err != nil {
+		t.Fatalf("refuseNewer = %v for known migrations", err)
+	}
+
 	// Another subcommand knows only the system migrations, so it cannot tell.
 	other := pocketbase.NewWithConfig(pocketbase.Config{DefaultDataDir: dir, HideStartBanner: true})
 	Register(other, false)
@@ -305,4 +313,25 @@ func TestRegisterRefusesADatabaseANewerReleaseMigrated(t *testing.T) {
 		t.Fatalf("non-serve Bootstrap = %v, want it left alone", err)
 	}
 	defer other.ClearBootstrap()
+}
+
+// A migration PocketBase has deleted from its own list (it announces this for
+// its v0.23 upgrade) is applied in every database, and starts nothing.
+func TestRegisterStartsOnAMigrationPocketBaseDeleted(t *testing.T) {
+	dir, _ := upToDate(t)
+	db, err := dbx.Open("sqlite", filepath.Join(dir, "data.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.NewQuery("INSERT INTO _migrations (file, applied) VALUES ('1700000000_deleted_by_pocketbase.go', 1)").Execute(); err != nil {
+		t.Fatal(err)
+	}
+	_ = db.Close()
+
+	app := pocketbase.NewWithConfig(pocketbase.Config{DefaultDataDir: dir, HideStartBanner: true})
+	Register(app, true)
+	if err := app.Bootstrap(); err != nil {
+		t.Fatalf("Bootstrap = %v, want a start", err)
+	}
+	defer app.ClearBootstrap()
 }

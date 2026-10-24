@@ -332,6 +332,8 @@ export const db = new AppDB();
 export function reloadOnUpgrade(database: Dexie, reload: () => void): void {
 	database.on('versionchange', (event) => {
 		if (!event.newVersion) return;
+		// Closed for good, the window cannot upgrade anything before it
+		// reloads, so two windows cannot reload each other in turn.
 		database.close({ disableAutoOpen: true });
 		reload();
 		return false;
