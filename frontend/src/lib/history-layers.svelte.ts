@@ -210,11 +210,6 @@ export function goAcross(path: ResolvedPathname): Promise<void> {
 	});
 }
 
-/** Takes the current screen's layers off — before leaving the document. */
-export function closeLayers(): Promise<void> {
-	return serial(unwind);
-}
-
 /**
  * A link (`<a href>`) cannot pass state, so its arrival records where it came
  * from here. Call once, from the root layout. The replace queues like every
