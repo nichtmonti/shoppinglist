@@ -6,7 +6,9 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
-## Unreleased
+## v0.17.2: an update that loses nothing an open tab held, 32-bit Raspberry Pis, and Back in Firefox (2026-10)
+
+**For operators.** Nothing to do before upgrading.
 
 - **For operators: releases also come for 32-bit ARM (`armv7`)**, as a Docker image and a zip: a Raspberry Pi 2, and any Pi on the 32-bit Raspberry Pi OS. Docker picks it by itself ([D-36]).
 - **In Firefox, Back from the join screen goes home again** after you paste an invite into "Join with invite", instead of skipping the home and leaving the app ([D-347]).
