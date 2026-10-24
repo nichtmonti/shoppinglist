@@ -3,7 +3,7 @@
 # binary: the two-client Dexie sync integration suite, then the Playwright
 # harnesses (passkey ceremonies via CDP virtual authenticator, offline sync,
 # conflict UX, the dead-controls walk, OIDC against Dex, the tile audit, the
-# demo build).
+# demo build, the previous release updated to this build).
 # Every step runs in the CI image ([D-203]) and calls the gate's tasks
 # (Taskfile.yml, [D-177]), so CI runs what `scripts/gate.sh e2e` runs locally.
 # Steps share one workspace and run serially in definition order: the binary
@@ -96,8 +96,9 @@ steps:
     commands:
       - *install_task
       # The previous release's tag, and the history that finds it, for the
-      # upgrade harness ([D-343]): a push's clone has neither, a tag's both.
-      - if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch -q --tags --unshallow origin; fi
+      # upgrade harness ([D-343]): a push's clone has neither.
+      - if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch -q --unshallow origin; fi
+      - git fetch -q --tags origin
       - task e2e:functional e2e:arch e2e:oidc e2e:tiles e2e:demo e2e:upgrade
 
   # Go coverage ([D-203]): the backend suite (go.yaml's run, mostly from the

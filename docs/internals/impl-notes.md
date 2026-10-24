@@ -31,7 +31,7 @@ them, and what to watch for, is in [`AGENTS.md`](../../AGENTS.md#the-gate).
 | `e2e:oidc` | the OIDC journeys against Dex, `e2e/oidc/` ([D-154]) | 8095 (+8094 OIDC-only, Dex 5557) |
 | `e2e:tiles` | the tile audit and the state audit on the Vite dev server, in Chromium and Firefox, `e2e/tiles/` ([D-166], [D-228], [D-301]) | 8093 |
 | `e2e:demo` | the demo binary (`task build-demo`) and its harness, `e2e/demo/` ([D-234]) | 8088 |
-| `e2e:upgrade` | the previous release (`task prev-release`, a worktree in `~/.cache/shoppinglist-prev`) updated to this build, `e2e/upgrade/`, then its own `integration` project against this server ([D-343]) | 8085, 8084 |
+| `e2e:upgrade` | the previous release (`task prev-release`, a worktree in `~/.cache/shoppinglist-prev`, outside the checkout because osv and prettier would read its lockfiles as this one's) updated to this build, `e2e/upgrade/`, then its own `integration` project against this server ([D-343]) | 8085, 8084 |
 
 Passkey ceremonies have a Go-side layer too: `testutil.Authenticator` is a
 software passkey (one ES256 key, a "none" attestation, real signatures) that

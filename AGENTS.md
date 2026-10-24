@@ -184,12 +184,13 @@ e2e:<name>`) or by hand as below.
   build-demo`.
 - **Upgrade, `e2e/upgrade/`** ([D-343]), 8085: the previous release's server
   and page, then this build's on the same port and data; then that release's
-  `integration` project against this server on 8084. `task prev-release`
-  builds it from its tag in a worktree under `~/.cache/shoppinglist-prev`, out
-  of the checkout so the repo-wide layers never read its lockfiles; the host's
-  `git worktree list` shows it as prunable. A server variable of the harness's
-  own is `E2E_`-named: the previous release refuses a `SHOPPINGLIST_` name it
-  does not know ([D-336]).
+  `integration` project against this server on 8084, from a worktree of the
+  previous tag under `~/.cache/shoppinglist-prev` (the host's `git worktree
+  list` shows it as prunable; never prune from the container). Until the
+  reload the page is the previous build's, so those steps say its own words
+  (`previousCopy()`, by message key). A variable of the harness's own is
+  `E2E_`-named: the previous release refuses a `SHOPPINGLIST_` name it does
+  not know ([D-336]).
 
 **A wait names a state its action creates** ([D-342]), never one the screen
 before already shows: a new screen by an element of its own (`appearsAfter()`

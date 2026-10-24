@@ -529,37 +529,50 @@ tasks:
 
   # --- the previous release ([D-343]) ---------------------------------------------
   # The release this build updates: on a release commit the one before it,
-  # otherwise the newest. Its worktree sits outside the checkout, whose
-  # repo-wide layers (osv, prettier) would read its lockfiles as this one's,
-  # and shares this one's objects, which a partial clone (CI's) fetches when
-  # they are first read.
+  # otherwise the newest. A worktree outside the checkout (docs/internals/impl-notes.md
+  # says why), sharing this one's objects, which a partial clone (CI's)
+  # fetches when they are first read. Only under the machine lock (e2e:upgrade
+  # and e2e:lanes take it), as everything that reads it: another checkout's
+  # previous tag replaces it.
   prev-release:
-    desc: The previous release's worktree and both its binaries, built once per tag
     vars: &prev
       PREV_TAG:
         sh: git describe --tags --abbrev=0 HEAD^
-      PREV_DIR:
-        sh: echo "${XDG_CACHE_HOME:-$HOME/.cache}/shoppinglist-prev/$(git describe --tags --abbrev=0 HEAD^)"
+      PREV_ROOT:
+        sh: echo "${XDG_CACHE_HOME:-$HOME/.cache}/shoppinglist-prev"
     status:
-      - test -x {{.PREV_DIR}}/backend/shoppinglist -a -x {{.PREV_DIR}}/backend/shoppinglist-no-ui
+      - test -x {{.PREV_ROOT}}/{{.PREV_TAG}}/backend/shoppinglist
     cmds:
       - defer: *failed
-      # One release's worktree at a time: the one before it goes.
-      - rm -rf "$(dirname {{.PREV_DIR}})" && git worktree prune
-      - git worktree add -q --detach {{.PREV_DIR}} {{.PREV_TAG}}
-      # Its binaries write no coverage: their counters are another tree's.
-      - cd {{.PREV_DIR}} && env -u GOCOVERDIR task deps build-app build-backend
+      # Its own worktrees only: a prune would also drop those that live where
+      # this container cannot see them.
+      - >-
+        git worktree list --porcelain | sed -n 's|^worktree \({{.PREV_ROOT}}/.*\)|\1|p' |
+        while read -r tree; do git worktree remove --force "$tree"; done
+      - rm -rf {{.PREV_ROOT}}
+      - git worktree add -q --detach {{.PREV_ROOT}}/{{.PREV_TAG}} {{.PREV_TAG}}
+      # Its binary writes no coverage: its counters belong to another tree.
+      - cd {{.PREV_ROOT}}/{{.PREV_TAG}} && env -u GOCOVERDIR task deps build-app
 
   e2e:upgrade:
     desc: The previous release updated to this build (e2e/upgrade, 8085, and its sync suite on 8084, [D-343])
-    deps: [deps, prev-release, build-app, build-backend]
+    deps: [deps]
+    cmds:
+      - defer: *failed
+      # One build at a time ([D-177]'s box), and the previous release's tree
+      # under one lock from its build to its last test.
+      - task: build-app
+      - task: build-backend
+      - '{{.LOCK}} e2e:upgrade task e2e:upgrade:run -- {{.CLI_ARGS}}'
+
+  e2e:upgrade:run:
+    deps: [prev-release]
     vars: *prev
     cmds:
       - defer: *failed
-      - cd e2e && SHOPPINGLIST_BIN='{{.BIN}}' E2E_PREVIOUS_BIN='{{.PREV_DIR}}/backend/shoppinglist' {{.ROOT_DIR}}/{{.LOCK}} e2e:upgrade npx playwright test -c upgrade/upgrade.config.ts {{.CLI_ARGS}}
+      - cd e2e && SHOPPINGLIST_BIN='{{.BIN}}' E2E_PREVIOUS_DIR='{{.PREV_ROOT}}/{{.PREV_TAG}}' npx playwright test -c upgrade/upgrade.config.ts {{.CLI_ARGS}}
       # Its engine, as a page still running it after the update, against this server.
-      # The lock from here: in the clone, lock.sh would find the clone's own.
-      - '{{.LOCK}} e2e:upgrade sh -c "cd {{.PREV_DIR}}/frontend && SHOPPINGLIST_BIN={{.BIN_NOUI}} INTEGRATION_PORT=8084 npx vitest run --project integration --silent=passed-only"'
+      - cd {{.PREV_ROOT}}/{{.PREV_TAG}}/frontend && SHOPPINGLIST_BIN='{{.BIN_NOUI}}' INTEGRATION_PORT=8084 npx vitest run --project integration --silent=passed-only
 
   e2e:
     desc: Every harness, in two lanes (what CI runs)
