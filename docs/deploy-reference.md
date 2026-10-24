@@ -306,7 +306,8 @@ from.
 ### Without Docker
 
 The [releases page](https://codeberg.org/sclermont/shoppinglist/releases) has
-a zip for `linux/amd64` and `arm64` holding the self-contained binary, with
+a zip for `linux/amd64`, `arm64` and `armv7` (32-bit, a Raspberry Pi on a
+32-bit system) holding the self-contained binary, with
 the licences and the operator docs:
 
 ```sh

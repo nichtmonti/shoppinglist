@@ -8,8 +8,8 @@ zip contain the third-party components below. Each keeps its own license;
 all of them permit distribution as part of an AGPL-3.0 work.
 
 What is listed is what ships, found from the build itself: the Go modules
-linked into the binary (`go list -deps` of backend/, linux/amd64 and
-linux/arm64, as GoReleaser builds it) and the npm packages whose code, styles,
+linked into the binary (`go list -deps` of backend/, linux/amd64, arm64
+and armv7, as GoReleaser builds it) and the npm packages whose code, styles,
 fonts or images end up in the web app compiled into that binary (`vite build`
 of frontend/). Development and test tooling is not shipped and not listed.
 

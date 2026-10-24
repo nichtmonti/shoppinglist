@@ -1,6 +1,6 @@
 # GoReleaser config (docs/internals/design.md §14, [D-36]).
 # Ships both §14 artifacts from one pipeline: a multi-arch Docker image (incl.
-# arm64 for Raspberry Pi) and a plain binary + dist zip (no Docker required).
+# arm64 and armv7 for a Raspberry Pi) and a plain binary + dist zip (no Docker required).
 # A second build and image carry the demo ([D-234], [D-235]): the :demo tag.
 #
 # Before running `goreleaser release` (or `--snapshot`), the SPA must already
@@ -37,7 +37,9 @@ builds:
     env:
       - CGO_ENABLED=0
     goos: [linux]
-    goarch: [amd64, arm64]
+    # arm: 32-bit ARMv7, a Raspberry Pi on a 32-bit system ([D-36]).
+    goarch: [amd64, arm64, arm]
+    goarm: ['7']
     # Provenance, before anything is published: a binary built with another
     # toolchain than the release workflow's EXPECT_GO (backend/go.mod says why
     # the pin) stops the release. Unset, EXPECT_GO fails the template.
@@ -66,7 +68,9 @@ builds:
     env:
       - CGO_ENABLED=0
     goos: [linux]
-    goarch: [amd64, arm64]
+    # arm: 32-bit ARMv7, a Raspberry Pi on a 32-bit system ([D-36]).
+    goarch: [amd64, arm64, arm]
+    goarm: ['7']
     hooks:
       post: *provenance
 
@@ -77,7 +81,7 @@ archives:
   - id: shoppinglist
     ids: [shoppinglist]
     formats: [zip]
-    name_template: "shoppinglist_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "shoppinglist_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
     # Each file's time and mode are fixed ([D-338]): the checkout's own (when
     # it was cloned, under which umask) would make every rebuild's zip differ.
     builds_info:
@@ -106,7 +110,7 @@ checksum:
   name_template: "checksums.txt"
 
 # Multi-arch Docker image (§14) via buildx (dockers_v2, [D-36]) — one entry,
-# one `docker buildx build --platform linux/amd64,linux/arm64`, no separate
+# one `docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7`, no separate
 # docker_manifests merge step. Requires a buildx builder that can emit
 # multi-platform images (the docker-container driver) on the runner; the
 # release step in .woodpecker/release.yaml creates one. No QEMU: the
@@ -126,6 +130,7 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
+      - linux/arm/v7
     annotations:
       "org.opencontainers.image.description": "Self-hosted offline-first shared shopping list PWA"
       "org.opencontainers.image.source": "{{ .GitURL }}"
@@ -148,6 +153,7 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
+      - linux/arm/v7
     annotations:
       "org.opencontainers.image.description": "Demo build of the self-hosted shopping list: one-button guest accounts, deleted after 24 hours"
       "org.opencontainers.image.source": "{{ .GitURL }}"

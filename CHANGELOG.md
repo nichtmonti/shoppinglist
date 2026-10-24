@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **For operators: releases also come for 32-bit ARM (`armv7`)**, as a Docker image and a zip: a Raspberry Pi 2, and any Pi on the 32-bit Raspberry Pi OS. Docker picks it by itself ([D-36]).
 - **In Firefox, Back from the join screen goes home again** after you paste an invite into "Join with invite", instead of skipping the home and leaving the app ([D-347]).
 - **An app window left open across an update switches to the new version** the next time you leave it, instead of running the old one until it is closed ([D-346]).
 - **For operators: a server started on data a newer version has changed refuses to start**, and names the backup the newer version made before changing it. Going back to an older image without restoring that backup used to start and run the old version over a database it did not know ([D-345]).
@@ -818,6 +819,7 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-25]: docs/internals/decisions.md#D-25
 [D-28]: docs/internals/decisions.md#D-28
 [D-29]: docs/internals/decisions.md#D-29
+[D-36]: docs/internals/decisions.md#D-36
 [D-40]: docs/internals/decisions.md#D-40
 [D-42]: docs/internals/decisions.md#D-42
 [D-48]: docs/internals/decisions.md#D-48

@@ -8,6 +8,7 @@
 #
 #   linux/amd64/shoppinglist
 #   linux/arm64/shoppinglist
+#   linux/arm/v7/shoppinglist
 #
 # Just the binaries: the SvelteKit SPA is compiled into each one ([D-64]), so
 # nothing has to be copied alongside them.
@@ -22,7 +23,7 @@
 # nothing to pivot to.
 #
 # Pinned by index digest so a rebuild of an old tag produces the same image;
-# the digest covers linux/amd64 and linux/arm64 (Raspberry Pi, §14).
+# the digest covers linux/amd64, linux/arm64 and linux/arm/v7 (Raspberry Pi, §14).
 FROM gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3
 ARG TARGETPLATFORM
 

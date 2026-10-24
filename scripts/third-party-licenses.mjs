@@ -9,7 +9,7 @@
 //
 //   - The Go binary: the modules `go list -deps` reports for the main package
 //     of backend/, as GoReleaser builds it (no build tags, CGO_ENABLED=0,
-//     linux/amd64 + linux/arm64, unioned). Test-only and tools/ modules are not
+//     linux/amd64, arm64 and arm (GOARM=7), unioned). Test-only and tools/ modules are not
 //     in that graph, so they are not listed. Their licence files are read
 //     from the module cache, the standard library's from GOROOT.
 //   - The SPA embedded in it: a real `vite build` of frontend/, with a
@@ -166,7 +166,7 @@ function goComponents() {
 	const go = (args, env = {}) =>
 		run('go', args, { cwd: BACKEND, env: { ...process.env, GOFLAGS: '', ...env } });
 	const modules = new Map();
-	for (const GOARCH of ['amd64', 'arm64']) {
+	for (const GOARCH of ['amd64', 'arm64', 'arm']) {
 		const out = go(
 			[
 				'list',
@@ -180,7 +180,7 @@ function goComponents() {
 				'{{if not .Standard}}{{with .Module}}{{if not .Main}}{{.Path}}\t{{.Version}}\t{{if .Replace}}{{.Replace.Dir}}{{else}}{{.Dir}}{{end}}{{end}}{{end}}{{end}}',
 				'.'
 			],
-			{ CGO_ENABLED: '0', GOOS: 'linux', GOARCH }
+			{ CGO_ENABLED: '0', GOOS: 'linux', GOARCH, GOARM: '7' }
 		);
 		for (const line of out.split('\n').filter(Boolean)) {
 			const [name, version, dir] = line.split('\t');
@@ -517,8 +517,8 @@ zip contain the third-party components below. Each keeps its own license;
 all of them permit distribution as part of an AGPL-3.0 work.
 
 What is listed is what ships, found from the build itself: the Go modules
-linked into the binary (\`go list -deps\` of backend/, linux/amd64 and
-linux/arm64, as GoReleaser builds it) and the npm packages whose code, styles,
+linked into the binary (\`go list -deps\` of backend/, linux/amd64, arm64
+and armv7, as GoReleaser builds it) and the npm packages whose code, styles,
 fonts or images end up in the web app compiled into that binary (\`vite build\`
 of frontend/). Development and test tooling is not shipped and not listed.
 

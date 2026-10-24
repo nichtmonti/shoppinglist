@@ -6,7 +6,7 @@
 
 ![CI status](https://woodpecker.sebastianclermont.de/api/badges/2/status.svg)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-![Docker image for amd64 and arm64](https://img.shields.io/badge/docker-amd64%20%7C%20arm64-2496ED?logo=docker&logoColor=white)
+![Docker image for amd64, arm64 and armv7](https://img.shields.io/badge/docker-amd64%20%7C%20arm64%20%7C%20armv7-2496ED?logo=docker&logoColor=white)
 ![Sign in with passkeys or OpenID Connect](https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white)
 <br>
 ![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
@@ -170,7 +170,7 @@ one. Every other setting is in [`.env.example`](.env.example), upgrades and the
 admin account in [`docs/deploying.md`](docs/deploying.md), and backups in
 [`docs/operating.md`](docs/operating.md#backups).
 
-A plain binary for `linux/amd64` and `arm64`, zipped, is on the
+A plain binary for `linux/amd64`, `arm64` and `armv7`, zipped, is on the
 [releases page](https://codeberg.org/sclermont/shoppinglist/releases).
 
 ## How it's built
