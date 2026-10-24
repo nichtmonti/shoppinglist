@@ -19,7 +19,7 @@ const BIN = process.env.SHOPPINGLIST_DEMO_BIN ?? 'backend/shoppinglist-demo';
 
 export default defineConfig({
 	testDir: './',
-	// Its own, beside this config: the lanes run harnesses side by side (Taskfile e2e:browsers).
+	// Its own, beside this config: a run never empties another harness's traces.
 	outputDir: 'test-results',
 	workers: 1,
 	// Same ceilings as the functional suite (playwright.config.ts).

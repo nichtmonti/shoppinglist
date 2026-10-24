@@ -20,7 +20,7 @@ const PORT = basePort('8096');
 
 export default defineConfig({
 	testDir: './',
-	// Its own, beside this config: the lanes run harnesses side by side (Taskfile e2e:browsers).
+	// Its own, beside this config: a run never empties another harness's traces.
 	outputDir: 'test-results',
 	// One worker is load-bearing: the parallel burst is why this config exists.
 	workers: 1,

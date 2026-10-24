@@ -88,8 +88,8 @@ and its port are in [impl-notes](docs/internals/impl-notes.md#test-layers).
   harness on every push ([D-177]), so the full matrix is not your commit
   gate's job.
 - **`scripts/gate.sh full` is for a release or a toolchain bump**: every
-  non-browser layer at full scope. `scripts/gate.sh e2e` runs every harness in
-  two lanes. The changed-file layers check everything not yet on
+  non-browser layer at full scope. `scripts/gate.sh e2e` runs every harness, one
+  after another, as CI does. The changed-file layers check everything not yet on
   `origin/main`, committed or not, on any branch; `SINCE=<ref>` picks another
   base.
 - **One gate runs at a time on the machine**, in any checkout or worktree, and

@@ -2,7 +2,7 @@
 # [D-177]); docs/internals/impl-notes.md says what each runs. Run them through
 # scripts/gate.sh, which takes the same arguments (`scripts/gate.sh e2e:arch
 # -- --last-failed`) and adds what go-task leaves out. `task --list` shows the
-# tasks to run: gate, gate:full and e2e:lanes have no desc, since the default,
+# tasks to run: gate, gate:full and e2e:all have no desc, since the default,
 # `full` and `e2e` run them under the machine lock.
 #
 # What runs is decided by the tools, not by path rules here: a task whose
@@ -532,7 +532,7 @@ tasks:
   # otherwise the newest. A worktree outside the checkout (docs/internals/impl-notes.md
   # says why), sharing this one's objects, which a partial clone (CI's)
   # fetches when they are first read. Only under the machine lock (e2e:upgrade
-  # and e2e:lanes take it), as everything that reads it: another checkout's
+  # and e2e:all take it), as everything that reads it: another checkout's
   # previous tag replaces it.
   prev-release:
     vars: &prev
@@ -575,39 +575,22 @@ tasks:
       - cd {{.PREV_ROOT}}/{{.PREV_TAG}}/frontend && SHOPPINGLIST_BIN='{{.BIN_NOUI}}' INTEGRATION_PORT=8084 npx vitest run --project integration --silent=passed-only
 
   e2e:
-    desc: Every harness, in two lanes (what CI runs)
+    desc: Every harness, one after another, as CI runs them
     cmds:
-      - '{{.LOCK}} e2e task e2e:lanes'
+      - '{{.LOCK}} e2e task e2e:all'
 
-  e2e:lanes:
+  e2e:all:
     cmds:
       # Every binary before any browser: a build beside a running suite starves
-      # it on the box's four cores (the arch walk failed to load a chunk while
-      # the other lane built the demo; alone it passed).
+      # it on the box's four cores. One harness at a time for the same reason:
+      # two side by side took as long as one after the other, and timed out.
       - task: build-app
       - task: build-demo
       - task: build-backend
       - task: prev-release
-      - task: e2e:browsers
-
-  # The two lanes run side by side, so every harness writes its own
-  # test-results/ beside its config: Playwright's default is one folder beside
-  # package.json, which each harness empties at its start, deleting the other
-  # lane's traces mid-run (ENOENT at a context's close).
-  e2e:browsers:
-    internal: true
-    deps: [e2e:lane-a, e2e:lane-b]
-
-  e2e:lane-a:
-    internal: true
-    cmds:
       - task: e2e:functional
       - task: e2e:arch
-
-  e2e:lane-b:
-    internal: true
-    cmds:
-      - task: e2e:tiles
       - task: e2e:oidc
+      - task: e2e:tiles
       - task: e2e:demo
       - task: e2e:upgrade
