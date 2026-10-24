@@ -37,8 +37,10 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	await createList(pageA, 'Wochenshop');
 	await openListView(pageA);
 
+	// No lookup stub on B, which only renders the synced image_url: a route
+	// in a context keeps Firefox's service worker out, and B's photo cache is
+	// the worker's.
 	const ctxB = await browser.newContext();
-	await stubBarcodeLookup(ctxB); // harmless on B — it never triggers a lookup, only renders the synced image_url
 	const pageB = await ctxB.newPage();
 	await registerAccount(pageB, 'Ben');
 	await shareListWith(pageA, pageB);

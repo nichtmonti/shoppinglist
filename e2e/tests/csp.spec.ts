@@ -94,6 +94,9 @@ test('CSP: the app runs its real flows without a single policy violation', async
 
 	// 5. The service worker serving the cached shell — worker-src, and the
 	//    precached assets coming back through it rather than off the network.
+	//    The lookup stub has done its part, and a route in the context keeps
+	//    Firefox's worker out.
+	await context.unrouteAll({ behavior: 'wait' });
 	await page.evaluate(() => navigator.serviceWorker.ready);
 	await context.setOffline(true);
 	await reloadInPage(page);
