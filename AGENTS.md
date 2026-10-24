@@ -183,7 +183,7 @@ e2e:<name>`) or by hand as below.
   `[data-item="<case id>"]`; never drive the toolbar. Vite is started with
   `node`, not `pnpm exec`, whose process group hung every run.
 - **Demo, `e2e/demo/`** ([D-234]), 8088, its own binary from `task
-  build-demo`.
+  build-demo`, in Chromium and Firefox ([D-301]).
 - **Upgrade, `e2e/upgrade/`** ([D-343]), 8085: the previous release's server
   and page, then this build's on the same port and data; then that release's
   `integration` project against this server on 8084, from a worktree of the

@@ -3,7 +3,9 @@ import { appServer, basePort, LOCALE } from '../server';
 
 // The demo build's harness ([D-234]): a visitor's way in, the example list,
 // a second visitor joining through an invite, sign-out and an expired demo,
-// in a real browser against the demo binary (`task build-demo`).
+// in Chromium and Firefox against the demo binary (`task build-demo`): with
+// no passkey to sign in, the one harness Firefox can run on a real server
+// ([D-301]).
 //
 // Its own run because it is its own binary: a demo instance has passkeys and
 // OIDC off and a different auth screen, which no other harness expects. A
@@ -45,6 +47,10 @@ export default defineConfig({
 		{
 			name: 'demo-chromium',
 			use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${PORT}` }
+		},
+		{
+			name: 'demo-firefox',
+			use: { ...devices['Desktop Firefox'], baseURL: `http://localhost:${PORT}` }
 		}
 	]
 });
