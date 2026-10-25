@@ -1,20 +1,15 @@
-<h1 align="center"><img src="frontend/static/favicon.svg" width="44" align="absmiddle" alt=""> shoppinglist</h1>
+<h1 align="center"><a href="https://codeberg.org/sclermont/shoppinglist"><img src="frontend/static/favicon.svg" width="44" align="absmiddle" alt=""></a> shoppinglist</h1>
 
 <p align="center">A shared shopping list for your household, hosted by you. Syncs live, works without signal, signs in with passkeys.</p>
 
 <div align="center">
 
-![CI status](https://woodpecker.sebastianclermont.de/api/badges/2/status.svg)
-[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-![Docker image for amd64, arm64 and armv7](https://img.shields.io/badge/docker-amd64%20%7C%20arm64%20%7C%20armv7-2496ED?logo=docker&logoColor=white)
-![Sign in with passkeys or OpenID Connect](https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white)
-<br>
-![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
-![PocketBase](https://img.shields.io/badge/PocketBase-B8DBE4?logo=pocketbase&logoColor=black)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
-![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white)
+**[Try the demo](#try-it) · [Deploy](docs/deploying.md) · [Using it](docs/using.md) · [Changelog](CHANGELOG.md)**
 
-[Try the demo](#try-it) · [Deploy](docs/deploying.md) · [Using it](docs/using.md) · [Changelog](CHANGELOG.md)
+[![CI status](https://woodpecker.sebastianclermont.de/api/badges/2/status.svg)](https://codeberg.org/sclermont/shoppinglist/commits/branch/main)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+[![Docker image for amd64, arm64 and armv7](https://img.shields.io/badge/docker-amd64%20%7C%20arm64%20%7C%20armv7-2496ED?logo=docker&logoColor=white)](https://codeberg.org/sclermont/-/packages/container/shoppinglist)
+[![Sign in with passkeys or OpenID Connect](https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white)](docs/using.md#getting-in)
 
 </div>
 

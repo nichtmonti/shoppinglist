@@ -8,6 +8,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 ## Unreleased
 
+- **The README's links come first**, above a single row of badges, and each badge opens what it names: the CI results, the licence, the container images and how to sign in. On Codeberg a badge used to open only its own picture.
 - **Dependencies on their latest versions.** PocketBase 0.40.6 (a cap on the size of an image it makes a thumbnail of, against running out of memory, and more checks on file paths), the UI components (`bits-ui` 2.20), the local database (Dexie 4.4.7), the icons and the barcode decoder (`zxing-wasm` 3.1.6). The Docker image's base carries a newer certificate list, without the root of eMudhra, whose certificate authority was compromised.
 
 ## v0.17.2: an update that loses nothing an open tab held, 32-bit Raspberry Pis, and Back in Firefox (2026-10)
