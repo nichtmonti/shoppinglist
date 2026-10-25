@@ -10,6 +10,11 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 [![Docker image for amd64, arm64 and armv7](https://img.shields.io/badge/docker-amd64%20%7C%20arm64%20%7C%20armv7-2496ED?logo=docker&logoColor=white)](https://codeberg.org/sclermont/-/packages/container/shoppinglist)
 [![Sign in with passkeys or OpenID Connect](https://img.shields.io/badge/sign%20in-passkeys%20%7C%20OIDC-05773b?logo=fidoalliance&logoColor=white)](docs/using.md#getting-in)
+<br>
+[![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)](https://go.dev)
+[![PocketBase](https://img.shields.io/badge/PocketBase-B8DBE4?logo=pocketbase&logoColor=black)](https://pocketbase.io)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/docs/kit)
 
 </div>
 

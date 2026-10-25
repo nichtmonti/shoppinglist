@@ -6,6 +6,10 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
+## Unreleased
+
+- **The README's stack badges are back** (Go, PocketBase, SQLite, SvelteKit), each linking to its project.
+
 ## v0.17.3: PocketBase 0.40.6, a newer certificate list in the image, and the build toolchain past Node2Shell (2026-10)
 
 **For operators.** Nothing to do before upgrading.
