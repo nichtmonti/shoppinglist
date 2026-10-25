@@ -269,10 +269,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/github.com/pocketbase/pocketbase@v0.40.5",
+			"bom-ref": "pkg:golang/github.com/pocketbase/pocketbase@v0.40.6",
 			"name": "github.com/pocketbase/pocketbase",
-			"version": "v0.40.5",
-			"purl": "pkg:golang/github.com/pocketbase/pocketbase@v0.40.5",
+			"version": "v0.40.6",
+			"purl": "pkg:golang/github.com/pocketbase/pocketbase@v0.40.6",
 			"licenses": [
 				{
 					"expression": "MIT"
@@ -365,10 +365,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/golang.org/x/crypto@v0.57.0",
+			"bom-ref": "pkg:golang/golang.org/x/crypto@v0.58.0",
 			"name": "golang.org/x/crypto",
-			"version": "v0.57.0",
-			"purl": "pkg:golang/golang.org/x/crypto@v0.57.0",
+			"version": "v0.58.0",
+			"purl": "pkg:golang/golang.org/x/crypto@v0.58.0",
 			"licenses": [
 				{
 					"expression": "BSD-3-Clause"
@@ -377,10 +377,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/golang.org/x/image@v0.46.0",
+			"bom-ref": "pkg:golang/golang.org/x/image@v0.47.0",
 			"name": "golang.org/x/image",
-			"version": "v0.46.0",
-			"purl": "pkg:golang/golang.org/x/image@v0.46.0",
+			"version": "v0.47.0",
+			"purl": "pkg:golang/golang.org/x/image@v0.47.0",
 			"licenses": [
 				{
 					"expression": "BSD-3-Clause"
@@ -389,10 +389,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/golang.org/x/net@v0.60.0",
+			"bom-ref": "pkg:golang/golang.org/x/net@v0.61.0",
 			"name": "golang.org/x/net",
-			"version": "v0.60.0",
-			"purl": "pkg:golang/golang.org/x/net@v0.60.0",
+			"version": "v0.61.0",
+			"purl": "pkg:golang/golang.org/x/net@v0.61.0",
 			"licenses": [
 				{
 					"expression": "BSD-3-Clause"
@@ -425,10 +425,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/golang.org/x/sys@v0.48.0",
+			"bom-ref": "pkg:golang/golang.org/x/sys@v0.49.0",
 			"name": "golang.org/x/sys",
-			"version": "v0.48.0",
-			"purl": "pkg:golang/golang.org/x/sys@v0.48.0",
+			"version": "v0.49.0",
+			"purl": "pkg:golang/golang.org/x/sys@v0.49.0",
 			"licenses": [
 				{
 					"expression": "BSD-3-Clause"
@@ -545,10 +545,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/%40inlang/paraglide-js@2.29.0",
+			"bom-ref": "pkg:npm/%40inlang/paraglide-js@2.29.1",
 			"name": "@inlang/paraglide-js",
-			"version": "2.29.0",
-			"purl": "pkg:npm/%40inlang/paraglide-js@2.29.0",
+			"version": "2.29.1",
+			"purl": "pkg:npm/%40inlang/paraglide-js@2.29.1",
 			"licenses": [
 				{
 					"expression": "MIT"
@@ -557,10 +557,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/%40lucide/svelte@1.58.0",
+			"bom-ref": "pkg:npm/%40lucide/svelte@1.61.0",
 			"name": "@lucide/svelte",
-			"version": "1.58.0",
-			"purl": "pkg:npm/%40lucide/svelte@1.58.0",
+			"version": "1.61.0",
+			"purl": "pkg:npm/%40lucide/svelte@1.61.0",
 			"licenses": [
 				{
 					"expression": "ISC AND MIT"
@@ -617,10 +617,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/barcode-detector@3.2.2",
+			"bom-ref": "pkg:npm/barcode-detector@3.2.3",
 			"name": "barcode-detector",
-			"version": "3.2.2",
-			"purl": "pkg:npm/barcode-detector@3.2.2",
+			"version": "3.2.3",
+			"purl": "pkg:npm/barcode-detector@3.2.3",
 			"licenses": [
 				{
 					"expression": "MIT"
@@ -629,10 +629,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/bits-ui@2.19.5",
+			"bom-ref": "pkg:npm/bits-ui@2.20.0",
 			"name": "bits-ui",
-			"version": "2.19.5",
-			"purl": "pkg:npm/bits-ui@2.19.5",
+			"version": "2.20.0",
+			"purl": "pkg:npm/bits-ui@2.20.0",
 			"licenses": [
 				{
 					"expression": "MIT"
@@ -665,10 +665,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/dexie@4.4.6",
+			"bom-ref": "pkg:npm/dexie@4.4.7",
 			"name": "dexie",
-			"version": "4.4.6",
-			"purl": "pkg:npm/dexie@4.4.6",
+			"version": "4.4.7",
+			"purl": "pkg:npm/dexie@4.4.7",
 			"licenses": [
 				{
 					"expression": "Apache-2.0"
@@ -941,10 +941,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/zxing-wasm@3.1.3",
+			"bom-ref": "pkg:npm/zxing-wasm@3.1.6",
 			"name": "zxing-wasm",
-			"version": "3.1.3",
-			"purl": "pkg:npm/zxing-wasm@3.1.3",
+			"version": "3.1.6",
+			"purl": "pkg:npm/zxing-wasm@3.1.6",
 			"licenses": [
 				{
 					"expression": "MIT"

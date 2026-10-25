@@ -45,7 +45,7 @@ variables:
     GOFLAGS: ""
   - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
   - &go_mod_cache export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod"
-  - &ci_image localhost/shoppinglist-ci:go1.27.3-node26.12.0-pw1.64.1-386ad4a9
+  - &ci_image localhost/shoppinglist-ci:go1.27.3-node26.12.1-pw1.64.1-bcbaf635
 
 when:
   - event: [push, pull_request, manual]

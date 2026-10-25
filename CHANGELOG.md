@@ -6,6 +6,10 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
+## Unreleased
+
+- **Dependencies on their latest versions.** PocketBase 0.40.6 (a cap on the size of an image it makes a thumbnail of, against running out of memory, and more checks on file paths), the UI components (`bits-ui` 2.20), the local database (Dexie 4.4.7), the icons and the barcode decoder (`zxing-wasm` 3.1.6). The Docker image's base carries a newer certificate list, without the root of eMudhra, whose certificate authority was compromised.
+
 ## v0.17.2: an update that loses nothing an open tab held, 32-bit Raspberry Pis, and Back in Firefox (2026-10)
 
 **For operators.** Nothing to do before upgrading.

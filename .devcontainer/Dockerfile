@@ -3,7 +3,7 @@
 # work headlessly as well as under VS Code / Codespaces. Every toolchain version
 # is pinned exactly (docs/internals/design.md §14, "Every dependency is pinned to an exact version").
 #
-# Pins:  Go 1.27.3 · Node 26.12.0 · pnpm 12.14.0 (npm) · Playwright Chromium + Firefox (1.64.1)
+# Pins:  Go 1.27.3 · Node 26.12.1 · pnpm 12.15.0 (npm) · Playwright Chromium + Firefox (1.64.1)
 # Go dev tools (staticcheck, gosec, osv-scanner, govulncheck, air, dex): tools/<name>/go.mod [D-75]
 # diff-cover: tools/diff-cover/requirements.txt, hash-pinned [D-203]
 # Binary/module name: `shoppinglist` (matches docs/internals/design.md [D-34] `./shoppinglist` CLI).
@@ -27,16 +27,16 @@ RUN apt-get update \
 
 # --- Node (exact patch) -------------------------------------------------------
 # The golang base ships no Node; install the official linux-x64 tarball.
-ARG NODE_VERSION=26.12.0
+ARG NODE_VERSION=26.12.1
 RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" -o /tmp/node.tar.xz \
     && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 \
     && rm /tmp/node.tar.xz \
     && node --version && npm --version
 
-# --- pnpm 12.14.0, installed by npm (pinned) — Node 25+ ships no Corepack -----
+# --- pnpm 12.15.0, installed by npm (pinned) — Node 25+ ships no Corepack -----
 ENV PNPM_HOME=/usr/local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN npm install -g pnpm@12.14.0 && pnpm --version
+RUN npm install -g pnpm@12.15.0 && pnpm --version
 
 # Ensure Go + pnpm are on PATH for *login* shells too (e.g. VS Code integrated
 # terminal); the golang base image only sets ENV PATH, which login profiles reset.

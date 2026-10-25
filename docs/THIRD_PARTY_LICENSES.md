@@ -60,7 +60,7 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | github.com/philhofer/fwd | v1.2.0 | MIT | Copyright (c) 2014-2015, Philip Hofer |
 | github.com/pocketbase/dbx | v1.12.0 | MIT | Copyright (c) 2016, Qiang Xue |
 | github.com/pocketbase/ozzo-validation/v4 | v4.3.0 | MIT | Copyright (c) 2016, Qiang Xue |
-| github.com/pocketbase/pocketbase | v0.40.5 | MIT | Copyright (c) 2022 - present, Gani Georgiev |
+| github.com/pocketbase/pocketbase | v0.40.6 | MIT | Copyright (c) 2022 - present, Gani Georgiev |
 | github.com/remyoudompheng/bigfft | v0.0.0-20230129092748-24d4a6f8daec | BSD-3-Clause | Copyright (c) 2012 The Go Authors. All rights reserved. |
 | github.com/spf13/cast | v1.10.0 | MIT | Copyright (c) 2014 Steve Francia |
 | github.com/spf13/cobra | v1.10.2 | Apache-2.0 | — |
@@ -68,12 +68,12 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | github.com/tinylib/msgp | v1.6.4 | MIT | Copyright (c) 2014 Philip Hofer |
 | github.com/x448/float16 | v0.8.4 | MIT | Copyright (c) 2019 Montgomery Edwards⁴⁴⁸ and Faye Amacker |
 | Go standard library and runtime | go1.27.3 | BSD-3-Clause | Copyright 2009 The Go Authors. |
-| golang.org/x/crypto | v0.57.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
-| golang.org/x/image | v0.46.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
-| golang.org/x/net | v0.60.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
+| golang.org/x/crypto | v0.58.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
+| golang.org/x/image | v0.47.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
+| golang.org/x/net | v0.61.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/oauth2 | v0.37.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/sync | v0.24.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
-| golang.org/x/sys | v0.48.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
+| golang.org/x/sys | v0.49.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/text | v0.43.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | modernc.org/libc | v1.77.1 | BSD-3-Clause | Copyright (c) 2017 The Libc Authors. All rights reserved.<br>Copyright (c) 2009 The Go Authors. All rights reserved.<br>Copyright © 2005-2020 Rich Felker, et al.<br>Copyright © 1993,2004 Sun Microsystems or<br>Copyright © 2003-2011 David Schultz or<br>Copyright © 2003-2009 Steven G. Kargl or<br>Copyright © 2003-2009 Bruce D. Evans or<br>Copyright © 2008 Stephen L. Moshier or<br>Copyright © 2017-2018 Arm Limited<br>Copyright © 1999-2019, Arm Limited.<br>Copyright © 1994 David Burren. It is licensed under a BSD license.<br>Copyright (c) 2012 Dominik Honnef<br>Copyright (c) 2003-2025 Eelco Dolstra and the Nixpkgs/NixOS contributors |
 | modernc.org/mathutil | v1.7.1 | BSD-3-Clause | Copyright (c) 2014 The mathutil Authors. All rights reserved. |
@@ -88,17 +88,17 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | @floating-ui/dom | 1.8.0 | MIT | Copyright (c) 2021-present Floating UI contributors |
 | @floating-ui/utils | 0.2.12 | MIT | Copyright (c) 2021-present Floating UI contributors |
 | @fontsource-variable/readex-pro | 5.3.0 | OFL-1.1 | Copyright 2019 The Readex Pro Project Authors (https://github.com/ThomasJockin/readexpro) |
-| @inlang/paraglide-js | 2.29.0 | MIT | Copyright (c) 2025 Opral US Inc. |
-| @lucide/svelte | 1.58.0 | ISC AND MIT | Copyright (c) 2026 Lucide Icons and Contributors<br>Copyright (c) 2013-present Cole Bemis |
+| @inlang/paraglide-js | 2.29.1 | MIT | Copyright (c) 2025 Opral US Inc. |
+| @lucide/svelte | 1.61.0 | ISC AND MIT | Copyright (c) 2026 Lucide Icons and Contributors<br>Copyright (c) 2013-present Cole Bemis |
 | @simplewebauthn/browser | 14.0.0 | MIT | Copyright (c) 2020 Matthew Miller |
 | @sveltejs/kit | 3.1.0 | MIT | Copyright (c) 2020 [these people](https://github.com/sveltejs/kit/graphs/contributors) |
 | @use-gesture/core | 10.3.1 | MIT | Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com> |
 | @use-gesture/vanilla | 10.3.1 | MIT | Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com> |
-| barcode-detector | 3.2.2 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
-| bits-ui | 2.19.5 | MIT | Copyright (c) 2023 Hunter Johnston |
+| barcode-detector | 3.2.3 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
+| bits-ui | 2.20.0 | MIT | Copyright (c) 2023 Hunter Johnston |
 | clsx | 2.1.1 | MIT | Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com) |
 | devalue | 5.9.4 | MIT | Copyright (c) 2018-19 [these people](https://github.com/rich-harris/devalue/graphs/contributors) |
-| dexie | 4.4.6 | Apache-2.0 | Copyright (c) 2014-2017 David Fahlander |
+| dexie | 4.4.7 | Apache-2.0 | Copyright (c) 2014-2017 David Fahlander |
 | inline-style-parser | 0.2.7 | MIT | Copyright (c) 2012 TJ Holowaychuk <tj@vision-media.ca> |
 | mode-watcher | 1.1.0 | MIT | Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte><br>Copyright (c) 2024 Svecosystem <https://github.com/svecosystem> |
 | openmoji | 17.0.0 | CC-BY-SA-4.0 | All emojis designed by OpenMoji – the open-source emoji and icon project (https://openmoji.org). License: CC BY-SA 4.0 |
@@ -121,13 +121,13 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | tailwindcss | 4.3.3 | MIT | Copyright (c) Tailwind Labs, Inc. |
 | tw-animate-css | 1.4.0 | MIT | Copyright (c) 2025 Wombosvideo |
 | vaul-svelte | 1.0.0-next.7 | MIT | Copyright (c) 2023 Hunter Johnston<br>Copyright (c) 2023 Emil Kowalski |
-| zxing-wasm | 3.1.3 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
+| zxing-wasm | 3.1.6 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
 
 ## Embedded in a listed package
 
 | Component | Version | License | Copyright |
 | --- | --- | --- | --- |
-| zxing-cpp (compiled into zxing-wasm/reader/zxing_reader.wasm) | via zxing-wasm 3.1.3 | Apache-2.0 | Copyright 2016 Nu-book Inc.<br>Copyright 2016 ZXing authors<br>and the zxing-cpp contributors (per its source file headers) |
+| zxing-cpp (compiled into zxing-wasm/reader/zxing_reader.wasm) | via zxing-wasm 3.1.6 | Apache-2.0 | Copyright 2016 Nu-book Inc.<br>Copyright 2016 ZXing authors<br>and the zxing-cpp contributors (per its source file headers) |
 
 - zxing-cpp (compiled into zxing-wasm/reader/zxing_reader.wasm): zxing-wasm README, "Licenses": zxing-cpp and src/cpp/ZXingWasm.cpp are Apache-2.0. The reader build used here does not contain zint (the writer's BSD-3-Clause encoder).
 
@@ -140,7 +140,7 @@ Copyright lines are omitted from the texts and listed with each component.
 
 Applies to:
 
-- dexie 4.4.6 (LICENSE): Copyright (c) 2014-2017 David Fahlander
+- dexie 4.4.7 (LICENSE): Copyright (c) 2014-2017 David Fahlander
 
 ```text
 Apache License
@@ -351,7 +351,7 @@ Apache License
 Applies to:
 
 - github.com/google/go-tpm v0.9.8 (LICENSE)
-- zxing-cpp (compiled into zxing-wasm/reader/zxing_reader.wasm) via zxing-wasm 3.1.3 (LICENSE): Copyright 2016 Nu-book Inc.; Copyright 2016 ZXing authors; and the zxing-cpp contributors (per its source file headers)
+- zxing-cpp (compiled into zxing-wasm/reader/zxing_reader.wasm) via zxing-wasm 3.1.6 (LICENSE): Copyright 2016 Nu-book Inc.; Copyright 2016 ZXing authors; and the zxing-cpp contributors (per its source file headers)
 
 ```text
 Apache License
@@ -852,12 +852,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Applies to:
 
 - Go standard library and runtime go1.27.3 (LICENSE): Copyright 2009 The Go Authors.
-- golang.org/x/crypto v0.57.0 (LICENSE): Copyright 2009 The Go Authors.
-- golang.org/x/image v0.46.0 (LICENSE): Copyright 2009 The Go Authors.
-- golang.org/x/net v0.60.0 (LICENSE): Copyright 2009 The Go Authors.
+- golang.org/x/crypto v0.58.0 (LICENSE): Copyright 2009 The Go Authors.
+- golang.org/x/image v0.47.0 (LICENSE): Copyright 2009 The Go Authors.
+- golang.org/x/net v0.61.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/oauth2 v0.37.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/sync v0.24.0 (LICENSE): Copyright 2009 The Go Authors.
-- golang.org/x/sys v0.48.0 (LICENSE): Copyright 2009 The Go Authors.
+- golang.org/x/sys v0.49.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/text v0.43.0 (LICENSE): Copyright 2009 The Go Authors.
 
 ```text
@@ -3321,7 +3321,7 @@ uncontaminated with licensed code from other projects.
 
 Applies to:
 
-- @lucide/svelte 1.58.0 (LICENSE): Copyright (c) 2026 Lucide Icons and Contributors; Copyright (c) 2013-present Cole Bemis
+- @lucide/svelte 1.61.0 (LICENSE): Copyright (c) 2026 Lucide Icons and Contributors; Copyright (c) 2013-present Cole Bemis
 
 ```text
 ISC License
@@ -3378,7 +3378,7 @@ Applies to:
 - github.com/mattn/go-colorable v0.1.16 (LICENSE): Copyright (c) 2016 Yasuhiro Matsumoto
 - github.com/pocketbase/dbx v1.12.0 (LICENSE): Copyright (c) 2016, Qiang Xue
 - github.com/pocketbase/ozzo-validation/v4 v4.3.0 (LICENSE): Copyright (c) 2016, Qiang Xue
-- github.com/pocketbase/pocketbase v0.40.5 (LICENSE.md): Copyright (c) 2022 - present, Gani Georgiev
+- github.com/pocketbase/pocketbase v0.40.6 (LICENSE.md): Copyright (c) 2022 - present, Gani Georgiev
 - github.com/spf13/cast v1.10.0 (LICENSE): Copyright (c) 2014 Steve Francia
 - photoswipe 5.4.4 (LICENSE): Copyright (c) 2014-2022 Dmitry Semenov, https://dimsemenov.com
 - pocketbase 0.28.1 (LICENSE.md): Copyright (c) 2022 - present, Gani Georgiev
@@ -3446,10 +3446,10 @@ Applies to:
 - @floating-ui/core 1.8.0 (LICENSE): Copyright (c) 2021-present Floating UI contributors
 - @floating-ui/dom 1.8.0 (LICENSE): Copyright (c) 2021-present Floating UI contributors
 - @floating-ui/utils 0.2.12 (LICENSE): Copyright (c) 2021-present Floating UI contributors
-- @inlang/paraglide-js 2.29.0 (LICENSE): Copyright (c) 2025 Opral US Inc.
+- @inlang/paraglide-js 2.29.1 (LICENSE): Copyright (c) 2025 Opral US Inc.
 - @simplewebauthn/browser 14.0.0 (LICENSE.md): Copyright (c) 2020 Matthew Miller
-- barcode-detector 3.2.2 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
-- bits-ui 2.19.5 (LICENSE): Copyright (c) 2023 Hunter Johnston
+- barcode-detector 3.2.3 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
+- bits-ui 2.20.0 (LICENSE): Copyright (c) 2023 Hunter Johnston
 - clsx 2.1.1 (license): Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
 - mode-watcher 1.1.0 (LICENSE): Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte>; Copyright (c) 2024 Svecosystem <https://github.com/svecosystem>
 - runed 0.23.4 (LICENSE): Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte>; Copyright (c) 2024 Thomas G. Lopes <https://github.com/tglide>
@@ -3465,7 +3465,7 @@ Applies to:
 - tailwindcss 4.3.3 (LICENSE): Copyright (c) Tailwind Labs, Inc.
 - tw-animate-css 1.4.0 (LICENSE): Copyright (c) 2025 Wombosvideo
 - vaul-svelte 1.0.0-next.7 (LICENSE): Copyright (c) 2023 Hunter Johnston; Copyright (c) 2023 Emil Kowalski
-- zxing-wasm 3.1.3 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
+- zxing-wasm 3.1.6 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
 
 ```text
 MIT License
@@ -3562,7 +3562,7 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Applies to:
 
-- dexie 4.4.6 (NOTICE): Copyright (c) 2014-2017 David Fahlander
+- dexie 4.4.7 (NOTICE): Copyright (c) 2014-2017 David Fahlander
 
 ```text
 Dexie.js
@@ -3684,11 +3684,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 Applies to:
 
 - Go standard library and runtime go1.27.3 (PATENTS): Copyright 2009 The Go Authors.
-- golang.org/x/crypto v0.57.0 (PATENTS): Copyright 2009 The Go Authors.
-- golang.org/x/image v0.46.0 (PATENTS): Copyright 2009 The Go Authors.
-- golang.org/x/net v0.60.0 (PATENTS): Copyright 2009 The Go Authors.
+- golang.org/x/crypto v0.58.0 (PATENTS): Copyright 2009 The Go Authors.
+- golang.org/x/image v0.47.0 (PATENTS): Copyright 2009 The Go Authors.
+- golang.org/x/net v0.61.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/sync v0.24.0 (PATENTS): Copyright 2009 The Go Authors.
-- golang.org/x/sys v0.48.0 (PATENTS): Copyright 2009 The Go Authors.
+- golang.org/x/sys v0.49.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/text v0.43.0 (PATENTS): Copyright 2009 The Go Authors.
 
 ```text
