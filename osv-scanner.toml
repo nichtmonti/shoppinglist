@@ -48,3 +48,13 @@ reason = "tools/dex runs HTTP-only on loopback for tests; the TLS listener is ne
 [[IgnoredVulns]]
 id = "GO-2026-5932"
 reason = "openpgp is unmaintained with no fix and ships in every x/crypto; the app never imports it, and the dev tools (Dex, gitleaks) are not shipped"
+
+# GHSA-gcqx-w48m-w2h4 — deepmerge 4.3.1 (frontend/pnpm-lock.yaml), prototype
+# poisoning from a merged source object. No fixed version exists. Its one
+# consumer is @sveltejs/vite-plugin-svelte, which merges the project's own
+# Svelte config with it at build time; it is not in the shipped bundle
+# (docs/THIRD_PARTY_LICENSES.md). Revisit on a vite-plugin-svelte bump or a
+# deepmerge release.
+[[IgnoredVulns]]
+id = "GHSA-gcqx-w48m-w2h4"
+reason = "deepmerge runs only inside vite-plugin-svelte at build time, on the project's own config; not shipped; no fixed version (2026-10)"

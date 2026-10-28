@@ -101,10 +101,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.6",
+			"bom-ref": "pkg:golang/github.com/fxamacker/cbor/v2@v2.10.0",
 			"name": "github.com/fxamacker/cbor/v2",
-			"version": "v2.9.6",
-			"purl": "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.6",
+			"version": "v2.10.0",
+			"purl": "pkg:golang/github.com/fxamacker/cbor/v2@v2.10.0",
 			"licenses": [
 				{
 					"expression": "MIT"
@@ -389,10 +389,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:golang/golang.org/x/net@v0.61.0",
+			"bom-ref": "pkg:golang/golang.org/x/net@v0.62.0",
 			"name": "golang.org/x/net",
-			"version": "v0.61.0",
-			"purl": "pkg:golang/golang.org/x/net@v0.61.0",
+			"version": "v0.62.0",
+			"purl": "pkg:golang/golang.org/x/net@v0.62.0",
 			"licenses": [
 				{
 					"expression": "BSD-3-Clause"
@@ -629,10 +629,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/bits-ui@2.20.0",
+			"bom-ref": "pkg:npm/bits-ui@2.20.2",
 			"name": "bits-ui",
-			"version": "2.20.0",
-			"purl": "pkg:npm/bits-ui@2.20.0",
+			"version": "2.20.2",
+			"purl": "pkg:npm/bits-ui@2.20.2",
 			"licenses": [
 				{
 					"expression": "MIT"

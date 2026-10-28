@@ -1024,8 +1024,8 @@ describe('AddBar — typeahead keyboard navigation', () => {
 		await fireEvent.keyDown(input, { key: 'ArrowUp' });
 		expect(activeName(input)).toBe(names[0]);
 
-		await fireEvent.keyDown(input, { key: 'End' });
-		// End lands on the last candidate — the as-typed row at the foot, which is
+		for (let i = 0; i < names.length; i++) await fireEvent.keyDown(input, { key: 'ArrowDown' });
+		// Past the named candidates lies the as-typed row at the foot, which is
 		// a real option (no data-ta-name; it carries data-ta-add).
 		expect(document.querySelector('[data-highlighted]')?.getAttribute('data-ta-add')).toBe('Sa');
 	});

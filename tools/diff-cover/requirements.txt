@@ -4,9 +4,9 @@
 # of resolving freely. Renovate's pip_requirements manager updates the
 # versions and their hashes. Installed into tools/diff-cover/.venv by the
 # Taskfile's diff-cover task.
-diff-cover==10.6.0 \
-    --hash=sha256:8d1194dfb537f70480ac97c9c45dd40721cf4c326c9903fbe997db67a4db6195 \
-    --hash=sha256:a701553060f72d59b81f9cb1645b75ef66204427eb9dd99873c91092220e52ce
+diff-cover==11.0.0 \
+    --hash=sha256:5450247cc885ac0c252f0d7a4cf91608f454377c6f88e579bc9ead410af50c36 \
+    --hash=sha256:8b0a5b356d525718ee18c14b163ce179c75ccdc5b8d5474ef22ade6a0e1fa65d
 chardet==7.7.0 \
     --hash=sha256:074a5b6efd46bd35059f53a3b385349e9b9e38111063c8d2c5b36923e2e07de6 \
     --hash=sha256:091f50d3567b1a066f797835ee5367dbcf3cb77c5e56993b3f61b28264b8e6f8 \

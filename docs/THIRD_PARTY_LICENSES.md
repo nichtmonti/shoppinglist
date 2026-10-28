@@ -46,7 +46,7 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | github.com/dustin/go-humanize | v1.1.0 | MIT | Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net> |
 | github.com/fatih/color | v1.19.0 | MIT | Copyright (c) 2013 Fatih Arslan |
 | github.com/fsnotify/fsnotify | v1.10.1 | BSD-3-Clause | Copyright © 2012 The Go Authors. All rights reserved.<br>Copyright © fsnotify Authors. All rights reserved. |
-| github.com/fxamacker/cbor/v2 | v2.9.6 | MIT | Copyright (c) 2019-present Faye Amacker |
+| github.com/fxamacker/cbor/v2 | v2.10.0 | MIT | Copyright (c) 2019-present Faye Amacker |
 | github.com/gabriel-vasile/mimetype | v1.4.15 | MIT | Copyright (c) 2018 Gabriel Vasile |
 | github.com/ganigeorgiev/fexpr | v0.6.0 | BSD-3-Clause | Copyright (c) 2022-present, Gani Georgiev |
 | github.com/go-viper/mapstructure/v2 | v2.5.0 | MIT | Copyright (c) 2013 Mitchell Hashimoto |
@@ -70,7 +70,7 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | Go standard library and runtime | go1.27.3 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/crypto | v0.58.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/image | v0.47.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
-| golang.org/x/net | v0.61.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
+| golang.org/x/net | v0.62.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/oauth2 | v0.37.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/sync | v0.24.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/sys | v0.49.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
@@ -95,7 +95,7 @@ Components: 40 Go, 38 npm, 1 embedded in a listed package.
 | @use-gesture/core | 10.3.1 | MIT | Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com> |
 | @use-gesture/vanilla | 10.3.1 | MIT | Copyright (c) 2018-present Paul Henschel <drcmda@gmail.com> |
 | barcode-detector | 3.2.3 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
-| bits-ui | 2.20.0 | MIT | Copyright (c) 2023 Hunter Johnston |
+| bits-ui | 2.20.2 | MIT | Copyright (c) 2023 Hunter Johnston |
 | clsx | 2.1.1 | MIT | Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com) |
 | devalue | 5.9.4 | MIT | Copyright (c) 2018-19 [these people](https://github.com/rich-harris/devalue/graphs/contributors) |
 | dexie | 4.4.7 | Apache-2.0 | Copyright (c) 2014-2017 David Fahlander |
@@ -854,7 +854,7 @@ Applies to:
 - Go standard library and runtime go1.27.3 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/crypto v0.58.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/image v0.47.0 (LICENSE): Copyright 2009 The Go Authors.
-- golang.org/x/net v0.61.0 (LICENSE): Copyright 2009 The Go Authors.
+- golang.org/x/net v0.62.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/oauth2 v0.37.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/sync v0.24.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/sys v0.49.0 (LICENSE): Copyright 2009 The Go Authors.
@@ -3439,7 +3439,7 @@ SOFTWARE.
 
 Applies to:
 
-- github.com/fxamacker/cbor/v2 v2.9.6 (LICENSE): Copyright (c) 2019-present Faye Amacker
+- github.com/fxamacker/cbor/v2 v2.10.0 (LICENSE): Copyright (c) 2019-present Faye Amacker
 - github.com/gabriel-vasile/mimetype v1.4.15 (LICENSE): Copyright (c) 2018 Gabriel Vasile
 - github.com/x448/float16 v0.8.4 (LICENSE): Copyright (c) 2019 Montgomery Edwards⁴⁴⁸ and Faye Amacker
 - modernc.org/sqlite v1.60.1 (LICENSE-SQLITE_VEC): Copyright (c) 2017 The Sqlite Authors. All rights reserved.; Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net>; Copyright (c) 2009,2014 Google Inc. All rights reserved.; Copyright (c) 2015 The Go Authors. All rights reserved.; Copyright (c) 2012 The Go Authors. All rights reserved.; Copyright (c) 2009 The Go Authors. All rights reserved.; Copyright 2009 The Go Authors.; Copyright (c) 2014 The CC Authors. All rights reserved.; Copyright (c) 2017 The CCGO Authors. All rights reserved.; Copyright (c) 2014 The fileutil Authors. All rights reserved.; Copyright (c) 2017 The Libc Authors. All rights reserved.; Copyright (c) 2014 The mathutil Authors. All rights reserved.; Copyright (c) 2014 The mersenne Authors. All rights reserved.; Copyright (c) 2017 The Memory Authors. All rights reserved.; Copyright (c) 2019 The Opt Authors. All rights reserved.; Copyright (c) 2014 The sortutil Authors. All rights reserved.; Copyright (c) 2014 The strutil Authors. All rights reserved.; Copyright (c) 2011, Evan Shaw <edsrzf@gmail.com>; Copyright (c) 2022 Nuno Cruces; Copyright (c) 2024 Alex Garcia; Copyright 2009-2017 Andrea Leofreddi <a.leofreddi@vleo.net>. All rights reserved.; Copyright (c) 2011 CZ.NIC z.s.p.o. All rights reserved.; Copyright (c) 2015 Chzyer; Copyright (c) 2014 HashiCorp, Inc.; Copyright (c) Yasuhiro MATSUMOTO <mattn.jp@gmail.com>; Copyright (c) 2016 The GC Authors. All rights reserved.; Copyright (c) 2025 The goabi0 Authors. All rights reserved.; Copyright © 2005-2020 Rich Felker, et al.; Copyright © 1993,2004 Sun Microsystems or; Copyright © 2003-2011 David Schultz or; Copyright © 2003-2009 Steven G. Kargl or; Copyright © 2003-2009 Bruce D. Evans or; Copyright © 2008 Stephen L. Moshier or; Copyright © 2017-2018 Arm Limited; Copyright © 1999-2019, Arm Limited.; Copyright © 1994 David Burren. It is licensed under a BSD license.; Copyright (c) 2012 Dominik Honnef; Copyright (c) 2003-2025 Eelco Dolstra and the Nixpkgs/NixOS contributors
@@ -3449,7 +3449,7 @@ Applies to:
 - @inlang/paraglide-js 2.29.1 (LICENSE): Copyright (c) 2025 Opral US Inc.
 - @simplewebauthn/browser 14.0.0 (LICENSE.md): Copyright (c) 2020 Matthew Miller
 - barcode-detector 3.2.3 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
-- bits-ui 2.20.0 (LICENSE): Copyright (c) 2023 Hunter Johnston
+- bits-ui 2.20.2 (LICENSE): Copyright (c) 2023 Hunter Johnston
 - clsx 2.1.1 (license): Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
 - mode-watcher 1.1.0 (LICENSE): Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte>; Copyright (c) 2024 Svecosystem <https://github.com/svecosystem>
 - runed 0.23.4 (LICENSE): Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte>; Copyright (c) 2024 Thomas G. Lopes <https://github.com/tglide>
@@ -3686,7 +3686,7 @@ Applies to:
 - Go standard library and runtime go1.27.3 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/crypto v0.58.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/image v0.47.0 (PATENTS): Copyright 2009 The Go Authors.
-- golang.org/x/net v0.61.0 (PATENTS): Copyright 2009 The Go Authors.
+- golang.org/x/net v0.62.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/sync v0.24.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/sys v0.49.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/text v0.43.0 (PATENTS): Copyright 2009 The Go Authors.

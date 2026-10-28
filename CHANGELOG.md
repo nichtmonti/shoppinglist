@@ -9,6 +9,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 ## Unreleased
 
 - **The README's stack badges are back** (Go, PocketBase, SQLite, SvelteKit), each linking to its project.
+- **Dependencies on their latest versions.** The UI components (`bits-ui` 2.20.2: menus and selects pick the item pressed even when the list scrolls under the finger before it lifts), the passkey data decoder (`fxamacker/cbor` 2.10), and Go's HTML parser (`golang.org/x/net` 0.62.0, two advisories in the HTML PocketBase cuts an excerpt from).
 
 ## v0.17.3: PocketBase 0.40.6, a newer certificate list in the image, and the build toolchain past Node2Shell (2026-10)
 

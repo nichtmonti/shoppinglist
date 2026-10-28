@@ -21,13 +21,11 @@ trustPolicyExclude:
   - chokidar@4.0.3
 # Dependency-advisory fixes for transitives whose parents pin them too tight to
 # take the fixed version in-range: brace-expansion (minimatch), nanoid+postcss
-# (eslint-plugin-svelte/vite), handlebars (eslint-plugin-boundaries and
-# @boundaries/elements pin 4.7.9 exactly). All are patch-level. These are
+# (eslint-plugin-svelte/vite). All are patch-level. These are
 # the osv-scan findings from .woodpecker/security.yaml; drop an entry once the
 # parent bumps its range (SvelteKit 3 did for cookie and devalue; undici left
 # with jsdom).
 overrides:
   brace-expansion: ^5.0.12
-  handlebars: ^4.7.10
   nanoid: ^3.3.17
   postcss: ^8.5.23
