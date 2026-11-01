@@ -2,6 +2,8 @@
 
 <p align="center">A shared shopping list for your household, hosted by you. Syncs live, works without signal, signs in with passkeys.</p>
 
+<p align="center"><sub>Developed on <a href="https://codeberg.org/sclermont/shoppinglist">Codeberg</a>; the GitHub repository is a mirror.</sub></p>
+
 <div align="center">
 
 **[Try the demo](#try-it) · [Deploy](docs/deploying.md) · [Using it](docs/using.md) · [Changelog](CHANGELOG.md)**
