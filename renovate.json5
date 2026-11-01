@@ -11,7 +11,7 @@
 // write:repository (the same scope as the release workflow's `gitea_token`).
 // The runner lives outside this repo; nothing here configures it.
 //
-// WHAT IT COVERS. Six ecosystems, because the versions in this repo are
+// WHAT IT COVERS. Seven ecosystems, because the versions in this repo are
 // spread across more than the lockfiles:
 //   npm       package.json + frontend/ + e2e/ (three separate pnpm projects,
 //             no workspace root)
@@ -19,6 +19,8 @@
 //   dockerfile  Dockerfile and .devcontainer/Dockerfile, both bases digest-pinned
 //             (the CI image builds the released SPA; Renovate moves the digest)
 //   woodpecker  every step image in .woodpecker/
+//   docker-compose  .devcontainer/demo/compose.yaml, the Codespace demo's
+//             workspace base, digest-pinned
 //   pip_requirements  tools/diff-cover/requirements.txt, versions and their
 //             hashes (hashin), the one Python tool ([D-203])
 //   custom    the versions that live in shell commands and ARGs, which no

@@ -1,5 +1,5 @@
 {
-	"name": "shoppinglist",
+	"name": "shoppinglist-dev",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": ".",

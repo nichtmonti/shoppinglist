@@ -1,0 +1,24 @@
+// The demo in a GitHub Codespace, on the visitor's own account ([D-235]): the
+// README's "Try it" links here with ?devcontainer_path=. Development uses
+// ../devcontainer.json, which a Codespace cannot start (it mounts the host's
+// home).
+{
+	"name": "shoppinglist-demo",
+	"dockerComposeFile": "compose.yaml",
+	"service": "workspace",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"forwardPorts": [8090],
+	"portsAttributes": {
+		"8090": {
+			"label": "shoppinglist-demo",
+			"onAutoForward": "notify"
+		}
+	},
+	// Public: a private port answers 502 behind GitHub's sign-in, and an invite
+	// must open in a private window. devcontainer.json has no setting for it,
+	// so GitHub's CLI sets it once VS Code is attached and the port forwarded.
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+	"postAttachCommand": "gh codespace ports visibility 8090:public -c \"$CODESPACE_NAME\""
+}
