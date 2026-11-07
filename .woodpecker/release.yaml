@@ -126,7 +126,9 @@ steps:
     image: localhost/shoppinglist-ci:go1.27.3-node26.13.0-pw1.64.1-439dd534
     commands:
       # go-task as frontend.yaml installs it; .gomod and .task are gitignored,
-      # so goreleaser still sees a clean tree.
+      # and frontend/.gitignore ignores the Paraglide 3 compile cache the
+      # build writes into project.inlang/, so goreleaser still sees a clean
+      # tree.
       - export GOMODCACHE="${CI_WORKSPACE:-$PWD}/.gomod" && go -C tools/task install tool
       # The SPA's version is the commit's time, so a rebuild of the tag is
       # byte-identical ([D-338]).

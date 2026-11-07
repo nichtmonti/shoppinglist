@@ -1,7 +1,8 @@
 // The Paraglide options, read by both the CLI (`pnpm paraglide:compile`) and
 // the Vite plugin. Tracked with `git add -f`: inlang writes a .gitignore here
-// that ignores everything but settings.json.
-//
+// that ignores everything but settings.json. Since Paraglide 3 the plugin
+// also writes a compile cache into ./cache/ — ignored in ../.gitignore,
+// because a fresh checkout has no inlang .gitignore yet.
 // Strategy: no cookie/URL locale routing — this is a client-only SPA with its
 // own `meta.locale` persistence (§12), so `globalVariable` is the only strategy
 // that applies; `getLocale()`/`setLocale()` are driven entirely by #lib/i18n.
