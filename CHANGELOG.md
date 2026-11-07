@@ -6,8 +6,11 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
-## Unreleased
+## v0.17.4: an update reaches a hidden window too, and the newest dependencies (2026-11)
 
+**For operators.** Nothing to do before upgrading.
+
+- **A window hidden across an update still switches to it**, even when it was hidden before the check for a new version had answered. It used to stay on the previous build until it was hidden a second time ([D-346]).
 - **The README says where the project lives:** it is developed on Codeberg, and the GitHub repository is a mirror.
 - **The README's stack badges are back** (Go, PocketBase, SQLite, SvelteKit), each linking to its project.
 - **Dependencies on their latest versions.** The UI components (`bits-ui` 2.20.4: menus and selects pick the item pressed even when the list scrolls under the finger before it lifts), Svelte 5.57.3 and SvelteKit 3.1.1, the passkey data decoder (`fxamacker/cbor` 2.10), Go's HTML parser (`golang.org/x/net` 0.62.0, two advisories in the HTML PocketBase cuts an excerpt from), and the image's distroless base at its latest build.
