@@ -20,12 +20,14 @@ trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
 # Dependency-advisory fixes for transitives whose parents pin them too tight to
-# take the fixed version in-range: brace-expansion (minimatch), nanoid+postcss
-# (eslint-plugin-svelte/vite). All are patch-level. These are
-# the osv-scan findings from .woodpecker/security.yaml; drop an entry once the
-# parent bumps its range (SvelteKit 3 did for cookie and devalue; undici left
-# with jsdom).
+# take the fixed version in-range: nanoid+postcss (eslint-plugin-svelte/vite),
+# patch-level; minimatch (eslint, typescript-eslint), a major whose fix
+# 10.x never got, safe because they call only `new Minimatch(…).match()` and
+# `minimatch()`, which 11 kept. These are the osv-scan findings from
+# .woodpecker/security.yaml; drop an entry once the parent bumps its range
+# (SvelteKit 3 did for cookie and devalue; undici left with jsdom; minimatch 11
+# did for brace-expansion).
 overrides:
-  brace-expansion: ^5.0.12
+  minimatch: ^11.0.1
   nanoid: ^3.3.17
   postcss: ^8.5.23

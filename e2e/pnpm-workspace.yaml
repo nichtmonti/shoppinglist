@@ -6,3 +6,8 @@ minimumReleaseAge: 4320
 # publisher, then provenance, then none) is refused: what a hijacked npm
 # account publishes looks like that.
 trustPolicy: no-downgrade
+# minimatch's advisory fix is 11 only, which eslint and typescript-eslint do
+# not allow yet; frontend/pnpm-workspace.yaml says why the major is safe. Drop
+# it once they take 11.
+overrides:
+  minimatch: ^11.0.1
