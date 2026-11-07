@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
-import { createTV } from 'tailwind-variants';
+import { createTV } from 'tailwind-variants/lite';
 
 /**
  * The project's own theme scales (app.css `@theme`), which tailwind-merge
@@ -25,11 +25,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * tailwind-variants' `tv`, on the same taught merge ([D-146]). Import `tv` from
+ * tailwind-variants' `tv`, on the same taught merge ([D-146]): its lite entry
+ * runs no merge of its own and calls the one it is handed. Import `tv` from
  * here, never from 'tailwind-variants', whose stock merge has the same
  * blindness.
  */
-export const tv = createTV({ twMergeConfig: { extend: { theme: THEME_SCALES } } });
+export const tv = createTV({ twMerge: mergeClasses });
 
 /**
  * The utilities in a class list that another utility in the same list

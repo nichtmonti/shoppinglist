@@ -116,7 +116,7 @@ Components: 40 Go, 37 npm, 1 embedded in a listed package.
 | svelte-toolbelt | 0.10.6 | MIT | Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte><br>Copyright (c) 2024 Thomas G. Lopes <https://github.com/tglide> |
 | tabbable | 6.5.1 | MIT | Copyright (c) 2015 David Clark |
 | tailwind-merge | 3.7.0 | MIT | Copyright (c) 2021 Dany Castillo |
-| tailwind-variants | 3.3.1 | MIT | Copyright (c) 2020 Tailwid Variants |
+| tailwind-variants | 4.0.1 | MIT | Copyright (c) 2020 Tailwind Variants |
 | tailwindcss | 4.3.4 | MIT | Copyright (c) Tailwind Labs, Inc. |
 | tw-animate-css | 1.4.0 | MIT | Copyright (c) 2025 Wombosvideo |
 | vaul-svelte | 1.0.0-next.7 | MIT | Copyright (c) 2023 Hunter Johnston<br>Copyright (c) 2023 Emil Kowalski |
@@ -3459,7 +3459,7 @@ Applies to:
 - svelte-toolbelt 0.7.1 (LICENSE): Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte>; Copyright (c) 2024 Thomas G. Lopes <https://github.com/tglide>
 - svelte-toolbelt 0.10.6 (LICENSE): Copyright (c) 2024 Hunter Johnston <https://github.com/huntabyte>; Copyright (c) 2024 Thomas G. Lopes <https://github.com/tglide>
 - tailwind-merge 3.7.0 (LICENSE.md): Copyright (c) 2021 Dany Castillo
-- tailwind-variants 3.3.1 (LICENSE): Copyright (c) 2020 Tailwid Variants
+- tailwind-variants 4.0.1 (LICENSE): Copyright (c) 2020 Tailwind Variants
 - tailwindcss 4.3.4 (LICENSE): Copyright (c) Tailwind Labs, Inc.
 - tw-animate-css 1.4.0 (LICENSE): Copyright (c) 2025 Wombosvideo
 - vaul-svelte 1.0.0-next.7 (LICENSE): Copyright (c) 2023 Hunter Johnston; Copyright (c) 2023 Emil Kowalski

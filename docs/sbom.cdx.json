@@ -881,10 +881,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/tailwind-variants@3.3.1",
+			"bom-ref": "pkg:npm/tailwind-variants@4.0.1",
 			"name": "tailwind-variants",
-			"version": "3.3.1",
-			"purl": "pkg:npm/tailwind-variants@3.3.1",
+			"version": "4.0.1",
+			"purl": "pkg:npm/tailwind-variants@4.0.1",
 			"licenses": [
 				{
 					"expression": "MIT"

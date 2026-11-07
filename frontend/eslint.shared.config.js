@@ -31,11 +31,15 @@ const themeMergePaths = [
 		name: 'tailwind-merge',
 		message: 'Use cn or tv from #lib/utils — they know the project theme ([D-146]).'
 	},
-	{
-		name: 'tailwind-variants',
-		importNames: ['tv', 'createTV', 'cn', 'cnMerge'],
-		message: 'Use tv from #lib/utils — it merges with the project theme ([D-146]).'
-	}
+	...['tailwind-variants', 'tailwind-variants/lite'].map((name) => ({
+		name,
+		importNames: ['tv', 'createTV', 'cn', 'cnMerge', 'twMerge'],
+		message: 'Use cn or tv from #lib/utils — they merge with the project theme ([D-146]).'
+	})),
+	...['tailwind-variants/merge', 'tailwind-variants/config'].map((name) => ({
+		name,
+		message: 'Use cn or tv from #lib/utils — they know the project theme ([D-146]).'
+	}))
 ];
 
 // [D-221] Tables only the sync engine writes: the view rows, their shadows and
