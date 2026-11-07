@@ -18,9 +18,15 @@ watchServiceWorker();
 reloadOnUpgrade(db, () => location.reload());
 // [D-346] A window still on the previous build reloads into the new one when
 // it is next hidden; SvelteKit looks for a new version whenever it is shown.
+// check() answers at once once one was seen, and hands back the check its
+// showing started if that has not answered yet; a window shown again by then
+// stays as it is.
 if (typeof document !== 'undefined') {
 	document.addEventListener('visibilitychange', () => {
-		if (document.visibilityState === 'hidden' && updated.current) location.reload();
+		if (document.visibilityState !== 'hidden') return;
+		void updated.check().then((newer) => {
+			if (newer && document.visibilityState === 'hidden') location.reload();
+		});
 	});
 }
 // A change the device's database refused (full, or its connection lost) is

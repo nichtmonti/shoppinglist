@@ -21,16 +21,38 @@ async function showWith(page: Page, version: string) {
 	await asked;
 }
 
+/** How the page's current document came to be: 'reload' after a reload. */
+function navigationType(page: Page) {
+	return page.evaluate(
+		() => (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
+	);
+}
+
 test('a window on the previous build reloads once it is hidden', async ({ page }) => {
 	await registerAccount(page, 'Ute');
 	await showWith(page, 'a-newer-build');
 	const reloaded = page.waitForEvent('load', { timeout: 15_000 });
 	await setVisibility(page, 'hidden');
 	await reloaded;
-	const navigation = await page.evaluate(
-		() => (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
-	);
-	expect(navigation).toBe('reload');
+	expect(await navigationType(page)).toBe('reload');
+});
+
+test('a window hidden before its check has answered still reloads', async ({ page }) => {
+	await registerAccount(page, 'Ute');
+	let answer = () => {};
+	const answered = new Promise<void>((resolve) => (answer = resolve));
+	await page.route('**/_app/version.json', async (route) => {
+		await answered;
+		await route.fulfill({ json: { version: 'a-newer-build' } });
+	});
+	const asked = page.waitForRequest('**/_app/version.json');
+	await setVisibility(page, 'visible');
+	await asked;
+	const reloaded = page.waitForEvent('load', { timeout: 15_000 });
+	await setVisibility(page, 'hidden');
+	answer();
+	await reloaded;
+	expect(await navigationType(page)).toBe('reload');
 });
 
 test('a window on the current build stays as it is when hidden', async ({ page }) => {
