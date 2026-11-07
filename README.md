@@ -108,11 +108,6 @@ Open **http://localhost:8090** and press "Try it": you get a guest account with
 three example lists. To see sync, share a list from its ⋮ menu and open the link
 in a private window.
 
-No Docker at hand? [Open it in a GitHub Codespace](https://codespaces.new/nichtmonti/shoppinglist?quickstart=1&devcontainer_path=.devcontainer%2Fdemo%2Fdevcontainer.json):
-the same image on your own GitHub account and its free hours, ready after a
-minute or two. Open it with “Open in Browser” in the message that appears, or
-the globe icon beside port 8090 in the Ports tab.
-
 ## Run your own instance
 
 You need Docker with Compose, HTTPS from a reverse proxy, and a domain for
