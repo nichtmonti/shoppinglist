@@ -19,7 +19,7 @@
 set -euo pipefail
 
 # Renovate updates the version (a custom manager in renovate.json5).
-DEVCONTAINER_CLI=@devcontainers/cli@0.89.0
+DEVCONTAINER_CLI=@devcontainers/cli@0.90.0
 
 # The main checkout: the devcontainer is created from it, never from a worktree
 # (a second container on a nested copy shares the build directories, AGENTS.md).

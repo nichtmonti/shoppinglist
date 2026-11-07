@@ -116,7 +116,7 @@
 			animate:flipNear={{ duration: dur(DND_FLIP_MS), easing: cubicOut }}
 			aria-label={name}
 		>
-			<div class="min-w-0 flex-1 @max-[16rem]:basis-full">{@render row(r)}</div>
+			<div class="min-w-0 flex-1 @max-3xs:basis-full">{@render row(r)}</div>
 			<div class="ms-auto flex items-center gap-2">
 				{#if selected === key}
 					<Button

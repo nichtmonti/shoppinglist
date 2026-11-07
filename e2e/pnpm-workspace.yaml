@@ -10,4 +10,4 @@ trustPolicy: no-downgrade
 # not allow yet; frontend/pnpm-workspace.yaml says why the major is safe. Drop
 # it once they take 11.
 overrides:
-  minimatch: ^11.0.1
+  minimatch: 11.0.4

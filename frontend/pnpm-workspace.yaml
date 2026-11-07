@@ -28,6 +28,6 @@ trustPolicyExclude:
 # (SvelteKit 3 did for cookie and devalue; undici left with jsdom; minimatch 11
 # did for brace-expansion).
 overrides:
-  minimatch: ^11.0.1
-  nanoid: ^3.3.17
-  postcss: ^8.5.23
+  minimatch: 11.0.4
+  nanoid: 3.3.20
+  postcss: 8.5.32

@@ -31,7 +31,7 @@ when:
 steps:
   image:
     # By digest ([D-339]): the step holds the agent's Docker socket, root on the host.
-    image: docker:29-cli@sha256:5e6baf67325a79f64ed3bed6863954d5e05d0f3d4e57cbdb14809346814bbfdb
+    image: docker:29-cli@sha256:2357639ad1ea7d0194134bf3292622fd4e562483966ed674e5d7c945b5f3b28d
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:

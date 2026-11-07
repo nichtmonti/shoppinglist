@@ -11,7 +11,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **The demo also opens in a GitHub Codespace**, for trying it without Docker: "Try it" in the README links to it, and it runs on your own GitHub account ([D-235]).
 - **The README says where the project lives:** it is developed on Codeberg, and the GitHub repository is a mirror.
 - **The README's stack badges are back** (Go, PocketBase, SQLite, SvelteKit), each linking to its project.
-- **Dependencies on their latest versions.** The UI components (`bits-ui` 2.20.2: menus and selects pick the item pressed even when the list scrolls under the finger before it lifts), the passkey data decoder (`fxamacker/cbor` 2.10), and Go's HTML parser (`golang.org/x/net` 0.62.0, two advisories in the HTML PocketBase cuts an excerpt from).
+- **Dependencies on their latest versions.** The UI components (`bits-ui` 2.20.4: menus and selects pick the item pressed even when the list scrolls under the finger before it lifts), Svelte 5.57.3 and SvelteKit 3.1.1, the passkey data decoder (`fxamacker/cbor` 2.10), Go's HTML parser (`golang.org/x/net` 0.62.0, two advisories in the HTML PocketBase cuts an excerpt from), and the image's distroless base at its latest build.
 
 ## v0.17.3: PocketBase 0.40.6, a newer certificate list in the image, and the build toolchain past Node2Shell (2026-10)
 
