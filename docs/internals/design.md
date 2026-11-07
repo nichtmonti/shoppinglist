@@ -32,7 +32,7 @@ An installable Progressive Web App for shared shopping lists:
 | Frontend | **SvelteKit static SPA** (`adapter-static`) | Built into `backend/pb_public` and embedded in the binary ([D-64]). |
 | Local DB | **Dexie** | Apache-2.0 core only; not Dexie Cloud. |
 | PWA shell | SvelteKit's service worker | App-shell precache. |
-| i18n | **Paraglide**, compile-time, `@inlang/paraglide-js` pinned to the **2.x line** ([§14]) | No runtime fetch, so it works offline. de/en, additive locale files ([§12.2]). |
+| i18n | **Paraglide**, compile-time, `@inlang/paraglide-js` pinned to the **3.x line** ([§14]) | No runtime fetch, so it works offline. de/en, additive locale files ([§12.2]). |
 | Barcode scan | **`barcode-detector` ponyfill** with **`zxing-wasm`** at the version the ponyfill inlines its glue from ([D-21]; `wasm-version.test.ts`) | Decoded on the device by WASM zxing-cpp on every browser; lookup via Open Food Facts ([§9.2]). Operator-disableable. |
 
 ### Accepted stack risks
@@ -807,7 +807,7 @@ Sync state is a permanently visible chip left of the title in **every app bar** 
 ### 12.2 Localization (i18n)
 
 - **The entire app is localized** ([D-22]). Three tiers: (1) **all UI chrome**, including the chip ([§12.1]) and conflict notices ([§8.4]), is a translated message, never a literal; (2) **app-seeded vocab**, `category_templates.name_i18n` / `item_dictionary.names_i18n`, rendered in the current locale, falling back to `en`, then the slug; (3) **user-entered text** (item and list names) is never translated.
-- **de + en, additive.** Compile-time i18n with **Paraglide** (`@inlang/paraglide-js`, pinned to 2.x, [§2]), so no catalog is fetched at runtime and it works from the app-shell cache. A new language is a UI locale file, seed keys, an entry in `project.inlang/settings.json` `locales` (Paraglide generates the `Locale` type from it) and a `browserLocale()` prefix (`#lib/i18n`).
+- **de + en, additive.** Compile-time i18n with **Paraglide** (`@inlang/paraglide-js`, pinned to 3.x, [§2]), so no catalog is fetched at runtime and it works from the app-shell cache. A new language is a UI locale file, seed keys, an entry in `project.inlang/settings.json` `locales` (Paraglide generates the `Locale` type from it) and a `browserLocale()` prefix (`#lib/i18n`).
 - **Locale selection ([D-68], [D-223]):** (1) the explicit choice from the `LocaleToggle` in settings **and on the auth and join screens**, persisted in `meta.locale` and never overridden; (2) the browser's language, when it is a shipped locale (`de*`/`en*` on the lowercased tag); (3) `en`. There is no instance default.
 - **A switch changes the strings in place, in every open tab** [D-291]: nothing is remounted and nothing a screen holds is lost. Lint refuses a message resolved once into a constant of a component script.
 - **Locale stability:** items reference categories by **stable row id** and store free-text names, and a category's default label comes from its seed `slug` ([§6.7]), so switching language changes labels only, never item↔category mapping or history.

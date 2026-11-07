@@ -88,7 +88,7 @@ Components: 40 Go, 37 npm, 1 embedded in a listed package.
 | @floating-ui/dom | 1.8.0 | MIT | Copyright (c) 2021-present Floating UI contributors |
 | @floating-ui/utils | 0.2.12 | MIT | Copyright (c) 2021-present Floating UI contributors |
 | @fontsource-variable/readex-pro | 5.3.0 | OFL-1.1 | Copyright 2019 The Readex Pro Project Authors (https://github.com/ThomasJockin/readexpro) |
-| @inlang/paraglide-js | 2.29.3 | MIT | Copyright (c) 2025 Opral US Inc. |
+| @inlang/paraglide-js | 3.1.0 | MIT | Copyright (c) 2025 Opral US Inc. |
 | @lucide/svelte | 1.68.0 | ISC AND MIT | Copyright (c) 2026 Lucide Icons and Contributors<br>Copyright (c) 2013-present Cole Bemis |
 | @simplewebauthn/browser | 14.0.0 | MIT | Copyright (c) 2020 Matthew Miller |
 | @sveltejs/kit | 3.1.1 | MIT | Copyright (c) 2020 [these people](https://github.com/sveltejs/kit/graphs/contributors) |
@@ -3445,7 +3445,7 @@ Applies to:
 - @floating-ui/core 1.8.0 (LICENSE): Copyright (c) 2021-present Floating UI contributors
 - @floating-ui/dom 1.8.0 (LICENSE): Copyright (c) 2021-present Floating UI contributors
 - @floating-ui/utils 0.2.12 (LICENSE): Copyright (c) 2021-present Floating UI contributors
-- @inlang/paraglide-js 2.29.3 (LICENSE): Copyright (c) 2025 Opral US Inc.
+- @inlang/paraglide-js 3.1.0 (LICENSE): Copyright (c) 2025 Opral US Inc.
 - @simplewebauthn/browser 14.0.0 (LICENSE.md): Copyright (c) 2020 Matthew Miller
 - barcode-detector 3.2.3 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
 - bits-ui 2.20.4 (LICENSE): Copyright (c) 2023 Hunter Johnston

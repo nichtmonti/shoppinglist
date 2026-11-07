@@ -30,7 +30,7 @@
 	"devDependencies": {
 		"@eslint/js": "10.0.1",
 		"@fontsource-variable/readex-pro": "5.3.0",
-		"@inlang/paraglide-js": "2.29.3",
+		"@inlang/paraglide-js": "3.1.0",
 		"@inlang/plugin-message-format": "4.6.0",
 		"@sveltejs/adapter-static": "4.0.1",
 		"@sveltejs/kit": "3.1.1",

@@ -545,10 +545,10 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/%40inlang/paraglide-js@2.29.3",
+			"bom-ref": "pkg:npm/%40inlang/paraglide-js@3.1.0",
 			"name": "@inlang/paraglide-js",
-			"version": "2.29.3",
-			"purl": "pkg:npm/%40inlang/paraglide-js@2.29.3",
+			"version": "3.1.0",
+			"purl": "pkg:npm/%40inlang/paraglide-js@3.1.0",
 			"licenses": [
 				{
 					"expression": "MIT"
