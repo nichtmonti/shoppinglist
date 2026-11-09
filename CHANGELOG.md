@@ -10,6 +10,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 
 - **On an iPhone, a sheet stays in view while you type in it.** Tapping a field in a sheet, such as the name, quantity or note in an item's details, used to push the sheet so far up that only its bottom row was left on the screen, without the field ([D-348]).
 - **A sheet no longer closes when pulled down, and has no handle at its top.** Close it with its ✕, by tapping outside it, or with Back. Pulling it down comes back once the component library it is built on offers it ([D-348]).
+- **Dialogs, confirmations and menus fade in.** Their animations never ran, so they appeared at once. Menus and tooltips now also fade out, and the dimmed background behind a sheet fades in and out with it ([D-54]).
 
 ## v0.17.4: an update reaches a hidden window too, and the newest dependencies (2026-11)
 
@@ -846,6 +847,7 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-40]: docs/internals/decisions.md#D-40
 [D-42]: docs/internals/decisions.md#D-42
 [D-48]: docs/internals/decisions.md#D-48
+[D-54]: docs/internals/decisions.md#D-54
 [D-55]: docs/internals/decisions.md#D-55
 [D-56]: docs/internals/decisions.md#D-56
 [D-61]: docs/internals/decisions.md#D-61

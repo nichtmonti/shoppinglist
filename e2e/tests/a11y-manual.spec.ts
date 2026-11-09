@@ -141,10 +141,17 @@ test('touch targets: every interactive element meets ≥24px painted or ≥44px 
 
 	// Each sweep after a marker of what it sweeps: one before it would measure
 	// the screen before, or a menu not yet open, and pass on fewer targets.
+	// A menu is measured once its zoom-in has ended, at its full size.
 	const menu = page.getByRole('menu');
+	const settled = async () => {
+		await expect(menu).toBeVisible();
+		await menu.evaluate((el) =>
+			Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished))
+		);
+	};
 	await sweep('list');
 	await page.getByTestId('item-sort').click();
-	await expect(menu).toBeVisible();
+	await settled();
 	await sweep('item sort menu');
 	await page.keyboard.press('Escape');
 	await expect(menu).toHaveCount(0);
@@ -153,12 +160,12 @@ test('touch targets: every interactive element meets ≥24px painted or ≥44px 
 	await sweep('shop');
 	await page.goto('/');
 	await page.getByRole('button', { name: 'Aktionen für Küche' }).click();
-	await expect(menu).toBeVisible();
+	await settled();
 	await sweep('list card menu');
 	await page.keyboard.press('Escape');
 	await expect(menu).toHaveCount(0);
 	await page.getByTestId('list-sort').click();
-	await expect(menu).toBeVisible();
+	await settled();
 	await sweep('list sort menu');
 	await page.keyboard.press('Escape');
 	await page.goto('/settings');

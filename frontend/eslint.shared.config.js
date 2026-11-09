@@ -124,6 +124,11 @@ const tokenClasses = [
 			'Spacing sits on a 2px grid: a whole or half step (gap-2.5, not gap-2.75), or `px` for a 1px nudge ([D-318]).'
 	},
 	{
+		pattern: '(?:^|:)data-(?:open|closed):',
+		message:
+			'bits-ui marks open and closed as data-state, never data-open or data-closed, so these never match: data-[state=open]:, data-[state=closed]: ([D-54]).'
+	},
+	{
 		pattern: '^(?:m-0|p-0|border-0|bg-transparent|text-inherit|font-inherit|list-none)$',
 		message:
 			"Tailwind's preflight already resets margins, padding, borders and list style, and gives buttons and fields the page's font, colour and a clear ground. To change a part's default, change the part ([D-320])."

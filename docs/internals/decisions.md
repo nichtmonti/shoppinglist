@@ -261,7 +261,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 
 ## Decision log
 
-<a id="D-54"></a>**[D-54] The frontend UI layer is shadcn-svelte on Tailwind v4 (2026-08).** The app's primitives (sheets, dialogs, buttons, single-select groups) come from shadcn-svelte on bits-ui, with bundled CSS in place of hand-written CSS. The tokens use shadcn's names (`--background`, `--primary`, `--destructive`, `--border`), the `--cat-*` tokens are custom `@theme inline` entries, and dark mode is `.dark` + `@custom-variant dark` with mode-watcher for the theme toggle. The look stays the app's green.
+<a id="D-54"></a>**[D-54] The frontend UI layer is shadcn-svelte on Tailwind v4 (2026-08).** The app's primitives (sheets, dialogs, buttons, single-select groups) come from shadcn-svelte on bits-ui, with bundled CSS in place of hand-written CSS. The tokens use shadcn's names (`--background`, `--primary`, `--destructive`, `--border`), the `--cat-*` tokens are custom `@theme inline` entries, and dark mode is `.dark` + `@custom-variant dark` with mode-watcher for the theme toggle. The look stays the app's green. bits-ui marks a part's state as `data-state`, so open and closed styles key on `data-[state=open]` and `data-[state=closed]`: shadcn's `data-open:` never matches, and lint refuses it.
 
 **Constraints:**
 - AddBar uses the **bits-ui Combobox primitive directly**, not shadcn's Popover+Command. An inline free-text input is a different shape, and the ✕ suppression interaction stays custom under the ARIA rule that an option must not hold focusable children.

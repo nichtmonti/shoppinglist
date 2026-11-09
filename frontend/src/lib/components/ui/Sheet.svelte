@@ -33,10 +33,8 @@
 	}}
 >
 	<Dialog.Portal>
-		<!-- bits-ui marks state as `data-state`, so the fades key on that. -->
-		<Dialog.Overlay
-			class="duration-500 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"
-		/>
+		<!-- The scrim fades as long as the sheet slides. -->
+		<Dialog.Overlay class="duration-500" />
 		<!-- 80dvh, not 80vh: `vh` assumes the mobile URL bar expanded, so the
 		     sheet would stop short. No focus moved on open: a focused field
 		     would raise the keyboard over a sheet the user only meant to read. -->
