@@ -3,7 +3,9 @@
  * going null) the one it last showed. A dialog or sheet stays mounted and
  * bits-ui animates it out once `open` is false; this keeps its content there
  * meanwhile, where content read off the open value would empty first.
- * Svelte and bits-ui have no such state of their own.
+ * Svelte and bits-ui have no such state. runed's `Previous` (one change back)
+ * would make it `read() ?? previous.current`, read on every change alike: no
+ * shorter, and runed is no direct dependency.
  */
 export class Kept<T> {
 	#read: () => T | null;

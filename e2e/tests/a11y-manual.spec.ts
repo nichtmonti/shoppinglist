@@ -146,7 +146,7 @@ test('touch targets: every interactive element meets ≥24px painted or ≥44px 
 	const settled = async () => {
 		await expect(menu).toBeVisible();
 		await menu.evaluate((el) =>
-			Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished))
+			Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => {})))
 		);
 	};
 	await sweep('list');

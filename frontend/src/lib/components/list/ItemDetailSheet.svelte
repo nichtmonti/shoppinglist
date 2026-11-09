@@ -117,10 +117,12 @@
 		if (document.visibilityState === 'hidden') commitOnBlur();
 	}
 
+	// The edit or removal is handed over before `onclose`, while the caller
+	// still holds the row it opened (the import review's key).
 	function close(): void {
 		const target = item;
-		onclose();
 		if (target) void commit(target);
+		onclose();
 	}
 
 	function remove(): void {
@@ -128,9 +130,9 @@
 		if (!target) return;
 		// Not close(): committing drafts would race the delete.
 		committed = $state.snapshot(drafts);
-		onclose();
 		if (onremove) onremove();
 		else void removeItem(target);
+		onclose();
 	}
 </script>
 

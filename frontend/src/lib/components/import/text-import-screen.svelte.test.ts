@@ -412,6 +412,44 @@ describe('TextImportScreen', () => {
 		]);
 	});
 
+	// The sheet hands its row over before it closes: the screen names the row
+	// it is open on only until then.
+	it("removes a row from the import with the item sheet's remove button", async () => {
+		render(TextImportScreen, { sharedText: SHARE });
+		await screen.findByRole('checkbox', { name: 'Mango' });
+
+		await fireEvent.click(within(rowOf('Mango')).getByRole('button', { name: 'Mango' }));
+		const sheet = await screen.findByRole('dialog', { name: 'Artikel bearbeiten' });
+		await fireEvent.click(within(sheet).getByRole('button', { name: /Mango.*entfernen/ }));
+
+		await waitFor(() =>
+			expect(screen.getByRole('checkbox', { name: 'Mango' }).getAttribute('aria-checked')).toBe(
+				'false'
+			)
+		);
+	});
+
+	it('keeps a name typed in the item sheet and left with Escape', async () => {
+		render(TextImportScreen, { sharedText: SHARE });
+		await screen.findByRole('checkbox', { name: 'Mango' });
+
+		await fireEvent.click(
+			within(rowOf('Erbsenmilch')).getByRole('button', { name: 'Erbsenmilch' })
+		);
+		const sheet = await screen.findByRole('dialog', { name: 'Artikel bearbeiten' });
+		await fireEvent.input(within(sheet).getByPlaceholderText('Name'), {
+			target: { value: 'Hafermilch' }
+		});
+		await fireEvent.keyDown(document, { key: 'Escape' });
+
+		await fireEvent.click(
+			await screen.findByRole('button', { name: 'Liste mit 4 Artikeln erstellen' })
+		);
+		await waitFor(() => expect(importBackup).toHaveBeenCalledTimes(1));
+		const [backup] = vi.mocked(importBackup).mock.calls[0];
+		expect(backup.items.map((i) => i.name)).toContain('Hafermilch');
+	});
+
 	// [D-254] a file pasted where a list goes.
 	it('imports a pasted backup of this app, as a picked file would be', async () => {
 		vi.mocked(importListFromFile).mockResolvedValueOnce({ ok: true, id: 'list-b' });

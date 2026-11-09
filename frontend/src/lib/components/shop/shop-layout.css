@@ -48,8 +48,8 @@
 
 /* ---- the three densities ([D-83], [D-313]) ------------------------
  *
- * `data-density` sits on the root, not .app-shell, because vaul portals sheets
- * to <body>. The selectors are attribute-only so a subtree can opt in
+ * `data-density` sits on the root, not .app-shell, because sheets and dialogs
+ * are portaled to <body>. The selectors are attribute-only so a subtree can opt in
  * (/dev/gallery shows the densities side by side); every density therefore
  * needs its own block restating every token, or a subtree would inherit the
  * root's. `:root` doubles as the first paint's fallback.

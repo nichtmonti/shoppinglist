@@ -91,7 +91,7 @@ test('a confirmation, a sheet and their scrims animate in and out', async ({ pag
 	// Closed once it has opened: closed mid-entrance, bits-ui drops it at once.
 	await page
 		.getByRole('alertdialog')
-		.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+		.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished.catch(() => {}))));
 	await page.keyboard.press('Escape');
 	await expect
 		.poll(started)

@@ -336,6 +336,10 @@ export async function installEffectSpies(page: Page): Promise<void> {
  * - "emptied as it closed": it had fewer elements when its exit started than
  *   just before, its content read off the open value, which the close made
  *   null.
+ *
+ * It needs the animations: under reduced motion (app.css turns them off)
+ * nothing animates out and every close would read as a fault, so this
+ * harness must not emulate it.
  */
 export async function watchOverlays(page: Page): Promise<void> {
 	await page.addInitScript(() => {
