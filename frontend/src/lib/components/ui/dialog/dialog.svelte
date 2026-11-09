@@ -4,7 +4,9 @@
 
 	let { open = $bindable(false), onOpenChange, ...restProps }: DialogPrimitive.RootProps = $props();
 
-	// Back closes it, reporting the close as Escape would (see drawer.svelte).
+	// Open, it is a history entry, so Back closes it (#lib/history-layers),
+	// reporting the close as Escape would: setting `open` here does not fire
+	// onOpenChange.
 	backClosable(
 		() => open,
 		() => {

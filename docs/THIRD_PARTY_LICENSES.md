@@ -13,7 +13,7 @@ and armv7, as GoReleaser builds it) and the npm packages whose code, styles,
 fonts or images end up in the web app compiled into that binary (`vite build`
 of frontend/). Development and test tooling is not shipped and not listed.
 
-Components: 40 Go, 37 npm, 1 embedded in a listed package.
+Components: 40 Go, 36 npm, 1 embedded in a listed package.
 
 ## Notes
 
@@ -119,7 +119,6 @@ Components: 40 Go, 37 npm, 1 embedded in a listed package.
 | tailwind-variants | 4.0.1 | MIT | Copyright (c) 2020 Tailwind Variants |
 | tailwindcss | 4.3.4 | MIT | Copyright (c) Tailwind Labs, Inc. |
 | tw-animate-css | 1.4.0 | MIT | Copyright (c) 2025 Wombosvideo |
-| vaul-svelte | 1.0.0-next.7 | MIT | Copyright (c) 2023 Hunter Johnston<br>Copyright (c) 2023 Emil Kowalski |
 | zxing-wasm | 3.1.6 | MIT | Copyright (c) 2023 Ze-Zheng Wu |
 
 ## Embedded in a listed package
@@ -3434,7 +3433,7 @@ SOFTWARE.
 <http://www.opensource.org/licenses/mit-license.php>
 ```
 
-### MIT: github.com/fxamacker/cbor/v2, github.com/gabriel-vasile/mimetype, github.com/x448/float16 and 23 more
+### MIT: github.com/fxamacker/cbor/v2, github.com/gabriel-vasile/mimetype, github.com/x448/float16 and 22 more
 
 Applies to:
 
@@ -3462,7 +3461,6 @@ Applies to:
 - tailwind-variants 4.0.1 (LICENSE): Copyright (c) 2020 Tailwind Variants
 - tailwindcss 4.3.4 (LICENSE): Copyright (c) Tailwind Labs, Inc.
 - tw-animate-css 1.4.0 (LICENSE): Copyright (c) 2025 Wombosvideo
-- vaul-svelte 1.0.0-next.7 (LICENSE): Copyright (c) 2023 Hunter Johnston; Copyright (c) 2023 Emil Kowalski
 - zxing-wasm 3.1.6 (LICENSE): Copyright (c) 2023 Ze-Zheng Wu
 
 ```text

@@ -185,7 +185,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 | [D-275] | An item reads in three tiers, name over quantity over note, and quantities are set in Readex |  |
 | [D-276] | The app bar draws every glyph at one line weight, keeps green for states, and switches the list's view with tabs |  |
 | [D-277] | The add field is one filled shape that says "add": a + at its start, the scanner inside its end | partly superseded by [D-290] |
-| [D-278] | A bottom sheet has a visible grabber and a real title |  |
+| [D-278] | A bottom sheet has a real title | partly superseded by [D-348] |
 | [D-280] | The share sheet's invite sits on the sheet, and resetting the link is a red word |  |
 | [D-281] | A chosen option is soft green everywhere, and a screen's hero title is bold |  |
 | [D-282] | The aisle editor's row actions are quiet icons |  |
@@ -253,6 +253,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 | [D-345] | A server refuses data a newer version has migrated |  |
 | [D-346] | A window on the previous build reloads into the new one when it is next hidden |  |
 | [D-347] | The functional suite runs in Firefox too, its accounts made in Chromium |  |
+| [D-348] | A bottom sheet is a bits-ui dialog, without swipe until bits-ui's Drawer ships |  |
 
 <!-- decisions-index:end -->
 
@@ -735,7 +736,9 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 
 <a id="D-277"></a>**[D-277] The add field is one filled shape that says "add": a + at its start, the scanner inside its end (2026-10).** An outlined empty box with the camera button floating beside it read as a form field, with nothing in it that said "add". The field is a grey filled shape, no outline at rest, with a + at its start and the scan button inside its end, so the row reads as one control. Its green + was replaced by [D-290]: the + is grey, and a tap on it opens the keyboard. Focus fills it with the surface and draws one green line, no ring. The field and the scan button stay lit above the typeahead's scrim ([D-131]). It is 44px tall with 16px text (iOS zooms on anything smaller). *Rejected:* the field as the list's first row, with the + in the aisle chip's column (reads as a row that is already there); a composer pinned to the bottom (thumb reach, but the typeahead would open upwards over the keyboard and the add bar moves out of the list it adds to). ([§9], [§9.1], [§9.2], [D-131], [D-218])
 
-<a id="D-278"></a>**[D-278] A bottom sheet has a visible grabber and a real title (2026-10).** **The grabber** is 36 by 4px in `line-strong`, 8px from the top, and says the sheet can be dragged away; shadcn's drew it in the sheet's own colour. **The title** is a screen's: 19px bold in the text colour, sentence case, as in the app bar ([D-272]), not a small grey caps label quieter than the fields under it. It sits in the 40px row of the close button, which keeps [D-134]'s item sheet clear of scrolling. Confirmations and prompts are dialogs with their own titles. *Rejected:* removing the grabber (dragging down closes the sheet, and nothing else says so). ([§9.1], [§12], [D-54], [D-134], [D-272])
+<a id="D-278"></a>**[D-278] A bottom sheet has a real title (2026-10).** **The title** is a screen's: 19px bold in the text colour, sentence case, as in the app bar ([D-272]), not a small grey caps label quieter than the fields under it. It sits in the 40px row of the close button, which keeps [D-134]'s item sheet clear of scrolling. Confirmations and prompts are dialogs with their own titles. Its grabber was replaced by [D-348]: a sheet that cannot be dragged shows none. ([§9.1], [§12], [D-54], [D-134], [D-272])
+
+<a id="D-348"></a>**[D-348] A bottom sheet is a bits-ui dialog, without swipe until bits-ui's Drawer ships (2026-11).** `Sheet.svelte` draws a bits-ui `Dialog` at the bottom edge, the primitive of the app's dialogs, so focus trap and return, scroll lock, Escape, outside taps and Back ([D-230]) work as in every dialog, and a confirmation over a sheet shares its layer stack. Nothing moves the sheet for the on-screen keyboard: the browser brings a focused field into view. A sheet closes by its ✕, a tap outside, Escape or Back, and shows no grabber, since it cannot be dragged. When bits-ui releases its Drawer (a port of Base UI's, in review as `unstable_Drawer`), the sheet moves to it for swipe-to-close and the grabber comes back. *Rejected:* vaul-svelte (a pre-release unmaintained since 2025-03, whose keyboard shim lifted the sheet while Safari also scrolled it, taking the field off the top of an iPhone's screen). *Rejected:* Zag's drawer swiping the bits-ui dialog (a second layer stack, which closed a sheet another had handed over to, and glue to strip its dialog half). *Rejected:* a hand-built drag or a CSS scroll-snap sheet (a gesture mechanism of our own). ([§9.1], [D-54], [D-278])
 
 <a id="D-280"></a>**[D-280] The share sheet's invite sits on the sheet, and resetting the link is a red word (2026-10).** **The invite** sits on the sheet under a rule that separates it from the members, not in a box of its own; the QR keeps its white frame, which a scanner needs. **Resetting** is a red text button by the expiry line: red, since the old link stops working, but rare and redone by sharing the new one, so not a full-width slab louder than inviting ([D-214]'s grading). When minting failed it stands alone as the retry. „Kopieren“ is set in the app's face, not the link's monospace, and „Teilen“ carries the platform's share icon. *Rejected:* moving the reset into a confirmation behind a ⋮ (one more tap for the case where a link has leaked). ([§7.1], [§9.3], [D-214])
 
@@ -1343,3 +1346,4 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 [D-345]: #D-345
 [D-346]: #D-346
 [D-347]: #D-347
+[D-348]: #D-348

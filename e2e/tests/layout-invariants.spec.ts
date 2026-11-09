@@ -24,10 +24,9 @@ import {
 //      equality.
 //   2. No horizontal overflow: document.scrollingElement.scrollWidth ===
 //      clientWidth on every page.
-//   3. An open Sheet (bottom drawer) has nothing that scrolls inside it: a
+//   3. An open Sheet has nothing that scrolls inside it: a
 //      nested overflow-y container scrolls independently of the sheet and
-//      breaks the single-scroller model the drawer's drag-to-dismiss and focus
-//      trap assume.
+//      breaks the single-scroller model the sheet's focus trap assumes.
 //
 // E2E_DIAG=1 makes the width test print every sample with console.table,
 // attach them as width-samples.json, and screenshot the settings screen in
@@ -241,15 +240,15 @@ test('the item detail sheet fits a phone without scrolling', async ({ page }) =>
 	expect(focused, 'Tab should reach a row name button').toContain('row-name');
 	await page.keyboard.press('Enter');
 
-	const drawer = page.locator('[data-vaul-drawer-direction="bottom"]');
-	await expect(drawer).toBeVisible();
-	await expect(drawer.getByRole('radio')).toHaveCount(21);
+	const sheet = page.locator('[data-slot="sheet-content"]');
+	await expect(sheet).toBeVisible();
+	await expect(sheet.getByRole('radio')).toHaveCount(21);
 
-	// Nothing inside the open drawer scrolls: no nested overflow-y container
+	// Nothing inside the open sheet scrolls: no nested overflow-y container
 	// scrolling on its own, apart from the sheet, and no scrolling .sheet-body
 	// either. Only elements that can actually scroll count (overflow-y
 	// auto/scroll AND overflowing content).
-	const scrollables = await drawer.evaluate((el) => {
+	const scrollables = await sheet.evaluate((el) => {
 		const els = Array.from(el.querySelectorAll<HTMLElement>('*')).filter((e) => {
 			const s = getComputedStyle(e);
 			return (
@@ -261,7 +260,7 @@ test('the item detail sheet fits a phone without scrolling', async ({ page }) =>
 	expect(scrollables, 'every field and every aisle must be visible without scrolling').toEqual([]);
 
 	await page.keyboard.press('Escape');
-	await expect(drawer).toHaveCount(0);
+	await expect(sheet).toHaveCount(0);
 });
 
 // [D-83]/[D-86]: the aisle header is ONE shared component over both views and

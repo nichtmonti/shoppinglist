@@ -546,8 +546,8 @@ function watchSideEffects(page: Page): SideEffectWatch {
  * The walk does not reload between controls (see reachSurface), so two kinds
  * of leftover can outlive one control:
  *
- *   1. vaul and bits-ui park `pointer-events: none` on the document while a
- *      sheet is open and clear it on an ANIMATED close, so for a few frames
+ *   1. bits-ui parks `pointer-events: none` on the document while a
+ *      sheet is open and clears it on an ANIMATED close, so for a few frames
  *      after Escape the page looks idle while `<html>` still swallows every
  *      click.
  *   2. A control that OPENS something can be the last one walked on its

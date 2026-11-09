@@ -144,7 +144,7 @@ old enough. Concrete cases already in the tree, each checked against the floor:
 | `color-mix()` | category chips | Safari 16.2, Chrome 111 |
 | `text-wrap: balance` | tile names | Safari 17.5, **above the floor**; degrades to normal wrapping, which is why it is used only where the fallback is acceptable |
 | `content-visibility` / `contain-intrinsic-size` | long lists | Safari 18, Chrome 85. Same reasoning: a progressive enhancement, never a correctness dependency |
-| `dvh` | app shell, drawer cap | Safari 15.4, Chrome 108 |
+| `dvh` | app shell, sheet cap | Safari 15.4, Chrome 108 |
 | Web Locks | `sync/leader.ts` | Safari 15.4, Chrome 69, and `requestLeadership` has an explicit no-Locks fallback path |
 | `BroadcastChannel` | `#lib/auth/session` ([D-109]) | Safari 15.4, Chrome 54; guarded, and the local half of the session boundary works without it |
 | `AbortSignal.any` | `sync/http.ts` `anySignal` ([D-341]) | Safari 17.4 and Chrome 116, **above the floor** (Firefox 124 is within it); `anySignal` builds the same from a controller and listeners where it is missing, and lint refuses a direct call |

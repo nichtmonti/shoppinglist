@@ -917,18 +917,6 @@
 		},
 		{
 			"type": "library",
-			"bom-ref": "pkg:npm/vaul-svelte@1.0.0-next.7",
-			"name": "vaul-svelte",
-			"version": "1.0.0-next.7",
-			"purl": "pkg:npm/vaul-svelte@1.0.0-next.7",
-			"licenses": [
-				{
-					"expression": "MIT"
-				}
-			]
-		},
-		{
-			"type": "library",
 			"bom-ref": "pkg:npm/zxing-wasm@3.1.6",
 			"name": "zxing-wasm",
 			"version": "3.1.6",

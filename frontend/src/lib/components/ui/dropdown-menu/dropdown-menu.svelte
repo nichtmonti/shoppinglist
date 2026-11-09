@@ -8,7 +8,7 @@
 		...restProps
 	}: DropdownMenuPrimitive.RootProps = $props();
 
-	// Back closes it, reporting the close as Escape would (see drawer.svelte).
+	// Back closes it, reporting the close as Escape would (see dialog.svelte).
 	backClosable(
 		() => open,
 		() => {

@@ -346,7 +346,7 @@ test('dead-controls: list ⋮ settings sheet', async () => {
 	await walkSurface(page, 'list settings sheet', async () => {
 		await reachSurface(page, listPath);
 		await page.getByTestId('list-menu').click();
-		const sheet = page.locator('[data-vaul-drawer-direction="bottom"]');
+		const sheet = page.locator('[data-slot="sheet-content"]');
 		await expect(sheet).toBeVisible();
 		return sheet;
 	});

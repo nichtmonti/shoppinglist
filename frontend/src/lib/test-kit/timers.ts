@@ -1,9 +1,6 @@
 // Test-only timer instrumentation for the one class of dependency a test
-// cannot otherwise observe: a callback scheduled inside a library whose
-// visible effect is a no-op (vaul's drawer-close restores a body cssText
-// that bits-ui's earlier 24ms cleanup already restored — the write fires
-// but changes nothing), or whose ABSENCE is the assertion (the sync loop
-// must not re-arm a retry after stop()).
+// cannot otherwise observe: a callback whose ABSENCE is the assertion (the
+// sync loop must not re-arm a retry after stop()).
 //
 // trackTimers() wraps globalThis.setTimeout/clearTimeout TRANSPARENTLY —
 // same handles, same timing, unwatched delays untouched — and counts the

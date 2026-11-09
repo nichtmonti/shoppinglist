@@ -6,6 +6,11 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
+## Unreleased
+
+- **On an iPhone, a sheet stays in view while you type in it.** Tapping a field in a sheet, such as the name, quantity or note in an item's details, used to push the sheet so far up that only its bottom row was left on the screen, without the field ([D-348]).
+- **A sheet no longer closes when pulled down, and has no handle at its top.** Close it with its ✕, by tapping outside it, or with Back. Pulling it down comes back once the component library it is built on offers it ([D-348]).
+
 ## v0.17.4: an update reaches a hidden window too, and the newest dependencies (2026-11)
 
 **For operators.** Nothing to do before upgrading.
@@ -1015,3 +1020,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-345]: docs/internals/decisions.md#D-345
 [D-346]: docs/internals/decisions.md#D-346
 [D-347]: docs/internals/decisions.md#D-347
+[D-348]: docs/internals/decisions.md#D-348

@@ -1,6 +1,5 @@
-// The bottom sheet is a thin wrapper over vaul-svelte via shadcn's Drawer
-// ([D-54]). vaul provides modality, focus management, Escape and native
-// drag-to-dismiss — so these tests cover the wrapper contract only.
+// The bottom sheet is a bits-ui dialog ([D-348]), which provides modality,
+// focus management and Escape, so these tests cover the wrapper contract.
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
@@ -11,7 +10,7 @@ const headerActions = createRawSnippet(() => ({
 	render: () => '<button type="button" aria-label="Entfernen">remove</button>'
 }));
 
-describe('Sheet — Drawer wrapper contract', () => {
+describe('Sheet — wrapper contract', () => {
 	it('renders the title, children and a close button when open', () => {
 		render(Sheet, { props: { open: true, title: 'Mein Sheet', onclose: vi.fn(), children } });
 		expect(screen.getByRole('dialog')).toBeTruthy();
@@ -41,6 +40,26 @@ describe('Sheet — Drawer wrapper contract', () => {
 	it('renders nothing when closed', () => {
 		render(Sheet, { props: { open: false, title: 'Mein Sheet', onclose: vi.fn(), children } });
 		expect(screen.queryByRole('dialog')).toBeNull();
+	});
+
+	it('leaves moving a focused field above the keyboard to the browser', () => {
+		// happy-dom has no visualViewport; a keyboard shim would listen to it.
+		// On an iPhone, one beside Safari's own scroll moved the field off the
+		// top of the screen.
+		const viewport = Object.assign(new EventTarget(), { height: 400, width: 400, offsetTop: 0 });
+		Object.defineProperty(window, 'visualViewport', { configurable: true, value: viewport });
+		try {
+			const field = createRawSnippet(() => ({ render: () => '<input data-testid="field" />' }));
+			render(Sheet, {
+				props: { open: true, title: 'Mein Sheet', onclose: vi.fn(), children: field }
+			});
+			screen.getByTestId('field').focus();
+			viewport.dispatchEvent(new Event('resize'));
+			const sheet = document.querySelector<HTMLElement>('[data-slot="sheet-content"]');
+			expect(sheet?.style.bottom).toBe('');
+		} finally {
+			Reflect.deleteProperty(window, 'visualViewport');
+		}
 	});
 
 	it('closes on Escape', async () => {

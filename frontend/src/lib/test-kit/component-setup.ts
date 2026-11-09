@@ -11,9 +11,8 @@
 // constraint on which locale tests assert against. Reset to 'de' before each test so a `setLocale('en')` inside one
 // test (e.g. a locale-switch test) can't leak into the next.
 import { act, cleanup, configure, setup, waitFor } from '@testing-library/svelte';
-import { afterAll, afterEach, beforeEach, expect, vi } from 'vitest';
+import { afterEach, beforeEach, expect, vi } from 'vitest';
 import { setLocale } from '#lib/i18n/index.js';
-import { trackTimers } from '#lib/test-kit/timers.js';
 import { conflictingClasses } from '#lib/utils.js';
 
 // The default 1000ms is too tight for the first test per file on a slow CI
@@ -102,28 +101,6 @@ beforeEach(() => {
 	});
 });
 
-// vaul's drawer-close path arms two REAL 500ms timers — a body-cssText
-// restore and an onAnimationEnd ping (vaul-svelte's use-drawer-root:
-// handleOpenChange(false) → afterSleep(TRANSITIONS.DURATION * 1000, …),
-// svelte-toolbelt's afterSleep is a plain setTimeout) — and never cancels
-// them on unmount. They are Node's timers, not the DOM environment's, so
-// they outlive its teardown: if the file's environment is gone before they
-// fire, the callback throws "ReferenceError: document is not defined" as
-// an UNHANDLED error and vitest fails the whole run despite every test
-// passing. The restore's write is value-invisible (bits-ui's 24ms
-// scroll-lock cleanup restored the same cssText long before), so the
-// timers are the thing to watch: count them (see timers.ts) and,
-// ONCE PER FILE, wait for the count to drain — the dependent event itself,
-// however long it actually takes, instead of the old blind 650ms.
-//
-// Deliberately NOT per test: the hazard is the environment dying at
-// FILE end, and draining after every drawer test would serialize up to
-// 500ms apiece — under parallel workers that stall starves other files'
-// hydration waits (measured: 12 spurious failures across 8 files).
-// Watching [400,600)ms keeps every other delay — vitest's own, Dexie's,
-// ScanButton's 1200ms reset — untracked and untouched.
-const drawerTimers = trackTimers((delay) => delay >= 400 && delay < 600);
-
 afterEach(async () => {
 	// Collected BEFORE cleanup (which unmounts everything), asserted after it,
 	// so a conflict never leaves this test's components mounted in the next.
@@ -138,9 +115,8 @@ afterEach(async () => {
 	cleanup();
 
 	// bits-ui's body-scroll-lock schedules a 24ms cleanup timer when the last
-	// Dialog/Drawer closes, on Node's timers like vaul's below; if this file's
-	// environment tears down before
-	// it fires, resetBodyStyle throws "document is not defined" as an unhandled
+	// Dialog closes, on Node's timers; if this file's environment tears down
+	// before it fires, resetBodyStyle throws "document is not defined" as an unhandled
 	// error. The lock is value-visible — `overflow: hidden` on document.body
 	// until the timer fires — so wait for the observable, not for a sleep past
 	// its delay. Tests that opened no dialog never see the lock and skip
@@ -152,14 +128,4 @@ afterEach(async () => {
 	}
 
 	expect(conflicts, 'elements carrying utilities that override each other ([D-146])').toEqual([]);
-});
-
-// vaul's close timers (see trackTimers above) — drained once per file, while
-// this environment is still alive: a timer that never fires fails HERE with
-// a count of who is still armed, instead of as an unhandled
-// "document is not defined" attributed who-knows-where.
-afterAll(async () => {
-	await waitFor(() => {
-		expect(drawerTimers.pending()).toBe(0);
-	});
 });

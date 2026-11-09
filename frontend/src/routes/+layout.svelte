@@ -138,7 +138,7 @@
 		document.documentElement.lang = getLocale();
 	});
 
-	// §9.1 [D-83]: the density tokens live on the ROOT so vaul-portaled sheets
+	// §9.1 [D-83]: the density tokens live on the ROOT so portaled sheets and dialogs
 	// (rendered to <body>, outside .app-shell) follow too.
 	$effect(() => {
 		document.documentElement.dataset.density = $uiDensity;

@@ -149,7 +149,7 @@ test('category-sorted list: the bar pins, the headers stick below it, and the op
 	// Dismissed, and the tap went nowhere else: no detail sheet, no new row,
 	// and the typed text survives the near miss.
 	await expect(dropdown).toHaveCount(0);
-	await expect(page.locator('[data-vaul-drawer-direction="bottom"]')).toHaveCount(0);
+	await expect(page.locator('[data-slot="sheet-content"]')).toHaveCount(0);
 	await expect(input).toHaveValue('Mil');
 	await expect(page.locator('[data-testid="row"]')).toHaveCount(rowsBefore);
 
@@ -288,7 +288,7 @@ test.describe('as an iPhone', () => {
 		// eslint-disable-next-line playwright/no-wait-for-timeout -- the absence below needs its window ([D-342])
 		await page.waitForTimeout(500);
 		await expect(
-			page.locator('[data-vaul-drawer-direction="bottom"]'),
+			page.locator('[data-slot="sheet-content"]'),
 			'the tap on a suggestion fell through and opened the detail sheet of the row behind it'
 		).toHaveCount(0);
 	});
