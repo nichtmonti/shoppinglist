@@ -13,6 +13,7 @@
 	import CategoryPlate from '#lib/components/common/CategoryPlate.svelte';
 	import Sheet from '#lib/components/ui/Sheet.svelte';
 	import { backClosable } from '#lib/history-layers.svelte.js';
+	import { Kept } from '#lib/state/kept.svelte.js';
 
 	let {
 		item,
@@ -32,7 +33,9 @@
 		onclose: () => void;
 	} = $props();
 
-	let category = $derived(item ? categoryOf(item, categories) : undefined);
+	// What the sheet shows, kept while it slides closed.
+	const shown = new Kept(() => item);
+	let category = $derived(shown.value ? categoryOf(shown.value, categories) : undefined);
 
 	let lightboxOpen = $state(false);
 	let closeViewer: (() => void) | null = null;
@@ -47,8 +50,8 @@
 <!-- The sheet unmounts while the photo viewer is open, since two focus traps
      fight ([D-94]); `item` stays set, so it returns intact. -->
 <Sheet open={item !== null && !lightboxOpen} title={t('shop_product_details')} {onclose}>
-	{#if item}
-		{@const detail = item}
+	{#if shown.value}
+		{@const detail = shown.value}
 		<div class="product-details flex flex-col gap-2.5">
 			<ProductMedia
 				url={detail.image_url}

@@ -23,6 +23,7 @@
 	import { memberName } from '#lib/member-name.js';
 	import { currentAccountId } from '#lib/auth/state.js';
 	import { AsyncAction } from '#lib/state/async-action.svelte.js';
+	import { Kept } from '#lib/state/kept.svelte.js';
 	import { listRoster } from '#lib/state/data.js';
 	import { refreshRoster } from '#lib/sync/index.js';
 	import { online } from '#lib/state/online.js';
@@ -77,6 +78,9 @@
 	let lastRun = $state<'load' | 'change'>('load');
 	// Both retire the link already sent ([D-31]), so both are confirmed.
 	let confirming = $state<'reset' | 'revoke' | null>(null);
+	// What the confirmation asks, kept while it animates out.
+	const asked = new Kept(() => confirming);
+	const askedReset = $derived(asked.value === 'reset');
 	// No live link until one is created ([D-330]).
 	let linkless = $state(false);
 	let tab = $state<'link' | 'qr'>('link');
@@ -340,17 +344,14 @@
 	{/if}
 </Sheet>
 
-{#if confirming}
-	{@const reset = confirming === 'reset'}
-	<ConfirmDialog
-		open
-		title={t(reset ? 'share_reset_link' : 'share_revoke_link')}
-		body={t('share_link_stops_confirm')}
-		confirmLabel={t(reset ? 'share_reset_confirm_action' : 'share_revoke_confirm_action')}
-		danger
-		busy={inviteAction.busy}
-		error={inviteAction.error}
-		onconfirm={() => void (reset ? handleReset() : handleRevoke())}
-		oncancel={() => (confirming = null)}
-	/>
-{/if}
+<ConfirmDialog
+	open={confirming !== null}
+	title={t(askedReset ? 'share_reset_link' : 'share_revoke_link')}
+	body={t('share_link_stops_confirm')}
+	confirmLabel={t(askedReset ? 'share_reset_confirm_action' : 'share_revoke_confirm_action')}
+	danger
+	busy={inviteAction.busy}
+	error={inviteAction.error}
+	onconfirm={() => void (askedReset ? handleReset() : handleRevoke())}
+	oncancel={() => (confirming = null)}
+/>

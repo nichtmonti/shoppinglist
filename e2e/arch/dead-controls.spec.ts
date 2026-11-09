@@ -7,7 +7,13 @@ import {
 	registerAccount,
 	showInviteLink
 } from '../tests/helpers';
-import { expandDoneSection, installEffectSpies, reachSurface, walkSurface } from './walk';
+import {
+	expandDoneSection,
+	installEffectSpies,
+	reachSurface,
+	walkSurface,
+	watchOverlays
+} from './walk';
 import { guardTest, watchPage } from '../diagnose';
 
 // Architectural regression gate for "dead controls" — a control that is
@@ -42,6 +48,9 @@ import { guardTest, watchPage } from '../diagnose';
 // controls that do NOT follow that pattern are named individually in
 // walk.ts's NEVER_CLICK sets.
 //
+// ALSO, on the way past ([D-349]): every dialog or sheet a control opens and
+// the walk closes must animate out with its content (watchOverlays in walk.ts).
+//
 // The engine lives in walk.ts. ANTI-FLAKE: `stableSignature` waits until two 250ms-apart reads agree before
 // treating a signature as "before" (a relative-time tick or a sync banner
 // settling must not be mistaken for the click's own effect, and must not mask
@@ -71,6 +80,7 @@ test.beforeAll(async ({ browser }) => {
 	page = await context.newPage();
 	watchPage(page);
 	await installEffectSpies(page);
+	await watchOverlays(page);
 	await registerAccount(page, 'Deadctrl');
 
 	// Two lists: the home surface is specified as the POPULATED home, and a

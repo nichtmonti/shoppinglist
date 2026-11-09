@@ -49,17 +49,37 @@ test('a confirmation over the sheet keeps Escape, taps and focus', async ({ page
 });
 
 // bits-ui marks a dialog's state as data-state; parts keyed on data-open
-// never animated at all. The confirmation is mounted only while it is
-// asked (ShareSheet's `{#if}`), so it leaves at once; the sheet stays
-// mounted, and it and the scrim animate out.
-test('a confirmation animates in, and a sheet and its scrim animate out', async ({ page }) => {
+// never animated at all. A confirmation stays mounted while it animates out,
+// so it shows what it asked until it has left.
+test('a confirmation, a sheet and their scrims animate in and out', async ({ page }) => {
 	const sheet = await openShareSheet(page, 'Motion');
+	// What runs on a part as it mounts or changes state, read off the element
+	// as bits-ui reads it: an `animationstart` right after an `animationend`
+	// on the same element is not always dispatched.
 	await page.evaluate(() => {
 		const w = window as unknown as { started: string[] };
 		w.started = [];
-		document.addEventListener('animationstart', (e) => {
-			const slot = (e.target as HTMLElement).dataset.slot ?? '?';
-			w.started.push(`${slot} ${e.animationName}`);
+		const note = (el: Element) => {
+			const slot = (el as HTMLElement).dataset.slot;
+			if (!slot) return;
+			for (const a of el.getAnimations()) {
+				w.started.push(`${slot} ${(a as CSSAnimation).animationName}`);
+			}
+		};
+		new MutationObserver((records) => {
+			for (const r of records) {
+				if (r.type === 'attributes') note(r.target as Element);
+				for (const n of Array.from(r.addedNodes)) {
+					if (!(n instanceof Element)) continue;
+					note(n);
+					n.querySelectorAll('[data-slot]').forEach(note);
+				}
+			}
+		}).observe(document.body, {
+			subtree: true,
+			childList: true,
+			attributes: true,
+			attributeFilter: ['data-state']
 		});
 	});
 	const started = () => page.evaluate(() => (window as unknown as { started: string[] }).started);
@@ -68,7 +88,14 @@ test('a confirmation animates in, and a sheet and its scrim animate out', async 
 	await expect
 		.poll(started)
 		.toEqual(expect.arrayContaining(['alert-dialog-content enter', 'alert-dialog-overlay enter']));
+	// Closed once it has opened: closed mid-entrance, bits-ui drops it at once.
+	await page
+		.getByRole('alertdialog')
+		.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
 	await page.keyboard.press('Escape');
+	await expect
+		.poll(started)
+		.toEqual(expect.arrayContaining(['alert-dialog-content exit', 'alert-dialog-overlay exit']));
 	await expect(page.getByRole('alertdialog')).toBeHidden();
 
 	await page.keyboard.press('Escape');

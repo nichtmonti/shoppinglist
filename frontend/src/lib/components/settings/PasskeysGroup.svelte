@@ -18,6 +18,7 @@
 	} from '#lib/actions/account.js';
 	import { addPasskey } from '#lib/auth/index.js';
 	import { AsyncAction, AsyncDialog } from '#lib/state/async-action.svelte.js';
+	import { Kept } from '#lib/state/kept.svelte.js';
 	import ConfirmDialog from '#lib/components/ui/ConfirmDialog.svelte';
 	import PromptDialog from '#lib/components/ui/PromptDialog.svelte';
 	import { maxBytesFor } from '#lib/field-contract.js';
@@ -64,6 +65,8 @@
 	// prompt. The prompts finish on close: a rename or a ceremony that went
 	// through still reloads the list.
 	let chosen = $state<PasskeyRow | null>(null);
+	// What its sheet shows, kept while it slides closed.
+	const shownKey = new Kept(() => chosen);
 	const renaming = new AsyncDialog<PasskeyRow>({ onClose: 'finish' });
 	const adding = new AsyncDialog<true>({ onClose: 'finish' });
 	const confirm = new AsyncDialog<{ id: string; label: string }>({ onClose: 'forget' });
@@ -127,11 +130,11 @@
 
 <Sheet
 	open={chosen !== null}
-	title={chosen ? passkeyLabel(chosen) : ''}
+	title={shownKey.value ? passkeyLabel(shownKey.value) : ''}
 	onclose={() => (chosen = null)}
 >
-	{#if chosen}
-		{@const p = chosen}
+	{#if shownKey.value}
+		{@const p = shownKey.value}
 		<!-- The note under the rows it explains, 8px below ([D-327]). -->
 		<div class="flex flex-col gap-2">
 			<RuledRows flush>
@@ -162,10 +165,10 @@
 <PromptDialog
 	open={renaming.current !== null}
 	title={t('settings_rename_passkey_named', {
-		name: renaming.current ? passkeyLabel(renaming.current) : ''
+		name: renaming.last ? passkeyLabel(renaming.last) : ''
 	})}
 	label={t('settings_rename_passkey_label')}
-	value={renaming.current?.friendly_name ?? ''}
+	value={renaming.last?.friendly_name ?? ''}
 	maxlength={maxBytesFor('credentials', 'friendly_name')}
 	busy={renaming.busy}
 	error={renaming.error}
@@ -186,10 +189,10 @@
 	oncancel={() => adding.close()}
 />
 
-{#if confirm.current}
-	{@const c = confirm.current}
+{#if confirm.last}
+	{@const c = confirm.last}
 	<ConfirmDialog
-		open
+		open={confirm.current !== null}
 		title={t('settings_remove_passkey')}
 		body={t('settings_remove_passkey_confirm', { name: c.label })}
 		confirmLabel={t('settings_remove_passkey_confirm_action')}

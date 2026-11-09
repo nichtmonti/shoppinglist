@@ -323,6 +323,109 @@ export async function installEffectSpies(page: Page): Promise<void> {
 	});
 }
 
+// ---- overlays leave whole ([D-349]) ---------------------------------------
+
+/**
+ * Watches every dialog and sheet the walk opens and closes: one that finished
+ * opening must animate out, and keep its content while it does. A fault is
+ * recorded as it happens, and walkSurface() reads them before each control:
+ *
+ * - "left without animating out": mounted only while open (`{#if}`), it went
+ *   with its state. One closed mid-entrance is not judged: bits-ui drops it
+ *   at once.
+ * - "emptied as it closed": it had fewer elements when its exit started than
+ *   just before, its content read off the open value, which the close made
+ *   null.
+ */
+export async function watchOverlays(page: Page): Promise<void> {
+	await page.addInitScript(() => {
+		const OVERLAY = '[role="dialog"], [role="alertdialog"]';
+		const w = window as unknown as { __e2eOverlayFaults: string[] };
+		w.__e2eOverlayFaults = [];
+		const seen = new WeakSet<Element>();
+		const opened = new WeakSet<Element>();
+		const exiting = new WeakSet<Element>();
+		const openSize = new WeakMap<Element, number>();
+		const size = (el: Element) => el.querySelectorAll('*').length;
+		const name = (el: Element) =>
+			el.querySelector('[data-dialog-title], [data-alert-dialog-title]')?.textContent?.trim() ||
+			'(no title)';
+		const running = (el: Element, keyframes: string) =>
+			el.getAnimations().filter((a) => (a as CSSAnimation).animationName === keyframes);
+		// Read off the elements, as bits-ui reads them: an `animationstart` right
+		// after an `animationend` on the same element is not always dispatched.
+		new MutationObserver((records) => {
+			for (const el of Array.from(document.querySelectorAll(OVERLAY))) {
+				const state = (el as HTMLElement).dataset.state;
+				if (state === 'open') {
+					// Its size while open, last taken before the mutations that close it.
+					openSize.set(el, size(el));
+					if (!seen.has(el)) {
+						seen.add(el);
+						// Opened once its entrance has run; one cut short is not judged.
+						void Promise.all(running(el, 'enter').map((a) => a.finished))
+							.then(() => opened.add(el))
+							.catch(() => {});
+					}
+				} else if (state === 'closed' && !exiting.has(el) && running(el, 'exit').length > 0) {
+					exiting.add(el);
+					const before = openSize.get(el);
+					if (before !== undefined && size(el) < before) {
+						w.__e2eOverlayFaults.push(
+							`"${name(el)}" emptied as it closed (${before} → ${size(el)} elements)`
+						);
+					}
+				}
+			}
+			for (const r of records) {
+				for (const n of Array.from(r.removedNodes)) {
+					if (!(n instanceof Element)) continue;
+					for (const el of [n, ...Array.from(n.querySelectorAll(OVERLAY))]) {
+						if (el.matches(OVERLAY) && opened.has(el) && !exiting.has(el)) {
+							w.__e2eOverlayFaults.push(`"${name(el)}" left without animating out`);
+						}
+					}
+				}
+			}
+		}).observe(document, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			attributeFilter: ['data-state']
+		});
+	});
+}
+
+/** Fails on what watchOverlays() recorded since the last call, and clears it. */
+async function expectOverlaysLeftWhole(page: Page, surface: string, after: string): Promise<void> {
+	const faults = await page.evaluate(() => {
+		const w = window as unknown as { __e2eOverlayFaults?: string[] };
+		const found = w.__e2eOverlayFaults ?? [];
+		w.__e2eOverlayFaults = [];
+		return found;
+	});
+	expect(
+		faults,
+		`${surface}: after ${after}, a dialog or sheet did not leave whole ([D-349]): ` +
+			'mounted only while open, or its content read off the open value instead of a Kept'
+	).toEqual([]);
+}
+
+/** Waits out every entrance under way, so the walk's Escape closes an opened
+ *  overlay, which watchOverlays() judges, not one still arriving. */
+async function settleEntrances(page: Page): Promise<void> {
+	await page
+		.evaluate(() =>
+			Promise.all(
+				document
+					.getAnimations()
+					.filter((a) => (a as CSSAnimation).animationName === 'enter')
+					.map((a) => a.finished.catch(() => {}))
+			)
+		)
+		.catch(() => {});
+}
+
 // ---- enumerating & relocating controls ------------------------------------
 
 interface ControlDesc {
@@ -733,6 +836,7 @@ export async function walkSurface(
 		`${surface}: enumeration found nothing to walk — selector/scope wrong?`
 	).toBeGreaterThan(0);
 
+	let previous = 'establishing the surface';
 	for (const desc of found) {
 		// BEFORE establish(), every iteration — not only after the click. The
 		// enumeration pass above ran establish() too, and for a menu/sheet
@@ -741,6 +845,8 @@ export async function walkSurface(
 		// bits-ui blocks. Closing at the end of an iteration cannot cover
 		// that, because the leftover is from before the loop.
 		await settleOverlays(page);
+		await expectOverlaysLeftWhole(page, surface, previous);
+		previous = `"${desc.name}" (${desc.role})`;
 		await page
 			.evaluate(() =>
 				document
@@ -808,6 +914,9 @@ export async function walkSurface(
 		}
 		// The start-of-iteration settleOverlays() is what guarantees a clear
 		// page; this Escape just gets the common case out of the way cheaply.
+		await settleEntrances(page);
 		await page.keyboard.press('Escape').catch(() => {});
 	}
+	await settleOverlays(page);
+	await expectOverlaysLeftWhole(page, surface, previous);
 }

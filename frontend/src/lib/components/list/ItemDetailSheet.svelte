@@ -32,6 +32,7 @@
 	import { PickerTile } from '#lib/components/ui/picker-tile/index.js';
 	import RemoveItemButton from './RemoveItemButton.svelte';
 	import Sheet from '#lib/components/ui/Sheet.svelte';
+	import { Kept } from '#lib/state/kept.svelte.js';
 	import { Field, FieldLabel } from '#lib/components/ui/field/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 
@@ -54,6 +55,9 @@
 	}
 
 	let { item, categories, templates, onclose, onedit, onremove, nameTaken }: Props = $props();
+
+	// What the sheet shows, kept while it slides closed; edits go to `item`.
+	const shown = new Kept(() => item);
 
 	let drafts = $state<ItemDrafts>({ name: '', quantity: '', note: '', category: '' });
 	// What the drafts last matched: as opened, then as committed. Only a field
@@ -134,18 +138,19 @@
 <svelte:window onpagehide={commitOnBlur} />
 
 {#snippet headerActions()}
-	{#if item}
-		<RemoveItemButton name={displayName(item)} onremove={remove} />
+	{#if shown.value}
+		<RemoveItemButton name={displayName(shown.value)} onremove={remove} />
 	{/if}
 {/snippet}
 
 <Sheet open={item !== null} title={t('list_detail_title')} onclose={close} {headerActions}>
-	{#if item}
+	{#if shown.value}
+		{@const row = shown.value}
 		<div class="flex flex-col">
 			<ProductMedia
-				url={item.image_url}
-				name={displayName(item)}
-				barcode={item.barcode}
+				url={row.image_url}
+				name={displayName(row)}
+				barcode={row.barcode}
 				failed={photoFailed}
 				onerror={() => (photoFailed = true)}
 				class="mb-3.5"

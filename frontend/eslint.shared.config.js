@@ -219,6 +219,15 @@ const pickerTile = {
 		'A picker tile is PickerTile from #lib/components/ui/picker-tile: it carries the chosen mark, a green edge and tick ([D-319], [D-332]).'
 };
 
+// [D-349] A dialog or sheet mounted only while open (`{#if …}<X open>`)
+// leaves at once instead of animating out.
+const mountedOpen = {
+	selector:
+		"SvelteElement[kind='component'] > SvelteStartTag > SvelteAttribute[boolean=true][key.name='open']",
+	message:
+		'A dialog or sheet stays mounted and opens from its state: `open={…}`, with its content from a Kept (#lib/state/kept), so bits-ui can animate it out ([D-349]).'
+};
+
 // [D-333] Lines a part already draws, written by hand.
 const handDrawn = [
 	{
@@ -502,6 +511,7 @@ export function sharedRest() {
 					iconSizeProp,
 					greyLine,
 					pickerTile,
+					mountedOpen,
 					...handDrawn,
 					...rawStyle
 				]

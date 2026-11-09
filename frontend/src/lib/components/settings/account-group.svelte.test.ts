@@ -205,7 +205,8 @@ describe('AccountGroup — the OIDC link entry', () => {
 		await waitFor(() => expect(vi.mocked(unlinkOidc)).toHaveBeenCalled());
 		expect(await screen.findByRole('button', { name: /^Mit Keycloak verbinden/ })).toBeDefined();
 		expect(screen.queryByText(/Verbunden mit/)).toBeNull();
-		expect(screen.queryByText('Keycloak-Anmeldung entfernen?')).toBeNull();
+		// The confirmation leaves once it has animated out.
+		await waitFor(() => expect(screen.queryByText('Keycloak-Anmeldung entfernen?')).toBeNull());
 	});
 
 	it('shows a refusal inside the dialog and keeps the login', async () => {

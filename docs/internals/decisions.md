@@ -254,6 +254,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 | [D-346] | A window on the previous build reloads into the new one when it is next hidden |  |
 | [D-347] | The functional suite runs in Firefox too, its accounts made in Chromium |  |
 | [D-348] | A bottom sheet is a bits-ui dialog, without swipe until bits-ui's Drawer ships |  |
+| [D-349] | A dialog or sheet stays mounted and leaves with its content |  |
 
 <!-- decisions-index:end -->
 
@@ -739,6 +740,8 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 <a id="D-278"></a>**[D-278] A bottom sheet has a real title (2026-10).** **The title** is a screen's: 19px bold in the text colour, sentence case, as in the app bar ([D-272]), not a small grey caps label quieter than the fields under it. It sits in the 40px row of the close button, which keeps [D-134]'s item sheet clear of scrolling. Confirmations and prompts are dialogs with their own titles. Its grabber was replaced by [D-348]: a sheet that cannot be dragged shows none. ([§9.1], [§12], [D-54], [D-134], [D-272])
 
 <a id="D-348"></a>**[D-348] A bottom sheet is a bits-ui dialog, without swipe until bits-ui's Drawer ships (2026-11).** `Sheet.svelte` draws a bits-ui `Dialog` at the bottom edge, the primitive of the app's dialogs, so focus trap and return, scroll lock, Escape, outside taps and Back ([D-230]) work as in every dialog, and a confirmation over a sheet shares its layer stack. Nothing moves the sheet for the on-screen keyboard: the browser brings a focused field into view. A sheet closes by its ✕, a tap outside, Escape or Back, and shows no grabber, since it cannot be dragged. When bits-ui releases its Drawer (a port of Base UI's, in review as `unstable_Drawer`), the sheet moves to it for swipe-to-close and the grabber comes back. *Rejected:* vaul-svelte (a pre-release unmaintained since 2025-03, whose keyboard shim lifted the sheet while Safari also scrolled it, taking the field off the top of an iPhone's screen). *Rejected:* Zag's drawer swiping the bits-ui dialog (a second layer stack, which closed a sheet another had handed over to, and glue to strip its dialog half). *Rejected:* a hand-built drag or a CSS scroll-snap sheet (a gesture mechanism of our own). ([§9.1], [D-54], [D-278])
+
+<a id="D-349"></a>**[D-349] A dialog or sheet stays mounted and leaves with its content (2026-11).** Every dialog and sheet is rendered from the start and opens from its state (`open={…}`): bits-ui keeps it in the page while it animates out, and drops it after. What it shows comes from a `Kept` (`#lib/state/kept`), the value it is open on and after the close the one it last showed, so it does not empty as it leaves; `AsyncDialog.last` is one. One closed while still arriving bits-ui drops at once, which is no fault. Lint refuses a bare `open` on a component, the `{#if …}<X open>` that mounts one only while open, and the arch walk ([D-124]) fails on a dialog or sheet it opened that leaves without animating out or with fewer elements than it had. *Rejected:* mounting under `{#if}` (it vanishes at once: bits-ui cannot animate what is gone). *Rejected:* clearing the data in `onOpenChangeComplete` (a second callback at every caller for what a kept value does alone). *Rejected:* keeping the last value by hand at each caller (five copies of one mechanism). ([§9.1], [D-54], [D-348])
 
 <a id="D-280"></a>**[D-280] The share sheet's invite sits on the sheet, and resetting the link is a red word (2026-10).** **The invite** sits on the sheet under a rule that separates it from the members, not in a box of its own; the QR keeps its white frame, which a scanner needs. **Resetting** is a red text button by the expiry line: red, since the old link stops working, but rare and redone by sharing the new one, so not a full-width slab louder than inviting ([D-214]'s grading). When minting failed it stands alone as the retry. „Kopieren“ is set in the app's face, not the link's monospace, and „Teilen“ carries the platform's share icon. *Rejected:* moving the reset into a confirmation behind a ⋮ (one more tap for the case where a link has leaked). ([§7.1], [§9.3], [D-214])
 
@@ -1347,3 +1350,4 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 [D-346]: #D-346
 [D-347]: #D-347
 [D-348]: #D-348
+[D-349]: #D-349

@@ -137,10 +137,10 @@
 	oncancel={() => nicknamePrompt.close()}
 />
 
-{#if unlinkDialog.current}
-	{@const c = unlinkDialog.current}
+{#if unlinkDialog.last}
+	{@const c = unlinkDialog.last}
 	<ConfirmDialog
-		open
+		open={unlinkDialog.current !== null}
 		title={t('settings_unlink_oidc_title', { name: c.name })}
 		body={t('settings_unlink_oidc_confirm', { name: c.name })}
 		confirmLabel={t('settings_unlink_oidc_confirm_action')}

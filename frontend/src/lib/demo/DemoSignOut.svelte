@@ -19,16 +19,14 @@
 	onclick={() => confirm.open(true)}
 />
 
-{#if confirm.current}
-	<ConfirmDialog
-		open
-		title={t('demo_signout')}
-		body={t('demo_signout_confirm')}
-		confirmLabel={t('demo_signout_confirm_action')}
-		danger="strong"
-		busy={confirm.busy}
-		error={confirm.error}
-		onconfirm={() => void confirm.run(() => deleteAccountForever())}
-		oncancel={() => confirm.close()}
-	/>
-{/if}
+<ConfirmDialog
+	open={confirm.current !== null}
+	title={t('demo_signout')}
+	body={t('demo_signout_confirm')}
+	confirmLabel={t('demo_signout_confirm_action')}
+	danger="strong"
+	busy={confirm.busy}
+	error={confirm.error}
+	onconfirm={() => void confirm.run(() => deleteAccountForever())}
+	oncancel={() => confirm.close()}
+/>

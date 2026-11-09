@@ -74,10 +74,10 @@
 	{/snippet}
 </SettingsGroup>
 
-{#if confirm.current}
-	{@const { impact, signIn } = confirm.current}
+{#if confirm.last}
+	{@const { impact, signIn } = confirm.last}
 	<ConfirmDialog
-		open
+		open={confirm.current !== null}
 		title={t('settings_delete_account')}
 		body={consequences(impact)}
 		confirmLabel={t('settings_delete_account_confirm')}

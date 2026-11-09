@@ -52,30 +52,26 @@
 	{/if}
 </SettingsGroup>
 
-{#if confirmingDevice}
-	<ConfirmDialog
-		open
-		title={t('settings_signout_device')}
-		body={t('settings_signout_device_unsynced')}
-		confirmLabel={t('settings_signout_device_anyway')}
-		danger
-		onconfirm={() => void logout()}
-		oncancel={() => (confirmingDevice = false)}
-	/>
-{/if}
+<ConfirmDialog
+	open={confirmingDevice}
+	title={t('settings_signout_device')}
+	body={t('settings_signout_device_unsynced')}
+	confirmLabel={t('settings_signout_device_anyway')}
+	danger
+	onconfirm={() => void logout()}
+	oncancel={() => (confirmingDevice = false)}
+/>
 
-{#if everywhere.current}
-	<ConfirmDialog
-		open
-		title={t('settings_logout_everywhere')}
-		body={$queued.length > 0
-			? t('settings_logout_everywhere_confirm_unsynced')
-			: t('settings_logout_everywhere_confirm')}
-		confirmLabel={t('settings_logout_everywhere_confirm_action')}
-		danger={$queued.length > 0}
-		busy={everywhere.busy}
-		error={everywhere.error}
-		onconfirm={() => void confirmLogoutEverywhere()}
-		oncancel={() => everywhere.close()}
-	/>
-{/if}
+<ConfirmDialog
+	open={everywhere.current !== null}
+	title={t('settings_logout_everywhere')}
+	body={$queued.length > 0
+		? t('settings_logout_everywhere_confirm_unsynced')
+		: t('settings_logout_everywhere_confirm')}
+	confirmLabel={t('settings_logout_everywhere_confirm_action')}
+	danger={$queued.length > 0}
+	busy={everywhere.busy}
+	error={everywhere.error}
+	onconfirm={() => void confirmLogoutEverywhere()}
+	oncancel={() => everywhere.close()}
+/>

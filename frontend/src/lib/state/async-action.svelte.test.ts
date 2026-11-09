@@ -104,6 +104,22 @@ describe("AsyncDialog onClose: 'forget'", () => {
 		expect(dialog.current).toBeNull();
 	});
 
+	it('keeps what it last opened on after it closes, to show while animating out', async () => {
+		// Read after each step, as the dialog's markup reads it.
+		const dialog = new AsyncDialog<Dialog>({ onClose: 'forget' });
+		dialog.open({ kind: 'rename', listId: 'l1' });
+		expect(dialog.last).toEqual({ kind: 'rename', listId: 'l1' });
+		dialog.close();
+		expect(dialog.current).toBeNull();
+		expect(dialog.last).toEqual({ kind: 'rename', listId: 'l1' });
+
+		dialog.open({ kind: 'leave' });
+		expect(dialog.last).toEqual({ kind: 'leave' });
+		await dialog.run(() => Promise.resolve());
+		expect(dialog.current).toBeNull();
+		expect(dialog.last).toEqual({ kind: 'leave' });
+	});
+
 	it('STAYS OPEN on failure, with the error to render inside it', async () => {
 		// The invariant the whole class exists for. These surfaces were
 		// window.confirm once, which resolved before the mutation ran — so a

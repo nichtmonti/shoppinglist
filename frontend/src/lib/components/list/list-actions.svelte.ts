@@ -103,8 +103,6 @@ export class ListActions {
 	readonly dialog = new AsyncDialog<ListDialog>({ onClose: 'forget' });
 	/** The list whose share sheet is open, or null. */
 	shareFor = $state<string | null>(null);
-	/** The list it last opened on, which it shows while it slides closed. */
-	sharedLast = $state('');
 	#isOnline: () => boolean;
 	#afterLeave: () => Promise<void> | void;
 
@@ -126,7 +124,6 @@ export class ListActions {
 				break;
 			case 'share':
 				this.shareFor = listId;
-				this.sharedLast = listId;
 				break;
 			case 'rename':
 				this.dialog.open({ kind: 'rename', listId, current: name });

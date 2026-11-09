@@ -3,6 +3,7 @@
 // the still-open surface to render in.
 import { reportUncaught } from '#lib/client-errors.js';
 import { failureMessage, isAppError } from '#lib/failure-message.js';
+import { Kept } from '#lib/state/kept.svelte.js';
 
 /**
  * The outcome of one attempt; a union rather than `T | undefined` so a void
@@ -75,8 +76,9 @@ export interface AsyncDialogOptions {
  * parameters travel with the flag instead of in variables cleared in step.
  */
 export class AsyncDialog<K> extends AsyncAction {
-	/** The open dialog, or null for none. */
+	/** The open dialog, or null for none: what decides whether it shows. */
 	current = $state<K | null>(null);
+	readonly #shown = new Kept(() => this.current);
 	#forgetOnClose: boolean;
 
 	constructor(options: AsyncDialogOptions) {
@@ -88,6 +90,15 @@ export class AsyncDialog<K> extends AsyncAction {
 	open(next: K): void {
 		if (this.#forgetOnClose || !this.busy) this.reset();
 		this.current = next;
+	}
+
+	/**
+	 * What the dialog shows: `current`, kept after it closes so the dialog
+	 * keeps its content while it animates out. A caller mounts the dialog
+	 * from the first `last` on and passes `current` as its `open`.
+	 */
+	get last(): K | null {
+		return this.#shown.value;
 	}
 
 	close(): void {
