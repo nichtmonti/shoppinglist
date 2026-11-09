@@ -6,7 +6,9 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
-## Unreleased
+## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
+
+**For operators.** Nothing to do before upgrading.
 
 - **On an iPhone, a sheet stays in view while you type in it.** Tapping a field in a sheet, such as the name, quantity or note in an item's details, used to push the sheet so far up that only its bottom row was left on the screen, without the field ([D-348]).
 - **A sheet no longer closes when pulled down, and has no handle at its top.** Close it with its ✕, by tapping outside it, or with Back. Pulling it down comes back once the component library it is built on offers it ([D-348]).
