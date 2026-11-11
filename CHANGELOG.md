@@ -11,6 +11,13 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 **For operators.** Nothing to do before upgrading.
 
 - **On a phone, tapping a shop tile or row no longer leaves it subtly highlighted.** A tap used to light the tapped tile or row the way a mouse hovering over it does, and it stayed lit until the next tap elsewhere; a toast's action button had the same ([D-350]).
+- **The red buttons, such as "Leave list" and "Delete account", now show that they are pressed**, as the green one does: the solid red darkens, the soft one's edge turns red ([D-350]).
+- **A shop tile or row whose quantity is cut short shows its ⓘ**, which opens the item with its whole quantity, as a cut name or note already did ([D-83]).
+- **A scanned product's name stands out under its photo**, in the size the product's own sheet names it in.
+- **An invite link's expiry names the month in English**: “Valid until Dec 9, 2026” rather than “12/09/2026”, which reads two ways. German keeps “09.12.2026”.
+- **In the dark theme, the invite QR code sits on a white card** instead of a white square inside a dark one.
+- **In "Share & members", the line under the members sits right under the last one**, and ends where the lines between them do ([D-326]).
+- **On a phone, the import's text field no longer shows a resize grip.**
 
 ## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
 

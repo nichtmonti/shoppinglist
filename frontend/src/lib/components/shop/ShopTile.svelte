@@ -51,12 +51,14 @@
 
 	let model = $derived(tileModel(item, { photoFailed, row }));
 
-	// Truncation ([D-83]): whether the name's clamp or the note's ellipsis cuts
-	// text, which decides the door ([D-83]) and the cut name's alignment. Row
-	// names are cut in width, grid names in height.
+	// Truncation ([D-83]): whether the name's clamp or the note's or the
+	// quantity's ellipsis cuts text, which decides the door ([D-83]); the
+	// name's also decides its alignment. Row names are cut in width, grid
+	// names in height.
 	let tileEl = $state<HTMLElement | null>(null);
 	let nameEl = $state<HTMLElement | null>(null);
 	let noteEl = $state<HTMLElement | null>(null);
+	let qtyEl = $state<HTMLElement | null>(null);
 	let textEl = $state<HTMLElement | null>(null);
 	// How far above the tile's foot the text starts, for the photo scrim
 	// ([D-83]); null without a scrim. The lead covers the glyphs' shadow.
@@ -66,6 +68,7 @@
 	let scrimmed = $derived(model.kind === 'product' && !row);
 	let nameCut = $state(false);
 	let noteCut = $state(false);
+	let qtyCut = $state(false);
 
 	let measuredContent = $derived(
 		[model.kind, model.media, model.name, model.note, model.quantity, model.hidesDetails].join(
@@ -76,10 +79,12 @@
 	$effect(() => {
 		const name = nameEl;
 		const note = noteEl;
+		const qty = qtyEl;
 		void remeasure;
 		void row;
 		void measuredContent;
 		noteCut = note ? note.scrollWidth > note.clientWidth + 1 : false;
+		qtyCut = qty ? qty.scrollWidth > qty.clientWidth + 1 : false;
 		const tile = tileEl;
 		const text = textEl;
 		const top =
@@ -94,7 +99,7 @@
 			: false;
 	});
 
-	let door = $derived(showsDoor(model, nameCut || noteCut));
+	let door = $derived(showsDoor(model, nameCut || noteCut || qtyCut));
 </script>
 
 {#snippet leadFace()}
@@ -169,6 +174,7 @@
 				? 'tile-photo'
 				: 'tile'}
 		aria-hidden="true"
+		bind:ref={qtyEl}
 	/>
 	{#if door && !row}
 		<button

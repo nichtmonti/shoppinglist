@@ -95,13 +95,15 @@ const collators = new Map<Locale, Intl.Collator>();
 const relativeFormats = new Map<string, Intl.RelativeTimeFormat>();
 const dateFormats = new Map<Locale, Intl.DateTimeFormat>();
 
-/** A calendar date in the active locale's numeric form ("04.10.2026",
- *  "10/04/2026"); an unparseable input comes back as given. */
+/** A calendar date in the active locale's medium form: German's numeric
+ *  "04.10.2026", English's "Oct 4, 2026", since a numeric English date reads
+ *  month-first to some and day-first to others. An unparseable input comes
+ *  back as given. */
 export function formatDate(iso: string): string {
 	const locale = getLocale();
 	let fmt = dateFormats.get(locale);
 	if (!fmt) {
-		fmt = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+		fmt = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' });
 		dateFormats.set(locale, fmt);
 	}
 	const ms = stampMs(iso);

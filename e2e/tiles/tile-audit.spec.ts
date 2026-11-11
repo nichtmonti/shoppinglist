@@ -13,7 +13,8 @@ import { openGallery } from './gallery';
 //     their element first);
 //   - the name squeezed below 24px (at 200% zoom the quantity and door keep
 //     their width and the name gets what is left);
-//   - a quantity cut without an ellipsis.
+//   - a quantity cut without an ellipsis;
+//   - a name, note or quantity cut with no ⓘ door to read it whole.
 //
 // Each of these is a geometry number that goes stale when a neighbouring
 // part changes, which is why it runs as its own harness ([D-83]).
@@ -114,6 +115,15 @@ function audit(page: Page) {
 				getComputedStyle(qty).textOverflow !== 'ellipsis'
 			)
 				issues.push('quantity cut without an ellipsis');
+			// The door shows while the tile hides something ([D-83]): any cut
+			// text opens it, the quantity's as much as the name's or note's.
+			const note = tile.querySelector('.tile-note');
+			const cut =
+				name.scrollHeight > name.clientHeight + 1 ||
+				name.scrollWidth > name.clientWidth + 1 ||
+				(note !== null && note.scrollWidth > note.clientWidth + 1) ||
+				(qty !== null && qty.scrollWidth > qty.clientWidth + 1);
+			if (cut && !tile.hasAttribute('data-door')) issues.push('text cut without a door');
 			if (issues.length)
 				findings.push(
 					`${wrap.dataset.item} (${tile.dataset.kind}${door ? '+door' : ''}): ${issues.join(', ')}`

@@ -164,6 +164,13 @@
 		background-position: right top;
 	}
 }
+/* The same line under the last row, where another part follows the rows. */
+@utility ruled-rows-closed {
+	background-image: linear-gradient(var(--border), var(--border));
+	background-repeat: no-repeat;
+	background-size: calc(100% - var(--rule-inset, 0px)) 1px;
+	background-position: right bottom;
+}
 
 /* A highlighted option in a list of rows (the typeahead): a 3px line on its
  * start edge in the text green, beside the soft-green fill ([D-321]). The
@@ -206,6 +213,7 @@
 	--color-amber-line: var(--amber-line);
 	--color-danger: var(--danger);
 	--color-danger-foreground: var(--danger-foreground);
+	--color-danger-press: var(--danger-press);
 	--color-danger-soft: var(--danger-soft);
 	--color-danger-line: var(--danger-line);
 
@@ -317,9 +325,14 @@
 
 	--surface: #ffffff;
 	--surface-2: #ffffff;
+	/* The QR's card, white in both themes: the code draws dark modules on
+	   its own white, and a scanner reads it that way round. */
+	--qr-ground: #ffffff;
 	--line-strong: #cbcbc5; /* oklch(0.84 0.008 100) */
 	--faint: #8a8984; /* oklch(0.63 0.008 100) — icons and glyphs only, never text: 3:1 on every surface */
 	--primary-press: #00662b; /* oklch(0.44 0.13 152) */
+	/* The solid red's press: the primary's step darker ([D-350]). */
+	--danger-press: #a52014; /* oklch(0.47 0.17 30) */
 	--primary-soft: #def6e3; /* oklch(0.95 0.035 152) */
 	--primary-line: #b8e0c1; /* oklch(0.87 0.06 152) */
 	/* The SyncBanner pending text and count glyph ([D-102]: expired moved to
@@ -559,6 +572,7 @@
 	/* The primary fill's pressed/hover shade — darker, so white stays AA
 	   (5.9:1); a lighter one drops below it. */
 	--primary-press: #007439; /* oklch(0.49 0.13 152) */
+	--danger-press: #db6656; /* oklch(0.65 0.15 30) */
 	--primary-soft: #172c1c; /* oklch(0.27 0.04 150) */
 	--primary-line: #294b31; /* oklch(0.38 0.06 150) */
 	--amber: #e4ac59; /* oklch(0.78 0.12 75) */

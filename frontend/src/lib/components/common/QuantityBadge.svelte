@@ -21,9 +21,17 @@
 		'aria-hidden'?: 'true';
 		/** Placement outside a tile; never inside one ([D-83]). */
 		class?: string;
+		/** The chip, for a tile that measures whether it cuts the quantity. */
+		ref?: HTMLElement | null;
 	}
 
-	let { quantity, variant = 'tile', 'aria-hidden': ariaHidden, class: className }: Props = $props();
+	let {
+		quantity,
+		variant = 'tile',
+		'aria-hidden': ariaHidden,
+		class: className,
+		ref = $bindable(null)
+	}: Props = $props();
 </script>
 
 {#if quantity}
@@ -40,6 +48,7 @@
 			className
 		)}
 		dir="auto"
+		bind:this={ref}
 		aria-hidden={ariaHidden}>{quantity}</span
 	>
 {/if}

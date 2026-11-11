@@ -141,7 +141,8 @@
 					onerror={() => (photoFailed = true)}
 					class="h-40"
 				/>
-				<p class="text-center text-foreground text-sm py-2" data-testid="scan-message">
+				<!-- Named as the product sheet names it: the result is the product. -->
+				<p class="type-heading text-center py-2" dir="auto" data-testid="scan-message">
 					{displayName(scan.foundProduct)}
 				</p>
 			</div>

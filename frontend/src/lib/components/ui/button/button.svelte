@@ -33,9 +33,13 @@
 				// undone or redone (remove a passkey, leave a shared list, unlink a
 				// login), the solid one for what nothing brings back (deleting the
 				// account, the last member leaving a list) — so the two never look
-				// alike.
-				destructive: 'bg-danger-soft text-danger border border-danger-line',
-				danger: 'bg-danger text-danger-foreground border border-danger'
+				// alike. Both answer a press, the touch's one feedback ([D-350]):
+				// the solid darkens, the soft firms its edge to the solid red, since
+				// a darker soft fill takes the red words below AA.
+				destructive:
+					'bg-danger-soft text-danger border border-danger-line hover:border-danger active:border-danger',
+				danger:
+					'bg-danger text-danger-foreground border border-danger hover:border-danger-press hover:bg-danger-press active:border-danger-press active:bg-danger-press'
 			},
 			size: {
 				// One height for every text button ([D-312]); `sm` sits inside a

@@ -234,7 +234,9 @@
 {#snippet youBadge()}<Badge tone="primary">{t('share_you')}</Badge>{/snippet}
 
 <Sheet open={props.open} title={t('share_title')} onclose={props.onclose}>
-	<RuledRows flush class="roster">
+	<!-- Closed: its last rule parts it from the invite below, drawn as its
+	     row rules are and at its last row's edge ([D-326]). -->
+	<RuledRows flush closed class="roster">
 		{#each roster as m (m.id)}
 			{@const me = m.account === myAccountId}
 			<SettingsRow
@@ -254,9 +256,10 @@
 			<ErrorText>{inviteAction.error}</ErrorText>
 		{/if}
 		{#if shown}
-			<!-- On the sheet itself under a rule, not in a box of its own: a box in
-			     the sheet, with the QR's frame inside it, nested three deep ([D-280]). -->
-			<div class="flex flex-col gap-3 border-t border-border pt-4">
+			<!-- On the sheet itself under the roster's rule, not in a box of its
+			     own: a box in the sheet, with the QR's frame inside it, nested
+			     three deep ([D-280]). -->
+			<div class="flex flex-col gap-3">
 				{#if url}
 					<!-- The band: its chosen side stands out against the track. -->
 					<Segmented
@@ -294,7 +297,7 @@
 							{:else}
 								<div class="flex flex-col items-center gap-1.5">
 									<div
-										class="qr size-33 bg-surface border border-border rounded-card p-2 [&_svg]:block [&_svg]:size-full"
+										class="qr size-33 bg-(--qr-ground) border border-border rounded-card p-2 [&_svg]:block [&_svg]:size-full"
 										data-testid="qr"
 									>
 										<!-- eslint-disable-next-line svelte/no-at-html-tags -- our own qrcode-generator SVG over a URL we minted (crypto-random token, §7.1); never user-supplied HTML. -->
@@ -322,7 +325,7 @@
 			</div>
 		{:else if linkless}
 			<!-- [D-330] No live link: nobody can join until a member creates one. -->
-			<div class="flex flex-col gap-3 border-t border-border pt-4">
+			<div class="flex flex-col gap-3">
 				<Hint>{t('share_no_link')}</Hint>
 				<Button type="button" disabled={inviteAction.busy} onclick={() => void handleReset()}>
 					{t('share_create_link')}
