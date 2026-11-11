@@ -146,8 +146,15 @@
 			class="row-name flex-1 min-w-0 flex flex-col justify-center gap-px self-stretch -my-2.5 focus-visible:-outline-offset-2 text-start cursor-pointer"
 			onclick={() => onopen?.()}
 		>
-			<span id={nameId} class="row-name-main text-base/tight font-book truncate" dir="auto"
-				>{displayName(item)}</span
+			<!-- A name alone may take the line a note would have, inside the
+			     same 52px row, so long names that start alike stay apart
+			     ([D-354]); with a note or a hint it keeps one line. -->
+			<span
+				id={nameId}
+				class="row-name-main text-base/tight font-book {item.note || hint
+					? 'truncate'
+					: 'line-clamp-2 hyphens-auto wrap-anywhere'}"
+				dir="auto">{displayName(item)}</span
 			>
 			{#if item.note}
 				<span class="text-note/flush font-book text-muted-foreground truncate" dir="auto"

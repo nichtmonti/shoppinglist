@@ -625,6 +625,23 @@ describe('ListView — detail sheet', () => {
 		expect(screen.getByRole('dialog')).toBeDefined();
 	});
 
+	// [D-354] A name alone may wrap to a second line, the line a note would
+	// take, so names that start alike stay apart; with a note it keeps one.
+	it('lets a name without a note take two lines, and one with a note one', async () => {
+		await seedList({
+			listId: LIST_ID,
+			items: [
+				makeItem({ list: LIST_ID, name: 'Haselnuss-Vollmilchschokolade', note: null }),
+				makeItem({ list: LIST_ID, name: 'Bergkäse', note: 'am Stück' })
+			]
+		});
+		await renderList();
+		const alone = (await screen.findByText('Haselnuss-Vollmilchschokolade')).classList;
+		expect(alone).toContain('line-clamp-2');
+		expect(alone).not.toContain('truncate');
+		expect(screen.getByText('Bergkäse').classList).toContain('truncate');
+	});
+
 	// [D-351] The aisle grid is icons only; a caption over it names the one
 	// chosen, and follows a new pick.
 	it('names the chosen aisle over the item sheet’s aisle grid', async () => {
