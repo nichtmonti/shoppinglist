@@ -111,7 +111,8 @@ describe('PasskeysGroup', () => {
 			props: { preloaded: [{ id: 'c1', friendly_name: 'Handy', last_used_at: null }] }
 		});
 		expect(screen.getByRole('button', { name: /^Handy/ })).toBeDefined();
-		expect(screen.getByText(t('settings_backup_key_nudge'))).toBeDefined();
+		// [D-351] A group's footnote is the row hints' size, not a larger line.
+		expect(screen.getByText(t('settings_backup_key_nudge')).classList).toContain('text-micro');
 		expect(credentialsGetFullList).not.toHaveBeenCalled();
 	});
 

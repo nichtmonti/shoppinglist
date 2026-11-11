@@ -37,7 +37,7 @@
 	import SubScreenTitle from '#lib/components/common/SubScreenTitle.svelte';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
-	import GripVertical from '@lucide/svelte/icons/grip-vertical';
+	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
 	import Lock from '@lucide/svelte/icons/lock';
 	import Plus from '@lucide/svelte/icons/plus';
 	import SettingsRow from '#lib/components/settings/SettingsRow.svelte';
@@ -107,7 +107,25 @@
 <SubScreenTitle
 	title={arrangeOpen ? t('categories_arrange_title') : t('categories_edit')}
 	meta={arrangeOpen ? t('arrange_hint') : undefined}
-/>
+>
+	<!-- Arranging is what makes the shop follow the store, so it sits in the
+	     bar, where home keeps its sort, not under every row ([D-351]). While
+	     arranging, "Fertig" is the one way out, as on home. -->
+	{#snippet action()}
+		{#if !arrangeOpen && movable.length > 1}
+			<Button
+				bind:ref={arrangeButton}
+				variant="ghost"
+				size="icon"
+				type="button"
+				aria-label={t('categories_arrange')}
+				onclick={() => openMode('arrange-categories')}
+			>
+				<ArrowUpDown class="bar-icon size-5" />
+			</Button>
+		{/if}
+	{/snippet}
+</SubScreenTitle>
 
 {#if arrangeOpen}
 	<RuledRows inset="var(--plate-rule-inset)">
@@ -265,20 +283,6 @@
 			{/if}
 		</section>
 	{/if}
-
-	<div class="mx-4 mt-3.5 mb-1 flex flex-col">
-		{#if movable.length > 1}
-			<Button
-				bind:ref={arrangeButton}
-				variant="outline"
-				class="ce-arrange gap-2"
-				onclick={() => openMode('arrange-categories')}
-			>
-				<GripVertical />
-				{t('categories_arrange')}
-			</Button>
-		{/if}
-	</div>
 {/if}
 
 <CategoryFormSheet

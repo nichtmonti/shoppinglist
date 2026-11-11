@@ -42,4 +42,11 @@ describe('Segmented', () => {
 		await fireEvent.keyDown(shop, { key: 'ArrowRight' });
 		expect(onchange).toHaveBeenCalledWith('list');
 	});
+
+	// [D-351] A choice chip is pressed like a control and has a control's
+	// corners; fully round is left to badges and counts.
+	it('gives a choice chip the control radius', () => {
+		const { shop, list } = renderSegmented();
+		for (const chip of [shop, list]) expect(chip.classList).toContain('rounded-control');
+	});
 });

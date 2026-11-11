@@ -74,7 +74,7 @@ export async function revokeInvite(listId: string): Promise<void> {
 	await pb.send(`/api/lists/${listId}/invite/revoke`, { method: 'POST', body: {} });
 }
 
-/** "Link zurücksetzen": the server rotates on a mint, in one transaction [D-31]. */
+/** „Neuer Link“: the server rotates on a mint, in one transaction [D-31]. */
 export async function resetInvite(listId: string): Promise<Invite> {
 	return createInvite(listId);
 }

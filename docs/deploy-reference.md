@@ -81,7 +81,7 @@ invite links still let people with an account join a list.
 | Without a link | With a list's invite link | The list's share sheet |
 |:-:|:-:|:-:|
 | <img src="images/signup-invite-only.png" width="200" alt="The auth screen under invite: passkey sign-in, and a note that new accounts need an invite link"> | <img src="images/signup-invite-join.png" width="200" alt="An invite link opened without an account: the list's preview above the sign-up form"> | <img src="images/share-sheet.png" width="200" alt="The share sheet: Anna and Ben, the invite link, and the reset and revoke buttons"> |
-| <sub>No "Create account", only<br>a note to ask for a link.</sub> | <sub>The list's preview, and an<br>account straight onto it.</sub> | <sub>Where the link comes from;<br>"Reset link" retires it.</sub> |
+| <sub>No "Create account", only<br>a note to ask for a link.</sub> | <sub>The list's preview, and an<br>account straight onto it.</sub> | <sub>Where the link comes from;<br>"New link" retires it.</sub> |
 
 **The setup link.** With `invite` and no account yet, every boot logs a link
 for the first account ([the log line](deploying.md#3-first-boot)). It admits
@@ -92,7 +92,7 @@ valid.
 **Invite links under `invite`.** A newcomer opening a list's invite link
 ("Share & members") can create an account there and is added to that list
 in the same step, so everyone who came in shows up in some list's members. A
-link lasts 30 days; "Reset link", "Revoke link" or any member leaving retires it.
+link lasts 30 days; "New link", "Revoke link" or any member leaving retires it.
 
 The switch covers passkey sign-up only. With OIDC on, the provider decides who
 may sign in, and a first sign-in creates the account: restrict the client at
@@ -505,7 +505,7 @@ allow it only those hosts, see [an egress allowlist](#an-egress-allowlist).
 **Invite links are bearer tokens.** Anyone holding one can join that list
 while it lasts. It travels in the URL fragment, so no page load and no access log
 carries it (the app sends it only in a request's body), but whoever it is
-forwarded to can use it. If one leaks, "Reset link"
+forwarded to can use it. If one leaks, "New link"
 replaces it and "Revoke link" ends it.
 
 **Only deleting the volume deletes everything.** The cleanup jobs

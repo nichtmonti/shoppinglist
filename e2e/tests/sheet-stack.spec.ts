@@ -22,7 +22,7 @@ async function openShareSheet(page: Page, who: string): Promise<Locator> {
 test('a confirmation over the sheet keeps Escape, taps and focus', async ({ page }) => {
 	const sheet = await openShareSheet(page, 'Stack');
 
-	await page.getByRole('button', { name: 'Link zurücksetzen' }).click();
+	await page.getByRole('button', { name: 'Neuer Link' }).click();
 	const confirm = page.getByRole('alertdialog');
 	await expect(confirm).toBeVisible();
 
@@ -84,7 +84,7 @@ test('a confirmation, a sheet and their scrims animate in and out', async ({ pag
 	});
 	const started = () => page.evaluate(() => (window as unknown as { started: string[] }).started);
 
-	await page.getByRole('button', { name: 'Link zurücksetzen' }).click();
+	await page.getByRole('button', { name: 'Neuer Link' }).click();
 	await expect
 		.poll(started)
 		.toEqual(expect.arrayContaining(['alert-dialog-content enter', 'alert-dialog-overlay enter']));

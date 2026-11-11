@@ -40,6 +40,7 @@ import { COLOR_LABEL_KEYS, PALETTE } from '#lib/categories.js';
 import { t } from '#lib/i18n/index.js';
 import * as appState from '#lib/test-kit/app-state.svelte.js';
 import CategoryEditor from './CategoryEditor.svelte';
+import SubScreenAction from '#lib/test-kit/SubScreenAction.svelte';
 import { addMissingCategories, persistReorder } from '#lib/actions/categories.js';
 
 const LIST_ID = 'list-1';
@@ -108,6 +109,8 @@ async function seedStandard() {
 // name: null) showing its resolved template default rather than the raw slug.
 async function renderEditor() {
 	render(CategoryEditor, { props: { listId: LIST_ID } });
+	// [D-351] Arranging is the bar's action, which the list layout renders.
+	render(SubScreenAction);
 	await waitFor(() => {
 		expect(labelOf(rowFor('cat-produce'))).toBe('Obst & Gemüse');
 	});

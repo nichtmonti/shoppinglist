@@ -43,4 +43,20 @@ describe('QuantityControl', () => {
 		await fireEvent.blur(input);
 		expect(oncommit).not.toHaveBeenCalled();
 	});
+
+	// [D-351] A set quantity is a fact and reads in the text colour; the offer
+	// to add one stays grey, so the column does not mix the two in one voice.
+	it('draws a set quantity in the text colour and the offer in grey', () => {
+		const { unmount } = render(QuantityControl, {
+			item: makeItem({ list: 'L', name: 'Käse', quantity: '200 g' })
+		});
+		const set = screen.getByText('200 g').closest('button')!;
+		expect(set.classList).toContain('text-foreground');
+		expect(set.classList).not.toContain('text-muted-foreground');
+		unmount();
+		render(QuantityControl, { item: makeItem({ list: 'L', name: 'Käse', quantity: '' }) });
+		const offer = document.querySelector('.qty-unset')!;
+		expect(offer.classList).toContain('text-muted-foreground');
+		expect(offer.classList).not.toContain('text-foreground');
+	});
 });

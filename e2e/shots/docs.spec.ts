@@ -69,7 +69,7 @@ test('who can sign up: SHOPPINGLIST_SIGNUP=invite', async ({ browser }) => {
 	await createAccount(ben, 'en', 'Ben');
 	await expect(ben).toHaveURL(/\/list\/[^/]+$/, { timeout: 15_000 });
 
-	// The owner's share sheet, with Ben in it: the link and "Reset link".
+	// The owner's share sheet, with Ben in it: the link and "New link".
 	const sheet = await openShareSheet(anna);
 	await expect(sheet.getByText('Ben', { exact: true })).toBeVisible();
 	await expect(sheet.getByRole('button', { name: msg('share_reset_link') })).toBeVisible();

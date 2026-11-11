@@ -124,7 +124,9 @@
 		{/if}
 	{/snippet}
 	{#snippet actions()}
-		<!-- A sub-screen keeps only what acts on it: previous items sort. -->
+		<!-- A sub-screen keeps only what acts on it: previous items sort, or the
+		     screen's own action (the category editor's arrange, [D-351]). -->
+		{#if known && subScreen.action}{@render subScreen.action()}{/if}
 		{#if known && (onListPage || onPreviousItems)}<ItemSort
 				history={onPreviousItems}
 				density={onListPage && $viewLoaded && $listView === 'shop'}

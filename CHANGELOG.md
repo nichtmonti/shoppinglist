@@ -18,6 +18,12 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **In the dark theme, the invite QR code sits on a white card** instead of a white square inside a dark one.
 - **In "Share & members", the line under the members sits right under the last one**, and ends where the lines between them do ([D-326]).
 - **On a phone, the import's text field no longer shows a resize grip.**
+- **In the planning list, a set quantity reads in the text colour**, while “+ Quantity” stays grey, so amounts and the offer to add one no longer look alike ([D-351]).
+- **An item's sheet names the aisle it is in** over the aisle icons, as in “Category · Dairy & chilled” ([D-351]).
+- **“Reset link” is now "New link", and no longer red.** Only "Revoke link" is red, since a new link leaves the list one that works; its confirmation reads "Create new link" ([D-351]).
+- **"Change order" moved into the app bar** of "Edit categories", as an ↑↓ button at the top, instead of a button under all the aisles ([D-351]).
+- **The "Language" and "Appearance" choices in Settings have the corners of a button** rather than fully round ones ([D-351]).
+- **A settings group's grey note, such as the one about a second passkey, is the size of the hints above it** ([D-351]).
 
 ## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
 
@@ -1042,3 +1048,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-348]: docs/internals/decisions.md#D-348
 [D-349]: docs/internals/decisions.md#D-349
 [D-350]: docs/internals/decisions.md#D-350
+[D-351]: docs/internals/decisions.md#D-351

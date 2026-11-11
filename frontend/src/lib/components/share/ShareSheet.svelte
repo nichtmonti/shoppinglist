@@ -1,7 +1,7 @@
 <!--
   §7.1 Share & members sheet: the roster (§7.4) above the list's single active
   invite link, with copy, the system share sheet, a QR code, its expiry,
-  "Link zurücksetzen" and "Link zurückziehen" ([D-310]). A list with no live
+  „Neuer Link“ and "Link zurückziehen" ([D-310]). A list with no live
   link offers "Link erstellen": opening the sheet never mints one ([D-330]).
 
   The roster refreshes on open, every ROSTER_POLL_MS while open, and once on
@@ -11,7 +11,7 @@
   Any member reads the live link's token: the server keeps it beside the hash
   it looks invites up by, behind the member-only rules, and blanks it on
   revocation ([D-294]). A link minted before that has no token, so it shows
-  no URL until "Link zurücksetzen" mints one (#lib/actions/invites).
+  no URL until „Neuer Link“ mints one (#lib/actions/invites).
 -->
 <script lang="ts">
 	import OfflineHint from '#lib/components/common/OfflineHint.svelte';
@@ -209,25 +209,26 @@
 	}
 </script>
 
-{#snippet redWord(label: string, onclick: () => void, cls = '-mx-2.5 self-start')}
-	<!-- A red word, not a red slab ([D-280]): resetting and revoking are rare
-	     and can be redone, so neither should be the loudest thing in the sheet. -->
-	<Button
-		variant="ghost-destructive"
-		size="sm"
-		class="gap-1.5 {cls}"
-		disabled={inviteAction.busy}
-		{onclick}
-	>
+{#snippet word(
+	label: string,
+	onclick: () => void,
+	cls = '-mx-2.5 self-start',
+	variant: 'ghost' | 'ghost-destructive' = 'ghost-destructive'
+)}
+	<!-- A word, not a slab ([D-280]): resetting and revoking are rare and can be
+	     redone, so neither is the loudest thing in the sheet. Only revoking is
+	     red: a new link leaves the list one that works ([D-351]). -->
+	<Button {variant} size="sm" class="gap-1.5 {cls}" disabled={inviteAction.busy} {onclick}>
 		{label}
 	</Button>
 {/snippet}
 
 {#snippet resetButton(cls?: string)}
-	{@render redWord(
+	{@render word(
 		t('share_reset_link'),
 		() => (shown ? (confirming = 'reset') : void handleReset()),
-		cls
+		cls,
+		'ghost'
 	)}
 {/snippet}
 
@@ -319,7 +320,7 @@
 					     them on a phone ([D-310]), on the buttons' two columns. -->
 					<div class="grid grid-cols-2 gap-2">
 						{@render resetButton('w-full')}
-						{@render redWord(t('share_revoke_link'), () => (confirming = 'revoke'), 'w-full')}
+						{@render word(t('share_revoke_link'), () => (confirming = 'revoke'), 'w-full')}
 					</div>
 				</div>
 			</div>
@@ -352,7 +353,7 @@
 	title={t(askedReset ? 'share_reset_link' : 'share_revoke_link')}
 	body={t('share_link_stops_confirm')}
 	confirmLabel={t(askedReset ? 'share_reset_confirm_action' : 'share_revoke_confirm_action')}
-	danger
+	danger={!askedReset}
 	busy={inviteAction.busy}
 	error={inviteAction.error}
 	onconfirm={() => void (askedReset ? handleReset() : handleRevoke())}

@@ -1,7 +1,8 @@
 <!--
   A grey line that explains ([D-325]): `meta` under a control, in a row or
   under a sheet's block; `sm` as the body copy of a focus screen or a sheet;
-  `micro` for a credit or a row's metadata.
+  `micro` for a credit, a row's metadata or a settings group's footnote
+  ([D-351]).
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';

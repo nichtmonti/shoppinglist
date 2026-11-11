@@ -124,7 +124,7 @@ func TestInviteRefusesAnExpiredLink(t *testing.T) {
 }
 
 // TestRedeemChecksTheLinkAgain: a link revoked between begin and finish — a
-// member pressed "Link zurücksetzen" mid-ceremony — no longer admits, and nor
+// member pressed „Neuer Link“ mid-ceremony — no longer admits, and nor
 // does a ticket begun while signup was open once a restart made it invite.
 func TestRedeemChecksTheLinkAgain(t *testing.T) {
 	app, _, invite, token := household(t)

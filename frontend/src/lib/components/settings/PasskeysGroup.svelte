@@ -117,13 +117,14 @@
 		{#snippet icon()}<Plus class="text-primary-text" aria-hidden="true" />{/snippet}
 	</SettingsRow>
 	{#snippet footnote()}
+		<!-- A group's grey footnote is micro, the row hints' size ([D-351]). -->
 		{#if loadAction.error}
 			<ErrorText>{loadAction.error}</ErrorText>
 		{:else if passkeysLoaded && passkeys.length === 0}
-			<Hint>{t('settings_no_passkeys')}</Hint>
+			<Hint size="micro">{t('settings_no_passkeys')}</Hint>
 		{:else if passkeys.length === 1}
 			<!-- The nudge is for the second key; with two it has done its job. -->
-			<Hint>{t('settings_backup_key_nudge')}</Hint>
+			<Hint size="micro">{t('settings_backup_key_nudge')}</Hint>
 		{/if}
 	{/snippet}
 </SettingsGroup>

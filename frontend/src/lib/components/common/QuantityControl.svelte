@@ -49,9 +49,11 @@
 	}
 
 	// Both button states. `hover:` applies only where the device can hover, so
-	// on a phone the fill shows while pressed and nowhere else.
+	// on a phone the fill shows while pressed and nowhere else. A set quantity
+	// is a fact and reads in the text colour; the offer to add one stays grey
+	// ([D-351]).
 	const quietClass =
-		'appearance-none flex-none inline-flex items-center justify-end min-w-(--qty-w) min-h-7.5 cursor-pointer relative rounded-chip px-1.5 py-0.5 text-qty tabular-nums text-muted-foreground hover:bg-tint-strong hover:text-foreground active:bg-tint-strong active:text-foreground hit-target';
+		'appearance-none flex-none inline-flex items-center justify-end min-w-(--qty-w) min-h-7.5 cursor-pointer relative rounded-chip px-1.5 py-0.5 text-qty tabular-nums hover:bg-tint-strong hover:text-foreground active:bg-tint-strong active:text-foreground hit-target';
 
 	function onKeydown(event: KeyboardEvent): void {
 		if (event.key === 'Enter') {
@@ -79,7 +81,7 @@
 {:else if item.quantity}
 	<button
 		type="button"
-		class="qty qty-set {quietClass} max-w-(--qty-max)"
+		class="qty qty-set {quietClass} text-foreground max-w-(--qty-max)"
 		onclick={start}
 		aria-label={t('list_edit_quantity_named', { quantity: item.quantity, name: displayName(item) })}
 	>
@@ -88,7 +90,7 @@
 {:else}
 	<button
 		type="button"
-		class="qty qty-unset {quietClass}"
+		class="qty qty-unset {quietClass} text-muted-foreground"
 		onclick={start}
 		aria-label={t('list_add_quantity_named', { name: displayName(item) })}
 	>

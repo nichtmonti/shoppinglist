@@ -19,7 +19,7 @@ import {
 // opens the link, sees the unauthenticated preview, creates their account
 // inline on the join screen, and only THEN joins — which is how a real new
 // household member arrives. This test drives that path end to end, then
-// exercises §7.1's "Link zurücksetzen": the old link must stop working and
+// exercises §7.1's „Neuer Link“: the old link must stop working and
 // the new one must keep working, without minting a third account just to
 // prove the new link's preview (the preview call itself is unauthenticated,
 // per JoinScreen.svelte, so a bare fresh context is enough).
@@ -76,11 +76,14 @@ test(
 			timeout: 15_000
 		});
 
-		// A resets the invite link (§7.1 "Link zurücksetzen" — one server
+		// A resets the invite link (§7.1 „Neuer Link“ — one server
 		// transaction that revokes the old link and mints a new one together).
-		await pageA.getByRole('button', { name: 'Link zurücksetzen' }).click();
+		await pageA.getByRole('button', { name: 'Neuer Link' }).click();
 		// Confirmed: it retires the link already sent ([D-293]).
-		await pageA.getByRole('alertdialog').getByRole('button', { name: 'Zurücksetzen' }).click();
+		await pageA
+			.getByRole('alertdialog')
+			.getByRole('button', { name: 'Neuen Link erstellen' })
+			.click();
 		await expect(
 			pageA.getByText('Neuer Link erstellt. Der alte funktioniert nicht mehr.')
 		).toBeVisible();

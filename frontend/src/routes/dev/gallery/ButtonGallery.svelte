@@ -165,11 +165,9 @@
 					</div>
 				</figure>
 				<figure class="pattern">
-					<figcaption>Rote Wörter auf den Spalten darüber</figcaption>
+					<figcaption>Wörter auf den Spalten darüber: neu neutral, zurückziehen rot</figcaption>
 					<div class="grid grid-cols-2 gap-2">
-						<Button variant="ghost-destructive" size="sm" class="w-full"
-							>{t('share_reset_link')}</Button
-						>
+						<Button variant="ghost" size="sm" class="w-full">{t('share_reset_link')}</Button>
 						<Button variant="ghost-destructive" size="sm" class="w-full"
 							>{t('share_revoke_link')}</Button
 						>

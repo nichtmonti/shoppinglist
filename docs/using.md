@@ -81,7 +81,7 @@ looked up before.
 
 In "My lists", open a list's **⋮** menu and choose "Share & members".
 Send the invite link, or let someone scan its QR code. Everyone on a list sees
-every change within seconds. A link lasts 30 days; "Reset link" replaces it if
+every change within seconds. A link lasts 30 days; "New link" replaces it if
 it went somewhere it shouldn't, and "Revoke link" ends it without a new one.
 
 <img src="images/share-sheet.png" width="220" alt="The share sheet: members, the invite link, and the reset and revoke buttons">

@@ -15,7 +15,7 @@ vi.mock('#lib/toasts.js', async () =>
 );
 
 // The sheet reaches invites through three calls: activeInvite (what to show
-// on open), resetInvite ("Link zurücksetzen", "Link erstellen") and
+// on open), resetInvite („Neuer Link“, "Link erstellen") and
 // revokeInvite ("Link zurückziehen"). Which invite and token those pick — none
 // when the list has no link, the server's token, none for a link older than it — is
 // asserted in src/lib/actions/invites.test.ts; here they are the sheet's inputs.
@@ -197,7 +197,7 @@ describe('ShareSheet', () => {
 		);
 	});
 
-	it('"Link zurücksetzen" mints a new invite', async () => {
+	it('„Neuer Link“ mints a new invite', async () => {
 		await db.memberships.put(makeMembership({ list: 'list-2', account: 'account-1' }));
 		vi.mocked(activeInvite).mockResolvedValue(
 			invite({ id: 'inv-1', list: 'list-2', token: 'tok-old' })
@@ -217,12 +217,21 @@ describe('ShareSheet', () => {
 			expect(screen.getByText('https://example.test/join#tok-old')).toBeDefined();
 		});
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Link zurücksetzen' }));
+		// [D-351] Only revoking is red: a new link leaves the list one that works.
+		expect(screen.getByRole('button', { name: 'Neuer Link' }).classList).not.toContain(
+			'text-danger'
+		);
+		expect(screen.getByRole('button', { name: 'Link zurückziehen' }).classList).toContain(
+			'text-danger'
+		);
+		await fireEvent.click(screen.getByRole('button', { name: 'Neuer Link' }));
 		// [D-293] It retires the link already sent, so it is confirmed first.
 		expect(vi.mocked(resetInvite)).not.toHaveBeenCalled();
 		const confirm = await screen.findByRole('alertdialog');
 		expect(confirm.textContent).toContain('funktioniert dann nicht mehr');
-		await fireEvent.click(within(confirm).getByRole('button', { name: 'Zurücksetzen' }));
+		const create = within(confirm).getByRole('button', { name: 'Neuen Link erstellen' });
+		expect(create.classList).not.toContain('text-danger');
+		await fireEvent.click(create);
 
 		await waitFor(() => {
 			expect(screen.getByText('https://example.test/join#tok-new')).toBeDefined();
@@ -266,7 +275,7 @@ describe('ShareSheet', () => {
 		);
 		expect(vi.mocked(revokeInvite)).toHaveBeenCalledWith('list-2');
 		expect(screen.queryByText('https://example.test/join#tok-old')).toBeNull();
-		expect(screen.queryByRole('button', { name: 'Link zurücksetzen' })).toBeNull();
+		expect(screen.queryByRole('button', { name: 'Neuer Link' })).toBeNull();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Link erstellen' }));
 		expect(await screen.findByText('https://example.test/join#tok-new')).toBeDefined();
@@ -334,8 +343,8 @@ describe('ShareSheet', () => {
 			expect(screen.getByText('https://example.test/join#tok-old')).toBeDefined();
 		});
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Link zurücksetzen' }));
-		await fireEvent.click(await screen.findByRole('button', { name: 'Zurücksetzen' }));
+		await fireEvent.click(screen.getByRole('button', { name: 'Neuer Link' }));
+		await fireEvent.click(await screen.findByRole('button', { name: 'Neuen Link erstellen' }));
 
 		const dialog = await screen.findByRole('alertdialog');
 		expect((await within(dialog).findByRole('alert')).textContent).toContain(
@@ -349,7 +358,7 @@ describe('ShareSheet', () => {
 		vi.mocked(resetInvite).mockResolvedValue(
 			invite({ id: 'inv-2', list: 'list-2', token: 'tok-new' })
 		);
-		await fireEvent.click(within(dialog).getByRole('button', { name: 'Zurücksetzen' }));
+		await fireEvent.click(within(dialog).getByRole('button', { name: 'Neuen Link erstellen' }));
 
 		await waitFor(() => {
 			expect(screen.getByText('https://example.test/join#tok-new')).toBeDefined();
@@ -371,7 +380,7 @@ describe('ShareSheet', () => {
 				)
 			).toBeDefined();
 		});
-		expect(screen.getByRole('button', { name: 'Link zurücksetzen' })).toBeDefined();
+		expect(screen.getByRole('button', { name: 'Neuer Link' })).toBeDefined();
 	});
 
 	// [D-293] A load that failed changed nothing: its retry loads again, and
@@ -386,7 +395,7 @@ describe('ShareSheet', () => {
 
 		const alert = await screen.findByRole('alert');
 		expect(alert.textContent).toContain('Keine Verbindung zum Server');
-		expect(screen.queryByRole('button', { name: 'Link zurücksetzen' })).toBeNull();
+		expect(screen.queryByRole('button', { name: 'Neuer Link' })).toBeNull();
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Erneut versuchen' }));
 

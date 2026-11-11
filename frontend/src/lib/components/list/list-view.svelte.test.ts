@@ -625,6 +625,45 @@ describe('ListView — detail sheet', () => {
 		expect(screen.getByRole('dialog')).toBeDefined();
 	});
 
+	// [D-351] The aisle grid is icons only; a caption over it names the one
+	// chosen, and follows a new pick.
+	it('names the chosen aisle over the item sheet’s aisle grid', async () => {
+		const item = makeItem({ list: LIST_ID, name: 'Senf', category_key: 'cat-spices' });
+		await seedList({
+			listId: LIST_ID,
+			items: [item],
+			categories: [
+				makeCategory({
+					id: 'cat-spices',
+					list: LIST_ID,
+					slug: null,
+					name: 'Gewürze',
+					sort_order: 1
+				}),
+				makeCategory({
+					id: 'cat-dairy',
+					list: LIST_ID,
+					slug: null,
+					name: 'Milchregal',
+					sort_order: 2
+				})
+			]
+		});
+		await itemSort.set('category');
+		await renderList();
+		// Categories arrive on their own liveQuery; the sheet reads them on open.
+		await waitFor(() =>
+			expect(document.querySelector('.cat-head-name')?.textContent).toBe('Gewürze')
+		);
+
+		await fireEvent.click(await screen.findByRole('button', { name: /^Senf/ }));
+		const dialog = await screen.findByRole('dialog');
+		const caption = await within(dialog).findByTestId('detail-category');
+		expect(caption.textContent).toContain('Gewürze');
+		await fireEvent.click(within(dialog).getByRole('radio', { name: 'Milchregal' }));
+		await waitFor(() => expect(caption.textContent).toContain('Milchregal'));
+	});
+
 	// An emptied name must never blank the row: ItemDetailSheet's commit() drops the name from
 	// the patch but still commits the other changed fields in the same op.
 	it('an emptied name keeps the current name and commits other deltas', async () => {

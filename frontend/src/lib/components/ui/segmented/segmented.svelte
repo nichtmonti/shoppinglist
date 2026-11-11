@@ -65,8 +65,9 @@
 				tabs: "relative flex items-center justify-center gap-1.5 px-2 text-sm after:absolute after:inset-x-2 after:-bottom-px after:h-[2.5px] after:rounded-t-full after:content-[''] chosen:text-foreground chosen:after:bg-primary-text chosen:[&>svg]:text-primary-text",
 				chips:
 					// A chosen option, like the band's: soft green, never the primary
-					// action's solid fill ([D-281]).
-					"relative inline-flex h-9 items-center rounded-full border border-border bg-surface-2 px-3.5 text-meta after:absolute after:inset-[-4px] after:content-[''] " +
+					// action's solid fill ([D-281]). A choice is pressed like a control,
+					// so it has a control's corners; round is a badge's ([D-351]).
+					"relative inline-flex h-9 items-center rounded-control border border-border bg-surface-2 px-3.5 text-meta after:absolute after:inset-[-4px] after:content-[''] " +
 					'unchosen:hover:border-line-strong unchosen:hover:bg-tint ' +
 					'chosen:border-primary-line chosen:bg-primary-soft ' +
 					'chosen:text-primary-text'

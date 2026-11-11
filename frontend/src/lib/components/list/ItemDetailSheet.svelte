@@ -92,6 +92,8 @@
 
 	// The aisle picker: the list's visible categories, aisle order.
 	let pickerCategories = $derived(sortCategories(visibleCategories(categories), templates));
+	// The grid's tiles are icons; the caption names the one chosen ([D-351]).
+	let chosenCategory = $derived(pickerCategories.find((c) => c.id === drafts.category));
 
 	/** Commits only what changed, as one outbox op. */
 	async function commit(target: Item): Promise<void> {
@@ -159,7 +161,7 @@
 			/>
 			<!-- Compact so the whole sheet fits a phone screen: labels are sr-only
 			     beside placeholders, and the aisles are an icon grid named by the
-			     radios' accessible names. -->
+			     radios' accessible names, the chosen one by a caption over it. -->
 			<div class="mb-2 flex w-full gap-2">
 				<Field class="min-w-0 flex-1">
 					<FieldLabel for="detail-name" class="sr-only">{t('common_name')}</FieldLabel>
@@ -195,6 +197,12 @@
 					onblur={commitOnBlur}
 				/>
 			</Field>
+			<!-- Seen, not heard: a screen reader hears the chosen radio itself. -->
+			{#if chosenCategory}
+				<p class="type-caption mb-2" aria-hidden="true" data-testid="detail-category">
+					{t('common_category')} · {categoryName(chosenCategory, templates)}
+				</p>
+			{/if}
 			<!-- 24% of the aisle colour, not a chip's 14%: here the colour is half
 			     of what a tile says ([D-251]). -->
 			<RadioGroup.Root

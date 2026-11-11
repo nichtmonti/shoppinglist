@@ -406,7 +406,7 @@ Growing the global taxonomy is an **operator** action ([D-15]) with two tools th
 - **One reusable link per list**, live until expiry (**30 days**) or revocation. Any member may share, reset (rotate), revoke or create it; revoking blocks new joins without evicting anyone. **Any member's departure revokes it** ([§7.3]) [D-31].
 - The token is **minted server-side** ([§10.1]) and looked up by its sha256 hash; a live link's token is kept beside the hash for every member to share, and a revocation blanks it [D-294]. It travels in the **URL fragment** (`#…`), never in access logs or Referer headers; the SPA POSTs it to the [§7.6] routes.
 - **The server holds one active link per list**: a partial unique index (`ON invites (list) WHERE revoked = 0`) plus atomic rotation in the mint route [D-31].
-- The **"Share & members" sheet** shows the roster ([§7.4], no avatars [D-57]) above the live link, with „Link zurücksetzen“ and „Link zurückziehen“ [D-310]; without a live link it offers „Link erstellen“, and opening it never mints [D-330].
+- The **"Share & members" sheet** shows the roster ([§7.4], no avatars [D-57]) above the live link, with „Neuer Link“ and „Link zurückziehen“ [D-310] [D-351]; without a live link it offers „Link erstellen“, and opening it never mints [D-330].
 
 ### 7.2 Leave = hard delete
 
@@ -1104,3 +1104,4 @@ The standing rules it set are in [§14].
 [D-345]: decisions.md#D-345
 [D-346]: decisions.md#D-346
 [D-347]: decisions.md#D-347
+[D-351]: decisions.md#D-351
