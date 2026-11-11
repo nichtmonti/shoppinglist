@@ -6,7 +6,7 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
-## Unreleased
+## v0.18.0: the design pass, sheets that close in a quarter second, and product photos offline (2026-11)
 
 **For operators.** Nothing to do before upgrading.
 
