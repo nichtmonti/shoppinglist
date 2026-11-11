@@ -134,6 +134,11 @@ const tokenClasses = [
 			"Tailwind's preflight already resets margins, padding, borders and list style, and gives buttons and fields the page's font, colour and a clear ground. To change a part's default, change the part ([D-320])."
 	},
 	{
+		pattern: '(?:^|:)duration-(?:\\d|\\[)',
+		message:
+			'A duration is a motion token from app.css: duration-(--motion-press | -pop | -state | -sheet-in | -sheet-out) ([D-352]).'
+	},
+	{
 		// Tailwind wraps hover: in @media (hover: hover); an arbitrary
 		// variant is not wrapped, so a tap leaves it lit on a phone.
 		pattern: '\\[[^\\]]*:hover[^\\]]*\\]:',

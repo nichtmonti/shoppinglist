@@ -20,7 +20,7 @@
 	bind:ref
 	data-slot="dialog-overlay"
 	class={cn(
-		'bg-overlay duration-100 supports-backdrop-filter:backdrop-blur-xs data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fixed inset-0 isolate z-(--layer-modal)',
+		'bg-overlay duration-(--motion-pop) supports-backdrop-filter:backdrop-blur-xs data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fixed inset-0 isolate z-(--layer-modal)',
 		className
 	)}
 	{...restProps}

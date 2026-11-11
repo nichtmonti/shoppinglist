@@ -455,3 +455,31 @@ describe('hover rules apply only where the device can hover ([D-350])', () => {
 		expect(offenders).toEqual([]);
 	});
 });
+
+// ---- motion: named durations ([D-352]) -------------------------------------
+//
+// A duration is a role (a press, a pop, a state change, a sheet in or out),
+// named once in app.css; a time written into a transition or an animation is
+// a role nobody named. Lint refuses the same in a class (duration-100).
+describe('motion durations are tokens ([D-352])', () => {
+	it('no transition or animation in the app’s own CSS writes a time', () => {
+		const root = new URL('../', import.meta.url);
+		const files = (readdirSync(root, { recursive: true }) as string[]).filter((f) =>
+			f.endsWith('.css')
+		);
+		const offenders: string[] = [];
+		const walk = (file: string, nodes: CssNode[]) => {
+			for (const n of nodes) {
+				for (const [prop, value] of n.decls)
+					if (
+						/^(?:transition|animation)(?:-duration|-delay)?$/.test(prop) &&
+						/\d(?:m?s)\b/.test(value)
+					)
+						offenders.push(`${file}: ${n.prelude} { ${prop}: ${value} }`);
+				walk(file, n.children);
+			}
+		};
+		for (const file of files) walk(file, parseCss(readFileSync(new URL(file, root), 'utf8')));
+		expect(offenders).toEqual([]);
+	});
+});

@@ -88,7 +88,7 @@
 				aria-hidden="true"
 			>
 				<Trash2
-					class="size-5 shrink-0 transition-transform duration-100 {swipe.armed
+					class="size-5 shrink-0 transition-transform duration-(--motion-pop) {swipe.armed
 						? 'scale-125'
 						: 'scale-100'}"
 				/>

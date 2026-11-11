@@ -24,6 +24,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **"Change order" moved into the app bar** of "Edit categories", as an ↑↓ button at the top, instead of a button under all the aisles ([D-351]).
 - **The "Language" and "Appearance" choices in Settings have the corners of a button** rather than fully round ones ([D-351]).
 - **A settings group's grey note, such as the one about a second passkey, is the size of the hints above it** ([D-351]).
+- **Sheets close in a quarter of a second** instead of half a second ([D-352]).
 
 ## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
 
@@ -1049,3 +1050,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-349]: docs/internals/decisions.md#D-349
 [D-350]: docs/internals/decisions.md#D-350
 [D-351]: docs/internals/decisions.md#D-351
+[D-352]: docs/internals/decisions.md#D-352

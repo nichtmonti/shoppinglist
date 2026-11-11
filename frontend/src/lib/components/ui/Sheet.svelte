@@ -33,14 +33,17 @@
 	}}
 >
 	<Dialog.Portal>
-		<!-- The scrim fades as long as the sheet slides. -->
-		<Dialog.Overlay class="duration-500" />
+		<!-- The scrim fades as long as the sheet slides; both leave faster than
+		     they came ([D-352]). -->
+		<Dialog.Overlay
+			class="duration-(--motion-sheet-in) data-[state=closed]:duration-(--motion-sheet-out)"
+		/>
 		<!-- 80dvh, not 80vh: `vh` assumes the mobile URL bar expanded, so the
 		     sheet would stop short. No focus moved on open: a focused field
 		     would raise the keyboard over a sheet the user only meant to read. -->
 		<DialogPrimitive.Content
 			data-slot="sheet-content"
-			class="fixed inset-x-0 bottom-0 z-(--layer-modal) mx-auto mt-24 flex h-auto max-h-[80dvh] max-w-(--app-max) flex-col rounded-t-card border-t border-line-strong bg-surface px-4 pt-4 pb-[calc(18px+env(safe-area-inset-bottom))] text-sm text-foreground shadow-sheet outline-none duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom"
+			class="fixed inset-x-0 bottom-0 z-(--layer-modal) mx-auto mt-24 flex h-auto max-h-[80dvh] max-w-(--app-max) flex-col rounded-t-card border-t border-line-strong bg-surface px-4 pt-4 pb-[calc(18px+env(safe-area-inset-bottom))] text-sm text-foreground shadow-sheet outline-none duration-(--motion-sheet-in) data-[state=closed]:duration-(--motion-sheet-out) ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom"
 			onOpenAutoFocus={(e) => e.preventDefault()}
 		>
 			<OverlayHead class="sheet-head mb-2.5" actions={headerActions}>

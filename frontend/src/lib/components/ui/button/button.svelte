@@ -8,7 +8,7 @@
 		// 650 labels, no depth, and a press that darkens the fill. Disabled is
 		// the same flat grey for every level, with no edge: what an enabled
 		// secondary has (a white fill and a firm edge), it lacks.
-		base: "rounded-control border border-transparent bg-clip-padding text-sm font-demi [&_svg:not([class*='size-'])]:size-4 inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-all select-none disabled:pointer-events-none disabled:border-transparent disabled:bg-tint-strong disabled:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+		base: "rounded-control border border-transparent bg-clip-padding text-sm font-demi [&_svg:not([class*='size-'])]:size-4 inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-colors select-none disabled:pointer-events-none disabled:border-transparent disabled:bg-tint-strong disabled:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
 		variants: {
 			variant: {
 				default:

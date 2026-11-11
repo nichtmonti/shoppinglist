@@ -144,8 +144,8 @@
  * it gives a little under the finger, one scale for both. */
 @utility press-card {
 	transition:
-		scale 0.12s ease,
-		background-color 0.12s ease;
+		scale var(--motion-press) ease,
+		background-color var(--motion-press) ease;
 	&:active {
 		scale: var(--press-card-scale);
 	}
@@ -455,6 +455,15 @@
 	--qty-max: min(40%, 220px);
 	/* How far a pressed card gives (press-card). */
 	--press-card-scale: 0.97;
+	/* Motion, by role ([D-352]): a press; an overlay that pops (a dialog, a
+	   menu, a scrim); a small change of state; a sheet coming, and going
+	   faster, since a closing sheet is already done with. Classes take them
+	   as duration-(--motion-…); JS transitions use #lib/state/motion.js. */
+	--motion-press: 120ms;
+	--motion-pop: 100ms;
+	--motion-state: 200ms;
+	--motion-sheet-in: 500ms;
+	--motion-sheet-out: 250ms;
 	--card-gap: 10px;
 
 	/* The pinned add bar's height (the segmented band carries its own h-11,

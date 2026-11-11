@@ -284,7 +284,7 @@
 				tabindex="-1"
 				aria-hidden="true"
 				data-testid="ta-scrim"
-				class="ta-scrim fixed inset-0 z-1 block bg-(--scrim) cursor-default duration-100 animate-in fade-in-0"
+				class="ta-scrim fixed inset-0 z-1 block bg-(--scrim) cursor-default duration-(--motion-pop) animate-in fade-in-0"
 				onpointerdown={(event) => event.stopPropagation()}
 				onclick={dismiss}
 			></button>

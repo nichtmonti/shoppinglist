@@ -25,7 +25,7 @@
 		{align}
 		class={cn(
 			floatSurface,
-			'w-max min-w-48 max-w-[calc(100vw-2rem)] p-1.5 text-foreground duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 z-(--layer-modal) overflow-x-hidden overflow-y-auto outline-none data-[state=closed]:overflow-hidden',
+			'w-max min-w-48 max-w-[calc(100vw-2rem)] p-1.5 text-foreground duration-(--motion-pop) data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 z-(--layer-modal) overflow-x-hidden overflow-y-auto outline-none data-[state=closed]:overflow-hidden',
 			className
 		)}
 		{...restProps}

@@ -34,8 +34,8 @@
 		color: var(--foreground);
 		text-align: start;
 		transition:
-			scale 0.12s ease,
-			border-color 0.12s ease;
+			scale var(--motion-press) ease,
+			border-color var(--motion-press) ease;
 	}
 
 	/* The check-off button covers the tile; the tile shows its states. */
@@ -372,7 +372,7 @@
 		/* The plate every category icon sits on (CategoryPlate's row size,
 		   cat-plate-14 / cat-border-28), in both themes ([D-326]). */
 		background-color: color-mix(in srgb, var(--c, var(--primary-text)) 14%, var(--icon-plate));
-		transition: scale 0.12s ease;
+		transition: scale var(--motion-press) ease;
 	}
 	.tile > button.tile-lead:active > .tile-cat {
 		scale: 0.9;

@@ -39,7 +39,7 @@
 			<span>{label}</span>
 			{#if count !== undefined}<span class="tabular-nums font-bold">{count}</span>{/if}
 			<ChevronDown
-				class="ms-auto size-4 text-faint transition-transform duration-200 group-aria-expanded:rotate-180"
+				class="ms-auto size-4 text-faint transition-transform duration-(--motion-state) group-aria-expanded:rotate-180"
 				aria-hidden="true"
 			/>
 		</Collapsible.Trigger>

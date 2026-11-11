@@ -257,6 +257,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 | [D-349] | A dialog or sheet stays mounted and leaves with its content |  |
 | [D-350] | A hover needs a device that can hover; the press is the touch's own feedback |  |
 | [D-351] | The second design pass's picks |  |
+| [D-352] | A duration is named by its role, and a sheet leaves faster than it came |  |
 
 <!-- decisions-index:end -->
 
@@ -776,6 +777,8 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 <a id="D-320"></a>**[D-320] A class says only what differs from Tailwind's preflight (2026-10).** A class that repeats what the preflight already does to every element (`m-0`, `bg-transparent`, `border-0`, `p-0`, `text-inherit`, `list-none` and the like) is left out, so a class string shows what it changes. A part that needs a different default changes the part, not each caller. **Guarded:** lint refuses those bare classes everywhere; `block` on an icon is left to review, since a `span` needs it. *Rejected:* a codemod run in CI (the lint rule finds the next one); keeping `m-0` on headings for readers who expect a browser margin (the preflight is the app's baseline, [D-314]). ([D-314])
 
 <a id="D-321"></a>**[D-321] A pressable row presses grey (2026-10).** `press-row` in `app.css` is the one press for a row: `tint` on hover, `tint-strong` while pressed (the ghost `Button`'s), the focus outline drawn inside ([D-315]). The list card keeps its press scale and hovers `tint`. Soft green stays for a chosen or highlighted thing: the typeahead's highlighted option, marked by `option-bar` on its start edge, so it flips in a right-to-left language. The shop view's list-density row keeps its aisle-coloured press, the shop's own. **Guarded:** lint refuses `hover:`/`active:` soft green, `surface-2` and a green edge. *Rejected:* green on rows that open something, grey on rows that act (two presses to learn). ([D-281], [D-284], [D-313], [D-315], [D-316])
+
+<a id="D-352"></a>**[D-352] A duration is named by its role, and a sheet leaves faster than it came (2026-11).** Five tokens in `app.css`: `--motion-press` (120ms, a pressed card or tile), `--motion-pop` (100ms, a dialog, a menu or a scrim appearing), `--motion-state` (200ms, a small change of state), `--motion-sheet-in` (500ms) and `--motion-sheet-out` (250ms). A closing sheet is already done with, so it leaves in half the time it took to arrive, its scrim with it. Classes take the tokens as `duration-(--motion-…)`; JS transitions keep `#lib/state/motion.js`, whose `dur()` honours reduced motion and whose beats a drag library reads. **Guarded:** lint refuses a numeric `duration-` class, and the design-tokens test a time written into a transition or an animation in the app's CSS. *Rejected:* Tailwind theme durations (Tailwind 4 has no duration namespace); one duration both ways (the 500ms exit held the page). ([D-348], [D-349])
 
 <a id="D-350"></a>**[D-350] A hover needs a device that can hover; the press is the touch's own feedback (2026-11).** A tap fires `:hover` as well, and a phone's browser keeps it on the last-tapped element until the next tap, so the shop's tiles and rows carried a subtly highlighted trail behind every finger. Tailwind's `hover:` variant already sits in `@media (hover: hover)` ([D-268]'s "pointer devices only"); hand-written CSS must too, and the tile template's hover rules (the row's aisle-coloured wash, the tile's border, the door's ink) and the toast action's now do. Every button answers the press: the solid red darkens to `danger-press` as the primary does, and the soft red firms its edge to the solid red, since a darker soft fill takes its red words below AA. **Guarded:** the design-tokens test fails any `:hover` rule outside that media block in the app's stylesheets and components' `<style>`, and lint refuses an arbitrary `[&:hover]:` variant, which Tailwind does not wrap. Keyboard focus is untouched: `focus-visible` never fires under a finger. *Rejected:* dropping hover styling (a mouse still needs its offer); gating on `pointer: fine` as well (Tailwind does not, and a touchscreen laptop's trackpad can hover). ([D-268], [D-321])
 
@@ -1359,3 +1362,4 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 [D-349]: #D-349
 [D-350]: #D-350
 [D-351]: #D-351
+[D-352]: #D-352

@@ -46,7 +46,7 @@
 	let pending = $derived(status.pending);
 
 	const bannerBase =
-		'size-6.5 shrink-0 grid place-items-center rounded-chip border transition-colors duration-220';
+		'size-6.5 shrink-0 grid place-items-center rounded-chip border transition-colors duration-(--motion-state)';
 	// [D-102]: no two states share a glyph, and the one actionable
 	// state is the only filled chip.
 	const bannerTone: Record<ChipState, string> = {
