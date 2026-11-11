@@ -6,6 +6,12 @@ Every release tag sits on the commit that adds its entry here (`docs(release): v
 
 Changes land under **Unreleased** in the commit that makes them; the release commit turns that heading into the version's.
 
+## Unreleased
+
+**For operators.** Nothing to do before upgrading.
+
+- **On a phone, tapping a shop tile or row no longer leaves it subtly highlighted.** A tap used to light the tapped tile or row the way a mouse hovering over it does, and it stayed lit until the next tap elsewhere; a toast's action button had the same ([D-350]).
+
 ## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
 
 **For operators.** Nothing to do before upgrading.
@@ -1028,3 +1034,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-347]: docs/internals/decisions.md#D-347
 [D-348]: docs/internals/decisions.md#D-348
 [D-349]: docs/internals/decisions.md#D-349
+[D-350]: docs/internals/decisions.md#D-350

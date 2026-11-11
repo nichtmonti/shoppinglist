@@ -751,16 +751,23 @@ textarea,
 	border: 1px solid var(--faint);
 	border-radius: var(--radius-control);
 	background: var(--surface-2);
+	/* The press tint (tint-strong) over the button's own ground. */
+	--action-press: color-mix(in oklab, var(--muted-foreground) 12%, var(--surface-2));
 	color: var(--foreground);
 	/* A `sm` button's label ([D-312]). */
 	font-size: var(--size-meta);
 	font-weight: var(--font-weight-demi);
 }
 
-[data-sonner-toast][data-styled='true'] [data-button][data-button]:hover,
+/* The press fires on touch too, the hover only where a device can hover
+   ([D-350]). */
 [data-sonner-toast][data-styled='true'] [data-button][data-button]:active {
-	/* The press tint (tint-strong) over the button's own ground. */
-	background: color-mix(in oklab, var(--muted-foreground) 12%, var(--surface-2));
+	background: var(--action-press);
+}
+@media (hover: hover) {
+	[data-sonner-toast][data-styled='true'] [data-button][data-button]:hover {
+		background: var(--action-press);
+	}
 }
 
 /* Sonner draws its own focus shadow; the app's one mark is the outline

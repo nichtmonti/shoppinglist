@@ -134,6 +134,13 @@ const tokenClasses = [
 			"Tailwind's preflight already resets margins, padding, borders and list style, and gives buttons and fields the page's font, colour and a clear ground. To change a part's default, change the part ([D-320])."
 	},
 	{
+		// Tailwind wraps hover: in @media (hover: hover); an arbitrary
+		// variant is not wrapped, so a tap leaves it lit on a phone.
+		pattern: '\\[[^\\]]*:hover[^\\]]*\\]:',
+		message:
+			"A hover is Tailwind's hover: (or group-hover:, has-[…]:hover:), which applies only where a device can hover ([D-350])."
+	},
+	{
 		pattern: '^(?:hover|active):(?:bg-(?:primary-soft|surface-2)|border-primary-line)$',
 		message:
 			'A pressable row or card presses grey: `press-row`, or hover:bg-tint / active:bg-tint-strong. Soft green means chosen ([D-281], [D-321]).'

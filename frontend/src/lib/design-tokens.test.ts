@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { PALETTE } from './categories';
+import { parseCss, type CssNode } from './test-kit/css';
 
 // AA conformance for the tint recipes that axe cannot see: every failing pair
 // here involves a background built from CSS custom properties + color-mix,
@@ -412,5 +413,44 @@ describe('shop-grid density ([D-83])', () => {
 	it('the tile height steps 104 → 76 → 52 ([D-83]: floor; [D-313]: row)', () => {
 		expect(DENSITIES.map((d) => blocks[d]['--tile-h'])).toEqual(['6.5rem', '4.75rem', '3.25rem']);
 		expect(DENSITIES.map((d) => parseFloat(blocks[d]['--tile-h']) * 16)).toEqual([104, 76, 52]);
+	});
+});
+
+// ---- hover rules: a device that can hover ([D-350]) ------------------------
+//
+// Tailwind's `hover:` variant sits in @media (hover: hover), so it cannot
+// fire under a finger — but a tap does fire a raw `:hover`, and iOS Safari
+// keeps it on the last-tapped element until the next tap. A hand-written
+// `:hover` rule outside that media block is a sticky highlight on a phone,
+// so every one the app ships, in a stylesheet or a component's <style>, must
+// sit inside it. (An arbitrary `[&:hover]:` variant is lint's to refuse.)
+describe('hover rules apply only where the device can hover ([D-350])', () => {
+	it('every :hover rule in the app’s own CSS sits in (hover: hover)', () => {
+		const root = new URL('../', import.meta.url);
+		const sources = (readdirSync(root, { recursive: true }) as string[]).flatMap((file) => {
+			if (file.endsWith('.css')) return [{ file, css: readFileSync(new URL(file, root), 'utf8') }];
+			if (!file.endsWith('.svelte')) return [];
+			const text = readFileSync(new URL(file, root), 'utf8');
+			return [...text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => ({
+				file,
+				css: m[1]
+			}));
+		});
+		expect(sources.some((s) => s.file.endsWith('.svelte'))).toBe(true);
+		const canHover = /\(\s*hover\s*:\s*hover\s*\)/;
+		const offenders: string[] = [];
+		const walk = (file: string, nodes: CssNode[], gated: boolean) => {
+			for (const n of nodes) {
+				if (!gated && !n.prelude.startsWith('@') && n.prelude.includes(':hover'))
+					offenders.push(`${file}: ${n.prelude}`);
+				walk(
+					file,
+					n.children,
+					gated || (n.prelude.startsWith('@media') && canHover.test(n.prelude))
+				);
+			}
+		};
+		for (const { file, css } of sources) walk(file, parseCss(css), false);
+		expect(offenders).toEqual([]);
 	});
 });

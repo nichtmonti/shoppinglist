@@ -20,6 +20,7 @@ import { dirname, resolve } from 'node:path';
 import { compile } from 'tailwindcss';
 import { describe, expect, it } from 'vitest';
 
+import { parseCss, type CssNode } from '#lib/test-kit/css.js';
 import { makeItem } from '#lib/test-kit/db.js';
 import type { Item } from '#lib/db.js';
 import ShopTile from './ShopTile.svelte';
@@ -27,46 +28,6 @@ import ShopTile from './ShopTile.svelte';
 const FRONTEND = resolve(import.meta.dirname, '../../../..');
 const APP_CSS = readFileSync(resolve(FRONTEND, 'src/app.css'), 'utf8');
 const TEMPLATE_CSS = readFileSync(resolve(import.meta.dirname, 'shop-tile.css'), 'utf8');
-
-// ---- a minimal brace parser -------------------------------------------------
-
-interface CssNode {
-	prelude: string;
-	decls: [string, string][];
-	children: CssNode[];
-}
-
-function parseCss(css: string): CssNode[] {
-	const text = css.replace(/\/\*[\s\S]*?\*\//g, '');
-	let i = 0;
-	function block(): { decls: [string, string][]; children: CssNode[] } {
-		const decls: [string, string][] = [];
-		const children: CssNode[] = [];
-		let buf = '';
-		while (i < text.length) {
-			const c = text[i++];
-			if (c === '{') {
-				const prelude = buf.trim();
-				buf = '';
-				children.push({ prelude, ...block() });
-			} else if (c === '}') {
-				break;
-			} else if (c === ';') {
-				const d = buf.trim();
-				buf = '';
-				const colon = d.indexOf(':');
-				if (colon > 0) decls.push([d.slice(0, colon).trim(), d.slice(colon + 1).trim()]);
-			} else {
-				buf += c;
-			}
-		}
-		const tail = buf.trim();
-		const colon = tail.indexOf(':');
-		if (colon > 0) decls.push([tail.slice(0, colon).trim(), tail.slice(colon + 1).trim()]);
-		return { decls, children };
-	}
-	return block().children;
-}
 
 function allDecls(node: CssNode): string[] {
 	return [...node.decls.map(([p]) => p), ...node.children.flatMap(allDecls)];
@@ -162,11 +123,17 @@ interface TemplateRule {
 
 function templateRules(): TemplateRule[] {
 	const layers = parseCss(TEMPLATE_CSS).filter((n) => n.prelude === '@layer components');
-	const tileRules = layers
+	// A @media or @container group is transparent: it conditions rules that
+	// are the template's as much as any other (a hover sits in (hover: hover),
+	// [D-350]; a row too narrow in a container query), so its children are
+	// descended into, one level deep. Anything else would hide rules from the
+	// parse below, so an at-rule left after that, or a rule with children,
+	// fails loudly rather than slipping through.
+	const nodes = layers
 		.flatMap((l) => l.children)
-		.filter((r) => r.prelude.split(',').some((s) => roleOf(s) !== null));
-	// The template block is flat by design; nesting would hide rules from the
-	// parse below, so a nested rule fails loudly rather than slipping through.
+		.flatMap((n) => (/^@(?:media|container)\b/.test(n.prelude) ? n.children : [n]));
+	for (const n of nodes) expect(n.prelude, 'an at-rule the contract cannot read').not.toMatch(/^@/);
+	const tileRules = nodes.filter((r) => r.prelude.split(',').some((s) => roleOf(s) !== null));
 	for (const rule of tileRules) expect(rule.children, `nested rule in ${rule.prelude}`).toEqual([]);
 	return tileRules.flatMap((rule) =>
 		rule.prelude

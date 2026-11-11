@@ -57,8 +57,14 @@
 		outline: 2px solid var(--primary-text);
 		outline-offset: 2px;
 	}
-	.tile:has(> .tile-check:hover) {
-		border-color: var(--line-strong);
+	/* A hover is the mouse's offer, so it needs a device that can hover
+	   ([D-350]): a touch tap fires :hover too, and iOS Safari keeps it on
+	   the last-tapped element until the next tap, which left a highlighted
+	   trail over the shop. The touch press is :active below, ungated. */
+	@media (hover: hover) {
+		.tile:has(> .tile-check:hover) {
+			border-color: var(--line-strong);
+		}
 	}
 	.tile:has(> .tile-check:active) {
 		scale: var(--press-card-scale);
@@ -183,8 +189,11 @@
 		color: var(--muted-foreground);
 		cursor: pointer;
 	}
-	.tile > .tile-info:hover {
-		color: var(--foreground);
+	/* The hover needs a device that can hover ([D-350]). */
+	@media (hover: hover) {
+		.tile > .tile-info:hover {
+			color: var(--foreground);
+		}
 	}
 	/* 44px effective target around whatever the box is ([D-56]). */
 	.tile > .tile-info::after {
@@ -243,8 +252,10 @@
 	.tile[data-shape='grid'][data-kind='product'] > .tile-info {
 		color: var(--tile-photo-note);
 	}
-	.tile[data-shape='grid'][data-kind='product'] > .tile-info:hover {
-		color: var(--tile-photo-ink);
+	@media (hover: hover) {
+		.tile[data-shape='grid'][data-kind='product'] > .tile-info:hover {
+			color: var(--tile-photo-ink);
+		}
 	}
 
 	/* Typed: name, note and chip centre as one label ([D-147]); a cut name
@@ -281,6 +292,8 @@
 	 * takes a wash of the same colour ([D-329]). --c is the tile's
 	 * categoryStyle(); a row with no category has neither. */
 	.tile[data-shape='row'] {
+		/* The aisle-coloured wash of a press, and of a mouse over the row. */
+		--row-wash: color-mix(in srgb, var(--c, var(--muted-foreground)) 14%, transparent);
 		grid-template-columns: auto minmax(0, 1fr) fit-content(var(--qty-max));
 		grid-template-areas: 'cat text qty';
 		align-items: center;
@@ -305,10 +318,15 @@
 	.tile[data-shape='row']:has(> .tile-check:focus-visible) {
 		outline-offset: -2px;
 	}
-	.tile[data-shape='row']:has(> .tile-check:hover),
 	.tile[data-shape='row']:has(> .tile-check:active) {
-		background-color: color-mix(in srgb, var(--c, var(--muted-foreground)) 14%, transparent);
+		background-color: var(--row-wash);
 		scale: none;
+	}
+	/* The same wash, held while the mouse is over the row ([D-350]). */
+	@media (hover: hover) {
+		.tile[data-shape='row']:has(> .tile-check:hover) {
+			background-color: var(--row-wash);
+		}
 	}
 	.tile > .tile-lead {
 		grid-area: cat;
