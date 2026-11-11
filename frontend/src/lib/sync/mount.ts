@@ -8,11 +8,14 @@ import { runSyncCycle } from '#lib/sync/cycle.js';
 import { subscribe } from '#lib/sync/sse.js';
 import { refreshRoster } from '#lib/sync/roster.js';
 import { setLeading } from '#lib/sync/leading.js';
+import { keepPhotos, watchPhotos } from './photo-keep';
 import type { SyncNotices } from './types';
 
 // ---- the loop ----------------------------------------------------------
 
 let stopLoop: (() => void) | null = null;
+/** Keeps synced items' photos for offline ([D-353]). */
+let stopPhotos: (() => void) | null = null;
 /** The app's notices, kept past unmount for a pull that outlives the session. */
 let notices: SyncNotices = {};
 /** Lists whose roster this session has fetched (or is fetching). */
@@ -23,11 +26,14 @@ export function mountSync(appNotices: SyncNotices): void {
 	if (stopLoop) return;
 	notices = appNotices;
 	rostersRefreshed.clear();
+	stopPhotos = watchPhotos();
 	stopLoop = startSyncLoop({
 		drain: notices,
 		onLeadership: setLeading,
 		onCycle: () => {
 			void refreshNewRosters();
+			// Retries a photo that failed while offline ([D-353]).
+			void keepPhotos();
 			// A completed cycle proves the connection: retry a failed subscribe
 			// for the open list ([D-164]).
 			if (activeListId) void setActiveList(activeListId);
@@ -38,6 +44,8 @@ export function mountSync(appNotices: SyncNotices): void {
 export function unmountSync(): void {
 	stopLoop?.();
 	stopLoop = null;
+	stopPhotos?.();
+	stopPhotos = null;
 }
 
 /**

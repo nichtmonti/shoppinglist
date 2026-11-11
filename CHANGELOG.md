@@ -25,6 +25,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **The "Language" and "Appearance" choices in Settings have the corners of a button** rather than fully round ones ([D-351]).
 - **A settings group's grey note, such as the one about a second passkey, is the size of the hints above it** ([D-351]).
 - **Sheets close in a quarter of a second** instead of half a second ([D-352]).
+- **Product photos are there offline even if you only planned the list.** A photo used to be kept only once its shop tile had shown it, so a list planned online could reach the store offline without pictures ([D-353]).
 
 ## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
 
@@ -1051,3 +1052,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-350]: docs/internals/decisions.md#D-350
 [D-351]: docs/internals/decisions.md#D-351
 [D-352]: docs/internals/decisions.md#D-352
+[D-353]: docs/internals/decisions.md#D-353

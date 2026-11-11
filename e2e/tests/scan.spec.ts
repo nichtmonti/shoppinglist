@@ -119,6 +119,53 @@ test('barcode scan creates an item with barcode + image_url; a second client ren
 	await ctxB.close();
 });
 
+// [D-353] A photo is kept for offline when its item arrives, not when a tile
+// first shows it: planning rows are text, and shop tiles load lazily, so a
+// member who planned the list online would otherwise meet the store offline
+// with no picture. B never opens the shop view before going offline.
+test('a scanned item’s photo is kept offline before any tile has shown it', async ({ browser }) => {
+	const ctxA = await browser.newContext();
+	await stubBarcodeLookup(ctxA);
+	const pageA = await ctxA.newPage();
+	await installCamera(pageA, FAKE_BARCODE);
+	await registerAccount(pageA, 'Anna');
+	await createList(pageA, 'Vorrat');
+	await openListView(pageA);
+
+	const ctxB = await browser.newContext();
+	const pageB = await ctxB.newPage();
+	await registerAccount(pageB, 'Ben');
+	await shareListWith(pageA, pageB);
+	await openListView(pageB);
+	await pageB.evaluate(() => navigator.serviceWorker.ready);
+
+	await pageA.locator('[data-testid="scan-trigger"]').click();
+	await aimCamera(pageA);
+	await expect(
+		pageA.locator('[data-testid="row"]', { hasText: 'Testprodukt Sonnencreme' })
+	).toBeVisible({ timeout: 10_000 });
+
+	// B plans: the row arrives as text, and nothing on screen asks for the photo.
+	await expect(
+		pageB.locator('[data-testid="row"]', { hasText: 'Testprodukt Sonnencreme' })
+	).toBeVisible({ timeout: 15_000 });
+	await expect.poll(() => photoCached(pageB), { timeout: 15_000 }).toBe(true);
+
+	// In the store, offline, the shop view shows it.
+	await ctxB.setOffline(true);
+	await reloadInPage(pageB);
+	await openShopView(pageB);
+	const photo = pageB
+		.locator('[data-testid="tile"]', { hasText: 'Testprodukt Sonnencreme' })
+		.locator('[data-testid="tile-photo"]');
+	await expect(async () => {
+		expect(await photo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+	}).toPass({ timeout: 15_000 });
+
+	await ctxA.close();
+	await ctxB.close();
+});
+
 /** Whether the service worker's `photos` cache holds the product photo. Asks
  *  `caches.has` first: opening a missing cache would create it. */
 function photoCached(page: Page): Promise<boolean> {
