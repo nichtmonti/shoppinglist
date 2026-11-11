@@ -147,7 +147,7 @@
 	{/if}
 {/snippet}
 
-<Sheet open={item !== null} title={t('list_detail_title')} onclose={close} {headerActions}>
+<Sheet open={item !== null} title={t('list_detail_title')} onclose={close} {headerActions} done>
 	{#if shown.value}
 		{@const row = shown.value}
 		<div class="flex flex-col">

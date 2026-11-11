@@ -260,6 +260,7 @@ An entry says what holds now: the rule, why, and what was chosen against. A deci
 | [D-352] | A duration is named by its role, and a sheet leaves faster than it came |  |
 | [D-353] | A product photo is kept for offline when its item arrives |  |
 | [D-354] | A planning row's name without a note may take two lines |  |
+| [D-355] | A sheet that keeps what was typed closes with a ✓ |  |
 
 <!-- decisions-index:end -->
 
@@ -785,6 +786,8 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 <a id="D-353"></a>**[D-353] A product photo is kept for offline when its item arrives (2026-11).** The service worker caches a photo when a tile asks for it ([D-21]), but planning rows are text and shop tiles load lazily, so a list planned online met the store offline without pictures. `#lib/sync/photo-keep`, beside the engine's mount, watches the items that carry a photo with Dexie's `liveQuery`, so a pull, a live event and this device's own scan all count, and puts each photo the cache lacks there with the Cache API's `add`; a sync cycle runs it again, for a photo that failed offline. A sign-out stops a run under way, so the cache logout deletes stays deleted ([D-55]). **Guarded:** the scan spec plans a list online and opens the shop view offline. *Rejected:* fetching from the sync engine's apply (a side effect inside the engine); eager loading on every tile (only the tiles on screen, and only once opened). ([D-21], [D-55], [D-266])
 
 <a id="D-354"></a>**[D-354] A planning row's name without a note may take two lines (2026-11).** At 320px, long German names that start alike were cut to the same text („Haselnuss-Vollmilchsch…“ three times). A name with no note or hint under it may wrap, hyphenated, to the line a note would take; measured on the gallery's hardest names, every row stays 52px at the default text size, so the list keeps one row height. A name with a note keeps one line. *Rejected:* two lines always (a row of three lines beside rows of two); one line cut in the middle (a measurement per row for a cut that still loses the middle); keeping one line. ([D-86], [D-326])
+
+<a id="D-355"></a>**[D-355] A sheet that keeps what was typed closes with a ✓ (2026-11).** The item sheet saves as it closes, so its close is a ✓ named „Fertig“, in soft green, the colour of a state kept (the edits are), set 16px from the delete beside it, which had stood 8px from a ✕ of the same size and shape. Its press is grey, as every press is ([D-321]). A sheet that only shows things keeps its ✕ „Schließen“. `Sheet`'s `done` sets it; `CloseButton` draws both. *Rejected:* the ✓ in solid green (a second primary on a sheet whose point is its fields, [D-284]); a grey ✓ (reads as the ✕ at a glance); widening the gap alone (the ✕ still said "discard" on a sheet that keeps). ([D-284], [D-321], [D-325])
 
 <a id="D-350"></a>**[D-350] A hover needs a device that can hover; the press is the touch's own feedback (2026-11).** A tap fires `:hover` as well, and a phone's browser keeps it on the last-tapped element until the next tap, so the shop's tiles and rows carried a subtly highlighted trail behind every finger. Tailwind's `hover:` variant already sits in `@media (hover: hover)` ([D-268]'s "pointer devices only"); hand-written CSS must too, and the tile template's hover rules (the row's aisle-coloured wash, the tile's border, the door's ink) and the toast action's now do. Every button answers the press: the solid red darkens to `danger-press` as the primary does, and the soft red firms its edge to the solid red, since a darker soft fill takes its red words below AA. **Guarded:** the design-tokens test fails any `:hover` rule outside that media block in the app's stylesheets and components' `<style>`, and lint refuses an arbitrary `[&:hover]:` variant, which Tailwind does not wrap. Keyboard focus is untouched: `focus-visible` never fires under a finger. *Rejected:* dropping hover styling (a mouse still needs its offer); gating on `pointer: fine` as well (Tailwind does not, and a touchscreen laptop's trackpad can hover). ([D-268], [D-321])
 
@@ -1371,3 +1374,4 @@ The `HEALTHCHECK` is `/shoppinglist healthcheck`, since the image has no shell o
 [D-352]: #D-352
 [D-353]: #D-353
 [D-354]: #D-354
+[D-355]: #D-355

@@ -286,7 +286,7 @@ async function setDetails(page: Page, locale: Locale, details: Household['main']
 			await sheet.locator(id).fill(value);
 			await sheet.locator(id).blur();
 		}
-		await sheet.getByRole('button', { name: msg(locale, 'common_close') }).click();
+		await sheet.getByRole('button', { name: msg(locale, 'common_done') }).click();
 		await expect(sheet).toBeHidden();
 	}
 }
@@ -441,7 +441,7 @@ for (const locale of LOCALES) {
 				const sheet = await openDetail(page, locale, h.main.open);
 				await settle(page);
 				await shoot(page, page, at(7, 'detail'));
-				await sheet.getByRole('button', { name: msg(locale, 'common_close') }).click();
+				await sheet.getByRole('button', { name: msg(locale, 'common_done') }).click();
 				await expect(sheet).toBeHidden();
 			}
 

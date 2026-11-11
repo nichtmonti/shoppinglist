@@ -26,6 +26,7 @@ Changes land under **Unreleased** in the commit that makes them; the release com
 - **A settings group's grey note, such as the one about a second passkey, is the size of the hints above it** ([D-351]).
 - **Sheets close in a quarter of a second** instead of half a second ([D-352]).
 - **In the planning list, a long name with no note under it takes a second line** instead of being cut off, so names that start alike stay apart; rows keep their height ([D-354]).
+- **An item's sheet closes with a green ✓, "Done", set further from the delete button**, since it keeps what you typed as it closes; other sheets keep their ✕ ([D-355]).
 - **Product photos are there offline even if you only planned the list.** A photo used to be kept only once its shop tile had shown it, so a list planned online could reach the store offline without pictures ([D-353]).
 
 ## v0.17.5: a sheet stays in view while you type on an iPhone, and dialogs fade in and out (2026-11)
@@ -1055,3 +1056,4 @@ First tagged build: a distroless multi-arch container (amd64 + arm64) with the S
 [D-352]: docs/internals/decisions.md#D-352
 [D-353]: docs/internals/decisions.md#D-353
 [D-354]: docs/internals/decisions.md#D-354
+[D-355]: docs/internals/decisions.md#D-355

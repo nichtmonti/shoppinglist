@@ -45,7 +45,7 @@ test('detail-sheet edits, the inline quantity chip, remove and restore all reach
 	await detail1.locator('#detail-quantity').blur();
 	await detail1.locator('#detail-note').fill('für Kinder');
 	await detail1.locator('#detail-note').blur();
-	await detail1.getByRole('button', { name: 'Schließen' }).click();
+	await detail1.getByRole('button', { name: 'Fertig' }).click();
 	await expect(detail1).toBeHidden();
 
 	// --- item 2: the row's own inline 3-state quantity control (unset → editing → set) ---

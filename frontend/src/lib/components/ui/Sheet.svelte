@@ -18,12 +18,14 @@
 		onclose: () => void;
 		children: Snippet;
 		headerActions?: Snippet;
+		/** It keeps what was typed as it closes: its close is a ✓ ([D-355]). */
+		done?: boolean;
 		/** The sheet's action, on its bottom edge while the content scrolls
 		 *  under it ([D-327]). */
 		footer?: Snippet;
 	}
 
-	let { open, title: titleText, onclose, children, headerActions, footer }: Props = $props();
+	let { open, title: titleText, onclose, children, headerActions, footer, done }: Props = $props();
 </script>
 
 <Dialog.Root
@@ -51,7 +53,7 @@
 				{#snippet title()}<Dialog.Title>{titleText}</Dialog.Title>{/snippet}
 				{#snippet close()}
 					<DialogPrimitive.Close>
-						{#snippet child({ props })}<CloseButton {...props} />{/snippet}
+						{#snippet child({ props })}<CloseButton {...props} {done} />{/snippet}
 					</DialogPrimitive.Close>
 				{/snippet}
 			</OverlayHead>

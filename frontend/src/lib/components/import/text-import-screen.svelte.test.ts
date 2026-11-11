@@ -311,7 +311,7 @@ describe('TextImportScreen', () => {
 		await fireEvent.click(within(rowOf('Mango')).getByRole('button', { name: 'Mango' }));
 		const sheet = await screen.findByRole('dialog', { name: 'Artikel bearbeiten' });
 		await fireEvent.click(within(sheet).getByRole('radio', { name: 'Brot & Backwaren' }));
-		await fireEvent.click(within(sheet).getByRole('button', { name: 'Schließen' }));
+		await fireEvent.click(within(sheet).getByRole('button', { name: 'Fertig' }));
 
 		await screen.findByRole('option', { name: 'Zuhause' });
 		await fireEvent.change(screen.getByLabelText('Wohin?'), { target: { value: 'list-a' } });
@@ -397,7 +397,7 @@ describe('TextImportScreen', () => {
 		const name = within(sheet).getByPlaceholderText('Name');
 		await fireEvent.input(name, { target: { value: 'Hafermilch' } });
 		await fireEvent.blur(name);
-		await fireEvent.click(within(sheet).getByRole('button', { name: 'Schließen' }));
+		await fireEvent.click(within(sheet).getByRole('button', { name: 'Fertig' }));
 
 		await fireEvent.click(
 			await screen.findByRole('button', { name: 'Liste mit 4 Artikeln erstellen' })

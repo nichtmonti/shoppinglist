@@ -444,7 +444,7 @@ describe('ListView — detail sheet', () => {
 
 		// Confirm is implicit: the category tap commits immediately, and the
 		// still-focused note field commits on blur when the sheet is dismissed.
-		const closeBtn = within(dialog).getByRole('button', { name: t('common_close') });
+		const closeBtn = within(dialog).getByRole('button', { name: t('common_done') });
 		await fireEvent.click(closeBtn);
 
 		await waitFor(async () => {
@@ -494,7 +494,7 @@ describe('ListView — detail sheet', () => {
 				'value',
 				'Nuss-Nougat-Creme'
 			);
-			await fireEvent.click(within(dialog).getByRole('button', { name: t('common_close') }));
+			await fireEvent.click(within(dialog).getByRole('button', { name: t('common_done') }));
 			await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 			expect(await db.pending_ops.where('record_id').equals(item.id).count()).toBe(0);
 
@@ -503,7 +503,7 @@ describe('ListView — detail sheet', () => {
 			await fireEvent.input(within(dialog).getByLabelText(t('common_name')), {
 				target: { value: 'Nutella' }
 			});
-			await fireEvent.click(within(dialog).getByRole('button', { name: t('common_close') }));
+			await fireEvent.click(within(dialog).getByRole('button', { name: t('common_done') }));
 
 			await waitFor(async () => {
 				const stored = await db.items.get(item.id);
@@ -550,7 +550,7 @@ describe('ListView — detail sheet', () => {
 
 		await fireEvent.click(screen.getByRole('button', { name: 'Senf' }));
 		const dialog = await screen.findByRole('dialog');
-		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_close') }));
+		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_done') }));
 
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
@@ -574,7 +574,7 @@ describe('ListView — detail sheet', () => {
 		// The row behind the sheet has it, so the sheet's item has too.
 		await screen.findByRole('button', { name: /^2 .*Senf/, hidden: true });
 		await fireEvent.blur(within(dialog).getByLabelText(t('common_quantity')));
-		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_close') }));
+		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_done') }));
 
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 		expect(await db.pending_ops.count()).toBe(0);
@@ -696,7 +696,7 @@ describe('ListView — detail sheet', () => {
 		await fireEvent.input(nameInput, { target: { value: '   ' } });
 		const noteInput = within(dialog).getByLabelText(t('common_note'));
 		await fireEvent.input(noteInput, { target: { value: 'die scharfe Sorte' } });
-		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_close') }));
+		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_done') }));
 
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
@@ -724,7 +724,7 @@ describe('ListView — detail sheet', () => {
 		await fireEvent.input(within(dialog).getByLabelText(t('common_note')), {
 			target: { value: 'Barista' }
 		});
-		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_close') }));
+		await fireEvent.click(within(dialog).getByRole('button', { name: t('common_done') }));
 
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 		await waitFor(async () => expect((await db.items.get(oat.id))?.note).toBe('Barista'));

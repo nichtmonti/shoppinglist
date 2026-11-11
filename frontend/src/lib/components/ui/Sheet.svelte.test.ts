@@ -37,6 +37,20 @@ describe('Sheet — wrapper contract', () => {
 		expect(screen.getByRole('button', { name: 'Schließen' })).toBeTruthy();
 	});
 
+	// [D-355] A sheet that keeps what was typed as it closes closes with a
+	// soft-green ✓ named „Fertig“, apart from its other actions; any other
+	// sheet keeps its ✕ „Schließen“.
+	it('closes with a ✓ „Fertig“ when it keeps edits, and with ✕ otherwise', async () => {
+		const onclose = vi.fn();
+		render(Sheet, { open: true, title: 'Artikel', onclose, children, headerActions, done: true });
+		const done = screen.getByRole('button', { name: 'Fertig' });
+		expect(done.classList).toContain('bg-primary-soft');
+		expect(done.classList).toContain('ms-3');
+		expect(screen.queryByRole('button', { name: 'Schließen' })).toBeNull();
+		await fireEvent.click(done);
+		await waitFor(() => expect(onclose).toHaveBeenCalled());
+	});
+
 	it('renders nothing when closed', () => {
 		render(Sheet, { props: { open: false, title: 'Mein Sheet', onclose: vi.fn(), children } });
 		expect(screen.queryByRole('dialog')).toBeNull();

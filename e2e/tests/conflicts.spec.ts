@@ -93,7 +93,7 @@ test('passive conflict notices: same-field, delete-vs-edit and duplicate-name me
 	const detailB = pageB.getByRole('dialog', { name: 'Artikel bearbeiten' });
 	await detailB.locator('#detail-note').fill('Bio');
 	await detailB.locator('#detail-note').blur();
-	await detailB.getByRole('button', { name: 'Schließen' }).click();
+	await detailB.getByRole('button', { name: 'Fertig' }).click();
 
 	// A removes the item entirely, online, while B's edit is still queued.
 	await itemRow(pageA, 'Butter').locator('.row-name').click();
@@ -200,7 +200,7 @@ test('a list deleted while this device was offline: named notice, list gone', as
 	const detail2 = page2.getByRole('dialog', { name: 'Artikel bearbeiten' });
 	await detail2.locator('#detail-note').fill('für Kaffee');
 	await detail2.locator('#detail-note').blur();
-	await detail2.getByRole('button', { name: 'Schließen' }).click();
+	await detail2.getByRole('button', { name: 'Fertig' }).click();
 
 	// Device 1 leaves — this is the ONLY membership on this list (both devices
 	// are the same account), so §7.3 deletes the list server-side.
