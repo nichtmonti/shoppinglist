@@ -67,7 +67,7 @@ Components: 40 Go, 36 npm, 1 embedded in a listed package.
 | github.com/spf13/pflag | v1.1.0 | BSD-3-Clause | Copyright (c) 2012 Alex Ogier. All rights reserved.<br>Copyright (c) 2012 The Go Authors. All rights reserved. |
 | github.com/tinylib/msgp | v1.6.4 | MIT | Copyright (c) 2014 Philip Hofer |
 | github.com/x448/float16 | v0.8.4 | MIT | Copyright (c) 2019 Montgomery Edwards⁴⁴⁸ and Faye Amacker |
-| Go standard library and runtime | go1.27.3 | BSD-3-Clause | Copyright 2009 The Go Authors. |
+| Go standard library and runtime | go1.27.4 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/crypto | v0.58.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/image | v0.47.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
 | golang.org/x/net | v0.62.0 | BSD-3-Clause | Copyright 2009 The Go Authors. |
@@ -849,7 +849,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Applies to:
 
-- Go standard library and runtime go1.27.3 (LICENSE): Copyright 2009 The Go Authors.
+- Go standard library and runtime go1.27.4 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/crypto v0.58.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/image v0.47.0 (LICENSE): Copyright 2009 The Go Authors.
 - golang.org/x/net v0.62.0 (LICENSE): Copyright 2009 The Go Authors.
@@ -3679,7 +3679,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 Applies to:
 
-- Go standard library and runtime go1.27.3 (PATENTS): Copyright 2009 The Go Authors.
+- Go standard library and runtime go1.27.4 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/crypto v0.58.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/image v0.47.0 (PATENTS): Copyright 2009 The Go Authors.
 - golang.org/x/net v0.62.0 (PATENTS): Copyright 2009 The Go Authors.

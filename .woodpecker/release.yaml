@@ -123,7 +123,7 @@ steps:
   # from `release` because the frontend build needs Node and goreleaser's own
   # image has none; it runs in the CI image, as the suites do ([D-203]).
   release-frontend:
-    image: localhost/shoppinglist-ci:go1.27.3-node26.13.0-pw1.64.1-439dd534
+    image: localhost/shoppinglist-ci:go1.27.4-node26.13.0-pw1.64.1-4c2b7784
     commands:
       # go-task as frontend.yaml installs it; .gomod and .task are gitignored,
       # and frontend/.gitignore ignores the Paraglide 3 compile cache the
@@ -177,8 +177,8 @@ steps:
       # .goreleaser.yaml's post-build hook refuses a binary not built with
       # EXPECT_GO, before anything is published. Rationale and advisory list:
       # backend/go.mod.
-      GOTOOLCHAIN: go1.27.3
-      EXPECT_GO: go1.27.3
+      GOTOOLCHAIN: go1.27.4
+      EXPECT_GO: go1.27.4
       # Module source owned by the repo, not the agent's environment (go.yaml
       # says why): the official proxy + sumdb.
       GOPROXY: https://proxy.golang.org,direct

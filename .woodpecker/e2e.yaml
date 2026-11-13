@@ -21,7 +21,7 @@
 # steps work either way, only colder.
 
 variables:
-  - &ci_image localhost/shoppinglist-ci:go1.27.3-node26.13.0-pw1.64.1-439dd534
+  - &ci_image localhost/shoppinglist-ci:go1.27.4-node26.13.0-pw1.64.1-4c2b7784
   - &pnpm_cache /var/lib/woodpecker-cache/pnpm:/root/.local/share/pnpm
   - &go_build_cache /var/lib/woodpecker-cache/go-build:/root/.cache/go-build
   # The previous release's worktree and binary (task prev-release, [D-343]):

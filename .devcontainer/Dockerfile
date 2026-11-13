@@ -3,7 +3,7 @@
 # work headlessly as well as under VS Code / Codespaces. Every toolchain version
 # is pinned exactly (docs/internals/design.md §14, "Every dependency is pinned to an exact version").
 #
-# Pins:  Go 1.27.3 · Node 26.13.0 · pnpm 12.17.0 (npm) · Playwright Chromium + Firefox (1.64.1)
+# Pins:  Go 1.27.4 · Node 26.13.0 · pnpm 12.17.0 (npm) · Playwright Chromium + Firefox (1.64.1)
 # Go dev tools (staticcheck, gosec, osv-scanner, govulncheck, air, dex): tools/<name>/go.mod [D-75]
 # diff-cover: tools/diff-cover/requirements.txt, hash-pinned [D-203]
 # Binary/module name: `shoppinglist` (matches docs/internals/design.md [D-34] `./shoppinglist` CLI).
@@ -16,7 +16,7 @@
 # the same toolchain. The base is pinned by digest: the release builds its SPA
 # in this image, and a tag can be re-pushed.
 
-FROM golang:1.27.3-trixie@sha256:fbb7ae40b62ff8afe31662df570d39b4f5052ac32b90dae8e60d7657a20a74f4 AS toolchain
+FROM golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9 AS toolchain
 
 # --- Base apt deps (xz-utils needed to unpack the Node tarball) ---------------
 # python3-venv: diff-cover runs from a venv of its own, installed from
