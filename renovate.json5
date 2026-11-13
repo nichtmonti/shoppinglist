@@ -29,8 +29,10 @@
 // The CI image ([D-203]) is the devcontainer Dockerfile's toolchain stage,
 // tagged by its content: an update to that Dockerfile rewrites the tag in
 // every workflow (postUpgradeTasks below), and the agent builds the image
-// for the PR's first pipeline ([D-203]). The self-hosted runner must allow that one command:
-// allowedCommands: ['^sh scripts/ci-image-tag\\.sh --write$'].
+// for the PR's first pipeline ([D-203]). A bump of a shipped dependency
+// likewise regenerates the licence notice and SBOM in the PR ([D-356]).
+// The self-hosted runner must allow those two commands:
+// allowedCommands: ['^sh scripts/ci-image-tag\\.sh --write$', '^sh scripts/renovate-licenses\\.sh$'].
 //
 // The eleven pinned Go tools (staticcheck, gosec, golangci-lint, deadcode,
 // osv-scanner, govulncheck, air, dex, task, gitleaks, gcov2lcov) need no custom manager: each declares itself in its own
@@ -188,15 +190,19 @@
 			// One PR for the toolchain, covering: go.mod's `toolchain` directive,
 			// the devcontainer's golang base image, and the GOTOOLCHAIN/EXPECT_GO pins
 			// above. Split across PRs they would each fail the other's gate. The
-			// go.mod header lists the seven stdlib advisories the current floor
-			// fixes — re-read it before lowering anything here.
+			// go.mod header lists the stdlib advisories the current floor fixes —
+			// re-read it before lowering anything here. A new advisory turns the
+			// security gate red on every dependency PR until the toolchain moves,
+			// so patches do not wait for the weekly window ([D-356]).
 			groupName: 'go toolchain',
-			matchDatasources: ['golang-version']
+			matchDatasources: ['golang-version'],
+			schedule: ['at any time']
 		},
 		{
 			groupName: 'go toolchain',
 			matchDatasources: ['docker'],
-			matchPackageNames: ['golang']
+			matchPackageNames: ['golang'],
+			schedule: ['at any time']
 		},
 		{
 			// The devcontainer's browser install and the @playwright/test package
@@ -224,6 +230,21 @@
 			postUpgradeTasks: {
 				commands: ['sh scripts/ci-image-tag.sh --write'],
 				fileFilters: ['.woodpecker/*.yaml'],
+				executionMode: 'branch'
+			}
+		},
+		{
+			// A bump of a shipped dependency changes what the licence notice and
+			// SBOM must list, and CI compares them against the code (`task licenses
+			// -- --check`), so regenerate them in the same PR ([D-356]). The script
+			// forces go.mod's toolchain and the Dockerfile's pnpm pin: the runner's
+			// own versions are not the repo's. installTools covers the slim runner
+			// image; the full one ships Go.
+			matchFileNames: ['backend/go.mod', 'frontend/package.json', 'frontend/pnpm-lock.yaml'],
+			postUpgradeTasks: {
+				commands: ['sh scripts/renovate-licenses.sh'],
+				installTools: { golang: {} },
+				fileFilters: ['docs/THIRD_PARTY_LICENSES.md', 'docs/sbom.cdx.json'],
 				executionMode: 'branch'
 			}
 		},
